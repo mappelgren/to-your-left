@@ -18,7 +18,12 @@ class NumberObjectsDataset(Dataset):
     def __init__(self, scenes_json_file, image_path) -> None:
         super().__init__()
         transform = transforms.ToTensor()
-
+        resnet_transform = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
         self.samples = []
         self.max_number = 0
         with open(scenes_json_file, 'r', encoding='utf-8') as f:
@@ -30,7 +35,7 @@ class NumberObjectsDataset(Dataset):
             # self.samples.append((transform(image), number_objects))
             
             image = Image.open(image_path + scene['image_filename'])
-            self.samples.append((ResNet18_Weights.IMAGENET1K_V1.transforms(image), number_objects))
+            self.samples.append((resnet_transform(image), number_objects))
             # self.samples.append(Sample(image_id=scene['image_filename'].removesuffix('.png'),
             #                            image=transform(image),
             #                            number_objects=number_objects))
