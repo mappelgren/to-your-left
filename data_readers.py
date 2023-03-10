@@ -34,7 +34,7 @@ class NumberObjectsDataset(Dataset):
             # image = Image.open(image_path + scene['image_filename']).resize((100,100)).convert('RGB')
             # self.samples.append((transform(image), number_objects))
             
-            image = Image.open(image_path + scene['image_filename'])
+            image = Image.open(image_path + scene['image_filename']).convert('RGB')
             self.samples.append((resnet_transform(image), number_objects))
             # self.samples.append(Sample(image_id=scene['image_filename'].removesuffix('.png'),
             #                            image=transform(image),
