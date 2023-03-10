@@ -1,10 +1,12 @@
-import torch.nn.functional as F
-from architectures import Receiver, Sender
-import sys
-from data_readers import NumberObjectsDataset
-from torch.utils.data import DataLoader, random_split
-import egg.core as core
 import argparse
+import sys
+
+import egg.core as core
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, random_split
+
+from architectures import Receiver, Sender
+from data_readers import NumberObjectsDataset
 
 
 def loss(
@@ -27,10 +29,10 @@ def get_params(params):
 
     # arguments concerning the input data and how they are processed
     parser.add_argument(
-        "--train_data", type=str, default=None, help="Path to the train data"
+        "--scene_json_file", type=str, default=None, help="Path to the scene JSON file"
     )
     parser.add_argument(
-        "--validation_data", type=str, default=None, help="Path to the validation data"
+        "--image_folder", type=str, default=None, help="Path to image folder"
     )
 
     parser.add_argument(
@@ -110,8 +112,8 @@ def main(params):
     if opts.validation_batch_size == 0:
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
-    dataset = NumberObjectsDataset(scenes_json_file='/home/dominik/Development/clevr-images/output/CLEVR_scenes.json',
-                                         image_path='/home/dominik/Development/clevr-images/output/images/')
+    dataset = NumberObjectsDataset(scenes_json_file=opts.scene_json_file,
+                                         image_path=opts.image_folder)
     n_labels = dataset.get_number_labels()
 
     train_dataset, test_dataset = random_split(dataset, (80, 20))
