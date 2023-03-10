@@ -1,9 +1,12 @@
-from dataclasses import dataclass
-import torch
-from torch.utils.data import Dataset
-import torchvision.transforms as transforms
 import json
+from dataclasses import dataclass
+
+import torch
+import torchvision.models.ResNet18_Weights.IMAGENET1K_V1.transforms as resnet_transforms
 from PIL import Image
+from torch.utils.data import Dataset
+from torchvision import transforms
+
 
 @dataclass
 class Sample:
@@ -23,8 +26,11 @@ class NumberObjectsDataset(Dataset):
         for scene in scenes_metadata['scenes']:
             number_objects = len(scene['objects'])
             self.max_number = max(self.max_number, number_objects)
-            image = Image.open(image_path + scene['image_filename']).resize((100,100)).convert('RGB')
-            self.samples.append((transform(image), number_objects))
+            # image = Image.open(image_path + scene['image_filename']).resize((100,100)).convert('RGB')
+            # self.samples.append((transform(image), number_objects))
+            
+            image = Image.open(image_path + scene['image_filename'])
+            self.samples.append((resnet_transforms(image), number_objects))
             # self.samples.append(Sample(image_id=scene['image_filename'].removesuffix('.png'),
             #                            image=transform(image),
             #                            number_objects=number_objects))
