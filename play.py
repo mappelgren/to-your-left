@@ -120,7 +120,9 @@ def main(params):
                                    max_number_samples=opts.max_number_samples)
     n_labels = dataset.get_number_labels()
 
-    train_dataset, test_dataset = random_split(dataset, (80, 20))
+    train_dataset_length = 0.8 * len(dataset)
+    test_dataset_length = len(dataset) - train_dataset_length
+    train_dataset, test_dataset = random_split(dataset, (train_dataset_length, test_dataset_length))
     train_loader = DataLoader(
             train_dataset, batch_size=opts.batch_size, shuffle=True, num_workers=1
         )
