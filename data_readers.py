@@ -15,7 +15,7 @@ class Sample:
     number_objects: int
 
 class NumberObjectsDataset(Dataset):
-    def __init__(self, scenes_json_file, image_path) -> None:
+    def __init__(self, scenes_json_file, image_path, max_number_samples) -> None:
         super().__init__()
         transform = transforms.ToTensor()
         resnet_transform = transforms.Compose([
@@ -28,7 +28,10 @@ class NumberObjectsDataset(Dataset):
         self.max_number = 0
         with open(scenes_json_file, 'r', encoding='utf-8') as f:
             scenes_metadata = json.load(f)
-        for scene in scenes_metadata['scenes']:
+        for index, scene in enumerate(scenes_metadata['scenes']):
+            if index == max_number_samples:
+                break
+
             number_objects = len(scene['objects'])
             self.max_number = max(self.max_number, number_objects)
             # image = Image.open(image_path + scene['image_filename']).resize((100,100)).convert('RGB')

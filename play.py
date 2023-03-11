@@ -34,6 +34,9 @@ def get_params(params):
     parser.add_argument(
         "--image_folder", type=str, default=None, help="Path to image folder"
     )
+    parser.add_argument(
+        "--max_number_samples", type=int, default=-1, help="Maximum number of samples (set -1 for all samples)"
+    )
 
     parser.add_argument(
         "--validation_batch_size",
@@ -113,7 +116,8 @@ def main(params):
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
     dataset = NumberObjectsDataset(scenes_json_file=opts.scene_json_file,
-                                         image_path=opts.image_folder)
+                                   image_path=opts.image_folder,
+                                   max_number_samples=opts.max_number_samples)
     n_labels = dataset.get_number_labels()
 
     train_dataset, test_dataset = random_split(dataset, (80, 20))
