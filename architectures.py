@@ -30,6 +30,6 @@ class Receiver(nn.Module):
     def forward(self, x, _input, _aux_input):
         resnet = self.resnet(_input)
         flattened = torch.flatten(self.relu(resnet), start_dim=1)
-        concat = torch.cat((flattened, x))
+        concat = torch.cat((flattened, x), dim=1)
         return self.relu(self.linear(concat))
 
