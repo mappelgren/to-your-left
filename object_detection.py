@@ -21,7 +21,7 @@ target_sizes = torch.tensor([image.size[::-1]])
 processed = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=threshold)
 results = processed[0]
 print(f'Threshold: {threshold}')
-print(f'number of boxes: {len(results[scores])}')
+print(f'number of boxes: {len(results['scores'])}')
 for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
     if score < threshold:
         continue
