@@ -1,4 +1,5 @@
 import argparse
+import math
 import sys
 
 import egg.core as core
@@ -6,7 +7,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, random_split
 
 from architectures import Receiver, Sender
-from data_readers import NumberObjectsDataset
+from data_readers import ClevrDataset
 
 
 def loss(
@@ -16,13 +17,9 @@ def loss(
         receiver_output,
         labels,
         _aux_input,
-    ):
-        # in the discriminative case, accuracy is computed by comparing the index with highest score in Receiver output (a distribution of unnormalized
-        # probabilities over target poisitions) and the corresponding label read from input, indicating the ground-truth position of the target
-        acc = (receiver_output.argmax(dim=1) == labels).detach().float()
-        # similarly, the loss computes cross-entropy between the Receiver-produced target-position probability distribution and the labels
-        loss = F.cross_entropy(receiver_output, labels, reduction="none")
-        return loss, {"acc": acc}
+    ):  
+        loss = (receiver_output[:,0] - labels[:,0])**2 + (receiver_output[:,1] - labels[:,1])**2
+        return loss, {"acc": loss}
 
 def get_params(params):
     parser = argparse.ArgumentParser()
@@ -115,10 +112,13 @@ def main(params):
     if opts.validation_batch_size == 0:
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
-    dataset = NumberObjectsDataset(scenes_json_file=opts.scene_json_file,
-                                   image_path=opts.image_folder,
-                                   max_number_samples=opts.max_number_samples)
-    n_labels = dataset.get_number_labels()
+    dataset = ClevrDataset(scenes_json_file=opts.scene_json_file,
+                           image_path=opts.image_folder,
+                           max_number_samples=opts.max_number_samples)
+    
+
+    # x and y pixel
+    n_labels = 2
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
