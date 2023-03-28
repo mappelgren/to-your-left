@@ -35,7 +35,7 @@ if __name__ == '__main__':
     else:
         raise AttributeError('Device must be cpu or cuda')
     
-    dataset = ClassifierDataset(args.scenes_json, args.image_dir, args.max_samples)
+    dataset = ClassifierDataset(args.scene_json_file, args.image_dir, args.max_samples)
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
