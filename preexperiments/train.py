@@ -64,5 +64,6 @@ if __name__ == '__main__':
 
         metric.update(max_indices, ground_truth)
 
-    metric.compute()
+    accuracy = metric.compute()
+    print(f'Accuracy: {accuracy}')
     
