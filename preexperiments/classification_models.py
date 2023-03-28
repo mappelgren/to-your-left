@@ -18,7 +18,7 @@ class ResnetFeatureClassifier(Module):
             nn.Linear(20480, 4096),
             nn.ReLU(),
             nn.Linear(4096, 10),
-            nn.Softmax()
+            nn.Softmax(dim=1)
         )
         self.linear = nn.Linear(20480, 10)
         self.relu = nn.ReLU()
