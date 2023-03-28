@@ -10,7 +10,7 @@ from architectures import Receiver, Sender
 from data_readers import ClevrDataset
 
 
-def loss(
+def pixel_loss(
         _sender_input,
         _message,
         _receiver_input,
@@ -20,6 +20,22 @@ def loss(
     ):  
         loss = (receiver_output[:,0] - labels[:,0])**2 + (receiver_output[:,1] - labels[:,1])**2
         return loss, {"acc": loss}
+
+def classification_loss(
+        _sender_input,
+        _message,
+        _receiver_input,
+        receiver_output,
+        labels,
+        _aux_input,
+    ):  
+        
+        # in the discriminative case, accuracy is computed by comparing the index with highest score in Receiver output (a distribution of unnormalized
+        # probabilities over target poisitions) and the corresponding label read from input, indicating the ground-truth position of the target
+        acc = (receiver_output.argmax(dim=1) == labels).detach().float()
+        # similarly, the loss computes cross-entropy between the Receiver-produced target-position probability distribution and the labels
+        loss = F.cross_entropy(receiver_output, labels, reduction="none")
+        return loss, {"acc": acc}
 
 def get_params(params):
     parser = argparse.ArgumentParser()
@@ -117,8 +133,11 @@ def main(params):
                            max_number_samples=opts.max_number_samples)
     
 
-    # x and y pixel
-    n_labels = 2
+    # # x and y pixel
+    # n_labels = 2
+
+    # 10 bounding boxes
+    n_labels = 10
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
@@ -151,7 +170,7 @@ def main(params):
             cell=opts.receiver_cell,
         )
     
-    game = core.SenderReceiverRnnGS(gs_sender, gs_receiver, loss)
+    game = core.SenderReceiverRnnGS(gs_sender, gs_receiver, classification_loss)
     callbacks = [core.TemperatureUpdater(agent=gs_sender, decay=0.9, minimum=0.1)]
     optimizer = core.build_optimizer(game.parameters())
     trainer = core.Trainer(
