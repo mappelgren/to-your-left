@@ -36,6 +36,6 @@ class ResnetFeatureClassifier(Module):
         stacked = torch.stack(after_resnet)
         stacked = stacked.permute(1, 0, 2, 3, 4)
 
-        classified = self.classifier(stacked)
+        classified = self.classifier(torch.flatten(stacked, start_dim=1))
 
         return classified
