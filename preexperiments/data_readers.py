@@ -29,7 +29,7 @@ class ClassifierDataset(Dataset):
 
             input_boxes = torch.stack([bounding_box for _, bounding_box in enumerated])
             indices, _ = zip(*enumerated)
-            target_index = indices.index(target_object)
+            target_index = torch.tensor(indices.index(target_object))
             
             self.samples.append((input_boxes, target_index))
             
