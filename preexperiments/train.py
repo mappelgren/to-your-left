@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
     for epoch in range(4):
         total_loss = 0
-        for i, batch in enumerate(dataloader):
-            model_input = torch.stack([sample[0] for sample in batch]).to(device)
-            ground_truth = torch.stack([sample[1] for sample in batch]).to(device)
+        for i, (model_input, ground_truth) in enumerate(dataloader):
+            model_input = model_input.to(device)
+            ground_truth = ground_truth.to(device)
 
             output = model(model_input)
 

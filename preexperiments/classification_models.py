@@ -24,7 +24,8 @@ class ResnetFeatureClassifier(Module):
         self.relu = nn.ReLU()
 
     def forward(self, data):
-        data = data.permute(1,0,2,3)
+        print(data.shape)
+        data = data.permute(1, 0, 2, 3, 4)
 
         after_resnet = []
         for bounding_box in data:
@@ -33,7 +34,7 @@ class ResnetFeatureClassifier(Module):
             after_resnet.append(pooled)
 
         stacked = torch.stack(after_resnet)
-        stacked = torch.permute(1,0,2,3)
+        stacked = torch.permute(1, 0, 2, 3, 4)
 
         classified = self.classifier(stacked)
 
