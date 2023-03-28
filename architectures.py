@@ -8,8 +8,6 @@ from torchvision.models.resnet import Bottleneck
 class Sender(nn.Module):
     def __init__(self, n_hidden, encoded_image_size=1) -> None:
         super().__init__()
-        self.cnn = nn.Conv2d(3,3,3)
-
         resnet = ResNet(Bottleneck, [3, 4, 6, 3])
         # resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
