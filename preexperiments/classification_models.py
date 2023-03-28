@@ -34,7 +34,7 @@ class ResnetFeatureClassifier(Module):
             after_resnet.append(pooled)
 
         stacked = torch.stack(after_resnet)
-        stacked = torch.permute(1, 0, 2, 3, 4)
+        stacked = stacked.permute(1, 0, 2, 3, 4)
 
         classified = self.classifier(stacked)
 
