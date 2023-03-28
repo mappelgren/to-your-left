@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 import torch
@@ -9,16 +10,32 @@ from torcheval.metrics import MulticlassAccuracy
 from data_readers import ClassifierDataset
 
 if __name__ == '__main__':
-    scenes_json, image_dir, max_samples, dev = sys.argv[1:]
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--scene_json_file", type=str, default=None, help="Path to the scene JSON file"
+    )
+    parser.add_argument(
+        "--image_dir", type=str, default=None, help="Path to the scene image dir"
+    )
+    parser.add_argument(
+        "--max_samples", type=int, default=None, help="max samples to load"
+    )
+    parser.add_argument(
+        "--epochs", type=int, default=None, help="number of epochs"
+    )
+    parser.add_argument(
+        "--device", type=str, default=None, help="cpu or cuda"
+    )
+    args = parser.parse_args()
 
-    if dev == 'cpu':
+    if args.device == 'cpu':
         device = torch.device('cpu')
-    elif dev == 'cuda':
+    elif args.device == 'cuda':
         device = torch.device('cuda:0')
     else:
         raise AttributeError('Device must be cpu or cuda')
     
-    dataset = ClassifierDataset(scenes_json, image_dir, int(max_samples))
+    dataset = ClassifierDataset(args.scenes_json, args.image_dir, args.max_samples)
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
@@ -34,7 +51,7 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.002)
     loss_function = nn.CrossEntropyLoss()
 
-    for epoch in range(4):
+    for epoch in range(args.epochs):
         total_loss = 0
         for i, (model_input, ground_truth) in enumerate(train_loader):
             model_input = model_input.to(device)
