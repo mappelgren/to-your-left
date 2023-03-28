@@ -5,11 +5,12 @@ from torchvision.models import ResNet50_Weights, resnet50
 
 
 class ResnetFeatureClassifier(Module):
-    def __init__(self) -> None:
+    def __init__(self, device=torch.device('cuda')) -> None:
         super().__init__()
         resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
         self.resnet.eval()
+        self.resnet.to(device)
 
         self.adaptive_pool = nn.AdaptiveAvgPool2d((14, 14))
         

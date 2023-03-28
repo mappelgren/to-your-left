@@ -32,7 +32,7 @@ if __name__ == '__main__':
             test_dataset, batch_size=8, shuffle=True, num_workers=1
         )
     
-    model = ResnetFeatureClassifier().to(device)
+    model = ResnetFeatureClassifier(device).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.002)
     loss_function = nn.CrossEntropyLoss()
 
