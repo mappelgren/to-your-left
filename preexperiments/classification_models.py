@@ -24,7 +24,6 @@ class ResnetFeatureClassifier(Module):
         self.relu = nn.ReLU()
 
     def forward(self, data):
-        print(data.shape)
         data = data.permute(1, 0, 2, 3, 4)
 
         after_resnet = []
