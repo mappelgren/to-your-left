@@ -56,7 +56,7 @@ if __name__ == '__main__':
     predictions = []
     ground_truths = []
     metric = MulticlassAccuracy()
-    for (model_input, ground_truth) in enumerate(test_loader):
+    for index, (model_input, ground_truth) in enumerate(test_loader):
         model_input = model_input.to(device)
         ground_truth = ground_truth.to(device)
         output = model(model_input).detach()
