@@ -12,7 +12,7 @@ class ResnetFeatureClassifier(Module):
         self.resnet.eval()
         self.resnet.to(device)
 
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((14, 14))
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
         
         self.classifier = nn.Sequential(
             nn.Linear(20480, 4096),
