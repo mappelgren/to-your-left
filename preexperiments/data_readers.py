@@ -56,7 +56,33 @@ class ClassifierDataset(Dataset):
 
     def __getitem__(self, index):
         return self.samples[index]
-    
+
     def __len__(self) -> int:
         return len(self.samples)
-    
+
+class AttentionDataset(Dataset):
+    def __init__(self, scenes_json_file, image_path, max_number_samples) -> None:
+        super().__init__()
+
+        preprocess = ResNet50_Weights.DEFAULT.transforms()
+        self.samples = []
+
+        with open(scenes_json_file, 'r', encoding='utf-8') as f:
+            scenes_metadata = json.load(f)
+        for index, scene in enumerate(scenes_metadata['scenes']):
+            if index == max_number_samples:
+                break
+
+            image = Image.open(image_path + scene['image_filename']).convert('RGB')
+
+            target_object = scene['groups']['target'][0]
+            target_x, target_y, _ = scene['objects'][target_object]['pixel_coords']
+
+
+            self.samples.append((preprocess(image), torch.tensor([target_x, target_y])))
+
+    def __getitem__(self, index):
+        return self.samples[index]
+
+    def __len__(self) -> int:
+        return len(self.samples)

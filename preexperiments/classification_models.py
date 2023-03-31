@@ -4,7 +4,7 @@ from torch.nn import Module
 from torchvision.models import ResNet50_Weights, resnet50
 
 
-class ResnetFeatureClassifier(Module):
+class ResnetBoundingBoxClassifier(Module):
     def __init__(self) -> None:
         super().__init__()
         resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
@@ -33,5 +33,29 @@ class ResnetFeatureClassifier(Module):
         stacked = stacked.permute(1, 0, 2, 3, 4)
 
         classified = self.classifier(torch.flatten(stacked, start_dim=1))
+
+        return classified
+
+
+class ResnetAttentionClassifier(Module):
+    def __init__(self) -> None:
+        super().__init__()
+        resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+        self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+        self.resnet.eval()
+
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        
+        self.classifier = nn.Sequential(
+            nn.Linear(100352, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 2),
+        )
+
+    def forward(self, data):
+        resnet = self.resnet(data)
+        pooled = self.adaptive_pool(resnet)
+
+        classified = self.classifier(torch.flatten(pooled, start_dim=1))
 
         return classified

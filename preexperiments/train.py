@@ -2,12 +2,12 @@ import argparse
 import sys
 
 import torch
-from classification_models import ResnetFeatureClassifier
+from classification_models import ResnetAttentionClassifier
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
-from torcheval.metrics import MulticlassAccuracy
+from torcheval.metrics import BinaryAccuracy, MulticlassAccuracy
 
-from data_readers import ClassifierDataset
+from data_readers import AttentionDataset
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     else:
         raise AttributeError('Device must be cpu or cuda')
     
-    dataset = ClassifierDataset(args.scene_json_file, args.image_dir, args.max_samples)
+    dataset = AttentionDataset(args.scene_json_file, args.image_dir, args.max_samples)
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
@@ -47,9 +47,41 @@ if __name__ == '__main__':
             test_dataset, batch_size=8, shuffle=True, num_workers=1
         )
     
-    model = ResnetFeatureClassifier().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.002)
-    loss_function = nn.CrossEntropyLoss()
+    model = ResnetAttentionClassifier().to(device)
+    optimizer = optim.Adam(model.parameters(), lr=0.0002)
+
+    classifier_loss = nn.CrossEntropyLoss()
+
+    def pixel_loss(model_output, ground_truth):
+        loss = torch.diagonal(torch.cdist(model_output, ground_truth.float()))
+
+        return torch.mean(loss)
+    mse_loss = nn.MSELoss()
+
+    def bounding_box_accuracy(model):
+        model.eval()
+        metric = MulticlassAccuracy()
+        for model_input, ground_truth in test_loader:
+            model_input = model_input.to(device)
+            ground_truth = ground_truth.to(device)
+            output = model(model_input).detach()
+            max_indices = torch.max(output, dim=1)[1]
+
+            metric.update(max_indices, ground_truth)
+        return metric.compute()
+    
+    def pixel_accuracy(model):
+        model.eval()
+        metric = BinaryAccuracy(device=device)
+        for model_input, ground_truth in test_loader:
+            model_input = model_input.to(device)
+            ground_truth = ground_truth.to(device)
+            output = model(model_input).detach()
+            
+            distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
+            positives = torch.where(distances < 50, distances, 0)
+            metric.update(positives, torch.ones_like(positives))
+        return metric.compute()
 
     for epoch in range(args.epochs):
         total_loss = 0
@@ -59,8 +91,11 @@ if __name__ == '__main__':
 
             output = model(model_input)
 
-            loss = loss_function(output, ground_truth.long())
-
+            # print('Truth:', ground_truth)
+            # print('Prediction:', output)
+            loss = pixel_loss(output, ground_truth)
+            # print(loss)
+            # print()
             total_loss += loss.item()
             print(f'epoch {epoch},', f'batch {i}:', round(total_loss / (i + 1), 4), end='\r')
 
@@ -68,19 +103,4 @@ if __name__ == '__main__':
             optimizer.step()
             optimizer.zero_grad()
         print()
-
-    model.eval()
-    predictions = []
-    ground_truths = []
-    metric = MulticlassAccuracy()
-    for index, (model_input, ground_truth) in enumerate(test_loader):
-        model_input = model_input.to(device)
-        ground_truth = ground_truth.to(device)
-        output = model(model_input).detach()
-        max_indices = torch.max(output, dim=1)[1]
-
-        metric.update(max_indices, ground_truth)
-
-    accuracy = metric.compute()
-    print(f'Accuracy: {accuracy}')
-    
+        print(f'Accuracy: {pixel_accuracy(model)}')
