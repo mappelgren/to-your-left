@@ -26,6 +26,9 @@ if __name__ == '__main__':
     parser.add_argument(
         "--device", type=str, default=None, help="cpu or cuda"
     )
+    parser.add_argument(
+        "--batch_size", type=int, default=32, help="batch size"
+    )
     args = parser.parse_args()
 
     if args.device == 'cpu':
@@ -41,10 +44,10 @@ if __name__ == '__main__':
     test_dataset_length = len(dataset) - train_dataset_length
     train_dataset, test_dataset = random_split(dataset, (train_dataset_length, test_dataset_length))
     train_loader = DataLoader(
-            train_dataset, batch_size=8, shuffle=True, num_workers=1
+            train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
         )
     test_loader = DataLoader(
-            test_dataset, batch_size=8, shuffle=True, num_workers=1
+            test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
         )
     
     model = ResnetAttentionClassifier().to(device)
@@ -56,6 +59,7 @@ if __name__ == '__main__':
         loss = torch.diagonal(torch.cdist(model_output, ground_truth.float()))
 
         return torch.mean(loss)
+    
     mse_loss = nn.MSELoss()
 
     def bounding_box_accuracy(model):
@@ -79,10 +83,11 @@ if __name__ == '__main__':
             output = model(model_input).detach()
             
             distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
-            positives = torch.where(distances < 50, distances, 0)
+            positives = torch.where(distances < 20, distances, 0)
             metric.update(positives, torch.ones_like(positives))
         return metric.compute()
 
+    print(f'Batches per epoch: {len(train_loader)}')
     for epoch in range(args.epochs):
         total_loss = 0
         for i, (model_input, ground_truth) in enumerate(train_loader):

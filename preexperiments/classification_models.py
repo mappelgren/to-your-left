@@ -54,8 +54,10 @@ class ResnetAttentionClassifier(Module):
 
     def forward(self, data):
         resnet = self.resnet(data)
+        print(resnet.shape)
         pooled = self.adaptive_pool(resnet)
-
+        print(pooled.shape)
+        return
         classified = self.classifier(torch.flatten(pooled, start_dim=1))
 
         return classified
