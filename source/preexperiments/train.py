@@ -12,7 +12,7 @@ from torcheval.metrics import BinaryAccuracy, MulticlassAccuracy
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--scene_json_file", type=str, default=None, help="Path to the scene JSON file"
+        "--scene_json_dir", type=str, default=None, help="Path to the scene json dir"
     )
     parser.add_argument(
         "--image_dir", type=str, default=None, help="Path to the scene image dir"
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     else:
         raise AttributeError('Device must be cpu or cuda')
     
-    dataset = AttentionAttributeDataset(args.scene_json_file, args.image_dir, args.max_samples)
+    dataset = AttentionAttributeDataset(args.scene_json_dir, args.image_dir, args.max_samples)
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
