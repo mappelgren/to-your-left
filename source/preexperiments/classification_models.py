@@ -84,7 +84,7 @@ class ResnetAttentionAttributeClassifier(Module):
         resnet = self.resnet(image)
         pooled = self.adaptive_pool(resnet)
         
-        concatenated = torch.cat((pooled.squeeze(), color_tensor, shape_tensor, size_tensor))
+        concatenated = torch.cat((pooled.squeeze(), color_tensor, shape_tensor, size_tensor), dim=1)
         classified = self.classifier(concatenated)
 
         return classified
