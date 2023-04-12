@@ -91,7 +91,7 @@ if __name__ == '__main__':
     for epoch in range(args.epochs):
         total_loss = 0
         for i, (model_input, ground_truth) in enumerate(train_loader):
-            model_input = model_input.to(device)
+            model_input = [t.to(device) for t in model_input]
             ground_truth = ground_truth.to(device)
 
             output = model(model_input)

@@ -1,4 +1,5 @@
 import json
+import os
 import random
 from enum import Enum
 
@@ -123,17 +124,18 @@ class AttentionDataset(Dataset):
         return len(self.samples)
     
 class AttentionAttributeDataset(Dataset):
-    def __init__(self, scenes_json_file, image_path, max_number_samples) -> None:
+    def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
         super().__init__()
 
         preprocess = ResNet50_Weights.DEFAULT.transforms()
         self.samples = []
 
-        with open(scenes_json_file, 'r', encoding='utf-8') as f:
-            scenes_metadata = json.load(f)
-        for index, scene in enumerate(scenes_metadata['scenes']):
-            if index == max_number_samples:
-                break
+        scenes = os.listdir(scenes_json_dir)
+        selected_scenes = random.sample(scenes, max_number_samples)
+
+        for scene_file in selected_scenes:
+            with open(os.path.join(scenes_json_dir, scene_file), 'r', encoding='utf-8') as f
+                scene = json.load(f)
 
             image = Image.open(image_path + scene['image_filename']).convert('RGB')
 
