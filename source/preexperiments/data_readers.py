@@ -98,8 +98,24 @@ class AttentionDataset(Dataset):
             target_object = scene['groups']['target'][0]
             target_x, target_y, _ = scene['objects'][target_object]['pixel_coords']
 
+            target_x, target_y = self._recalculate_target_pixels(image.size, (target_x, target_y), preprocess)
 
             self.samples.append((preprocess(image), torch.tensor([target_x, target_y])))
+
+    def _recalculate_target_pixels(self, image_size, target_pixels, preprocess):
+        target_x, target_y = target_pixels
+        image_x, image_y = image_size
+
+        new_image_x = min(image_x, preprocess.resize_size[0])
+        new_image_y = min(image_y, preprocess.resize_size[0])
+
+        new_x = int(target_x * (new_image_x / image_x))
+        new_y = int(target_y * (new_image_y / image_y))
+
+        new_x = int(new_x - ((new_image_x - preprocess.crop_size[0]) / 2))
+        new_y = int(new_y - ((new_image_y - preprocess.crop_size[0]) / 2))
+
+        return new_x, new_y
 
     def __getitem__(self, index):
         return self.samples[index]
