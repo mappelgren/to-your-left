@@ -150,7 +150,7 @@ class AttentionAttributeDataset(Dataset):
             size_tensor = self._one_hot_encode(Size, scene['objects'][target_object]['size'])
 
             self.samples.append((preprocess(image), color_tensor, shape_tensor, size_tensor),
-                                 torch.tensor([target_x, target_y])))
+                                 torch.tensor([target_x, target_y]))
 
     def _one_hot_encode(self, attribute: Enum, value: str):
         tensor = torch.zeros(len(attribute))
