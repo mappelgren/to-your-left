@@ -134,7 +134,7 @@ class AttentionAttributeSample:
     color_tensor: torch.Tensor
     shape_tensor: torch.Tensor
     size_tensor: torch.Tensor
-    target_pixel: torch.Tensor
+    target_pixels: torch.Tensor
 
 class AttentionAttributeDataset(Dataset):
     def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
