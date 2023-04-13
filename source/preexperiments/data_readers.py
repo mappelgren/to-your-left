@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from curses import color_pair
 from enum import Enum
 
 import torch
@@ -148,7 +149,7 @@ class AttentionAttributeDataset(Dataset):
             color_tensor = self._one_hot_encode(Color, scene['objects'][target_object]['color'])
             shape_tensor = self._one_hot_encode(Shape, scene['objects'][target_object]['shape'])
             size_tensor = self._one_hot_encode(Size, scene['objects'][target_object]['size'])
-
+            print(color_tensor, shape_tensor, size_tensor)
             self.samples.append(((preprocess(image), color_tensor, shape_tensor, size_tensor),
                                  torch.tensor([target_x, target_y])))
 
