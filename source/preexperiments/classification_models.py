@@ -69,9 +69,9 @@ class ResnetAttentionAttributeClassifier(Module):
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
         self.resnet.eval()
 
-        # out 2048
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
-
+        # out 100_352
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        self.linear = nn.Linear(100_352, 2048)
 
         self.classifier = nn.Sequential(
             nn.Linear(2048 + number_colors + number_shapes + number_size, 2),
@@ -83,8 +83,8 @@ class ResnetAttentionAttributeClassifier(Module):
         image, color_tensor, shape_tensor, size_tensor = data
         resnet = self.resnet(image)
         pooled = self.adaptive_pool(resnet)
-        
-        concatenated = torch.cat((pooled.squeeze(), color_tensor, shape_tensor, size_tensor), dim=1)
+        linear = self.linear(torch.flatten(pooled, start_dim=1))
+        concatenated = torch.cat((linear, color_tensor, shape_tensor, size_tensor), dim=1)
         classified = self.classifier(concatenated)
 
         return classified
