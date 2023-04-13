@@ -5,6 +5,7 @@ from curses import color_pair
 from enum import Enum
 
 import torch
+from attr import dataclass
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.models import ResNet50_Weights
@@ -125,7 +126,16 @@ class AttentionDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.samples)
-    
+
+@dataclass
+class AttentionAttributeSample:
+    image_id: str
+    image: torch.Tensor
+    color_tensor: torch.Tensor
+    shape_tensor: torch.Tensor
+    size_tensor: torch.Tensor
+    target_pixel: torch.Tensor
+
 class AttentionAttributeDataset(Dataset):
     def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
         super().__init__()
@@ -149,9 +159,15 @@ class AttentionAttributeDataset(Dataset):
             color_tensor = self._one_hot_encode(Color, scene['objects'][target_object]['color'])
             shape_tensor = self._one_hot_encode(Shape, scene['objects'][target_object]['shape'])
             size_tensor = self._one_hot_encode(Size, scene['objects'][target_object]['size'])
-            print(color_tensor, shape_tensor, size_tensor)
-            self.samples.append(((preprocess(image), color_tensor, shape_tensor, size_tensor),
-                                 torch.tensor([target_x, target_y])))
+
+            self.samples.append(AttentionAttributeSample(
+                image_id=scene_file,
+                image=preprocess(image),
+                color_tensor=color_tensor,
+                shape_tensor=shape_tensor,
+                size_tensor=size_tensor,
+                target_pixels=torch.tensor([target_x, target_y])
+                ))
 
     def _one_hot_encode(self, attribute: Enum, value: str):
         tensor = torch.zeros(len(attribute))
@@ -175,7 +191,11 @@ class AttentionAttributeDataset(Dataset):
         return new_x, new_y
     
     def __getitem__(self, index):
-        return self.samples[index]
+        return ((self.samples[index]['image'],
+                 self.samples[index]['color_tensor'],
+                 self.samples[index]['shape_tensor'],
+                 self.samples[index]['size_tensor']),
+                self.samples[index]['target_pixels'])
 
     def __len__(self) -> int:
         return len(self.samples)
