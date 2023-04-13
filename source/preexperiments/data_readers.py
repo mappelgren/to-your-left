@@ -141,7 +141,7 @@ class AttentionAttributeDataset(Dataset):
         super().__init__()
 
         preprocess = ResNet50_Weights.DEFAULT.transforms()
-        self.samples = []
+        self.samples: list[AttentionAttributeSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         selected_scenes = random.sample(scenes, max_number_samples)
@@ -191,11 +191,11 @@ class AttentionAttributeDataset(Dataset):
         return new_x, new_y
     
     def __getitem__(self, index):
-        return ((self.samples[index]['image'],
-                 self.samples[index]['color_tensor'],
-                 self.samples[index]['shape_tensor'],
-                 self.samples[index]['size_tensor']),
-                self.samples[index]['target_pixels'])
+        return ((self.samples[index].image,
+                 self.samples[index].color_tensor,
+                 self.samples[index].shape_tensor,
+                 self.samples[index].size_tensor),
+                self.samples[index].target_pixels)
 
     def __len__(self) -> int:
         return len(self.samples)
