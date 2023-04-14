@@ -74,30 +74,23 @@ if __name__ == '__main__':
             metric.update(max_indices, ground_truth)
         return metric.compute()
     
-    def pixel_accuracy(model):
+    def test_model(model, test_loader):
         model.eval()
-        metric = BinaryAccuracy(device=device)
+        accuracy = BinaryAccuracy(device=device)
+        mean = Mean(device=device)
+
         for model_input, ground_truth in test_loader:
             model_input = [t.to(device) for t in model_input]
             ground_truth = ground_truth.to(device)
             output = model(model_input).detach()
             
             distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
+            mean.update(distances)
+
             positives = torch.where(distances < 20, distances, 0)
-            metric.update(positives, torch.ones_like(positives))
-        return metric.compute()
-    
-    def pixel_mean_loss(model):
-        model.eval()
-        metric = Mean(device=device)
-        for model_input, ground_truth in test_loader:
-            model_input = [t.to(device) for t in model_input]
-            ground_truth = ground_truth.to(device)
-            output = model(model_input).detach()
-            
-            distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
-            metric.update(distances)
-        return metric.compute()
+            accuracy.update(positives, torch.ones_like(positives))
+
+        return accuracy.compute(), mean.compute()
 
     print(f'Batches per epoch: {len(train_loader)}')
     for epoch in range(args.epochs):
@@ -121,5 +114,5 @@ if __name__ == '__main__':
             optimizer.step()
             optimizer.zero_grad()
         print()
-        print(f'Accuracy: {pixel_accuracy(model)}')
-        print(f'Mean Test Loss: {pixel_mean_loss(model)}')
+        accuracy, mean = test_model(model, test_loader)
+        print(f'Accuracy: {accuracy:.2f}, Mean Test Loss: {mean:.2f}')
