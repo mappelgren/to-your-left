@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     print(f'Batches per epoch: {len(train_loader)}')
     for epoch in range(args.epochs):
-        total_loss = Mean()
+        total_loss = Mean(device=device)
         model.train()
         for i, (model_input, ground_truth) in enumerate(train_loader):
             model_input = [t.to(device) for t in model_input]
