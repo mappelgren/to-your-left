@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
             loss = pixel_loss(output, ground_truth)
 
-            total_loss.update(loss.item())
+            total_loss.update(loss)
             print(f'epoch {epoch},', f'batch {i}:', f'{total_loss.compute:.4f}', end='\r')
 
             loss.backward()
