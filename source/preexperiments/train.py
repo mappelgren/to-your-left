@@ -7,7 +7,7 @@ from classification_models import (ResnetAttentionAttributeClassifier,
 from data_readers import AttentionAttributeDataset, AttentionDataset
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
-from torcheval.metrics import BinaryAccuracy, MulticlassAccuracy
+from torcheval.metrics import BinaryAccuracy, Mean, MulticlassAccuracy
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -86,10 +86,23 @@ if __name__ == '__main__':
             positives = torch.where(distances < 20, distances, 0)
             metric.update(positives, torch.ones_like(positives))
         return metric.compute()
+    
+    def pixel_mean_loss(model):
+        model.eval()
+        metric = Mean(device=device)
+        for model_input, ground_truth in test_loader:
+            model_input = [t.to(device) for t in model_input]
+            ground_truth = ground_truth.to(device)
+            output = model(model_input).detach()
+            
+            distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
+            metric.update(distances)
+        return metric.compute()
 
     print(f'Batches per epoch: {len(train_loader)}')
     for epoch in range(args.epochs):
         total_loss = 0
+        model.train()
         for i, (model_input, ground_truth) in enumerate(train_loader):
             model_input = [t.to(device) for t in model_input]
             ground_truth = ground_truth.to(device)
@@ -109,3 +122,4 @@ if __name__ == '__main__':
             optimizer.zero_grad()
         print()
         print(f'Accuracy: {pixel_accuracy(model)}')
+        print(f'Mean Test Loss: {pixel_mean_loss(model)}')
