@@ -1,11 +1,10 @@
 import json
 import os
 import random
-from curses import color_pair
+from dataclasses import dataclass
 from enum import Enum
 
 import torch
-from attr import dataclass
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.models import ResNet50_Weights
@@ -15,6 +14,7 @@ class Shape(Enum):
     CUBE = 0
     SPHERE = 1
     CYLINDER = 2
+
 
 class Color(Enum):
     GRAY = 0
@@ -26,9 +26,11 @@ class Color(Enum):
     CYAN = 6
     YELLOW = 7
 
+
 class Size(Enum):
     SMALL = 0
     LARGE = 1
+
 
 class ClassifierDataset(Dataset):
     def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
@@ -54,10 +56,8 @@ class ClassifierDataset(Dataset):
             input_boxes = torch.stack([bounding_box for _, bounding_box in enumerated])
             indices, _ = zip(*enumerated)
             target_index = torch.tensor(indices.index(target_object))
-            
-            self.samples.append((input_boxes, target_index))
-            
 
+            self.samples.append((input_boxes, target_index))
 
     def _get_bounding_boxes(self, image, scene):
         preprocess = ResNet50_Weights.DEFAULT.transforms()
@@ -71,7 +71,7 @@ class ClassifierDataset(Dataset):
                 y_center - BOUNDING_BOX_SIZE/2,
                 x_center + BOUNDING_BOX_SIZE/2,
                 y_center + BOUNDING_BOX_SIZE/2
-                ))
+            ))
             object_bounding_boxes.append(preprocess(bounding_box))
 
         object_bounding_boxes.extend([torch.zeros_like(object_bounding_boxes[0])] * (10 - len(object_bounding_boxes)))
@@ -83,6 +83,7 @@ class ClassifierDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.samples)
+
 
 class AttentionDataset(Dataset):
     def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
@@ -127,6 +128,7 @@ class AttentionDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
+
 @dataclass
 class AttentionAttributeSample:
     image_id: str
@@ -135,6 +137,7 @@ class AttentionAttributeSample:
     shape_tensor: torch.Tensor
     size_tensor: torch.Tensor
     target_pixels: torch.Tensor
+
 
 class AttentionAttributeDataset(Dataset):
     def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
@@ -167,14 +170,14 @@ class AttentionAttributeDataset(Dataset):
                 shape_tensor=shape_tensor,
                 size_tensor=size_tensor,
                 target_pixels=torch.tensor([target_x, target_y])
-                ))
+            ))
 
     def _one_hot_encode(self, attribute: Enum, value: str):
         tensor = torch.zeros(len(attribute))
         tensor[attribute[value.upper()].value] = 1
 
         return tensor
-    
+
     def _recalculate_target_pixels(self, image_size, target_pixels, preprocess):
         target_x, target_y = target_pixels
         image_x, image_y = image_size
@@ -189,7 +192,7 @@ class AttentionAttributeDataset(Dataset):
         new_y = int(new_y - ((new_image_y - preprocess.crop_size[0]) / 2))
 
         return new_x, new_y
-    
+
     def __getitem__(self, index):
         return ((self.samples[index].image,
                  self.samples[index].color_tensor,

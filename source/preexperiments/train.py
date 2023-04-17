@@ -37,19 +37,19 @@ if __name__ == '__main__':
         device = torch.device('cuda:0')
     else:
         raise AttributeError('Device must be cpu or cuda')
-    
+
     dataset = AttentionAttributeDataset(args.scene_json_dir, args.image_dir, args.max_samples)
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
     train_dataset, test_dataset = random_split(dataset, (train_dataset_length, test_dataset_length))
     train_loader = DataLoader(
-            train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
-        )
+        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
+    )
     test_loader = DataLoader(
-            test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
-        )
-    
+        test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
+    )
+
     model = ResnetAttentionAttributeClassifier().to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.0002)
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         loss = torch.diagonal(torch.cdist(model_output, ground_truth.float()))
 
         return torch.mean(loss)
-    
+
     mse_loss = nn.MSELoss()
 
     def bounding_box_accuracy(model):
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
             metric.update(max_indices, ground_truth)
         return metric.compute()
-    
+
     def test_model(model, test_loader):
         model.eval()
         accuracy = BinaryAccuracy(device=device)
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             model_input = [t.to(device) for t in model_input]
             ground_truth = ground_truth.to(device)
             output = model(model_input).detach()
-            
+
             distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
             mean.update(distances)
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
             loss = pixel_loss(output, ground_truth)
 
             total_loss.update(loss)
-            print(f'epoch {epoch},', f'batch {i}:', f'{total_loss.compute:.4f}', end='\r')
+            print(f'epoch {epoch},', f'batch {i}:', f'{total_loss.compute():.4f}', end='\r')
 
             loss.backward()
             optimizer.step()
