@@ -42,14 +42,16 @@ class ClassifierDataset(Dataset):
         selected_scenes = random.sample(scenes, max_number_samples)
 
         for scene_file in selected_scenes:
-            with open(os.path.join(scenes_json_dir, scene_file), 'r', encoding='utf-8') as f:
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
                 scene = json.load(f)
 
-            image = Image.open(image_path + scene['image_filename']).convert('RGB')
+            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
             bounding_boxes = self._get_bounding_boxes(image, scene)
 
-            target_object = scene['groups']['target'][0]
+            target_object = scene["groups"]["target"][0]
             enumerated = list(enumerate(bounding_boxes))
             random.shuffle(enumerated)
 
@@ -64,17 +66,22 @@ class ClassifierDataset(Dataset):
         BOUNDING_BOX_SIZE = image.size[0] / 5
 
         object_bounding_boxes = []
-        for obj in scene['objects']:
-            x_center, y_center, _ = obj['pixel_coords']
-            bounding_box = image.crop((
-                x_center - BOUNDING_BOX_SIZE/2,
-                y_center - BOUNDING_BOX_SIZE/2,
-                x_center + BOUNDING_BOX_SIZE/2,
-                y_center + BOUNDING_BOX_SIZE/2
-            ))
+        for obj in scene["objects"]:
+            x_center, y_center, _ = obj["pixel_coords"]
+            bounding_box = image.crop(
+                (
+                    x_center - BOUNDING_BOX_SIZE / 2,
+                    y_center - BOUNDING_BOX_SIZE / 2,
+                    x_center + BOUNDING_BOX_SIZE / 2,
+                    y_center + BOUNDING_BOX_SIZE / 2,
+                )
+            )
             object_bounding_boxes.append(preprocess(bounding_box))
 
-        object_bounding_boxes.extend([torch.zeros_like(object_bounding_boxes[0])] * (10 - len(object_bounding_boxes)))
+        object_bounding_boxes.extend(
+            [torch.zeros_like(object_bounding_boxes[0])]
+            * (10 - len(object_bounding_boxes))
+        )
 
         return object_bounding_boxes
 
@@ -96,14 +103,18 @@ class AttentionDataset(Dataset):
         selected_scenes = random.sample(scenes, max_number_samples)
 
         for scene_file in selected_scenes:
-            with open(os.path.join(scenes_json_dir, scene_file), 'r', encoding='utf-8') as f:
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
                 scene = json.load(f)
 
-            image = Image.open(image_path + scene['image_filename']).convert('RGB')
+            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
-            target_object = scene['groups']['target'][0]
-            target_x, target_y, _ = scene['objects'][target_object]['pixel_coords']
-            target_x, target_y = self._recalculate_target_pixels(image.size, (target_x, target_y), preprocess)
+            target_object = scene["groups"]["target"][0]
+            target_x, target_y, _ = scene["objects"][target_object]["pixel_coords"]
+            target_x, target_y = self._recalculate_target_pixels(
+                image.size, (target_x, target_y), preprocess
+            )
 
             self.samples.append((preprocess(image), torch.tensor([target_x, target_y])))
 
@@ -150,27 +161,39 @@ class AttentionAttributeDataset(Dataset):
         selected_scenes = random.sample(scenes, max_number_samples)
 
         for scene_file in selected_scenes:
-            with open(os.path.join(scenes_json_dir, scene_file), 'r', encoding='utf-8') as f:
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
                 scene = json.load(f)
 
-            image = Image.open(image_path + scene['image_filename']).convert('RGB')
+            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
-            target_object = scene['groups']['target'][0]
-            target_x, target_y, _ = scene['objects'][target_object]['pixel_coords']
-            target_x, target_y = self._recalculate_target_pixels(image.size, (target_x, target_y), preprocess)
+            target_object = scene["groups"]["target"][0]
+            target_x, target_y, _ = scene["objects"][target_object]["pixel_coords"]
+            target_x, target_y = self._recalculate_target_pixels(
+                image.size, (target_x, target_y), preprocess
+            )
 
-            color_tensor = self._one_hot_encode(Color, scene['objects'][target_object]['color'])
-            shape_tensor = self._one_hot_encode(Shape, scene['objects'][target_object]['shape'])
-            size_tensor = self._one_hot_encode(Size, scene['objects'][target_object]['size'])
+            color_tensor = self._one_hot_encode(
+                Color, scene["objects"][target_object]["color"]
+            )
+            shape_tensor = self._one_hot_encode(
+                Shape, scene["objects"][target_object]["shape"]
+            )
+            size_tensor = self._one_hot_encode(
+                Size, scene["objects"][target_object]["size"]
+            )
 
-            self.samples.append(AttentionAttributeSample(
-                image_id=scene_file,
-                image=preprocess(image),
-                color_tensor=color_tensor,
-                shape_tensor=shape_tensor,
-                size_tensor=size_tensor,
-                target_pixels=torch.tensor([target_x, target_y])
-            ))
+            self.samples.append(
+                AttentionAttributeSample(
+                    image_id=scene_file,
+                    image=preprocess(image),
+                    color_tensor=color_tensor,
+                    shape_tensor=shape_tensor,
+                    size_tensor=size_tensor,
+                    target_pixels=torch.tensor([target_x, target_y]),
+                )
+            )
 
     def _one_hot_encode(self, attribute: Enum, value: str):
         tensor = torch.zeros(len(attribute))
@@ -194,11 +217,17 @@ class AttentionAttributeDataset(Dataset):
         return new_x, new_y
 
     def __getitem__(self, index):
-        return ((self.samples[index].image,
-                 self.samples[index].color_tensor,
-                 self.samples[index].shape_tensor,
-                 self.samples[index].size_tensor),
-                self.samples[index].target_pixels)
+        sample = self.samples[index]
+        return (
+            (
+                sample.image,
+                sample.color_tensor,
+                sample.shape_tensor,
+                sample.size_tensor,
+            ),
+            sample.target_pixels,
+            sample.image_id,
+        )
 
     def __len__(self) -> int:
         return len(self.samples)
