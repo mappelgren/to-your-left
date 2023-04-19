@@ -1,5 +1,6 @@
 __pycache__/
 .vscode/
+out/
 
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:

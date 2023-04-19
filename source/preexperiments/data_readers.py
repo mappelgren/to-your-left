@@ -32,7 +32,15 @@ class Size(Enum):
     LARGE = 1
 
 
-class ClassifierDataset(Dataset):
+class BoundingBoxClassifierDataset(Dataset):
+    """
+    Input:
+     - bounding boxes of all objects
+
+    Ouput:
+     - index of target bounding box
+    """
+
     def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
         super().__init__()
 
@@ -59,7 +67,9 @@ class ClassifierDataset(Dataset):
             indices, _ = zip(*enumerated)
             target_index = torch.tensor(indices.index(target_object))
 
-            self.samples.append((input_boxes, target_index))
+            self.samples.append(
+                (input_boxes, target_index, scene_file.removesuffix(".json"))
+            )
 
     def _get_bounding_boxes(self, image, scene):
         preprocess = ResNet50_Weights.DEFAULT.transforms()
@@ -78,6 +88,7 @@ class ClassifierDataset(Dataset):
             )
             object_bounding_boxes.append(preprocess(bounding_box))
 
+        # magic number 10 (max objects in scene)
         object_bounding_boxes.extend(
             [torch.zeros_like(object_bounding_boxes[0])]
             * (10 - len(object_bounding_boxes))
@@ -92,71 +103,102 @@ class ClassifierDataset(Dataset):
         return len(self.samples)
 
 
-class AttentionDataset(Dataset):
-    def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
-        super().__init__()
+class AttributeEncoder:
+    def encode(self, scene, object_index):
+        color_tensor = self._one_hot_encode(
+            Color, scene["objects"][object_index]["color"]
+        )
+        shape_tensor = self._one_hot_encode(
+            Shape, scene["objects"][object_index]["shape"]
+        )
+        size_tensor = self._one_hot_encode(Size, scene["objects"][object_index]["size"])
 
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
-        self.samples = []
+        return color_tensor, shape_tensor, size_tensor
 
-        scenes = os.listdir(scenes_json_dir)
-        selected_scenes = random.sample(scenes, max_number_samples)
+    def _one_hot_encode(self, attribute: Enum, value: str):
+        tensor = torch.zeros(len(attribute))
+        tensor[attribute[value.upper()].value] = 1
 
-        for scene_file in selected_scenes:
-            with open(
-                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
-            ) as f:
-                scene = json.load(f)
+        return tensor
 
-            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
-            target_object = scene["groups"]["target"][0]
-            target_x, target_y, _ = scene["objects"][target_object]["pixel_coords"]
-            target_x, target_y = self._recalculate_target_pixels(
-                image.size, (target_x, target_y), preprocess
-            )
+class CoordinateEncoder:
+    def __init__(self, preprocess) -> None:
+        self.preprocess = preprocess
 
-            self.samples.append((preprocess(image), torch.tensor([target_x, target_y])))
+    def get_object_coordinates(self, object_index, scene, image_size):
+        x, y, _ = scene["objects"][object_index]["pixel_coords"]
+        x, y = self._recalculate_coordinates(image_size, (x, y))
 
-    def _recalculate_target_pixels(self, image_size, target_pixels, preprocess):
-        target_x, target_y = target_pixels
+        return x, y
+
+    def get_locations(self, scene, image_size):
+        locations = []
+        for index, _ in enumerate(scene["objects"]):
+            x, y = self.get_object_coordinates(index, scene, image_size)
+            locations.append(torch.tensor([x, y]))
+        locations.extend([torch.zeros_like(locations[0])] * (10 - len(locations)))
+        random.shuffle(locations)
+
+        return locations
+
+    def _recalculate_coordinates(self, image_size, object_pixels):
+        old_x, old_y = object_pixels
         image_x, image_y = image_size
 
-        new_image_x = min(image_x, preprocess.resize_size[0])
-        new_image_y = min(image_y, preprocess.resize_size[0])
+        new_image_x = min(image_x, self.preprocess.resize_size[0])
+        new_image_y = min(image_y, self.preprocess.resize_size[0])
 
-        new_x = int(target_x * (new_image_x / image_x))
-        new_y = int(target_y * (new_image_y / image_y))
+        new_x = int(old_x * (new_image_x / image_x))
+        new_y = int(old_y * (new_image_y / image_y))
 
-        new_x = int(new_x - ((new_image_x - preprocess.crop_size[0]) / 2))
-        new_y = int(new_y - ((new_image_y - preprocess.crop_size[0]) / 2))
+        new_x = int(new_x - ((new_image_x - self.preprocess.crop_size[0]) / 2))
+        new_y = int(new_y - ((new_image_y - self.preprocess.crop_size[0]) / 2))
 
         return new_x, new_y
-
-    def __getitem__(self, index):
-        return self.samples[index]
-
-    def __len__(self) -> int:
-        return len(self.samples)
 
 
 @dataclass
-class AttentionAttributeSample:
+class CoordinatePredictorSample:
     image_id: str
     image: torch.Tensor
-    color_tensor: torch.Tensor
-    shape_tensor: torch.Tensor
-    size_tensor: torch.Tensor
+
+    # target
     target_pixels: torch.Tensor
-    locations: torch.Tensor
+
+    # addtional (optional) information
+    color_tensor: torch.Tensor = torch.tensor(0)
+    shape_tensor: torch.Tensor = torch.tensor(0)
+    size_tensor: torch.Tensor = torch.tensor(0)
+    locations: torch.Tensor = torch.tensor(0)
 
 
-class AttentionAttributeDataset(Dataset):
-    def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
+class CoordinatePredictorDataset(Dataset):
+    """
+    Input:
+     - image
+     - attributes (optional)
+     - center coordinates of all objects (optional)
+
+    Ouput:
+     - x and y coordinate of target object
+    """
+
+    def __init__(
+        self,
+        scenes_json_dir,
+        image_path,
+        max_number_samples,
+        encode_attributes=False,
+        encode_locations=False,
+    ) -> None:
         super().__init__()
 
         preprocess = ResNet50_Weights.DEFAULT.transforms()
-        self.samples: list[AttentionAttributeSample] = []
+        coordinate_encoder = CoordinateEncoder(preprocess)
+        attribute_encoder = AttributeEncoder()
+
+        self.samples: list[CoordinatePredictorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         selected_scenes = random.sample(scenes, max_number_samples)
@@ -170,150 +212,29 @@ class AttentionAttributeDataset(Dataset):
             image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
             target_object = scene["groups"]["target"][0]
-            target_x, target_y, _ = scene["objects"][target_object]["pixel_coords"]
-            target_x, target_y = self._recalculate_target_pixels(
-                image.size, (target_x, target_y), preprocess
+            target_x, target_y = coordinate_encoder.get_object_coordinates(
+                target_object, scene, image.size
             )
 
-            color_tensor = self._one_hot_encode(
-                Color, scene["objects"][target_object]["color"]
-            )
-            shape_tensor = self._one_hot_encode(
-                Shape, scene["objects"][target_object]["shape"]
-            )
-            size_tensor = self._one_hot_encode(
-                Size, scene["objects"][target_object]["size"]
+            sample = CoordinatePredictorSample(
+                image_id=scene_file.removesuffix(".json"),
+                image=preprocess(image),
+                target_pixels=torch.tensor([target_x, target_y]),
             )
 
-            self.samples.append(
-                AttentionAttributeSample(
-                    image_id=scene_file.removesuffix(".json"),
-                    image=preprocess(image),
-                    color_tensor=color_tensor,
-                    shape_tensor=shape_tensor,
-                    size_tensor=size_tensor,
-                    target_pixels=torch.tensor([target_x, target_y]),
-                    locations=torch.randn(0),
+            if encode_attributes:
+                (
+                    sample.color_tensor,
+                    sample.shape_tensor,
+                    sample.size_tensor,
+                ) = attribute_encoder.encode(scene, target_object)
+
+            if encode_locations:
+                sample.locations = torch.cat(
+                    coordinate_encoder.get_locations(scene, image.size)
                 )
-            )
 
-    def _one_hot_encode(self, attribute: Enum, value: str):
-        tensor = torch.zeros(len(attribute))
-        tensor[attribute[value.upper()].value] = 1
-
-        return tensor
-
-    def _recalculate_target_pixels(self, image_size, target_pixels, preprocess):
-        target_x, target_y = target_pixels
-        image_x, image_y = image_size
-
-        new_image_x = min(image_x, preprocess.resize_size[0])
-        new_image_y = min(image_y, preprocess.resize_size[0])
-
-        new_x = int(target_x * (new_image_x / image_x))
-        new_y = int(target_y * (new_image_y / image_y))
-
-        new_x = int(new_x - ((new_image_x - preprocess.crop_size[0]) / 2))
-        new_y = int(new_y - ((new_image_y - preprocess.crop_size[0]) / 2))
-
-        return new_x, new_y
-
-    def __getitem__(self, index):
-        sample = self.samples[index]
-        return (
-            (
-                sample.image,
-                sample.color_tensor,
-                sample.shape_tensor,
-                sample.size_tensor,
-            ),
-            sample.target_pixels,
-            sample.image_id,
-        )
-
-    def __len__(self) -> int:
-        return len(self.samples)
-
-
-class AttentionAttributeLocationDataset(Dataset):
-    def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
-        super().__init__()
-
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
-        self.samples: list[AttentionAttributeSample] = []
-
-        scenes = os.listdir(scenes_json_dir)
-        selected_scenes = random.sample(scenes, max_number_samples)
-
-        for scene_file in selected_scenes:
-            with open(
-                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
-            ) as f:
-                scene = json.load(f)
-
-            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
-
-            target_object = scene["groups"]["target"][0]
-            target_x, target_y, _ = scene["objects"][target_object]["pixel_coords"]
-            target_x, target_y = self._recalculate_target_pixels(
-                image.size, (target_x, target_y), preprocess
-            )
-
-            color_tensor = self._one_hot_encode(
-                Color, scene["objects"][target_object]["color"]
-            )
-            shape_tensor = self._one_hot_encode(
-                Shape, scene["objects"][target_object]["shape"]
-            )
-            size_tensor = self._one_hot_encode(
-                Size, scene["objects"][target_object]["size"]
-            )
-
-            locations = []
-            for obj in scene["objects"]:
-                object_x, object_y, _ = obj["pixel_coords"]
-                locations.append(
-                    torch.tensor(
-                        self._recalculate_target_pixels(
-                            image.size, (object_x, object_y), preprocess
-                        )
-                    )
-                )
-            locations.extend([torch.zeros_like(locations[0])] * (10 - len(locations)))
-            random.shuffle(locations)
-
-            self.samples.append(
-                AttentionAttributeSample(
-                    image_id=scene_file.removesuffix(".json"),
-                    image=preprocess(image),
-                    color_tensor=color_tensor,
-                    shape_tensor=shape_tensor,
-                    size_tensor=size_tensor,
-                    locations=torch.cat(locations),
-                    target_pixels=torch.tensor([target_x, target_y]),
-                )
-            )
-
-    def _one_hot_encode(self, attribute: Enum, value: str):
-        tensor = torch.zeros(len(attribute))
-        tensor[attribute[value.upper()].value] = 1
-
-        return tensor
-
-    def _recalculate_target_pixels(self, image_size, target_pixels, preprocess):
-        target_x, target_y = target_pixels
-        image_x, image_y = image_size
-
-        new_image_x = min(image_x, preprocess.resize_size[0])
-        new_image_y = min(image_y, preprocess.resize_size[0])
-
-        new_x = int(target_x * (new_image_x / image_x))
-        new_y = int(target_y * (new_image_y / image_y))
-
-        new_x = int(new_x - ((new_image_x - preprocess.crop_size[0]) / 2))
-        new_y = int(new_y - ((new_image_y - preprocess.crop_size[0]) / 2))
-
-        return new_x, new_y
+            self.samples.append(sample)
 
     def __getitem__(self, index):
         sample = self.samples[index]
