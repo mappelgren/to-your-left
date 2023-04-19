@@ -1,13 +1,12 @@
 import argparse
-import sys
 
 import torch
 from classification_models import (
     ResnetAttentionAttributeClassifier,
-    ResnetAttentionClassifier,
+    ResnetAttentionAttributeLocationClassifier,
 )
-from data_readers import AttentionAttributeDataset, AttentionDataset
-from torch import Tensor, nn, optim
+from data_readers import AttentionAttributeDataset, AttentionAttributeLocationDataset
+from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 from torcheval.metrics import BinaryAccuracy, Mean, MulticlassAccuracy
 
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    dataset = AttentionAttributeDataset(
+    dataset = AttentionAttributeLocationDataset(
         args.scene_json_dir, args.image_dir, args.max_samples
     )
 
@@ -58,7 +57,7 @@ if __name__ == "__main__":
         test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
     )
 
-    model = ResnetAttentionAttributeClassifier().to(device)
+    model = ResnetAttentionAttributeLocationClassifier().to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.0002)
 
     classifier_loss = nn.CrossEntropyLoss()

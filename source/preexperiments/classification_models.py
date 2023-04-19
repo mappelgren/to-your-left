@@ -17,8 +17,8 @@ class ResnetBoundingBoxClassifier(Module):
             nn.Linear(20480, 4096),
             # nn.ReLU(),
             nn.Linear(4096, 10),
-            nn.Softmax(dim=1)
-        )   
+            nn.Softmax(dim=1),
+        )
 
     def forward(self, data):
         data = data.permute(1, 0, 2, 3, 4)
@@ -62,6 +62,7 @@ class ResnetAttentionClassifier(Module):
 
         return classified
 
+
 class ResnetAttentionAttributeClassifier(Module):
     def __init__(self, number_colors=8, number_shapes=3, number_size=2) -> None:
         super().__init__()
@@ -84,8 +85,46 @@ class ResnetAttentionAttributeClassifier(Module):
         resnet = self.resnet(image)
         pooled = self.adaptive_pool(resnet)
         linear = self.linear(torch.flatten(pooled, start_dim=1))
-        concatenated = torch.cat((linear, color_tensor, shape_tensor, size_tensor), dim=1)
+        concatenated = torch.cat(
+            (linear, color_tensor, shape_tensor, size_tensor), dim=1
+        )
         classified = self.classifier(concatenated)
 
         return classified
-    
+
+
+class ResnetAttentionAttributeLocationClassifier(Module):
+    def __init__(
+        self, number_colors=8, number_shapes=3, number_size=2, number_objects=10
+    ) -> None:
+        super().__init__()
+        resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+        self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+        self.resnet.eval()
+
+        # out 100_352
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        self.linear = nn.Linear(100_352, 2048)
+
+        self.classifier = nn.Sequential(
+            nn.Linear(
+                2048
+                + number_colors
+                + number_shapes
+                + number_size
+                + (number_objects * 2),
+                2,
+            )
+        )
+
+    def forward(self, data):
+        image, color_tensor, shape_tensor, size_tensor, locations = data
+        resnet = self.resnet(image)
+        pooled = self.adaptive_pool(resnet)
+        linear = self.linear(torch.flatten(pooled, start_dim=1))
+        concatenated = torch.cat(
+            (linear, color_tensor, shape_tensor, size_tensor, locations), dim=1
+        )
+        classified = self.classifier(concatenated)
+
+        return classified
