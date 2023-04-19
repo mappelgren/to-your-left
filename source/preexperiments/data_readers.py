@@ -186,7 +186,7 @@ class AttentionAttributeDataset(Dataset):
 
             self.samples.append(
                 AttentionAttributeSample(
-                    image_id=scene_file,
+                    image_id=scene_file.removesuffix(".json"),
                     image=preprocess(image),
                     color_tensor=color_tensor,
                     shape_tensor=shape_tensor,
