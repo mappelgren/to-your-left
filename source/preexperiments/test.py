@@ -67,18 +67,33 @@ class CaptionGeneratorTester(Tester):
         model.eval()
         accuracy = MultilabelAccuracy(device=device)
         hamming_accuracy = MultilabelAccuracy(criteria="hamming", device=device)
+        non_target_accuracy = BinaryAccuracy(device=device)
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
-            model_input = model_input[0].to(device)
+            model_input = model_input.to(device)
+            image, _, non_target_captions, *_ = model_input
+
+            image = model_input[0].to(device)
             ground_truth = ground_truth.to(device)
-            output = model.caption(model_input).detach()
-            print(output, ground_truth)
+            output = model.caption(image).detach()
+
+            for caption in non_target_captions:
+                print(caption)
+                described_non_target_object = False
+                if output == caption:
+                    described_non_target_object = True
+                    break
+            non_target_accuracy.update(described_non_target_object, True)
+
+            print(zip(output, ground_truth))
             test_outputs.extend(zip(image_id, output))
+
             accuracy.update(output, ground_truth)
             hamming_accuracy.update(output, ground_truth)
 
         return {
             "accuracy": f"{accuracy.compute():.2f}",
             "hamming_accuracy": f"{hamming_accuracy.compute():.2f}",
+            "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
         }, test_outputs

@@ -274,6 +274,8 @@ class CaptionGeneratorSample:
     # target
     caption: torch.Tensor
 
+    non_target_captions: torch.Tensor
+
 
 class CaptionGeneratorDataset(Dataset):
     """
@@ -295,7 +297,6 @@ class CaptionGeneratorDataset(Dataset):
         super().__init__()
 
         preprocess = ResNet50_Weights.DEFAULT.transforms()
-        attribute_encoder = AttributeEncoder()
 
         # list instead of set, to make indices deterministic
         vocab = [
@@ -319,14 +320,22 @@ class CaptionGeneratorDataset(Dataset):
 
             target_object = scene["groups"]["target"][0]
             sos = self.get_encoded_word("<sos>")
-            size = self.get_encoded_word(scene["objects"][target_object]["size"])
-            color = self.get_encoded_word(scene["objects"][target_object]["color"])
-            shape = self.get_encoded_word(scene["objects"][target_object]["shape"])
+
+            captions = []
+            for obj in scene["objects"]:
+                size = self.get_encoded_word(obj["size"])
+                color = self.get_encoded_word(obj["color"])
+                shape = self.get_encoded_word(obj["shape"])
+                captions.append(torch.tensor([sos, size, color, shape]))
+
+            target_caption = captions[target_object]
+            captions.remove(target_object)
 
             sample = CaptionGeneratorSample(
                 image_id=scene_file.removesuffix(".json"),
                 image=preprocess(image),
-                caption=torch.tensor([sos, size, color, shape]),
+                caption=target_caption,
+                non_target_captions=torch.stack(captions),
             )
 
             self.samples.append(sample)
@@ -345,6 +354,7 @@ class CaptionGeneratorDataset(Dataset):
             (
                 sample.image,
                 sample.caption,
+                sample.non_target_captions,
             ),
             sample.caption[1:],
             sample.image_id,
