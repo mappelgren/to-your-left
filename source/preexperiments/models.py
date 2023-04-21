@@ -10,6 +10,8 @@ class AbstractResnet(Module):
         resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
         # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+        for param in self.resnet.parameters():
+            param.requires_grad = False
         self.resnet.eval()
 
 
