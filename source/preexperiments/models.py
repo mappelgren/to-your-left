@@ -159,9 +159,10 @@ class ImageEncoder(AbstractResnet):
 
     def forward(self, image):
         resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet).permute(0, 2, 3, 1)
+        pooled = self.adaptive_pool(resnet)
         # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
-        reduced = self.reduction(pooled.mean(dim=1))
+        flattened = torch.flatten(pooled, start_dim=2)
+        reduced = self.reduction(flattened.mean(dim=1))
         return reduced
 
 
