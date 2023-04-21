@@ -63,7 +63,7 @@ class BoundingBoxClassifierTester(Tester):
 
 class CaptionGeneratorTester(Tester):
     def test(self, model, test_loader, device):
-        # model.eval()
+        model.eval()
         accuracy = MultilabelAccuracy(device=device)
         hamming_accuracy = MultilabelAccuracy(criteria="hamming", device=device)
         non_target_accuracy = BinaryAccuracy(device=device)

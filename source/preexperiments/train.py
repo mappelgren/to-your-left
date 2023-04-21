@@ -184,7 +184,7 @@ if __name__ == "__main__":
     print(f"Batches per epoch: {len(train_loader)}")
     for epoch in range(args.epochs):
         total_loss = Mean(device=device)
-        # model.train()
+        model.train()
         train_outputs = []
         for i, (model_input, ground_truth, image_id) in enumerate(train_loader):
             if isinstance(model_input, list):
@@ -210,7 +210,7 @@ if __name__ == "__main__":
             optimizer.step()
             optimizer.zero_grad()
         print()
-        metrics, test_outputs = tester.test(model, train_loader, device)
+        metrics, test_outputs = tester.test(model, test_loader, device)
         print(metrics)
         log.append(loss_string + "\n")
         log.append(str(metrics) + "\n")
