@@ -70,13 +70,17 @@ class CaptionGeneratorTester(Tester):
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
-            image, _, non_target_captions, *_ = model_input
+            image, _, non_target_captions, masked_image, *_ = model_input
 
             image = image.to(device)
+            masked_image = masked_image.to(device)
             non_target_captions = non_target_captions.to(device)
             ground_truth = ground_truth.to(device)
 
-            output = model.caption(image).detach()
+            if masked_image.dim() != 1:
+                output = model.caption(image, masked_image).detach()
+            else:
+                output = model.caption(image).detach()
             for sample, output_sample in zip(non_target_captions, output):
                 for caption in sample:
                     described_non_target_object = torch.tensor(False)

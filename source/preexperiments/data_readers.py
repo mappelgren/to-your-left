@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 import random
@@ -274,7 +275,9 @@ class CaptionGeneratorSample:
     # target
     caption: torch.Tensor
 
-    non_target_captions: torch.Tensor
+    # additional attributes
+    masked_image: torch.Tensor = torch.tensor(0)
+    non_target_captions: torch.Tensor = torch.tensor(0)
 
 
 class CaptionGeneratorDataset(Dataset):
@@ -293,6 +296,7 @@ class CaptionGeneratorDataset(Dataset):
         scenes_json_dir,
         image_path,
         max_number_samples,
+        masked_input=False,
     ) -> None:
         super().__init__()
 
@@ -338,6 +342,25 @@ class CaptionGeneratorDataset(Dataset):
                 non_target_captions=torch.stack(captions),
             )
 
+            if masked_input:
+                masked_image = image.copy()
+                MASK_SIZE = masked_image.size[0] / 5
+                x_center, y_center, _ = scene["objects"][target_object]["pixel_coords"]
+                pixels = masked_image.load()
+
+                for i, j in itertools.product(
+                    range(masked_image.size[0]), range(masked_image.size[1])
+                ):
+                    if (
+                        i < x_center - MASK_SIZE
+                        or i > x_center + MASK_SIZE
+                        or j < y_center - MASK_SIZE
+                        or j > y_center + MASK_SIZE
+                    ):
+                        pixels[i, j] = (0, 0, 0)
+
+                sample.masked_image = preprocess(masked_image)
+
             self.samples.append(sample)
 
     def get_encoded_word(self, word):
@@ -355,6 +378,7 @@ class CaptionGeneratorDataset(Dataset):
                 sample.image,
                 sample.caption,
                 sample.non_target_captions[:, 1:],
+                sample.masked_image,
             ),
             sample.caption[1:],
             sample.image_id,

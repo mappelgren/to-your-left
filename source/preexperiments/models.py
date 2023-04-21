@@ -1,3 +1,5 @@
+from uu import encode
+
 import torch
 from torch import nn
 from torch.nn import Module
@@ -220,7 +222,6 @@ class CaptionGenerator(nn.Module):
 
         encoded_image = self.image_encoder(image).unsqueeze(dim=0)
         lstm_states = encoded_image, encoded_image
-        predicted = []
         predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
 
         return predicted.permute(0, 2, 1)
@@ -232,6 +233,53 @@ class CaptionGenerator(nn.Module):
 
         caption = []
         lstm_states = encoded_image, encoded_image
+
+        # shape: batch, sequence length
+        word = torch.full((image.shape[0], 1), self.encoded_sos, device=device)
+        for _ in range(3):
+            predicted_word_layer, lstm_states = self.caption_decoder(word, lstm_states)
+            word = torch.max(predicted_word_layer, dim=2).indices
+            caption.append(word)
+
+        return torch.cat(caption, dim=1)
+
+
+class MaskedCaptionGenerator(nn.Module):
+    """
+    Output:
+     - caption
+
+    Input:
+     - image
+    """
+
+    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.caption_decoder = caption_decoder
+        self.encoded_sos = torch.tensor(encoded_sos)
+
+    def forward(self, data):
+        image, caption, _, masked_image, *_ = data
+
+        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
+        encoded_masked_image = self.image_encoder(masked_image).unsqueeze(dim=0)
+        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
+
+        lstm_states = concatenated, concatenated
+        predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
+
+        return predicted.permute(0, 2, 1)
+
+    def caption(self, image, masked_image):
+        device = image.device
+
+        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
+        encoded_masked_image = self.image_encoder(masked_image).unsqueeze(dim=0)
+        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
+
+        caption = []
+        lstm_states = concatenated, concatenated
 
         # shape: batch, sequence length
         word = torch.full((image.shape[0], 1), self.encoded_sos, device=device)

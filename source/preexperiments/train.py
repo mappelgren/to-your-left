@@ -22,6 +22,7 @@ from models import (
     CaptionGenerator,
     CoordinatePredictor,
     ImageEncoder,
+    MaskedCaptionGenerator,
 )
 from save import (
     CaptionOutputProcessor,
@@ -101,6 +102,20 @@ models = {
         model_args={
             "image_encoder": ImageEncoder(2048),
             "caption_decoder": CaptionDecoder(14, 128, 2048),
+            "encoded_sos": 0,
+        },
+        loss_function=nn.CrossEntropyLoss(),
+        tester=CaptionGeneratorTester,
+        output_processor=CaptionOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "caption")},
+    ),
+    "masked_caption_generator": ModelDefinition(
+        dataset=CaptionGeneratorDataset,
+        dataset_args={"masked_input": True},
+        model=MaskedCaptionGenerator,
+        model_args={
+            "image_encoder": ImageEncoder(2048),
+            "caption_decoder": CaptionDecoder(14, 128, 4096),
             "encoded_sos": 0,
         },
         loss_function=nn.CrossEntropyLoss(),
