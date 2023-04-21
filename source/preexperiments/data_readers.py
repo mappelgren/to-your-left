@@ -171,6 +171,27 @@ class CoordinateEncoder:
         return new_x, new_y
 
 
+class ImageMasker:
+    def get_masked_image(self, image, scene, target_object):
+        masked_image = image.copy()
+        MASK_SIZE = masked_image.size[0] / 5
+        x_center, y_center, _ = scene["objects"][target_object]["pixel_coords"]
+        pixels = masked_image.load()
+
+        for i, j in itertools.product(
+            range(masked_image.size[0]), range(masked_image.size[1])
+        ):
+            if (
+                i < x_center - MASK_SIZE
+                or i > x_center + MASK_SIZE
+                or j < y_center - MASK_SIZE
+                or j > y_center + MASK_SIZE
+            ):
+                pixels[i, j] = (0, 0, 0)
+
+        return masked_image
+
+
 @dataclass
 class CoordinatePredictorSample:
     image_id: str
@@ -184,6 +205,7 @@ class CoordinatePredictorSample:
     shape_tensor: torch.Tensor = torch.tensor(0)
     size_tensor: torch.Tensor = torch.tensor(0)
     locations: torch.Tensor = torch.tensor(0)
+    masked_image: torch.Tensor = torch.tensor(0)
 
 
 class CoordinatePredictorDataset(Dataset):
@@ -192,6 +214,7 @@ class CoordinatePredictorDataset(Dataset):
      - image
      - attributes (optional)
      - center coordinates of all objects (optional)
+     - masked image
 
     Ouput:
      - x and y coordinate of target object
@@ -204,12 +227,14 @@ class CoordinatePredictorDataset(Dataset):
         max_number_samples,
         encode_attributes=False,
         encode_locations=False,
+        mask_image=False,
     ) -> None:
         super().__init__()
 
         preprocess = ResNet50_Weights.DEFAULT.transforms()
         coordinate_encoder = CoordinateEncoder(preprocess)
         attribute_encoder = AttributeEncoder()
+        image_masker = ImageMasker()
 
         self.samples: list[CoordinatePredictorSample] = []
 
@@ -247,6 +272,12 @@ class CoordinatePredictorDataset(Dataset):
                     coordinate_encoder.get_locations(scene, image.size)
                 )
 
+            if mask_image:
+                masked_image = image_masker.get_masked_image(
+                    image, scene, target_object
+                )
+                sample.masked_image = preprocess(masked_image)
+
             self.samples.append(sample)
 
     def __getitem__(self, index):
@@ -258,6 +289,7 @@ class CoordinatePredictorDataset(Dataset):
                 sample.shape_tensor,
                 sample.size_tensor,
                 sample.locations,
+                sample.masked_image,
             ),
             sample.target_pixels,
             sample.image_id,
@@ -296,11 +328,12 @@ class CaptionGeneratorDataset(Dataset):
         scenes_json_dir,
         image_path,
         max_number_samples,
-        masked_input=False,
+        mask_image=False,
     ) -> None:
         super().__init__()
 
         preprocess = ResNet50_Weights.DEFAULT.transforms()
+        image_masker = ImageMasker()
 
         # list instead of set, to make indices deterministic
         vocab = [
@@ -342,23 +375,10 @@ class CaptionGeneratorDataset(Dataset):
                 non_target_captions=torch.stack(captions),
             )
 
-            if masked_input:
-                masked_image = image.copy()
-                MASK_SIZE = masked_image.size[0] / 5
-                x_center, y_center, _ = scene["objects"][target_object]["pixel_coords"]
-                pixels = masked_image.load()
-
-                for i, j in itertools.product(
-                    range(masked_image.size[0]), range(masked_image.size[1])
-                ):
-                    if (
-                        i < x_center - MASK_SIZE
-                        or i > x_center + MASK_SIZE
-                        or j < y_center - MASK_SIZE
-                        or j > y_center + MASK_SIZE
-                    ):
-                        pixels[i, j] = (0, 0, 0)
-
+            if mask_image:
+                masked_image = image_masker.get_masked_image(
+                    image, scene, target_object
+                )
                 sample.masked_image = preprocess(masked_image)
 
             self.samples.append(sample)

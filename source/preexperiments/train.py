@@ -23,6 +23,7 @@ from models import (
     CoordinatePredictor,
     ImageEncoder,
     MaskedCaptionGenerator,
+    MaskedCoordinatePredictor,
 )
 from save import (
     CaptionOutputProcessor,
@@ -85,6 +86,16 @@ models = {
         output_processor=PixelOutputProcessor,
         output_processor_args={"output_fields": ("image_id", "x", "y")},
     ),
+    "masked_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={"mask_image": True},
+        model=MaskedCoordinatePredictor,
+        model_args={},
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "x", "y")},
+    ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
         dataset_args={},
@@ -111,7 +122,7 @@ models = {
     ),
     "masked_caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
-        dataset_args={"masked_input": True},
+        dataset_args={"mask_image": True},
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(2048),

@@ -166,6 +166,55 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
             ),
             dim=1,
         )
+
+        predicted = self.predictor(concatenated)
+
+        return predicted
+
+
+class MaskedCoordinatePredictor(AbstractResnet):
+    """
+    Output:
+     - x and y coordinates of target object
+
+    Input:
+     - image
+     - attributes (shape, size, color)
+     - center coordinates of all objects
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.dropout = nn.Dropout(0.3)
+
+        self.cnn = nn.Sequential(
+            nn.Conv2d(2048, 512, kernel_size=1, padding=0),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+        # out 100_352
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        self.reduction = nn.Linear(100_352, 2048)
+
+        self.predictor = nn.Linear(
+            4096,
+            2,
+        )
+
+    def forward(self, data):
+        image, _, _, _, _, masked_image, *_ = data
+        resnet = self.resnet(image)
+        pooled = self.adaptive_pool(self.dropout(resnet))
+        reduced = self.reduction(torch.flatten(pooled, start_dim=1))
+
+        masked_resnet = self.resnet(masked_image)
+        masked_pooled = self.adaptive_pool(self.dropout(masked_resnet))
+        masked_reduced = self.reduction(torch.flatten(masked_pooled, start_dim=1))
+
+        concatenated = torch.cat(
+            (reduced, masked_reduced),
+            dim=1,
+        )
         predicted = self.predictor(concatenated)
 
         return predicted
