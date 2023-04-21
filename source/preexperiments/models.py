@@ -7,7 +7,7 @@ from torchvision.models import ResNet50_Weights, resnet50
 class AbstractResnet(Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        resnet = resnet50()
+        resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
         # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
 
@@ -132,23 +132,31 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
     ) -> None:
         super().__init__()
         self.dropout = nn.Dropout(0.3)
+
+        self.cnn = nn.Sequential(
+            nn.Conv2d(2048, 512, kernel_size=1, padding=0),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         # out 100_352
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
         self.reduction = nn.Linear(100_352, 2048)
 
         self.predictor = nn.Linear(
-            2048 + number_colors + number_shapes + number_size + (number_objects * 2),
+            4608 + number_colors + number_shapes + number_size + (number_objects * 2),
             2,
         )
 
     def forward(self, data):
         image, color_tensor, shape_tensor, size_tensor, locations = data
         resnet = self.resnet(image)
-        pooled = self.adaptive_pool(self.dropout(resnet))
-        reduced = self.reduction(torch.flatten(pooled, start_dim=1))
+        cnn = self.cnn(resnet)
+
+        # pooled = self.adaptive_pool(self.dropout(resnet))
+        # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
             (
-                reduced,
+                torch.flatten(cnn, start_dim=1),
                 color_tensor,
                 shape_tensor,
                 size_tensor,
