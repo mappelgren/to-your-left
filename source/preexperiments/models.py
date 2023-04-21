@@ -7,7 +7,7 @@ from torchvision.models import ResNet50_Weights, resnet50
 class AbstractResnet(Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+        resnet = resnet50()
         # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
 
@@ -137,11 +137,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         self.reduction = nn.Linear(100_352, 2048)
 
         self.predictor = nn.Linear(
-            100_352
-            + number_colors
-            + number_shapes
-            + number_size
-            + (number_objects * 2),
+            2048 + number_colors + number_shapes + number_size + (number_objects * 2),
             2,
         )
 
@@ -152,7 +148,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
             (
-                torch.flatten(pooled, start_dim=1),
+                reduced,
                 color_tensor,
                 shape_tensor,
                 size_tensor,
