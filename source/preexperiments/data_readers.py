@@ -328,8 +328,8 @@ class CaptionGeneratorDataset(Dataset):
                 shape = self.get_encoded_word(obj["shape"])
                 captions.append(torch.tensor([sos, size, color, shape]))
 
-            target_caption = captions[target_object]
-            captions.remove(target_object)
+            target_caption = captions.pop(target_object)
+            captions.extend([torch.zeros_like(captions[0])] * (10 - len(captions)))
 
             sample = CaptionGeneratorSample(
                 image_id=scene_file.removesuffix(".json"),
@@ -354,7 +354,7 @@ class CaptionGeneratorDataset(Dataset):
             (
                 sample.image,
                 sample.caption,
-                sample.non_target_captions,
+                sample.non_target_captions[:, 1:],
             ),
             sample.caption[1:],
             sample.image_id,

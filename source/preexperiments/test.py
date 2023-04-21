@@ -71,22 +71,24 @@ class CaptionGeneratorTester(Tester):
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
-            model_input = model_input.to(device)
             image, _, non_target_captions, *_ = model_input
 
-            image = model_input[0].to(device)
+            image = image.to(device)
+            non_target_captions = non_target_captions.to(device)
             ground_truth = ground_truth.to(device)
+
             output = model.caption(image).detach()
+            for sample, output_sample in zip(non_target_captions, output):
+                for caption in sample:
+                    described_non_target_object = torch.tensor(False)
+                    if torch.equal(output_sample, caption):
+                        described_non_target_object = torch.tensor(True)
+                        break
+                non_target_accuracy.update(
+                    described_non_target_object.unsqueeze(dim=0),
+                    torch.tensor(True).unsqueeze(dim=0),
+                )
 
-            for caption in non_target_captions:
-                print(caption)
-                described_non_target_object = False
-                if output == caption:
-                    described_non_target_object = True
-                    break
-            non_target_accuracy.update(described_non_target_object, True)
-
-            print(zip(output, ground_truth))
             test_outputs.extend(zip(image_id, output))
 
             accuracy.update(output, ground_truth)
