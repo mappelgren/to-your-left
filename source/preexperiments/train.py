@@ -177,9 +177,8 @@ if __name__ == "__main__":
     tester = models[args.model].tester()
 
     model = models[args.model].model(**models[args.model].model_args).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.0002)
+    optimizer = optim.Adam(model.parameters(), lr=0.002)
     loss_function = models[args.model].loss_function
-    test_function = models[args.model].tester
 
     log = [str(args) + "\n"]
     print(f"Batches per epoch: {len(train_loader)}")
@@ -211,7 +210,7 @@ if __name__ == "__main__":
             optimizer.step()
             optimizer.zero_grad()
         print()
-        metrics, test_outputs = tester.test(model, test_loader, device)
+        metrics, test_outputs = tester.test(model, train_loader, device)
         print(metrics)
         log.append(loss_string + "\n")
         log.append(str(metrics) + "\n")

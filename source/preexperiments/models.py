@@ -10,6 +10,8 @@ class AbstractResnet(Module):
         resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
         # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+
+        # no fine-tuning
         for param in self.resnet.parameters():
             param.requires_grad = False
         self.resnet.eval()
@@ -210,7 +212,7 @@ class CaptionGenerator(nn.Module):
     def caption(self, image):
         device = image.device
 
-        encoded_image: torch.Tensor = self.image_encoder(image).unsqueeze(dim=0)
+        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
 
         caption = []
         lstm_states = encoded_image, encoded_image
