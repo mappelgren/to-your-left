@@ -203,13 +203,15 @@ class CaptionGenerator(nn.Module):
         return predicted.permute(0, 2, 1)
 
     def caption(self, image):
-        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
+        encoded_image: torch.Tensor = self.image_encoder(image).unsqueeze(dim=0)
 
         caption = []
         lstm_states = encoded_image, encoded_image
 
         # shape: batch, sequence length
-        word = torch.full((image.shape[0], 1), self.encoded_sos)
+        word = torch.full(
+            (image.shape[0], 1), self.encoded_sos, device=encoded_image.device
+        )
         for _ in range(3):
             predicted_word_layer, lstm_states = self.caption_decoder(word, lstm_states)
             word = torch.max(predicted_word_layer, dim=2).indices
