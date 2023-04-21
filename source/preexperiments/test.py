@@ -73,7 +73,7 @@ class CaptionGeneratorTester(Tester):
             model_input = model_input[0].to(device)
             ground_truth = ground_truth.to(device)
             output = model.caption(model_input).detach()
-
+            print(output, ground_truth)
             test_outputs.extend(zip(image_id, output))
             accuracy.update(output, ground_truth)
             hamming_accuracy.update(output, ground_truth)

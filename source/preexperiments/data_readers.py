@@ -274,17 +274,11 @@ class CaptionGeneratorSample:
     # target
     caption: torch.Tensor
 
-    # addtional (optional) information
-    color_tensor: torch.Tensor = torch.tensor(0)
-    shape_tensor: torch.Tensor = torch.tensor(0)
-    size_tensor: torch.Tensor = torch.tensor(0)
-
 
 class CaptionGeneratorDataset(Dataset):
     """
     Input:
      - image
-     - attributes (optional)
 
     Ouput:
      - caption in form of (size, color, shape) e.g. large green sphere
@@ -297,7 +291,6 @@ class CaptionGeneratorDataset(Dataset):
         scenes_json_dir,
         image_path,
         max_number_samples,
-        encode_attributes=False,
     ) -> None:
         super().__init__()
 
@@ -336,13 +329,6 @@ class CaptionGeneratorDataset(Dataset):
                 caption=torch.tensor([sos, size, color, shape]),
             )
 
-            if encode_attributes:
-                (
-                    sample.color_tensor,
-                    sample.shape_tensor,
-                    sample.size_tensor,
-                ) = attribute_encoder.encode(scene, target_object)
-
             self.samples.append(sample)
 
     def get_encoded_word(self, word):
@@ -359,9 +345,6 @@ class CaptionGeneratorDataset(Dataset):
             (
                 sample.image,
                 sample.caption,
-                sample.color_tensor,
-                sample.shape_tensor,
-                sample.size_tensor,
             ),
             sample.caption[1:],
             sample.image_id,
