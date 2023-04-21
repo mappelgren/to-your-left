@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from turtle import pu
 
 import torch
 from torcheval.metrics import (
@@ -65,6 +66,7 @@ class CaptionGeneratorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
         accuracy = MultilabelAccuracy(device=device)
+        hamming_accuracy = MultilabelAccuracy(criteria="hamming", device=device)
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
@@ -74,7 +76,9 @@ class CaptionGeneratorTester(Tester):
 
             test_outputs.extend(zip(image_id, output))
             accuracy.update(output, ground_truth)
+            hamming_accuracy.update(output, ground_truth)
 
         return {
             "accuracy": f"{accuracy.compute():.2f}",
+            "hamming_accuracy": f"{hamming_accuracy.compute():.2f}",
         }, test_outputs
