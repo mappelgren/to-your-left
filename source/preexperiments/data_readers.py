@@ -15,6 +15,10 @@ class Shape(Enum):
     SPHERE = 1
     CYLINDER = 2
 
+    @staticmethod
+    def names():
+        return list(map(lambda s: s.name, Shape))
+
 
 class Color(Enum):
     GRAY = 0
@@ -26,10 +30,18 @@ class Color(Enum):
     CYAN = 6
     YELLOW = 7
 
+    @staticmethod
+    def names():
+        return list(map(lambda c: c.name, Color))
+
 
 class Size(Enum):
     SMALL = 0
     LARGE = 1
+
+    @staticmethod
+    def names():
+        return list(map(lambda s: s.name, Size))
 
 
 class BoundingBoxClassifierDataset(Dataset):
@@ -247,6 +259,111 @@ class CoordinatePredictorDataset(Dataset):
                 sample.locations,
             ),
             sample.target_pixels,
+            sample.image_id,
+        )
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+
+@dataclass
+class CaptionGeneratorSample:
+    image_id: str
+    image: torch.Tensor
+
+    # target
+    caption: torch.Tensor
+
+    # addtional (optional) information
+    color_tensor: torch.Tensor = torch.tensor(0)
+    shape_tensor: torch.Tensor = torch.tensor(0)
+    size_tensor: torch.Tensor = torch.tensor(0)
+
+
+class CaptionGeneratorDataset(Dataset):
+    """
+    Input:
+     - image
+     - attributes (optional)
+
+    Ouput:
+     - caption in form of (size, color, shape) e.g. large green sphere
+    """
+
+    SOS_TOKEN = "<sos>"
+
+    def __init__(
+        self,
+        scenes_json_dir,
+        image_path,
+        max_number_samples,
+        encode_attributes=False,
+    ) -> None:
+        super().__init__()
+
+        preprocess = ResNet50_Weights.DEFAULT.transforms()
+        attribute_encoder = AttributeEncoder()
+
+        # list instead of set, to make indices deterministic
+        vocab = [
+            self.SOS_TOKEN,
+            *[word.lower() for word in [*Size.names(), *Color.names(), *Shape.names()]],
+        ]
+        self.vocab = {word: index for index, word in enumerate(list(vocab))}
+
+        self.samples: list[CaptionGeneratorSample] = []
+
+        scenes = os.listdir(scenes_json_dir)
+        selected_scenes = random.sample(scenes, max_number_samples)
+
+        for scene_file in selected_scenes:
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                scene = json.load(f)
+
+            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
+
+            target_object = scene["groups"]["target"][0]
+            sos = self.get_encoded_word("<sos>")
+            size = self.get_encoded_word(scene["objects"][target_object]["size"])
+            color = self.get_encoded_word(scene["objects"][target_object]["color"])
+            shape = self.get_encoded_word(scene["objects"][target_object]["shape"])
+
+            sample = CaptionGeneratorSample(
+                image_id=scene_file.removesuffix(".json"),
+                image=preprocess(image),
+                caption=torch.tensor([sos, size, color, shape]),
+            )
+
+            if encode_attributes:
+                (
+                    sample.color_tensor,
+                    sample.shape_tensor,
+                    sample.size_tensor,
+                ) = attribute_encoder.encode(scene, target_object)
+
+            self.samples.append(sample)
+
+    def get_encoded_word(self, word):
+        return self.vocab[word]
+
+    def get_decoded_word(self, search_index):
+        for word, index in self.vocab.items():
+            if index == search_index:
+                return word
+
+    def __getitem__(self, index):
+        sample = self.samples[index]
+        return (
+            (
+                sample.image,
+                sample.caption,
+                sample.color_tensor,
+                sample.shape_tensor,
+                sample.size_tensor,
+            ),
+            sample.caption[1:],
             sample.image_id,
         )
 

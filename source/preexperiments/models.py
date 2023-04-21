@@ -147,3 +147,72 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         predicted = self.predictor(concatenated)
 
         return predicted
+
+
+class ImageEncoder(AbstractResnet):
+    def __init__(self, encoder_out_dim) -> None:
+        super().__init__()
+        # out 100_352
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        self.reduction = nn.Linear(100_352, encoder_out_dim)
+
+    def forward(self, image):
+        resnet = self.resnet(image)
+        pooled = self.adaptive_pool(resnet)
+
+        return self.reduction(torch.flatten(pooled, start_dim=1))
+
+
+class CaptionDecoder(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, decoder_out_dim) -> None:
+        super().__init__()
+        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, decoder_out_dim, batch_first=True)
+        self.classifier = nn.Linear(decoder_out_dim, vocab_size)
+
+    def forward(self, caption, input_states):
+        embedded = self.embeddings(caption)
+        output, output_states = self.lstm(embedded, input_states)
+        prediction = self.classifier(output)
+        return prediction, output_states
+
+
+class CaptionGenerator(nn.Module):
+    """
+    Output:
+     - caption
+
+    Input:
+     - image
+    """
+
+    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.caption_decoder = caption_decoder
+        self.encoded_sos = torch.tensor(encoded_sos)
+
+    def forward(self, data):
+        image, caption, *_ = data
+
+        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
+        lstm_states = encoded_image, encoded_image
+        predicted = []
+        predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
+
+        return predicted.permute(0, 2, 1)
+
+    def caption(self, image):
+        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
+
+        caption = []
+        lstm_states = encoded_image, encoded_image
+
+        # shape: batch, sequence length
+        word = torch.full((image.shape[0], 1), self.encoded_sos)
+        for _ in range(3):
+            predicted_word_layer, lstm_states = self.caption_decoder(word, lstm_states)
+            word = torch.max(predicted_word_layer, dim=2).indices
+            caption.append(word)
+
+        return torch.cat(caption, dim=1)

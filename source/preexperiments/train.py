@@ -1,43 +1,38 @@
 import argparse
-import os
 from dataclasses import dataclass
-from time import gmtime, strftime
+from test import (
+    BoundingBoxClassifierTester,
+    CaptionGeneratorTester,
+    CoordinatePredictorTester,
+    Tester,
+)
 from typing import Callable
 
 import torch
-from classification_models import (
+from data_readers import (
+    BoundingBoxClassifierDataset,
+    CaptionGeneratorDataset,
+    CoordinatePredictorDataset,
+)
+from models import (
     AttributeCoordinatePredictor,
     AttributeLocationCoordinatePredictor,
     BoundingBoxClassifier,
+    CaptionDecoder,
+    CaptionGenerator,
     CoordinatePredictor,
+    ImageEncoder,
 )
-from data_readers import BoundingBoxClassifierDataset, CoordinatePredictorDataset
+from save import (
+    CaptionOutputProcessor,
+    ModelSaver,
+    PixelOutputProcessor,
+    StandardOutputProcessor,
+)
 from torch import nn, optim
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset, random_split
-from torcheval.metrics import BinaryAccuracy, Mean, MulticlassAccuracy
-
-
-def save_model(directory, model_name, model, log, train_output, test_output):
-    folder_name = f'{strftime("%Y-%m-%d_%H-%M-%S", gmtime())}_{model_name}'
-    sub_folder = os.path.join(directory, folder_name)
-    if not os.path.exists(sub_folder):
-        os.makedirs(sub_folder)
-
-    save_to_csv(train_output, os.path.join(sub_folder, "train_outputs.csv"))
-    save_to_csv(test_output, os.path.join(sub_folder, "test_outputs.csv"))
-
-    with open(os.path.join(sub_folder, "log.txt"), "w", encoding="utf-8") as f:
-        f.writelines(log)
-
-    torch.save(model.state_dict(), os.path.join(sub_folder, "model.pth"))
-
-
-def save_to_csv(data, file):
-    with open(file, "w", encoding="utf-8") as f:
-        f.write("image_id,x,y\n")
-        for image_id, pixels in data:
-            f.write(f"{image_id},{pixels[0]},{pixels[1]}\n")
+from torcheval.metrics import Mean
 
 
 def pixel_loss(model_output, ground_truth):
@@ -46,57 +41,16 @@ def pixel_loss(model_output, ground_truth):
     return torch.mean(loss)
 
 
-def test_coordinate_predictor(model, test_loader):
-    model.eval()
-    accuracy = BinaryAccuracy(device=device)
-    mean = Mean(device=device)
-
-    test_outputs = []
-    for model_input, ground_truth, image_id in test_loader:
-        model_input = [t.to(device) for t in model_input]
-        ground_truth = ground_truth.to(device)
-
-        output = model(model_input).detach()
-        test_outputs.extend(zip(image_id, output))
-
-        distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
-        mean.update(distances)
-
-        positives = torch.where(distances < 20, distances, 0)
-        accuracy.update(positives, torch.ones_like(positives))
-
-    return {
-        "accuracy": f"{accuracy.compute():.2f}",
-        "mean test loss": f"{mean.compute():.2f}",
-    }, test_outputs
-
-
-def test_bounding_box_classifier(model, test_loader):
-    model.eval()
-    accuracy = MulticlassAccuracy()
-
-    test_outputs = []
-    for model_input, ground_truth, image_id in test_loader:
-        model_input = model_input.to(device)
-        ground_truth = ground_truth.to(device)
-        output = model(model_input).detach()
-        max_indices = torch.max(output, dim=1)[1]
-        test_outputs.extend(zip(image_id, max_indices))
-
-        accuracy.update(max_indices, ground_truth)
-
-    return {
-        "accuracy": f"{accuracy.compute():.2f}",
-    }, test_outputs
-
-
 @dataclass
 class ModelDefinition:
     dataset: Dataset
     dataset_args: dict
     model: Module
+    model_args: dict
     loss_function: Callable
-    test_function: Callable
+    tester: Tester
+    output_processor: StandardOutputProcessor
+    output_processor_args: dict
 
 
 models = {
@@ -104,29 +58,55 @@ models = {
         dataset=CoordinatePredictorDataset,
         dataset_args={},
         model=CoordinatePredictor,
+        model_args={},
         loss_function=pixel_loss,
-        test_function=test_coordinate_predictor,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "x", "y")},
     ),
     "attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"encode_attributes": True},
         model=AttributeCoordinatePredictor,
+        model_args={},
         loss_function=pixel_loss,
-        test_function=test_coordinate_predictor,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "x", "y")},
     ),
     "attribute_location_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"encode_attributes": True, "encode_locations": True},
         model=AttributeLocationCoordinatePredictor,
+        model_args={},
         loss_function=pixel_loss,
-        test_function=test_coordinate_predictor,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "x", "y")},
     ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
         dataset_args={},
         model=BoundingBoxClassifier,
+        model_args={},
         loss_function=nn.CrossEntropyLoss(),
-        test_function=test_bounding_box_classifier,
+        tester=BoundingBoxClassifierTester,
+        output_processor=StandardOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "bounding_box")},
+    ),
+    "caption_generator": ModelDefinition(
+        dataset=CaptionGeneratorDataset,
+        dataset_args={},
+        model=CaptionGenerator,
+        model_args={
+            "image_encoder": ImageEncoder(2048),
+            "caption_decoder": CaptionDecoder(14, 128, 2048),
+            "encoded_sos": 0,
+        },
+        loss_function=nn.CrossEntropyLoss(),
+        tester=CaptionGeneratorTester,
+        output_processor=CaptionOutputProcessor,
+        output_processor_args={"output_fields": ("image_id", "caption")},
     ),
 }
 
@@ -190,10 +170,16 @@ if __name__ == "__main__":
         test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
     )
 
-    model = models[args.model].model().to(device)
+    output_processor = models[args.model].output_processor(
+        dataset=dataset, **models[args.model].output_processor_args
+    )
+    model_saver = ModelSaver(args.out_dir, args.model, output_processor)
+    tester = models[args.model].tester()
+
+    model = models[args.model].model(**models[args.model].model_args).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.0002)
     loss_function = models[args.model].loss_function
-    test_function = models[args.model].test_function
+    test_function = models[args.model].tester
 
     log = [str(args) + "\n"]
     print(f"Batches per epoch: {len(train_loader)}")
@@ -225,9 +211,12 @@ if __name__ == "__main__":
             optimizer.step()
             optimizer.zero_grad()
         print()
-        metrics, test_outputs = test_function(model, test_loader)
+        metrics, test_outputs = tester.test(model, test_loader, device)
         print(metrics)
         log.append(loss_string + "\n")
         log.append(str(metrics) + "\n")
 
-    save_model(args.out_dir, args.model, model, log, train_outputs, test_outputs)
+    model_saver.save_model(model, f"{model.__class__.__name__}.pth")
+    model_saver.save_log(log, "log.txt")
+    model_saver.save_output(test_outputs, "test_outputs.csv")
+    model_saver.save_output(train_outputs, "train_outputs.csv")
