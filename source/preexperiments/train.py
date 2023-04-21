@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
-    parser.add_argument("--lr", type=int, default=0.002, help="learning rate")
+    parser.add_argument("--lr", type=float, default=0.002, help="learning rate")
     parser.add_argument("--device", type=str, default=None, help="cpu or cuda")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size")
 
