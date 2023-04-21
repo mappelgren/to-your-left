@@ -44,7 +44,7 @@ class CoordinatePredictorTester(Tester):
 class BoundingBoxClassifierTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
-        accuracy = MulticlassAccuracy()
+        accuracy = MulticlassAccuracy(device=device)
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
@@ -64,7 +64,7 @@ class BoundingBoxClassifierTester(Tester):
 class CaptionGeneratorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
-        accuracy = MultilabelAccuracy()
+        accuracy = MultilabelAccuracy(device=device)
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
@@ -73,7 +73,6 @@ class CaptionGeneratorTester(Tester):
             output = model.caption(model_input).detach()
 
             test_outputs.extend(zip(image_id, output))
-            print(output.device, ground_truth.device)
             accuracy.update(output, ground_truth)
 
         return {
