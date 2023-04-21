@@ -12,9 +12,9 @@ class AbstractResnet(Module):
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
 
         # no fine-tuning
-        for param in self.resnet.parameters():
-            param.requires_grad = False
-        self.resnet.eval()
+        # for param in self.resnet.parameters():
+        #     param.requires_grad = False
+        # self.resnet.eval()
 
 
 class BoundingBoxClassifier(AbstractResnet):
