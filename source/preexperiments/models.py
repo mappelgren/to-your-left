@@ -161,8 +161,8 @@ class ImageEncoder(AbstractResnet):
         resnet = self.resnet(image)
         pooled = self.adaptive_pool(resnet)
         # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
-        flattened = torch.flatten(pooled, start_dim=2)
-        reduced = self.reduction(flattened.mean(dim=1))
+        flattened = torch.flatten(pooled, start_dim=2).permute(0, 2, 1)
+        reduced = self.mean_reduction(flattened.mean(dim=1))
         return reduced
 
 
