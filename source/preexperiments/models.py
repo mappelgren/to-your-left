@@ -203,7 +203,7 @@ class CaptionGenerator(nn.Module):
         return predicted.permute(0, 2, 1)
 
     def caption(self, image):
-        device = encoded_image.device
+        device = image.device
 
         encoded_image: torch.Tensor = self.image_encoder(image).unsqueeze(dim=0)
 
