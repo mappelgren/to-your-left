@@ -155,12 +155,14 @@ class ImageEncoder(AbstractResnet):
         # out 100_352
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
         self.reduction = nn.Linear(100_352, encoder_out_dim)
+        self.mean_reduction = nn.Linear(2048, encoder_out_dim)
 
     def forward(self, image):
         resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet)
-
-        return self.reduction(torch.flatten(pooled, start_dim=1))
+        pooled = self.adaptive_pool(resnet).permute(0, 3, 1, 2)
+        # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
+        reduced = self.reduction(pooled.mean(dim=1))
+        return reduced
 
 
 class CaptionDecoder(nn.Module):
