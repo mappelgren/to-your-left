@@ -137,7 +137,11 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         self.reduction = nn.Linear(100_352, 2048)
 
         self.predictor = nn.Linear(
-            2048 + number_colors + number_shapes + number_size + (number_objects * 2),
+            100_352
+            + number_colors
+            + number_shapes
+            + number_size
+            + (number_objects * 2),
             2,
         )
 
@@ -147,7 +151,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         pooled = self.adaptive_pool(self.dropout(resnet))
         reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
-            (reduced, color_tensor, shape_tensor, size_tensor, locations), dim=1
+            (pooled, color_tensor, shape_tensor, size_tensor, locations), dim=1
         )
         predicted = self.predictor(concatenated)
 
