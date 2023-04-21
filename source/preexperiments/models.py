@@ -217,4 +217,4 @@ class CaptionGenerator(nn.Module):
             word = torch.max(predicted_word_layer, dim=2).indices
             caption.append(word)
 
-        return torch.cat(caption, dim=1, device=device)
+        return torch.cat(caption, dim=1)

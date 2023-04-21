@@ -73,6 +73,7 @@ class CaptionGeneratorTester(Tester):
             output = model.caption(model_input).detach()
 
             test_outputs.extend(zip(image_id, output))
+            print(output.device, ground_truth.device)
             accuracy.update(output, ground_truth)
 
         return {
