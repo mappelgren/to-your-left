@@ -436,10 +436,9 @@ class ReferentialGameDataset(Dataset):
                 loaded_scenes.append(json.load(f))
 
         print("creating combinations...")
-        # TODO Remove slicing!! for better perfomance in testing
         scene_combinations = list(
             itertools.product(range(len(loaded_scenes)), repeat=2)
-        )[:10000]
+        )
         print("shuffling...")
         random.shuffle(scene_combinations)
 
@@ -472,8 +471,8 @@ class ReferentialGameDataset(Dataset):
 
             self.samples.append(
                 ReferentialGameSample(
-                    image_1_id=scene_1["image_filename"].removesuffix(".jpg"),
-                    image_2_id=scene_2["image_filename"].removesuffix(".jpg"),
+                    image_1_id=scene_1["image_filename"].removesuffix(".png"),
+                    image_2_id=scene_2["image_filename"].removesuffix(".png"),
                     image_1=preprocess(image_1),
                     image_2=preprocess(image_2),
                     target_image=torch.tensor(target_image),

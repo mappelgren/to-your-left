@@ -167,7 +167,7 @@ def main(params):
         callbacks=callbacks
         + [
             core.ConsoleLogger(print_train_loss=True, as_json=True),
-            # core.PrintValidationEvents(n_epochs=opts.n_epochs),
+            core.PrintValidationEvents(n_epochs=opts.n_epochs),
         ],
     )
     trainer.train(n_epochs=opts.n_epochs)
