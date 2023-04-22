@@ -1,5 +1,3 @@
-from uu import encode
-
 import torch
 from torch import nn
 from torch.nn import Module

@@ -406,3 +406,90 @@ class CaptionGeneratorDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.samples)
+
+
+@dataclass
+class ReferentialGameSample:
+    image_1_id: str
+    image_2_id: str
+    image_1: torch.Tensor
+    image_2: torch.Tensor
+
+    # target
+    target_image: torch.Tensor
+
+
+class ReferentialGameDataset(Dataset):
+    def __init__(self, scenes_json_dir, image_path="", max_number_samples="") -> None:
+        super().__init__()
+        preprocess = ResNet50_Weights.DEFAULT.transforms()
+
+        self.samples: list[ReferentialGameSample] = []
+
+        scenes = os.listdir(scenes_json_dir)
+        print("loading scenes...")
+        loaded_scenes = []
+        for scene_file in scenes:
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                loaded_scenes.append(json.load(f))
+
+        print("creating combinations...")
+        # TODO Remove slicing!! for better perfomance in testing
+        scene_combinations = list(
+            itertools.product(range(len(loaded_scenes)), repeat=2)
+        )[:10000]
+        print("shuffling...")
+        random.shuffle(scene_combinations)
+
+        print("looping...")
+
+        for scene_1_index, scene_2_index in scene_combinations:
+            if len(self.samples) == max_number_samples:
+                break
+
+            scene_1 = loaded_scenes[scene_1_index]
+            scene_2 = loaded_scenes[scene_2_index]
+
+            target_object_1_index = scene_1["groups"]["target"][0]
+            target_object_2_index = scene_2["groups"]["target"][0]
+
+            target_object_1 = scene_1["objects"][target_object_1_index]
+            target_object_2 = scene_2["objects"][target_object_2_index]
+
+            # no matching attribute
+            if (
+                target_object_1["color"] == target_object_2["color"]
+                or target_object_1["shape"] == target_object_2["shape"]
+                or target_object_1["size"] == target_object_2["size"]
+            ):
+                continue
+
+            image_1 = Image.open(image_path + scene_1["image_filename"]).convert("RGB")
+            image_2 = Image.open(image_path + scene_2["image_filename"]).convert("RGB")
+            target_image = random.randint(0, 1)
+
+            self.samples.append(
+                ReferentialGameSample(
+                    image_1_id=scene_1["image_filename"].removesuffix(".jpg"),
+                    image_2_id=scene_2["image_filename"].removesuffix(".jpg"),
+                    image_1=preprocess(image_1),
+                    image_2=preprocess(image_2),
+                    target_image=torch.tensor(target_image),
+                )
+            )
+
+    def __getitem__(self, index):
+        sample = self.samples[index]
+        sender_input = torch.stack((sample.image_1, sample.image_2))
+
+        receiver_input = [sample.image_2]
+        receiver_input.insert(sample.target_image, sample.image_1)
+        receiver_input = torch.stack(receiver_input)
+
+        target = sample.target_image
+        return (sender_input, target, receiver_input)
+
+    def __len__(self) -> int:
+        return len(self.samples)
