@@ -140,34 +140,35 @@ class CoordinateEncoder:
     def __init__(self, preprocess) -> None:
         self.preprocess = preprocess
 
-    def get_object_coordinates(self, object_index, scene, image_size):
+    def get_object_coordinates(self, object_index, scene, image_size, new_image_size):
         x, y, _ = scene["objects"][object_index]["pixel_coords"]
-        # x, y = self._recalculate_coordinates(image_size, (x, y))
+        x, y = self._recalculate_coordinates(image_size, new_image_size, (x, y))
 
         return x, y
 
-    def get_locations(self, scene, image_size):
+    def get_locations(self, scene, image_size, new_image_size):
         locations = []
         for index, _ in enumerate(scene["objects"]):
-            x, y = self.get_object_coordinates(index, scene, image_size)
+            x, y = self.get_object_coordinates(index, scene, image_size, new_image_size)
             locations.append(torch.tensor([x, y]))
         locations.extend([torch.zeros_like(locations[0])] * (10 - len(locations)))
         random.shuffle(locations)
 
         return locations
 
-    def _recalculate_coordinates(self, image_size, object_pixels):
+    def _recalculate_coordinates(self, image_size, new_image_size, object_pixels):
         old_x, old_y = object_pixels
         image_x, image_y = image_size
+        new_image_x, new_image_y = new_image_size
 
-        new_image_x = min(image_x, self.preprocess.resize_size[0])
-        new_image_y = min(image_y, self.preprocess.resize_size[0])
+        # new_image_x = min(image_x, self.preprocess.resize_size[0])
+        # new_image_y = min(image_y, self.preprocess.resize_size[0])
 
         new_x = int(old_x * (new_image_x / image_x))
         new_y = int(old_y * (new_image_y / image_y))
 
-        new_x = int(new_x - ((new_image_x - self.preprocess.crop_size[0]) / 2))
-        new_y = int(new_y - ((new_image_y - self.preprocess.crop_size[0]) / 2))
+        # new_x = int(new_x - ((new_image_x - self.preprocess.crop_size[0]) / 2))
+        # new_y = int(new_y - ((new_image_y - self.preprocess.crop_size[0]) / 2))
 
         return new_x, new_y
 
@@ -257,15 +258,18 @@ class CoordinatePredictorDataset(Dataset):
                 scene = json.load(f)
 
             image = Image.open(image_path + scene["image_filename"]).convert("RGB")
-
+            preprocessed_image = preprocess(image)
             target_object = scene["groups"]["target"][0]
             target_x, target_y = coordinate_encoder.get_object_coordinates(
-                target_object, scene, image.size
+                target_object,
+                scene,
+                image.size,
+                (preprocessed_image.shape[2], preprocessed_image.shape[1]),
             )
 
             sample = CoordinatePredictorSample(
                 image_id=scene_file.removesuffix(".json"),
-                image=preprocess(image),
+                image=preprocessed_image,
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
