@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import torch
+import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.models import ResNet50_Weights
@@ -231,7 +232,9 @@ class CoordinatePredictorDataset(Dataset):
     ) -> None:
         super().__init__()
 
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
+        # preprocess = ResNet50_Weights.DEFAULT.transforms()
+        preprocess = transforms.Compose([transforms.PILToTensor()])
+
         coordinate_encoder = CoordinateEncoder(preprocess)
         attribute_encoder = AttributeEncoder()
         image_masker = ImageMasker()
@@ -256,7 +259,7 @@ class CoordinatePredictorDataset(Dataset):
 
             sample = CoordinatePredictorSample(
                 image_id=scene_file.removesuffix(".json"),
-                image=image,
+                image=preprocess(image),
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
