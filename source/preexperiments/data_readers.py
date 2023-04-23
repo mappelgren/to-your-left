@@ -233,7 +233,9 @@ class CoordinatePredictorDataset(Dataset):
         super().__init__()
 
         # preprocess = ResNet50_Weights.DEFAULT.transforms()
-        preprocess = transforms.Compose([transforms.PILToTensor()])
+        preprocess = transforms.Compose(
+            [transforms.PILToTensor(), transforms.ConvertImageDtype(torch.float)]
+        )
 
         coordinate_encoder = CoordinateEncoder(preprocess)
         attribute_encoder = AttributeEncoder()
