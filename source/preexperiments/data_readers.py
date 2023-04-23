@@ -234,7 +234,11 @@ class CoordinatePredictorDataset(Dataset):
 
         # preprocess = ResNet50_Weights.DEFAULT.transforms()
         preprocess = transforms.Compose(
-            [transforms.PILToTensor(), transforms.ConvertImageDtype(torch.float)]
+            [
+                transforms.Resize(250),
+                transforms.PILToTensor(),
+                transforms.ConvertImageDtype(torch.float),
+            ]
         )
 
         coordinate_encoder = CoordinateEncoder(preprocess)
