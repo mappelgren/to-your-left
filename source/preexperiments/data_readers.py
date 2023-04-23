@@ -473,11 +473,31 @@ class ReferentialGameDataset(Dataset):
                 ReferentialGameSample(
                     image_1_id=scene_1["image_filename"].removesuffix(".png"),
                     image_2_id=scene_2["image_filename"].removesuffix(".png"),
-                    image_1=preprocess(image_1),
-                    image_2=preprocess(image_2),
+                    image_1=self._get_bounding_box(
+                        image_1, scene_1, target_object_1_index
+                    ),
+                    image_2=self._get_bounding_box(
+                        image_2, scene_2, target_object_2_index
+                    ),
                     target_image=torch.tensor(target_image),
                 )
             )
+
+    def _get_bounding_box(self, image, scene, target_index):
+        preprocess = ResNet50_Weights.DEFAULT.transforms()
+        BOUNDING_BOX_SIZE = image.size[0] / 5
+
+        x_center, y_center, _ = scene["objects"][target_index]["pixel_coords"]
+        bounding_box = image.crop(
+            (
+                x_center - BOUNDING_BOX_SIZE / 2,
+                y_center - BOUNDING_BOX_SIZE / 2,
+                x_center + BOUNDING_BOX_SIZE / 2,
+                y_center + BOUNDING_BOX_SIZE / 2,
+            )
+        )
+
+        return preprocess(bounding_box)
 
     def __getitem__(self, index):
         sample = self.samples[index]
