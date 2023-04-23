@@ -7,7 +7,7 @@ from torchvision.models import ResNet50_Weights, resnet50
 class AbstractResnet(Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+        resnet = resnet50()
         # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
 

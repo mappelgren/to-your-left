@@ -141,7 +141,7 @@ class CoordinateEncoder:
 
     def get_object_coordinates(self, object_index, scene, image_size):
         x, y, _ = scene["objects"][object_index]["pixel_coords"]
-        x, y = self._recalculate_coordinates(image_size, (x, y))
+        # x, y = self._recalculate_coordinates(image_size, (x, y))
 
         return x, y
 
@@ -256,7 +256,7 @@ class CoordinatePredictorDataset(Dataset):
 
             sample = CoordinatePredictorSample(
                 image_id=scene_file.removesuffix(".json"),
-                image=preprocess(image),
+                image=image,
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
