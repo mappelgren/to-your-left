@@ -13,6 +13,7 @@ from data_readers import (
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
     CoordinatePredictorDataset,
+    PreprocessScratch,
 )
 from models import (
     AttributeCoordinatePredictor,
@@ -26,6 +27,7 @@ from models import (
     MaskedCoordinatePredictor,
 )
 from save import (
+    BoundingBoxOutputProcessor,
     CaptionOutputProcessor,
     ModelSaver,
     PixelOutputProcessor,
@@ -60,79 +62,109 @@ models = {
         dataset=CoordinatePredictorDataset,
         dataset_args={},
         model=CoordinatePredictor,
-        model_args={},
+        model_args={"pretrained_resnet": True, "fine_tune_resnet": False},
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "x", "y")},
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "coordinate_predictor_scratch": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={"preprocess": PreprocessScratch(250)},
+        model=CoordinatePredictor,
+        model_args={"pretrained_resnet": False, "fine_tune_resnet": True},
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
     ),
     "attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"encode_attributes": True},
         model=AttributeCoordinatePredictor,
-        model_args={},
+        model_args={"pretrained_resnet": True, "fine_tune_resnet": False},
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "x", "y")},
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
     ),
     "attribute_location_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"encode_attributes": True, "encode_locations": True},
         model=AttributeLocationCoordinatePredictor,
-        model_args={},
+        model_args={"pretrained_resnet": True, "fine_tune_resnet": False},
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "x", "y")},
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
     ),
     "masked_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"mask_image": True},
         model=MaskedCoordinatePredictor,
-        model_args={},
+        model_args={"pretrained_resnet": True, "fine_tune_resnet": False},
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "x", "y")},
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
     ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
-        dataset_args={},
+        dataset_args={"preprocess": PreprocessScratch(50)},
         model=BoundingBoxClassifier,
-        model_args={},
+        model_args={"pretrained_resnet": False, "fine_tune_resnet": True},
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
-        output_processor=StandardOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "bounding_box")},
+        output_processor=BoundingBoxOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "bounding_box", "target_bounding_box")
+        },
     ),
     "caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
         dataset_args={},
         model=CaptionGenerator,
         model_args={
-            "image_encoder": ImageEncoder(2048),
+            "image_encoder": ImageEncoder(
+                2048, pretrained_resnet=True, fine_tune_resnet=False
+            ),
             "caption_decoder": CaptionDecoder(14, 128, 2048),
             "encoded_sos": 0,
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=CaptionGeneratorTester,
         output_processor=CaptionOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "caption")},
+        output_processor_args={
+            "output_fields": ("image_id", "caption", "target_caption")
+        },
     ),
     "masked_caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
         dataset_args={"mask_image": True},
         model=MaskedCaptionGenerator,
         model_args={
-            "image_encoder": ImageEncoder(2048),
+            "image_encoder": ImageEncoder(
+                2048, pretrained_resnet=True, fine_tune_resnet=False
+            ),
             "caption_decoder": CaptionDecoder(14, 128, 4096),
             "encoded_sos": 0,
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=CaptionGeneratorTester,
         output_processor=CaptionOutputProcessor,
-        output_processor_args={"output_fields": ("image_id", "caption")},
+        output_processor_args={
+            "output_fields": ("image_id", "caption", "target_caption")
+        },
     ),
 }
 
@@ -221,7 +253,7 @@ if __name__ == "__main__":
             ground_truth = ground_truth.to(device)
 
             output = model(model_input)
-            train_outputs.extend(zip(image_id, output.detach()))
+            train_outputs.extend(zip(image_id, output.detach(), ground_truth))
 
             loss = loss_function(output, ground_truth)
 

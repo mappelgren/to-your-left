@@ -27,7 +27,7 @@ class CoordinatePredictorTester(Tester):
             ground_truth = ground_truth.to(device)
 
             output = model(model_input).detach()
-            test_outputs.extend(zip(image_id, output))
+            test_outputs.extend(zip(image_id, output, ground_truth))
 
             distances = torch.diagonal(torch.cdist(output, ground_truth.float()))
             mean.update(distances)
@@ -52,7 +52,7 @@ class BoundingBoxClassifierTester(Tester):
             ground_truth = ground_truth.to(device)
             output = model(model_input).detach()
             max_indices = torch.max(output, dim=1)[1]
-            test_outputs.extend(zip(image_id, max_indices))
+            test_outputs.extend(zip(image_id, max_indices, ground_truth))
 
             accuracy.update(max_indices, ground_truth)
 
@@ -92,7 +92,7 @@ class CaptionGeneratorTester(Tester):
                     torch.tensor(True).unsqueeze(dim=0),
                 )
 
-            test_outputs.extend(zip(image_id, output))
+            test_outputs.extend(zip(image_id, output, ground_truth))
 
             accuracy.update(output, ground_truth)
             hamming_accuracy.update(output, ground_truth)

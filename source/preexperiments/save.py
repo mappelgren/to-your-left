@@ -45,12 +45,31 @@ class StandardOutputProcessor:
         return [self.output_fields, *outputs]
 
 
+class BoundingBoxOutputProcessor(StandardOutputProcessor):
+    def process(self, outputs):
+        processed_output = [self.output_fields]
+
+        for image_id, output, ground_truth in outputs:
+            # test data
+            if output.dim() == 0:
+                index = output
+
+            # train data
+            else:
+                index = torch.max(output, dim=0).indices
+
+            processed_output.append((image_id, str(int(index)), str(int(ground_truth))))
+
+        return processed_output
+
+
 class PixelOutputProcessor(StandardOutputProcessor):
     def process(self, outputs):
         processed_output = [self.output_fields]
-        for image_id, pixels in outputs:
+        for image_id, pixels, ground_truth in outputs:
             string_pixels = [str(p) for p in pixels.tolist()]
-            processed_output.append((image_id, *string_pixels))
+            string_ground_truths = [str(p) for p in ground_truth.tolist()]
+            processed_output.append((image_id, *string_pixels, *string_ground_truths))
 
         return processed_output
 
@@ -58,7 +77,7 @@ class PixelOutputProcessor(StandardOutputProcessor):
 class CaptionOutputProcessor(StandardOutputProcessor):
     def process(self, outputs):
         processed_output = [self.output_fields]
-        for image_id, output in outputs:
+        for image_id, output, ground_truth in outputs:
             # test data
             if output.dim() == 1:
                 encoded_caption = output
@@ -70,6 +89,9 @@ class CaptionOutputProcessor(StandardOutputProcessor):
             decoded_caption = " ".join(
                 [self.dataset.get_decoded_word(index) for index in encoded_caption]
             )
-            processed_output.append((image_id, decoded_caption))
+            decoded_target_caption = " ".join(
+                [self.dataset.get_decoded_word(index) for index in ground_truth]
+            )
+            processed_output.append((image_id, decoded_caption, decoded_target_caption))
 
         return processed_output

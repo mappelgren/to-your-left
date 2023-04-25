@@ -6,23 +6,25 @@ from dataclasses import dataclass
 from enum import Enum
 
 import torch
-import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import Dataset
+from torchvision import transforms
 from torchvision.models import ResNet50_Weights
 
 
-class Shape(Enum):
+class Attribute(Enum):
+    @classmethod
+    def names(cls):
+        return list(map(lambda a: a.name, cls))
+
+
+class Shape(Attribute):
     CUBE = 0
     SPHERE = 1
     CYLINDER = 2
 
-    @staticmethod
-    def names():
-        return list(map(lambda s: s.name, Shape))
 
-
-class Color(Enum):
+class Color(Attribute):
     GRAY = 0
     RED = 1
     BLUE = 2
@@ -32,18 +34,27 @@ class Color(Enum):
     CYAN = 6
     YELLOW = 7
 
-    @staticmethod
-    def names():
-        return list(map(lambda c: c.name, Color))
 
-
-class Size(Enum):
+class Size(Attribute):
     SMALL = 0
     LARGE = 1
 
-    @staticmethod
-    def names():
-        return list(map(lambda s: s.name, Size))
+
+class PreprocessScratch:
+    def __init__(self, image_size):
+        self.transform = transforms.Compose(
+            [
+                transforms.Resize(image_size),
+                transforms.PILToTensor(),
+                transforms.ConvertImageDtype(torch.float),
+            ]
+        )
+        ratio = 1.5
+        self.resize_size = (image_size * ratio, image_size)
+        self.crop_size = None
+
+    def __call__(self, image):
+        return self.transform(image)
 
 
 class BoundingBoxClassifierDataset(Dataset):
@@ -55,7 +66,13 @@ class BoundingBoxClassifierDataset(Dataset):
      - index of target bounding box
     """
 
-    def __init__(self, scenes_json_dir, image_path, max_number_samples) -> None:
+    def __init__(
+        self,
+        scenes_json_dir,
+        image_path,
+        max_number_samples,
+        preprocess=ResNet50_Weights.DEFAULT.transforms(),
+    ) -> None:
         super().__init__()
 
         self.samples = []
@@ -71,7 +88,7 @@ class BoundingBoxClassifierDataset(Dataset):
 
             image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
-            bounding_boxes = self._get_bounding_boxes(image, scene)
+            bounding_boxes = self._get_bounding_boxes(image, scene, preprocess)
 
             target_object = scene["groups"]["target"][0]
             enumerated = list(enumerate(bounding_boxes))
@@ -85,8 +102,7 @@ class BoundingBoxClassifierDataset(Dataset):
                 (input_boxes, target_index, scene_file.removesuffix(".json"))
             )
 
-    def _get_bounding_boxes(self, image, scene):
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
+    def _get_bounding_boxes(self, image, scene, preprocess):
         BOUNDING_BOX_SIZE = image.size[0] / 5
 
         object_bounding_boxes = []
@@ -140,35 +156,38 @@ class CoordinateEncoder:
     def __init__(self, preprocess) -> None:
         self.preprocess = preprocess
 
-    def get_object_coordinates(self, object_index, scene, image_size, new_image_size):
+    def get_object_coordinates(self, object_index, scene, image_size):
         x, y, _ = scene["objects"][object_index]["pixel_coords"]
-        x, y = self._recalculate_coordinates(image_size, new_image_size, (x, y))
+        x, y = self._recalculate_coordinates(image_size, (x, y))
 
         return x, y
 
-    def get_locations(self, scene, image_size, new_image_size):
+    def get_locations(self, scene, image_size):
         locations = []
         for index, _ in enumerate(scene["objects"]):
-            x, y = self.get_object_coordinates(index, scene, image_size, new_image_size)
+            x, y = self.get_object_coordinates(index, scene, image_size)
             locations.append(torch.tensor([x, y]))
         locations.extend([torch.zeros_like(locations[0])] * (10 - len(locations)))
         random.shuffle(locations)
 
         return locations
 
-    def _recalculate_coordinates(self, image_size, new_image_size, object_pixels):
+    def _recalculate_coordinates(self, image_size, object_pixels):
         old_x, old_y = object_pixels
         image_x, image_y = image_size
-        new_image_x, new_image_y = new_image_size
 
-        # new_image_x = min(image_x, self.preprocess.resize_size[0])
-        # new_image_y = min(image_y, self.preprocess.resize_size[0])
+        if len(self.preprocess.resize_size) == 1:
+            new_image_x = self.preprocess.resize_size[0]
+            new_image_y = self.preprocess.resize_size[0]
+        else:
+            new_image_x, new_image_y = self.preprocess.resize_size
 
         new_x = int(old_x * (new_image_x / image_x))
         new_y = int(old_y * (new_image_y / image_y))
 
-        # new_x = int(new_x - ((new_image_x - self.preprocess.crop_size[0]) / 2))
-        # new_y = int(new_y - ((new_image_y - self.preprocess.crop_size[0]) / 2))
+        if self.preprocess.crop_size is not None:
+            new_x = int(new_x - ((new_image_x - self.preprocess.crop_size[0]) / 2))
+            new_y = int(new_y - ((new_image_y - self.preprocess.crop_size[0]) / 2))
 
         return new_x, new_y
 
@@ -230,17 +249,9 @@ class CoordinatePredictorDataset(Dataset):
         encode_attributes=False,
         encode_locations=False,
         mask_image=False,
+        preprocess=ResNet50_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
-
-        # preprocess = ResNet50_Weights.DEFAULT.transforms()
-        preprocess = transforms.Compose(
-            [
-                transforms.Resize(250),
-                transforms.PILToTensor(),
-                transforms.ConvertImageDtype(torch.float),
-            ]
-        )
 
         coordinate_encoder = CoordinateEncoder(preprocess)
         attribute_encoder = AttributeEncoder()
@@ -258,18 +269,17 @@ class CoordinatePredictorDataset(Dataset):
                 scene = json.load(f)
 
             image = Image.open(image_path + scene["image_filename"]).convert("RGB")
-            preprocessed_image = preprocess(image)
+
             target_object = scene["groups"]["target"][0]
             target_x, target_y = coordinate_encoder.get_object_coordinates(
                 target_object,
                 scene,
                 image.size,
-                (preprocessed_image.shape[2], preprocessed_image.shape[1]),
             )
 
             sample = CoordinatePredictorSample(
                 image_id=scene_file.removesuffix(".json"),
-                image=preprocessed_image,
+                image=preprocess(image),
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
@@ -342,10 +352,10 @@ class CaptionGeneratorDataset(Dataset):
         image_path,
         max_number_samples,
         mask_image=False,
+        preprocess=ResNet50_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
 
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
         image_masker = ImageMasker()
 
         # list instead of set, to make indices deterministic
@@ -433,9 +443,14 @@ class ReferentialGameSample:
 
 
 class ReferentialGameDataset(Dataset):
-    def __init__(self, scenes_json_dir, image_path="", max_number_samples="") -> None:
+    def __init__(
+        self,
+        scenes_json_dir,
+        image_path="",
+        max_number_samples="",
+        preprocess=ResNet50_Weights.DEFAULT.transforms(),
+    ) -> None:
         super().__init__()
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
 
         self.samples: list[ReferentialGameSample] = []
 
@@ -486,18 +501,17 @@ class ReferentialGameDataset(Dataset):
                 ReferentialGameSample(
                     image_1_id=scene_1["image_filename"].removesuffix(".png"),
                     image_2_id=scene_2["image_filename"].removesuffix(".png"),
-                    image_1=self._get_bounding_box(
-                        image_1, scene_1, target_object_1_index
+                    image_1=preprocess(
+                        self._get_bounding_box(image_1, scene_1, target_object_1_index)
                     ),
-                    image_2=self._get_bounding_box(
-                        image_2, scene_2, target_object_2_index
+                    image_2=preprocess(
+                        self._get_bounding_box(image_2, scene_2, target_object_2_index)
                     ),
                     target_image=torch.tensor(target_image),
                 )
             )
 
     def _get_bounding_box(self, image, scene, target_index):
-        preprocess = ResNet50_Weights.DEFAULT.transforms()
         BOUNDING_BOX_SIZE = image.size[0] / 5
 
         x_center, y_center, _ = scene["objects"][target_index]["pixel_coords"]
@@ -510,7 +524,7 @@ class ReferentialGameDataset(Dataset):
             )
         )
 
-        return preprocess(bounding_box)
+        return bounding_box
 
     def __getitem__(self, index):
         sample = self.samples[index]

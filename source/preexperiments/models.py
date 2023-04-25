@@ -1,20 +1,27 @@
+from abc import ABC
+
 import torch
 from torch import nn
 from torch.nn import Module
 from torchvision.models import ResNet50_Weights, resnet50
 
 
-class AbstractResnet(Module):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        resnet = resnet50()
+class AbstractResnet(ABC, Module):
+    def __init__(self, pretrained, fine_tune) -> None:
+        super().__init__()
+
+        if pretrained:
+            resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+        else:
+            resnet = resnet50()
+
         # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
 
-        # no fine-tuning
-        # for param in self.resnet.parameters():
-        #     param.requires_grad = False
-        # self.resnet.eval()
+        if not fine_tune:
+            for param in self.resnet.parameters():
+                param.requires_grad = False
+            self.resnet.eval()
 
 
 class BoundingBoxClassifier(AbstractResnet):
@@ -26,8 +33,8 @@ class BoundingBoxClassifier(AbstractResnet):
      - bounding boxes of objects
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, pretrained_resnet, fine_tune_resnet) -> None:
+        super().__init__(pretrained_resnet, fine_tune_resnet)
         self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
 
         self.classifier = nn.Sequential(
@@ -63,8 +70,8 @@ class CoordinatePredictor(AbstractResnet):
      - image
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, pretrained_resnet, fine_tune_resnet) -> None:
+        super().__init__(pretrained_resnet, fine_tune_resnet)
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
 
         self.classifier = nn.Sequential(
@@ -93,8 +100,15 @@ class AttributeCoordinatePredictor(AbstractResnet):
      - attributes (shape, size, color)
     """
 
-    def __init__(self, number_colors=8, number_shapes=3, number_size=2) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        number_colors,
+        number_shapes,
+        number_size,
+        pretrained_resnet,
+        fine_tune_resnet,
+    ) -> None:
+        super().__init__(pretrained_resnet, fine_tune_resnet)
         # out 100_352
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
         self.reduction = nn.Linear(100_352, 2048)
@@ -128,9 +142,15 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
     """
 
     def __init__(
-        self, number_colors=8, number_shapes=3, number_size=2, number_objects=10
+        self,
+        number_colors,
+        number_shapes,
+        number_size,
+        number_objects,
+        pretrained_resnet,
+        fine_tune_resnet,
     ) -> None:
-        super().__init__()
+        super().__init__(pretrained_resnet, fine_tune_resnet)
         self.dropout = nn.Dropout(0.3)
 
         self.cnn = nn.Sequential(
@@ -181,8 +201,8 @@ class MaskedCoordinatePredictor(AbstractResnet):
      - center coordinates of all objects
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, pretrained_resnet, fine_tune_resnet) -> None:
+        super().__init__(pretrained_resnet, fine_tune_resnet)
         self.dropout = nn.Dropout(0.3)
 
         self.cnn = nn.Sequential(
@@ -219,8 +239,8 @@ class MaskedCoordinatePredictor(AbstractResnet):
 
 
 class ImageEncoder(AbstractResnet):
-    def __init__(self, encoder_out_dim) -> None:
-        super().__init__()
+    def __init__(self, encoder_out_dim, pretrained_resnet, fine_tune_resnet) -> None:
+        super().__init__(pretrained_resnet, fine_tune_resnet)
         # out 100_352
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
         self.reduction = nn.Linear(100_352, encoder_out_dim)
