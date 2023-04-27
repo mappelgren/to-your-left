@@ -113,14 +113,16 @@ class AttributeCoordinatePredictor(AbstractResnet):
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
         self.reduction = nn.Linear(100_352, 2048)
 
+        self.dropout(nn.Dropout(0.5))
+
         self.predictor = nn.Linear(
             2048 + number_colors + number_shapes + number_sizes, 2
         )
 
     def forward(self, data):
         image, color_tensor, shape_tensor, size_tensor, *_ = data
-        resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet)
+        resnet = self.resnet(self.drouput(image))
+        pooled = self.adaptive_pool(self.drouput(resnet))
         reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
             (reduced, color_tensor, shape_tensor, size_tensor), dim=1
