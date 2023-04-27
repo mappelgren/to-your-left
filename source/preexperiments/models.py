@@ -113,7 +113,7 @@ class AttributeCoordinatePredictor(AbstractResnet):
         self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
         self.reduction = nn.Linear(100_352, 2048)
 
-        self.dropout(nn.Dropout(0.5))
+        self.dropout = nn.Dropout(0.5)
 
         self.predictor = nn.Linear(
             2048 + number_colors + number_shapes + number_sizes, 2
