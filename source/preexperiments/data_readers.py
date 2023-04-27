@@ -150,13 +150,51 @@ class OneHotAttributeEncoder(AttributeEncoder):
         )
         size_tensor = self._one_hot_encode(Size, scene["objects"][object_index]["size"])
 
-        return color_tensor, shape_tensor, size_tensor
+        return torch.cat((color_tensor, shape_tensor, size_tensor))
 
     def _one_hot_encode(self, attribute: Enum, value: str):
         tensor = torch.zeros(len(attribute))
         tensor[attribute[value.upper()].value] = 1
 
         return tensor
+
+
+class DaleAttributeEncoder(AttributeEncoder):
+    PAD_TOKEN = "<pad>"
+
+    def __init__(self) -> None:
+        super().__init__()
+        vocab = [
+            self.PAD_TOKEN,
+            *[word.lower() for word in [*Size.names(), *Color.names(), *Shape.names()]],
+        ]
+        self.vocab = {word: index for index, word in enumerate(list(vocab))}
+
+    def encode(self, scene, object_index):
+        target_shape = scene["objects"][object_index]["shape"]
+        target_color = scene["objects"][object_index]["color"]
+        target_size = scene["objects"][object_index]["size"]
+
+        caption = [target_shape]
+        remaining_objects = [
+            obj for obj in scene["objects"] if obj["shape"] == target_shape
+        ]
+
+        if len(remaining_objects) > 1:
+            caption.insert(0, target_color)
+            remaining_objects = [
+                obj for obj in remaining_objects if obj["color"] == target_color
+            ]
+
+            if len(remaining_objects) > 1:
+                caption.insert(0, target_size)
+
+        encoded_caption = [self.vocab[word] for word in caption]
+        encoded_caption.extend(
+            [self.vocab[self.PAD_TOKEN]] * (3 - len(encoded_caption))
+        )
+
+        return torch.tensor(encoded_caption)
 
 
 class CoordinateEncoder:
@@ -229,9 +267,7 @@ class CoordinatePredictorSample:
     target_pixels: torch.Tensor
 
     # addtional (optional) information
-    color_tensor: torch.Tensor = torch.tensor(0)
-    shape_tensor: torch.Tensor = torch.tensor(0)
-    size_tensor: torch.Tensor = torch.tensor(0)
+    attribute_tensor: torch.Tensor = torch.tensor(0)
     locations: torch.Tensor = torch.tensor(0)
     masked_image: torch.Tensor = torch.tensor(0)
 
@@ -290,11 +326,7 @@ class CoordinatePredictorDataset(Dataset):
             )
 
             if attribute_encoder is not None:
-                (
-                    sample.color_tensor,
-                    sample.shape_tensor,
-                    sample.size_tensor,
-                ) = attribute_encoder.encode(scene, target_object)
+                sample.attribute_tensor = attribute_encoder.encode(scene, target_object)
 
             if encode_locations:
                 sample.locations = torch.cat(
@@ -314,9 +346,7 @@ class CoordinatePredictorDataset(Dataset):
         return (
             (
                 sample.image,
-                sample.color_tensor,
-                sample.shape_tensor,
-                sample.size_tensor,
+                sample.attribute_tensor,
                 sample.locations,
                 sample.masked_image,
             ),

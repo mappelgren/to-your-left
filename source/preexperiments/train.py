@@ -13,6 +13,7 @@ from data_readers import (
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
     CoordinatePredictorDataset,
+    DaleAttributeEncoder,
     OneHotAttributeEncoder,
     PreprocessScratch,
 )
@@ -23,6 +24,7 @@ from models import (
     CaptionDecoder,
     CaptionGenerator,
     CoordinatePredictor,
+    DaleAttributeCoordinatePredictor,
     ImageEncoder,
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
@@ -91,6 +93,24 @@ models = {
             "number_colors": 8,
             "number_shapes": 3,
             "number_sizes": 2,
+            "pretrained_resnet": True,
+            "fine_tune_resnet": False,
+        },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "dale_attribute_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={"attribute_encoder": DaleAttributeEncoder()},
+        model=DaleAttributeCoordinatePredictor,
+        model_args={
+            "vocab_size": 14,
+            "embedding_dim": 256,
+            "encoder_out_dim": 512,
             "pretrained_resnet": True,
             "fine_tune_resnet": False,
         },

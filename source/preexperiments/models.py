@@ -120,14 +120,12 @@ class AttributeCoordinatePredictor(AbstractResnet):
         )
 
     def forward(self, data):
-        image, color_tensor, shape_tensor, size_tensor, *_ = data
+        image, attribute_tensor, *_ = data
         resnet = self.resnet(image)
         pooled = self.adaptive_pool(resnet)
 
         reduced = self.dropout(self.reduction(torch.flatten(pooled, start_dim=1)))
-        concatenated = torch.cat(
-            (reduced, color_tensor, shape_tensor, size_tensor), dim=1
-        )
+        concatenated = torch.cat((reduced, attribute_tensor), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted
@@ -171,7 +169,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         )
 
     def forward(self, data):
-        image, color_tensor, shape_tensor, size_tensor, locations = data
+        image, attribute_tensor, locations = data
         resnet = self.resnet(image)
         cnn = self.cnn(resnet)
 
@@ -180,14 +178,61 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         concatenated = torch.cat(
             (
                 torch.flatten(cnn, start_dim=1),
-                color_tensor,
-                shape_tensor,
-                size_tensor,
+                attribute_tensor,
                 locations,
             ),
             dim=1,
         )
 
+        predicted = self.predictor(concatenated)
+
+        return predicted
+
+
+class DaleAttributeCoordinatePredictor(AbstractResnet):
+    """
+    Output:
+     - x and y coordinates of target object
+
+    Input:
+     - image
+     - attributes (shape, size, color)
+     - center coordinates of all objects
+    """
+
+    def __init__(
+        self,
+        vocab_size,
+        embedding_dim,
+        encoder_out_dim,
+        pretrained_resnet,
+        fine_tune_resnet,
+    ) -> None:
+        super().__init__(pretrained_resnet, fine_tune_resnet)
+        self.dropout = nn.Dropout(0.3)
+
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
+
+        # out 100_352
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        self.reduction = nn.Linear(100_352, 2048)
+
+        self.predictor = nn.Linear(
+            2048 + encoder_out_dim,
+            2,
+        )
+
+    def forward(self, data):
+        image, attribute_tensor, *_ = data
+        resnet = self.resnet(image)
+        pooled = self.adaptive_pool(resnet)
+        reduced = self.dropout(self.reduction(torch.flatten(pooled, start_dim=1)))
+
+        embedded = self.embedding(attribute_tensor)
+        _, (hidden_state, _) = self.lstm(embedded)
+
+        concatenated = torch.cat((reduced, hidden_state.squeeze()), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted
@@ -223,7 +268,7 @@ class MaskedCoordinatePredictor(AbstractResnet):
         )
 
     def forward(self, data):
-        image, _, _, _, _, masked_image, *_ = data
+        image, _, _, masked_image, *_ = data
         resnet = self.resnet(image)
         pooled = self.adaptive_pool(self.dropout(resnet))
         reduced = self.reduction(torch.flatten(pooled, start_dim=1))
