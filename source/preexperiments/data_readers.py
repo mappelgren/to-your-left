@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 import random
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 
@@ -133,7 +134,13 @@ class BoundingBoxClassifierDataset(Dataset):
         return len(self.samples)
 
 
-class AttributeEncoder:
+class AttributeEncoder(ABC):
+    @abstractmethod
+    def encode(self, scene, object_index):
+        pass
+
+
+class OneHotAttributeEncoder(AttributeEncoder):
     def encode(self, scene, object_index):
         color_tensor = self._one_hot_encode(
             Color, scene["objects"][object_index]["color"]
@@ -246,7 +253,7 @@ class CoordinatePredictorDataset(Dataset):
         scenes_json_dir,
         image_path,
         max_number_samples,
-        encode_attributes=False,
+        attribute_encoder: AttributeEncoder = None,
         encode_locations=False,
         mask_image=False,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
@@ -254,7 +261,6 @@ class CoordinatePredictorDataset(Dataset):
         super().__init__()
 
         coordinate_encoder = CoordinateEncoder(preprocess)
-        attribute_encoder = AttributeEncoder()
         image_masker = ImageMasker()
 
         self.samples: list[CoordinatePredictorSample] = []
@@ -283,7 +289,7 @@ class CoordinatePredictorDataset(Dataset):
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
-            if encode_attributes:
+            if attribute_encoder is not None:
                 (
                     sample.color_tensor,
                     sample.shape_tensor,

@@ -13,6 +13,7 @@ from data_readers import (
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
     CoordinatePredictorDataset,
+    OneHotAttributeEncoder,
     PreprocessScratch,
 )
 from models import (
@@ -84,7 +85,7 @@ models = {
     ),
     "attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
-        dataset_args={"encode_attributes": True},
+        dataset_args={"attribute_encoder": OneHotAttributeEncoder()},
         model=AttributeCoordinatePredictor,
         model_args={
             "number_colors": 8,
@@ -102,7 +103,10 @@ models = {
     ),
     "attribute_location_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
-        dataset_args={"encode_attributes": True, "encode_locations": True},
+        dataset_args={
+            "attribute_encoder": OneHotAttributeEncoder(),
+            "encode_locations": True,
+        },
         model=AttributeLocationCoordinatePredictor,
         model_args={
             "number_colors": 8,

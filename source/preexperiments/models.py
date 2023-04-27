@@ -104,7 +104,7 @@ class AttributeCoordinatePredictor(AbstractResnet):
         self,
         number_colors,
         number_shapes,
-        number_size,
+        number_sizes,
         pretrained_resnet,
         fine_tune_resnet,
     ) -> None:
@@ -114,7 +114,7 @@ class AttributeCoordinatePredictor(AbstractResnet):
         self.reduction = nn.Linear(100_352, 2048)
 
         self.predictor = nn.Linear(
-            2048 + number_colors + number_shapes + number_size, 2
+            2048 + number_colors + number_shapes + number_sizes, 2
         )
 
     def forward(self, data):
@@ -145,7 +145,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         self,
         number_colors,
         number_shapes,
-        number_size,
+        number_sizes,
         number_objects,
         pretrained_resnet,
         fine_tune_resnet,
@@ -163,7 +163,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         self.reduction = nn.Linear(100_352, 2048)
 
         self.predictor = nn.Linear(
-            4608 + number_colors + number_shapes + number_size + (number_objects * 2),
+            4608 + number_colors + number_shapes + number_sizes + (number_objects * 2),
             2,
         )
 
