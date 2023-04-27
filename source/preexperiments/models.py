@@ -122,9 +122,9 @@ class AttributeCoordinatePredictor(AbstractResnet):
     def forward(self, data):
         image, color_tensor, shape_tensor, size_tensor, *_ = data
         resnet = self.resnet(image)
-        pooled = self.adaptive_pool(self.dropout(resnet))
+        pooled = self.adaptive_pool(resnet)
 
-        reduced = self.reduction(torch.flatten(pooled, start_dim=1))
+        reduced = self.dropout(self.reduction(torch.flatten(pooled, start_dim=1)))
         concatenated = torch.cat(
             (reduced, color_tensor, shape_tensor, size_tensor), dim=1
         )
