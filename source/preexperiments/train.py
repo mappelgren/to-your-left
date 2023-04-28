@@ -133,6 +133,52 @@ models = {
             "output_fields": ("image_id", "x", "y", "target_x", "target_y")
         },
     ),
+    "feature_dale_attribute_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={
+            "attribute_encoder": DaleAttributeEncoder(),
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=False
+            ),
+        },
+        model=DaleAttributeCoordinatePredictor,
+        model_args={
+            "vocab_size": 14,
+            "embedding_dim": 32,
+            "encoder_out_dim": 32,
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=False
+            ),
+            "inputs_are_features": True,
+        },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "feature_dale_vgg_attribute_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={
+            "attribute_encoder": DaleAttributeEncoder(),
+            "feature_extractor": VggFeatureExtractor(pretrained=True, fine_tune=False),
+        },
+        model=DaleAttributeCoordinatePredictor,
+        model_args={
+            "vocab_size": 14,
+            "embedding_dim": 32,
+            "encoder_out_dim": 32,
+            "feature_extractor": VggFeatureExtractor(pretrained=True, fine_tune=False),
+            "inputs_are_features": True,
+        },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
     "dale_vgg_attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"attribute_encoder": DaleAttributeEncoder()},

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import torch
+from models import FeatureExtractor
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -72,6 +73,7 @@ class BoundingBoxClassifierDataset(Dataset):
         scenes_json_dir,
         image_path,
         max_number_samples,
+        feature_extractor: FeatureExtractor = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
@@ -79,9 +81,13 @@ class BoundingBoxClassifierDataset(Dataset):
         self.samples = []
 
         scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
         selected_scenes = random.sample(scenes, max_number_samples)
 
-        for scene_file in selected_scenes:
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
             with open(
                 os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
             ) as f:
@@ -90,6 +96,14 @@ class BoundingBoxClassifierDataset(Dataset):
             image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
             bounding_boxes = self._get_bounding_boxes(image, scene, preprocess)
+
+            if feature_extractor is not None:
+                feature_extractor.eval()
+                with torch.no_grad():
+                    bounding_boxes = [
+                        feature_extractor(bounding_box.unsqueeze(dim=0)).squeeze(dim=0)
+                        for bounding_box in bounding_boxes
+                    ]
 
             target_object = scene["groups"]["target"][0]
             enumerated = list(enumerate(bounding_boxes))
@@ -102,6 +116,8 @@ class BoundingBoxClassifierDataset(Dataset):
             self.samples.append(
                 (input_boxes, target_index, scene_file.removesuffix(".json"))
             )
+        print()
+        print("loaded data.")
 
     def _get_bounding_boxes(self, image, scene, preprocess):
         BOUNDING_BOX_SIZE = image.size[0] / 5
@@ -292,6 +308,7 @@ class CoordinatePredictorDataset(Dataset):
         attribute_encoder: AttributeEncoder = None,
         encode_locations=False,
         mask_image=False,
+        feature_extractor: FeatureExtractor = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
@@ -302,9 +319,13 @@ class CoordinatePredictorDataset(Dataset):
         self.samples: list[CoordinatePredictorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
         selected_scenes = random.sample(scenes, max_number_samples)
 
-        for scene_file in selected_scenes:
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
             with open(
                 os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
             ) as f:
@@ -319,9 +340,18 @@ class CoordinatePredictorDataset(Dataset):
                 image.size,
             )
 
+            if feature_extractor is not None:
+                feature_extractor.eval()
+                with torch.no_grad():
+                    encoded_image = feature_extractor(
+                        preprocess(image).unsqueeze(dim=0)
+                    ).squeeze(dim=0)
+            else:
+                encoded_image = preprocess(image)
+
             sample = CoordinatePredictorSample(
                 image_id=scene_file.removesuffix(".json"),
-                image=preprocess(image),
+                image=encoded_image,
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
@@ -337,9 +367,20 @@ class CoordinatePredictorDataset(Dataset):
                 masked_image = image_masker.get_masked_image(
                     image, scene, target_object
                 )
-                sample.masked_image = preprocess(masked_image)
+
+                if feature_extractor is not None:
+                    feature_extractor.eval()
+                    with torch.no_grad():
+                        encoded_masked_image = feature_extractor(
+                            preprocess(masked_image).unsqueeze(dim=0)
+                        ).squeeze(dim=0)
+                else:
+                    encoded_masked_image = preprocess(masked_image)
+                sample.masked_image = encoded_masked_image
 
             self.samples.append(sample)
+        print()
+        print("loaded data.")
 
     def __getitem__(self, index):
         sample = self.samples[index]
@@ -388,6 +429,7 @@ class CaptionGeneratorDataset(Dataset):
         image_path,
         max_number_samples,
         mask_image=False,
+        feature_extractor: FeatureExtractor = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
@@ -404,9 +446,13 @@ class CaptionGeneratorDataset(Dataset):
         self.samples: list[CaptionGeneratorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
         selected_scenes = random.sample(scenes, max_number_samples)
 
-        for scene_file in selected_scenes:
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
             with open(
                 os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
             ) as f:
@@ -427,9 +473,18 @@ class CaptionGeneratorDataset(Dataset):
             target_caption = captions.pop(target_object)
             captions.extend([torch.zeros_like(captions[0])] * (10 - len(captions)))
 
+            if feature_extractor is not None:
+                feature_extractor.eval()
+                with torch.no_grad():
+                    encoded_image = feature_extractor(
+                        preprocess(image).unsqueeze(dim=0)
+                    ).squeeze(dim=0)
+            else:
+                encoded_image = preprocess(image)
+
             sample = CaptionGeneratorSample(
                 image_id=scene_file.removesuffix(".json"),
-                image=preprocess(image),
+                image=encoded_image,
                 caption=target_caption,
                 non_target_captions=torch.stack(captions),
             )
@@ -438,9 +493,21 @@ class CaptionGeneratorDataset(Dataset):
                 masked_image = image_masker.get_masked_image(
                     image, scene, target_object
                 )
-                sample.masked_image = preprocess(masked_image)
+
+                if feature_extractor is not None:
+                    feature_extractor.eval()
+                    with torch.no_grad():
+                        encoded_masked_image = feature_extractor(
+                            preprocess(masked_image).unsqueeze(dim=0)
+                        ).squeeze(dim=0)
+                else:
+                    encoded_masked_image = preprocess(masked_image)
+
+                sample.masked_image = encoded_masked_image
 
             self.samples.append(sample)
+        print()
+        print("loaded data.")
 
     def get_encoded_word(self, word):
         return self.vocab[word]
