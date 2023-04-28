@@ -252,7 +252,7 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         feature_extractor: FeatureExtractor,
     ) -> None:
         super().__init__()
-        self.dropout = nn.Dropout(0.3)
+        self.dropout = nn.Dropout(0.2)
 
         self.feature_extractor = feature_extractor
         classifier_in_dim = math.prod(feature_extractor.feature_shape)
@@ -260,10 +260,11 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
 
-        self.reduction = nn.Linear(classifier_in_dim, 2048)
+        self.reduction = nn.Linear(classifier_in_dim, 1024)
+        self.relu = nn.ReLU()
 
         self.predictor = nn.Linear(
-            2048 + encoder_out_dim,
+            1024 + encoder_out_dim,
             2,
         )
 
@@ -278,7 +279,7 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         embedded = self.embedding(attribute_tensor)
         _, (hidden_state, _) = self.lstm(embedded)
 
-        concatenated = torch.cat((reduced, hidden_state.squeeze()), dim=1)
+        concatenated = self.relu(torch.cat((reduced, hidden_state.squeeze()), dim=1))
         predicted = self.predictor(concatenated)
 
         return predicted
