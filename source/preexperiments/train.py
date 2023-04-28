@@ -109,10 +109,10 @@ models = {
         model=DaleAttributeCoordinatePredictor,
         model_args={
             "vocab_size": 14,
-            "embedding_dim": 256,
-            "encoder_out_dim": 512,
+            "embedding_dim": 32,
+            "encoder_out_dim": 32,
             "pretrained_resnet": True,
-            "fine_tune_resnet": False,
+            "fine_tune_resnet": True,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
