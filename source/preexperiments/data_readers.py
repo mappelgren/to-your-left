@@ -351,10 +351,9 @@ class CoordinatePredictorDataset(Dataset):
             )
 
             if feature_extractor is not None:
-                image = image.to(device)
                 with torch.no_grad():
                     encoded_image = (
-                        feature_extractor(preprocess(image).unsqueeze(dim=0))
+                        feature_extractor(preprocess(image).to(device).unsqueeze(dim=0))
                         .squeeze(dim=0)
                         .cpu()
                     )
@@ -382,10 +381,11 @@ class CoordinatePredictorDataset(Dataset):
                 )
 
                 if feature_extractor is not None:
-                    masked_image = masked_image.to(device)
                     with torch.no_grad():
                         encoded_masked_image = (
-                            feature_extractor(preprocess(masked_image).unsqueeze(dim=0))
+                            feature_extractor(
+                                preprocess(masked_image).to(device).unsqueeze(dim=0)
+                            )
                             .squeeze(dim=0)
                             .cpu()
                         )
@@ -493,10 +493,9 @@ class CaptionGeneratorDataset(Dataset):
             captions.extend([torch.zeros_like(captions[0])] * (10 - len(captions)))
 
             if feature_extractor is not None:
-                image = image.to(device)
                 with torch.no_grad():
                     encoded_image = (
-                        feature_extractor(preprocess(image).unsqueeze(dim=0))
+                        feature_extractor(preprocess(image).to(device).unsqueeze(dim=0))
                         .squeeze(dim=0)
                         .cpu()
                     )
@@ -516,10 +515,11 @@ class CaptionGeneratorDataset(Dataset):
                 )
 
                 if feature_extractor is not None:
-                    mask_image = masked_image.to(device)
                     with torch.no_grad():
                         encoded_masked_image = (
-                            feature_extractor(preprocess(masked_image).unsqueeze(dim=0))
+                            feature_extractor(
+                                preprocess(masked_image).to(device).unsqueeze(dim=0)
+                            )
                             .squeeze(dim=0)
                             .cpu()
                         )
