@@ -28,6 +28,8 @@ from models import (
     ImageEncoder,
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
+    ResnetFeatureExtractor,
+    VggFeatureExtractor,
 )
 from save import (
     BoundingBoxOutputProcessor,
@@ -65,7 +67,11 @@ models = {
         dataset=CoordinatePredictorDataset,
         dataset_args={},
         model=CoordinatePredictor,
-        model_args={"pretrained_resnet": True, "fine_tune_resnet": False},
+        model_args={
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=False
+            )
+        },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
@@ -77,7 +83,11 @@ models = {
         dataset=CoordinatePredictorDataset,
         dataset_args={"preprocess": PreprocessScratch(250)},
         model=CoordinatePredictor,
-        model_args={"pretrained_resnet": False, "fine_tune_resnet": True},
+        model_args={
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=False, fine_tune=True
+            )
+        },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
@@ -93,8 +103,9 @@ models = {
             "number_colors": 8,
             "number_shapes": 3,
             "number_sizes": 2,
-            "pretrained_resnet": True,
-            "fine_tune_resnet": False,
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=False
+            ),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -111,8 +122,26 @@ models = {
             "vocab_size": 14,
             "embedding_dim": 32,
             "encoder_out_dim": 32,
-            "pretrained_resnet": True,
-            "fine_tune_resnet": True,
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=True
+            ),
+        },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "dale_vgg_attribute_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={"attribute_encoder": DaleAttributeEncoder()},
+        model=DaleAttributeCoordinatePredictor,
+        model_args={
+            "vocab_size": 14,
+            "embedding_dim": 32,
+            "encoder_out_dim": 32,
+            "feature_extractor": VggFeatureExtractor(pretrained=True, fine_tune=False),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -132,8 +161,9 @@ models = {
             "number_colors": 8,
             "number_shapes": 3,
             "number_sizes": 2,
-            "pretrained_resnet": True,
-            "fine_tune_resnet": False,
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=False
+            ),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -146,7 +176,11 @@ models = {
         dataset=CoordinatePredictorDataset,
         dataset_args={"mask_image": True},
         model=MaskedCoordinatePredictor,
-        model_args={"pretrained_resnet": True, "fine_tune_resnet": False},
+        model_args={
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=True, fine_tune=False
+            )
+        },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
@@ -158,7 +192,11 @@ models = {
         dataset=BoundingBoxClassifierDataset,
         dataset_args={"preprocess": PreprocessScratch(50)},
         model=BoundingBoxClassifier,
-        model_args={"pretrained_resnet": False, "fine_tune_resnet": True},
+        model_args={
+            "feature_extractor": ResnetFeatureExtractor(
+                pretrained=False, fine_tune=True
+            )
+        },
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
         output_processor=BoundingBoxOutputProcessor,
@@ -172,7 +210,10 @@ models = {
         model=CaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
-                2048, pretrained_resnet=True, fine_tune_resnet=False
+                2048,
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True, fine_tune=False
+                ),
             ),
             "caption_decoder": CaptionDecoder(14, 128, 2048),
             "encoded_sos": 0,
@@ -190,7 +231,10 @@ models = {
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
-                2048, pretrained_resnet=True, fine_tune_resnet=False
+                2048,
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True, fine_tune=False
+                ),
             ),
             "caption_decoder": CaptionDecoder(14, 128, 4096),
             "encoded_sos": 0,

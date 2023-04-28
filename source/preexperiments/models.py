@@ -1,12 +1,19 @@
-from abc import ABC
+import math
+from abc import ABC, abstractmethod
 
 import torch
 from torch import nn
-from torch.nn import Module
-from torchvision.models import ResNet50_Weights, resnet50
+from torchvision.models import ResNet50_Weights, VGG16_Weights, resnet50, vgg16
 
 
-class AbstractResnet(ABC, Module):
+class FeatureExtractor(ABC, nn.Module):
+    @property
+    @abstractmethod
+    def feature_shape(self):
+        ...
+
+
+class ResnetFeatureExtractor(FeatureExtractor):
     def __init__(self, pretrained, fine_tune) -> None:
         super().__init__()
 
@@ -15,16 +22,51 @@ class AbstractResnet(ABC, Module):
         else:
             resnet = resnet50()
 
-        # out 2048 * 7 * 7
         self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+        self._feature_shape = (2048, 7, 7)
 
         if not fine_tune:
             for param in self.resnet.parameters():
                 param.requires_grad = False
             self.resnet.eval()
 
+    @property
+    def feature_shape(self):
+        return self._feature_shape
 
-class BoundingBoxClassifier(AbstractResnet):
+    def forward(self, data):
+        resnet = self.resnet(data)
+        return self.adaptive_pool(resnet)
+
+
+class VggFeatureExtractor(FeatureExtractor):
+    def __init__(self, pretrained, fine_tune) -> None:
+        super().__init__()
+
+        if pretrained:
+            self.vgg = vgg16(weights=VGG16_Weights.IMAGENET1K_V1)
+        else:
+            self.vgg = vgg16()
+
+        classifier = nn.Sequential(list(self.vgg.children())[-1][:-3])
+        self.vgg.classifier = classifier
+        self._feature_shape = (4096,)
+
+        if not fine_tune:
+            for param in self.vgg.parameters():
+                param.requires_grad = False
+            self.vgg.eval()
+
+    @property
+    def feature_shape(self):
+        return self._feature_shape
+
+    def forward(self, data):
+        return self.vgg(data)
+
+
+class BoundingBoxClassifier(nn.Module):
     """
     Output:
      - classified bounding box (10 dimensions)
@@ -33,12 +75,14 @@ class BoundingBoxClassifier(AbstractResnet):
      - bounding boxes of objects
     """
 
-    def __init__(self, pretrained_resnet, fine_tune_resnet) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((1, 1))
+    def __init__(self, feature_extractor: FeatureExtractor) -> None:
+        super().__init__()
+        self.feature_extractor = feature_extractor
+
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
         self.classifier = nn.Sequential(
-            nn.Linear(20480, 4096),
+            nn.Linear(classifier_in_dim, 4096),
             nn.ReLU(),
             nn.Linear(4096, 10),
             nn.Softmax(dim=1),
@@ -47,13 +91,11 @@ class BoundingBoxClassifier(AbstractResnet):
     def forward(self, data):
         data = data.permute(1, 0, 2, 3, 4)
 
-        after_resnet = []
+        after_feature_extractor = []
         for bounding_box in data:
-            resnet = self.resnet(bounding_box)
-            pooled = self.adaptive_pool(resnet)
-            after_resnet.append(pooled)
+            after_feature_extractor.append(self.feature_extractor(bounding_box))
 
-        stacked = torch.stack(after_resnet)
+        stacked = torch.stack(after_feature_extractor)
         stacked = stacked.permute(1, 0, 2, 3, 4)
 
         classified = self.classifier(torch.flatten(stacked, start_dim=1))
@@ -61,7 +103,7 @@ class BoundingBoxClassifier(AbstractResnet):
         return classified
 
 
-class CoordinatePredictor(AbstractResnet):
+class CoordinatePredictor(nn.Module):
     """
     Output:
      - x and y coordinates of target object
@@ -70,12 +112,14 @@ class CoordinatePredictor(AbstractResnet):
      - image
     """
 
-    def __init__(self, pretrained_resnet, fine_tune_resnet) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
+    def __init__(self, feature_extractor: FeatureExtractor) -> None:
+        super().__init__()
+        self.feature_extractor = feature_extractor
+
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
         self.classifier = nn.Sequential(
-            nn.Linear(100352, 1024),
+            nn.Linear(classifier_in_dim, 1024),
             nn.ReLU(),
             nn.Linear(1024, 2),
         )
@@ -83,14 +127,13 @@ class CoordinatePredictor(AbstractResnet):
     def forward(self, data):
         image, *_ = data
 
-        resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet)
-        classified = self.classifier(torch.flatten(pooled, start_dim=1))
+        extracted_features = self.feature_extractor(image)
+        classified = self.classifier(torch.flatten(extracted_features, start_dim=1))
 
         return classified
 
 
-class AttributeCoordinatePredictor(AbstractResnet):
+class AttributeCoordinatePredictor(nn.Module):
     """
     Output:
      - x and y coordinates of target object
@@ -105,13 +148,12 @@ class AttributeCoordinatePredictor(AbstractResnet):
         number_colors,
         number_shapes,
         number_sizes,
-        pretrained_resnet,
-        fine_tune_resnet,
+        feature_extractor: FeatureExtractor,
     ) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
-        # out 100_352
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
-        self.reduction = nn.Linear(100_352, 2048)
+        super().__init__()
+        self.feature_extractor = feature_extractor
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
+        self.reduction = nn.Linear(classifier_in_dim, 2048)
 
         self.dropout = nn.Dropout(0.2)
 
@@ -121,17 +163,18 @@ class AttributeCoordinatePredictor(AbstractResnet):
 
     def forward(self, data):
         image, attribute_tensor, *_ = data
-        resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet)
+        extracted_features = self.feature_extractor(image)
 
-        reduced = self.dropout(self.reduction(torch.flatten(pooled, start_dim=1)))
+        reduced = self.dropout(
+            self.reduction(torch.flatten(extracted_features, start_dim=1))
+        )
         concatenated = torch.cat((reduced, attribute_tensor), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted
 
 
-class AttributeLocationCoordinatePredictor(AbstractResnet):
+class AttributeLocationCoordinatePredictor(nn.Module):
     """
     Output:
      - x and y coordinates of target object
@@ -148,10 +191,12 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         number_shapes,
         number_sizes,
         number_objects,
-        pretrained_resnet,
-        fine_tune_resnet,
+        feature_extractor: FeatureExtractor,
     ) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
+        super().__init__()
+        self.feature_extractor = feature_extractor
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
+
         self.dropout = nn.Dropout(0.3)
 
         self.cnn = nn.Sequential(
@@ -159,9 +204,8 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-        # out 100_352
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
-        self.reduction = nn.Linear(100_352, 2048)
+
+        self.reduction = nn.Linear(classifier_in_dim, 2048)
 
         self.predictor = nn.Linear(
             4608 + number_colors + number_shapes + number_sizes + (number_objects * 2),
@@ -170,10 +214,9 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
 
     def forward(self, data):
         image, attribute_tensor, locations = data
-        resnet = self.resnet(image)
-        cnn = self.cnn(resnet)
+        extracted_features = self.feature_extractor(image)
+        cnn = self.cnn(extracted_features)
 
-        # pooled = self.adaptive_pool(self.dropout(resnet))
         # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
             (
@@ -189,7 +232,7 @@ class AttributeLocationCoordinatePredictor(AbstractResnet):
         return predicted
 
 
-class DaleAttributeCoordinatePredictor(AbstractResnet):
+class DaleAttributeCoordinatePredictor(nn.Module):
     """
     Output:
      - x and y coordinates of target object
@@ -205,18 +248,18 @@ class DaleAttributeCoordinatePredictor(AbstractResnet):
         vocab_size,
         embedding_dim,
         encoder_out_dim,
-        pretrained_resnet,
-        fine_tune_resnet,
+        feature_extractor: FeatureExtractor,
     ) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
+        super().__init__()
         self.dropout = nn.Dropout(0.3)
+
+        self.feature_extractor = feature_extractor
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
 
-        # out 100_352
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
-        self.reduction = nn.Linear(100_352, 2048)
+        self.reduction = nn.Linear(classifier_in_dim, 2048)
 
         self.predictor = nn.Linear(
             2048 + encoder_out_dim,
@@ -225,9 +268,11 @@ class DaleAttributeCoordinatePredictor(AbstractResnet):
 
     def forward(self, data):
         image, attribute_tensor, *_ = data
-        resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet)
-        reduced = self.dropout(self.reduction(torch.flatten(pooled, start_dim=1)))
+        extracted_features = self.feature_extractor(image)
+
+        reduced = self.dropout(
+            self.reduction(torch.flatten(extracted_features, start_dim=1))
+        )
 
         embedded = self.embedding(attribute_tensor)
         _, (hidden_state, _) = self.lstm(embedded)
@@ -238,7 +283,7 @@ class DaleAttributeCoordinatePredictor(AbstractResnet):
         return predicted
 
 
-class MaskedCoordinatePredictor(AbstractResnet):
+class MaskedCoordinatePredictor(nn.Module):
     """
     Output:
      - x and y coordinates of target object
@@ -249,18 +294,20 @@ class MaskedCoordinatePredictor(AbstractResnet):
      - center coordinates of all objects
     """
 
-    def __init__(self, pretrained_resnet, fine_tune_resnet) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
+    def __init__(self, feature_extractor: FeatureExtractor) -> None:
+        super().__init__()
         self.dropout = nn.Dropout(0.3)
+
+        self.feature_extractor = feature_extractor
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
         self.cnn = nn.Sequential(
             nn.Conv2d(2048, 512, kernel_size=1, padding=0),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-        # out 100_352
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
-        self.reduction = nn.Linear(100_352, 2048)
+
+        self.reduction = nn.Linear(classifier_in_dim, 2048)
 
         self.predictor = nn.Linear(
             4096,
@@ -269,13 +316,13 @@ class MaskedCoordinatePredictor(AbstractResnet):
 
     def forward(self, data):
         image, _, _, masked_image, *_ = data
-        resnet = self.resnet(image)
-        pooled = self.adaptive_pool(self.dropout(resnet))
-        reduced = self.reduction(torch.flatten(pooled, start_dim=1))
+        extracted_features = self.dropout(self.feature_extractor(image))
+        reduced = self.reduction(torch.flatten(extracted_features, start_dim=1))
 
-        masked_resnet = self.resnet(masked_image)
-        masked_pooled = self.adaptive_pool(self.dropout(masked_resnet))
-        masked_reduced = self.reduction(torch.flatten(masked_pooled, start_dim=1))
+        masked_extracted_features = self.dropout(self.feature_extractor(masked_image))
+        masked_reduced = self.reduction(
+            torch.flatten(masked_extracted_features, start_dim=1)
+        )
 
         concatenated = torch.cat(
             (reduced, masked_reduced),
@@ -286,19 +333,19 @@ class MaskedCoordinatePredictor(AbstractResnet):
         return predicted
 
 
-class ImageEncoder(AbstractResnet):
-    def __init__(self, encoder_out_dim, pretrained_resnet, fine_tune_resnet) -> None:
-        super().__init__(pretrained_resnet, fine_tune_resnet)
-        # out 100_352
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
-        self.reduction = nn.Linear(100_352, encoder_out_dim)
+class ImageEncoder(nn.Module):
+    def __init__(self, encoder_out_dim, feature_extractor: FeatureExtractor) -> None:
+        super().__init__()
+        self.feature_extractor = feature_extractor
+        classifier_in_dim = math.prod(feature_extractor.feature_shape)
+
+        self.reduction = nn.Linear(classifier_in_dim, encoder_out_dim)
         self.mean_reduction = nn.Linear(2048, encoder_out_dim)
 
     def forward(self, image):
-        resnet = self.resnet(image)
-        pooled = self.adaptive_pool(resnet)
+        extracted_features = self.feature_extractor(image)
         # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
-        flattened = torch.flatten(pooled, start_dim=2).permute(0, 2, 1)
+        flattened = torch.flatten(extracted_features, start_dim=2).permute(0, 2, 1)
         reduced = self.mean_reduction(flattened.mean(dim=1))
         return reduced
 
