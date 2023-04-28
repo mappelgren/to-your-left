@@ -337,9 +337,10 @@ if __name__ == "__main__":
         raise AttributeError("Device must be cpu or cuda")
 
     dataset = models[args.model].dataset(
-        args.scene_json_dir,
-        args.image_dir,
-        args.max_samples,
+        scenes_json_dir=args.scene_json_dir,
+        image_path=args.image_dir,
+        max_number_samples=args.max_samples,
+        device=device,
         **models[args.model].dataset_args,
     )
 

@@ -75,8 +75,13 @@ class BoundingBoxClassifierDataset(Dataset):
         max_number_samples,
         feature_extractor: FeatureExtractor = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        device=torch.device("cpu"),
     ) -> None:
         super().__init__()
+
+        if feature_extractor is not None:
+            feature_extractor = feature_extractor.to(device)
+            feature_extractor.eval()
 
         self.samples = []
 
@@ -98,10 +103,11 @@ class BoundingBoxClassifierDataset(Dataset):
             bounding_boxes = self._get_bounding_boxes(image, scene, preprocess)
 
             if feature_extractor is not None:
-                feature_extractor.eval()
                 with torch.no_grad():
                     bounding_boxes = [
-                        feature_extractor(bounding_box.unsqueeze(dim=0)).squeeze(dim=0)
+                        feature_extractor(bounding_box.to(device).unsqueeze(dim=0))
+                        .squeeze(dim=0)
+                        .cpu()
                         for bounding_box in bounding_boxes
                     ]
 
@@ -310,11 +316,15 @@ class CoordinatePredictorDataset(Dataset):
         mask_image=False,
         feature_extractor: FeatureExtractor = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        device=torch.device("cpu"),
     ) -> None:
         super().__init__()
 
         coordinate_encoder = CoordinateEncoder(preprocess)
         image_masker = ImageMasker()
+        if feature_extractor is not None:
+            feature_extractor = feature_extractor.to(device)
+            feature_extractor.eval()
 
         self.samples: list[CoordinatePredictorSample] = []
 
@@ -341,11 +351,14 @@ class CoordinatePredictorDataset(Dataset):
             )
 
             if feature_extractor is not None:
-                feature_extractor.eval()
+                image = image.to(device)
                 with torch.no_grad():
-                    encoded_image = feature_extractor(
-                        preprocess(image).unsqueeze(dim=0)
-                    ).squeeze(dim=0)
+                    encoded_image = (
+                        feature_extractor(preprocess(image).unsqueeze(dim=0))
+                        .squeeze(dim=0)
+                        .cpu()
+                    )
+
             else:
                 encoded_image = preprocess(image)
 
@@ -369,11 +382,13 @@ class CoordinatePredictorDataset(Dataset):
                 )
 
                 if feature_extractor is not None:
-                    feature_extractor.eval()
+                    masked_image = masked_image.to(device)
                     with torch.no_grad():
-                        encoded_masked_image = feature_extractor(
-                            preprocess(masked_image).unsqueeze(dim=0)
-                        ).squeeze(dim=0)
+                        encoded_masked_image = (
+                            feature_extractor(preprocess(masked_image).unsqueeze(dim=0))
+                            .squeeze(dim=0)
+                            .cpu()
+                        )
                 else:
                     encoded_masked_image = preprocess(masked_image)
                 sample.masked_image = encoded_masked_image
@@ -431,10 +446,14 @@ class CaptionGeneratorDataset(Dataset):
         mask_image=False,
         feature_extractor: FeatureExtractor = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        device=torch.device("cpu"),
     ) -> None:
         super().__init__()
 
         image_masker = ImageMasker()
+        if feature_extractor is not None:
+            feature_extractor = feature_extractor.to(device)
+            feature_extractor.eval()
 
         # list instead of set, to make indices deterministic
         vocab = [
@@ -474,11 +493,13 @@ class CaptionGeneratorDataset(Dataset):
             captions.extend([torch.zeros_like(captions[0])] * (10 - len(captions)))
 
             if feature_extractor is not None:
-                feature_extractor.eval()
+                image = image.to(device)
                 with torch.no_grad():
-                    encoded_image = feature_extractor(
-                        preprocess(image).unsqueeze(dim=0)
-                    ).squeeze(dim=0)
+                    encoded_image = (
+                        feature_extractor(preprocess(image).unsqueeze(dim=0))
+                        .squeeze(dim=0)
+                        .cpu()
+                    )
             else:
                 encoded_image = preprocess(image)
 
@@ -495,11 +516,13 @@ class CaptionGeneratorDataset(Dataset):
                 )
 
                 if feature_extractor is not None:
-                    feature_extractor.eval()
+                    mask_image = masked_image.to(device)
                     with torch.no_grad():
-                        encoded_masked_image = feature_extractor(
-                            preprocess(masked_image).unsqueeze(dim=0)
-                        ).squeeze(dim=0)
+                        encoded_masked_image = (
+                            feature_extractor(preprocess(masked_image).unsqueeze(dim=0))
+                            .squeeze(dim=0)
+                            .cpu()
+                        )
                 else:
                     encoded_masked_image = preprocess(masked_image)
 
