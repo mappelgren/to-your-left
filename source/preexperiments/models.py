@@ -18,26 +18,27 @@ class ResnetFeatureExtractor(FeatureExtractor):
         super().__init__()
 
         if pretrained:
-            resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+            self.resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
         else:
-            resnet = resnet50()
-
-        self.resnet = nn.Sequential(*list(resnet.children())[:-2])
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((7, 7))
-        self._feature_shape = (2048, 7, 7)
+            self.resnet = resnet50()
 
         if not fine_tune:
             for param in self.resnet.parameters():
                 param.requires_grad = False
             self.resnet.eval()
 
+        # self.resnet = nn.Sequential(*list(resnet.children())[:-2])
+        self.resnet.avgpool = nn.AdaptiveAvgPool2d((7, 7))
+        self.resnet.fc = nn.Identity()
+
+        self._feature_shape = (2048, 7, 7)
+
     @property
     def feature_shape(self):
         return self._feature_shape
 
     def forward(self, data):
-        resnet = self.resnet(data)
-        return self.adaptive_pool(resnet)
+        return self.resnet(data)
 
 
 class VggFeatureExtractor(FeatureExtractor):
