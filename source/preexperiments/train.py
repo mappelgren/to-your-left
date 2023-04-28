@@ -123,7 +123,7 @@ models = {
             "embedding_dim": 32,
             "encoder_out_dim": 32,
             "feature_extractor": ResnetFeatureExtractor(
-                pretrained=True, fine_tune=True
+                pretrained=True, fine_tune=False
             ),
         },
         loss_function=pixel_loss,

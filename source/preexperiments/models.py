@@ -28,10 +28,10 @@ class ResnetFeatureExtractor(FeatureExtractor):
             self.resnet.eval()
 
         # self.resnet = nn.Sequential(*list(resnet.children())[:-2])
-        self.resnet.avgpool = nn.AdaptiveAvgPool2d((7, 7))
+        # self.resnet.avgpool = nn.AdaptiveAvgPool2d((7, 7))
         self.resnet.fc = nn.Identity()
 
-        self._feature_shape = (2048, 7, 7)
+        self._feature_shape = (2048, 1, 1)
 
     @property
     def feature_shape(self):
