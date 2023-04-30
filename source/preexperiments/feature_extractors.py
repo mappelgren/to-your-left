@@ -162,7 +162,7 @@ if __name__ == "__main__":
         "--classifier_layers",
         type=int,
         default=3,
-        help="number of classifier layers in case of ResNet",
+        help="number of classifier layers",
     )
 
     parser.add_argument("--device", type=str, default="cpu", help="cpu or cuda")
@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
             if len(batch) == args.batch_size or image_index == len(images) - 1:
                 with torch.no_grad():
-                    features = feature_extractor(torch.stack(batch))
+                    features = feature_extractor(torch.stack(batch)).cpu()
                 i_end = i_start + len(batch)
                 feature_dataset[i_start:i_end] = features
 
