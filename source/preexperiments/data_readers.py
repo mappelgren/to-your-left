@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import torch
+from image_loader import ImageLoader
 from models import FeatureExtractor
 from PIL import Image
 from torch.utils.data import Dataset
@@ -259,7 +260,13 @@ class CoordinateEncoder:
         return new_x, new_y
 
 
-class ImageMasker:
+class ImageMasker(ABC):
+    @abstractmethod
+    def get_masked_image(self, image, scene, target_object):
+        ...
+
+
+class BasicImageMasker(ImageMasker):
     def get_masked_image(self, image, scene, target_object):
         masked_image = image.copy()
         MASK_SIZE = masked_image.size[0] / 5
@@ -309,22 +316,16 @@ class CoordinatePredictorDataset(Dataset):
     def __init__(
         self,
         scenes_json_dir,
-        image_path,
+        image_loader: ImageLoader,
         max_number_samples,
         attribute_encoder: AttributeEncoder = None,
         encode_locations=False,
-        mask_image=False,
-        feature_extractor: FeatureExtractor = None,
+        image_masker: ImageMasker = None,
         preprocess=ResNet50_Weights.DEFAULT.transforms(),
-        device=torch.device("cpu"),
     ) -> None:
         super().__init__()
 
         coordinate_encoder = CoordinateEncoder(preprocess)
-        image_masker = ImageMasker()
-        if feature_extractor is not None:
-            feature_extractor = feature_extractor.to(device)
-            feature_extractor.eval()
 
         self.samples: list[CoordinatePredictorSample] = []
 
@@ -341,29 +342,19 @@ class CoordinatePredictorDataset(Dataset):
             ) as f:
                 scene = json.load(f)
 
-            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
+            image_id = scene_file.removesuffix(".json")
+            image, processed_image, image_size = image_loader.get_image(image_id)
 
             target_object = scene["groups"]["target"][0]
             target_x, target_y = coordinate_encoder.get_object_coordinates(
                 target_object,
                 scene,
-                image.size,
+                image_size,
             )
 
-            if feature_extractor is not None:
-                with torch.no_grad():
-                    encoded_image = (
-                        feature_extractor(preprocess(image).to(device).unsqueeze(dim=0))
-                        .squeeze(dim=0)
-                        .cpu()
-                    )
-
-            else:
-                encoded_image = preprocess(image)
-
             sample = CoordinatePredictorSample(
-                image_id=scene_file.removesuffix(".json"),
-                image=encoded_image,
+                image_id=image_id,
+                image=processed_image,
                 target_pixels=torch.tensor([target_x, target_y]),
             )
 
@@ -372,26 +363,13 @@ class CoordinatePredictorDataset(Dataset):
 
             if encode_locations:
                 sample.locations = torch.cat(
-                    coordinate_encoder.get_locations(scene, image.size)
+                    coordinate_encoder.get_locations(scene, image_size)
                 )
 
-            if mask_image:
-                masked_image = image_masker.get_masked_image(
-                    image, scene, target_object
+            if image_masker is not None:
+                sample.masked_image = preprocess(
+                    image_masker.get_masked_image(image, scene, target_object)
                 )
-
-                if feature_extractor is not None:
-                    with torch.no_grad():
-                        encoded_masked_image = (
-                            feature_extractor(
-                                preprocess(masked_image).to(device).unsqueeze(dim=0)
-                            )
-                            .squeeze(dim=0)
-                            .cpu()
-                        )
-                else:
-                    encoded_masked_image = preprocess(masked_image)
-                sample.masked_image = encoded_masked_image
 
             self.samples.append(sample)
         print()
@@ -441,19 +419,11 @@ class CaptionGeneratorDataset(Dataset):
     def __init__(
         self,
         scenes_json_dir,
-        image_path,
+        image_loader: ImageLoader,
         max_number_samples,
-        mask_image=False,
-        feature_extractor: FeatureExtractor = None,
-        preprocess=ResNet50_Weights.DEFAULT.transforms(),
-        device=torch.device("cpu"),
+        image_masker: ImageMasker = None,
     ) -> None:
         super().__init__()
-
-        image_masker = ImageMasker()
-        if feature_extractor is not None:
-            feature_extractor = feature_extractor.to(device)
-            feature_extractor.eval()
 
         # list instead of set, to make indices deterministic
         vocab = [
@@ -477,7 +447,8 @@ class CaptionGeneratorDataset(Dataset):
             ) as f:
                 scene = json.load(f)
 
-            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
+            image_id = scene_file.removesuffix(".json")
+            image, processed_image, _ = image_loader.get_image(image_id)
 
             target_object = scene["groups"]["target"][0]
             sos = self.get_encoded_word("<sos>")
@@ -492,41 +463,17 @@ class CaptionGeneratorDataset(Dataset):
             target_caption = captions.pop(target_object)
             captions.extend([torch.zeros_like(captions[0])] * (10 - len(captions)))
 
-            if feature_extractor is not None:
-                with torch.no_grad():
-                    encoded_image = (
-                        feature_extractor(preprocess(image).to(device).unsqueeze(dim=0))
-                        .squeeze(dim=0)
-                        .cpu()
-                    )
-            else:
-                encoded_image = preprocess(image)
-
             sample = CaptionGeneratorSample(
-                image_id=scene_file.removesuffix(".json"),
-                image=encoded_image,
+                image_id=image_id,
+                image=processed_image,
                 caption=target_caption,
                 non_target_captions=torch.stack(captions),
             )
 
-            if mask_image:
-                masked_image = image_masker.get_masked_image(
+            if image_masker is not None:
+                sample.masked_image = image_masker.get_masked_image(
                     image, scene, target_object
                 )
-
-                if feature_extractor is not None:
-                    with torch.no_grad():
-                        encoded_masked_image = (
-                            feature_extractor(
-                                preprocess(masked_image).to(device).unsqueeze(dim=0)
-                            )
-                            .squeeze(dim=0)
-                            .cpu()
-                        )
-                else:
-                    encoded_masked_image = preprocess(masked_image)
-
-                sample.masked_image = encoded_masked_image
 
             self.samples.append(sample)
         print()

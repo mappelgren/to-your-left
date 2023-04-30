@@ -1,70 +1,8 @@
 import math
-from abc import ABC, abstractmethod
 
 import torch
+from feature_extractors import FeatureExtractor
 from torch import nn
-from torchvision.models import ResNet50_Weights, VGG16_Weights, resnet50, vgg16
-
-
-class FeatureExtractor(ABC, nn.Module):
-    @property
-    @abstractmethod
-    def feature_shape(self):
-        ...
-
-
-class ResnetFeatureExtractor(FeatureExtractor):
-    def __init__(self, pretrained, fine_tune) -> None:
-        super().__init__()
-
-        if pretrained:
-            self.resnet = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
-        else:
-            self.resnet = resnet50()
-
-        if not fine_tune:
-            for param in self.resnet.parameters():
-                param.requires_grad = False
-            self.resnet.eval()
-
-        # self.resnet = nn.Sequential(*list(resnet.children())[:-2])
-        # self.resnet.avgpool = nn.AdaptiveAvgPool2d((7, 7))
-        self.resnet.fc = nn.Identity()
-
-        self._feature_shape = (2048, 1, 1)
-
-    @property
-    def feature_shape(self):
-        return self._feature_shape
-
-    def forward(self, data):
-        return self.resnet(data)
-
-
-class VggFeatureExtractor(FeatureExtractor):
-    def __init__(self, pretrained, fine_tune) -> None:
-        super().__init__()
-
-        if pretrained:
-            self.vgg = vgg16(weights=VGG16_Weights.IMAGENET1K_V1)
-        else:
-            self.vgg = vgg16()
-
-        classifier = nn.Sequential(list(self.vgg.children())[-1][:-3])
-        self.vgg.classifier = classifier
-        self._feature_shape = (4096,)
-
-        if not fine_tune:
-            for param in self.vgg.parameters():
-                param.requires_grad = False
-            self.vgg.eval()
-
-    @property
-    def feature_shape(self):
-        return self._feature_shape
-
-    def forward(self, data):
-        return self.vgg(data)
 
 
 class BoundingBoxClassifier(nn.Module):
@@ -76,16 +14,13 @@ class BoundingBoxClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(
-        self, feature_extractor: FeatureExtractor, inputs_are_features=False
-    ) -> None:
+    def __init__(self, feature_extractor: FeatureExtractor) -> None:
         super().__init__()
         self.feature_extractor = feature_extractor
-        self.input_are_feature = inputs_are_features
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
         self.classifier = nn.Sequential(
-            nn.Linear(classifier_in_dim, 4096),
+            nn.Flatten(),
+            nn.LazyLinear(4096),
             nn.ReLU(),
             nn.Linear(4096, 10),
             nn.Softmax(dim=1),
@@ -94,7 +29,7 @@ class BoundingBoxClassifier(nn.Module):
     def forward(self, data):
         data = data.permute(1, 0, 2, 3, 4)
 
-        if self.input_are_feature:
+        if self.inputs_are_feature:
             stacked = data
         else:
             after_feature_extractor = []
@@ -103,7 +38,7 @@ class BoundingBoxClassifier(nn.Module):
             stacked = torch.stack(after_feature_extractor)
             stacked = stacked.permute(1, 0, 2, 3, 4)
 
-        classified = self.classifier(torch.flatten(stacked, start_dim=1))
+        classified = self.classifier(stacked)
 
         return classified
 
@@ -117,17 +52,13 @@ class CoordinatePredictor(nn.Module):
      - image
     """
 
-    def __init__(
-        self, feature_extractor: FeatureExtractor, inputs_are_features=False
-    ) -> None:
+    def __init__(self, feature_extractor: FeatureExtractor) -> None:
         super().__init__()
         self.feature_extractor = feature_extractor
-        self.inputs_are_features = inputs_are_features
-
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
         self.classifier = nn.Sequential(
-            nn.Linear(classifier_in_dim, 1024),
+            nn.Flatten(),
+            nn.LazyLinear(1024),
             nn.ReLU(),
             nn.Linear(1024, 2),
         )
@@ -135,12 +66,8 @@ class CoordinatePredictor(nn.Module):
     def forward(self, data):
         image, *_ = data
 
-        if self.inputs_are_features:
-            extracted_features = image
-        else:
-            extracted_features = self.feature_extractor(image)
-
-        classified = self.classifier(torch.flatten(extracted_features, start_dim=1))
+        extracted_features = self.feature_extractor(image)
+        classified = self.classifier(extracted_features)
 
         return classified
 
@@ -161,16 +88,13 @@ class AttributeCoordinatePredictor(nn.Module):
         number_shapes,
         number_sizes,
         feature_extractor: FeatureExtractor,
-        inputs_are_features=False,
     ) -> None:
         super().__init__()
         self.feature_extractor = feature_extractor
-        self.inputs_are_features = inputs_are_features
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
 
-        self.reduction = nn.Linear(classifier_in_dim, 2048)
-
-        self.dropout = nn.Dropout(0.2)
+        self.process_features = nn.Sequential(
+            feature_extractor, nn.Flatten(), nn.LazyLinear(2048), nn.Dropout(0.2)
+        )
 
         self.predictor = nn.Linear(
             2048 + number_colors + number_shapes + number_sizes, 2
@@ -179,15 +103,8 @@ class AttributeCoordinatePredictor(nn.Module):
     def forward(self, data):
         image, attribute_tensor, *_ = data
 
-        if self.inputs_are_features:
-            extracted_features = image
-        else:
-            extracted_features = self.feature_extractor(image)
-
-        reduced = self.dropout(
-            self.reduction(torch.flatten(extracted_features, start_dim=1))
-        )
-        concatenated = torch.cat((reduced, attribute_tensor), dim=1)
+        processed = self.process_features(image)
+        concatenated = torch.cat((processed, attribute_tensor), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted
@@ -211,22 +128,17 @@ class AttributeLocationCoordinatePredictor(nn.Module):
         number_sizes,
         number_objects,
         feature_extractor: FeatureExtractor,
-        inputs_are_features=False,
     ) -> None:
         super().__init__()
-        self.feature_extractor = feature_extractor
-        self.inputs_are_features = inputs_are_features
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
-
-        self.dropout = nn.Dropout(0.3)
-
         self.cnn = nn.Sequential(
+            feature_extractor,
             nn.Conv2d(2048, 512, kernel_size=1, padding=0),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
         )
 
-        self.reduction = nn.Linear(classifier_in_dim, 2048)
+        self.reduction = nn.LazyLinear(2048)
 
         self.predictor = nn.Linear(
             4608 + number_colors + number_shapes + number_sizes + (number_objects * 2),
@@ -236,17 +148,12 @@ class AttributeLocationCoordinatePredictor(nn.Module):
     def forward(self, data):
         image, attribute_tensor, locations = data
 
-        if self.inputs_are_features:
-            extracted_features = image
-        else:
-            extracted_features = self.feature_extractor(image)
-
-        cnn = self.cnn(extracted_features)
+        cnn = self.cnn(image)
 
         # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
             (
-                torch.flatten(cnn, start_dim=1),
+                cnn,
                 attribute_tensor,
                 locations,
             ),
@@ -275,22 +182,17 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         embedding_dim,
         encoder_out_dim,
         feature_extractor: FeatureExtractor,
-        inputs_are_features=False,
     ) -> None:
         super().__init__()
-        self.dropout = nn.Dropout(0.2)
-
-        self.feature_extractor = feature_extractor
-        self.inputs_are_features = inputs_are_features
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
+        self.process_image = nn.Sequential(
+            feature_extractor, nn.Flatten(), nn.LazyLinear(1024), nn.Dropout(0.2)
+        )
 
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
 
-        self.reduction = nn.Linear(classifier_in_dim, 1024)
-        self.relu = nn.ReLU()
-
         self.predictor = nn.Linear(
+            nn.ReLU(),
             1024 + encoder_out_dim,
             2,
         )
@@ -298,19 +200,12 @@ class DaleAttributeCoordinatePredictor(nn.Module):
     def forward(self, data):
         image, attribute_tensor, *_ = data
 
-        if self.inputs_are_features:
-            extracted_features = image
-        else:
-            extracted_features = self.feature_extractor(image)
-
-        reduced = self.dropout(
-            self.reduction(torch.flatten(extracted_features, start_dim=1))
-        )
+        reduced = self.reduction(image)
 
         embedded = self.embedding(attribute_tensor)
         _, (hidden_state, _) = self.lstm(embedded)
 
-        concatenated = self.relu(torch.cat((reduced, hidden_state.squeeze()), dim=1))
+        concatenated = torch.cat((reduced, hidden_state.squeeze()), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted
@@ -330,22 +225,15 @@ class MaskedCoordinatePredictor(nn.Module):
     def __init__(
         self,
         feature_extractor: FeatureExtractor,
-        inputs_are_features=False,
     ) -> None:
         super().__init__()
-        self.dropout = nn.Dropout(0.3)
-
-        self.feature_extractor = feature_extractor
-        self.inputs_are_features = inputs_are_features
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
-
-        self.cnn = nn.Sequential(
-            nn.Conv2d(2048, 512, kernel_size=1, padding=0),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+        self.process_image = nn.Sequential(
+            feature_extractor, nn.Flatten(), nn.Dropout(0.3), nn.LazyLinear(2048)
         )
 
-        self.reduction = nn.Linear(classifier_in_dim, 2048)
+        self.process_masked_image = nn.Sequential(
+            feature_extractor, nn.Flatten(), nn.Dropout(0.3), nn.LazyLinear(2048)
+        )
 
         self.predictor = nn.Linear(
             4096,
@@ -355,23 +243,8 @@ class MaskedCoordinatePredictor(nn.Module):
     def forward(self, data):
         image, _, _, masked_image, *_ = data
 
-        if self.inputs_are_features:
-            extracted_features = image
-        else:
-            extracted_features = self.feature_extractor(image)
-
-        extracted_features = self.dropout(extracted_features)
-        reduced = self.reduction(torch.flatten(extracted_features, start_dim=1))
-
-        if self.inputs_are_features:
-            masked_extracted_features = self.feature_extractor(masked_image)
-        else:
-            masked_extracted_features = masked_image
-
-        masked_extracted_features = self.dropout(masked_extracted_features)
-        masked_reduced = self.reduction(
-            torch.flatten(masked_extracted_features, start_dim=1)
-        )
+        reduced = self.process_image(image)
+        masked_reduced = self.process_masked_image(masked_image)
 
         concatenated = torch.cat(
             (reduced, masked_reduced),
@@ -387,22 +260,13 @@ class ImageEncoder(nn.Module):
         self,
         encoder_out_dim,
         feature_extractor: FeatureExtractor,
-        inputs_are_features=False,
     ) -> None:
         super().__init__()
         self.feature_extractor = feature_extractor
-        self.inputs_are_features = inputs_are_features
-        classifier_in_dim = math.prod(feature_extractor.feature_shape)
-
-        self.reduction = nn.Linear(classifier_in_dim, encoder_out_dim)
         self.mean_reduction = nn.Linear(2048, encoder_out_dim)
 
     def forward(self, image):
-        if self.inputs_are_features:
-            extracted_features = image
-        else:
-            extracted_features = self.feature_extractor(image)
-        # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
+        extracted_features = self.feature_extractor(image)
         flattened = torch.flatten(extracted_features, start_dim=2).permute(0, 2, 1)
         reduced = self.mean_reduction(flattened.mean(dim=1))
         return reduced
