@@ -196,7 +196,7 @@ if __name__ == "__main__":
     else:
         raise AttributeError("no feature extractor specified")
 
-    images = os.listdir(args.image_dir)[:100]
+    images = os.listdir(args.image_dir)
     shape = [len(images), *feature_extractor.feature_shape]
 
     with h5py.File(args.out_file, "w") as f:
