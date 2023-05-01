@@ -362,11 +362,7 @@ if __name__ == "__main__":
         total_loss = Mean(device=device)
         model.train()
         train_outputs = []
-        for i, (model_input, ground_truth, image_id) in enumerate(
-            DataLoader(
-                train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
-            )
-        ):
+        for i, (model_input, ground_truth, image_id) in enumerate(train_loader):
             if isinstance(model_input, list):
                 model_input = [t.to(device) for t in model_input]
             else:
