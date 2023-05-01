@@ -32,6 +32,5 @@ class FeatureImageLoader(ImageLoader):
             self.features = list(feature_data_set)
 
     def get_image(self, image_id):
-        print(image_id)
         image_index = int(image_id[-6:])
         return torch.tensor(0), self.features[image_index], self.image_size
