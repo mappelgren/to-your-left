@@ -41,7 +41,6 @@ class ResnetFeatureExtractor(FeatureExtractor):
             raise AttributeError("number of blocks need to be between 1 and 3")
 
         self.resnet = nn.Sequential(*list(resnet.children())[:5])
-        print(self.resnet)
         self._feature_shape = (256, 56, 56)
 
         if number_blocks > 1:
