@@ -196,12 +196,12 @@ class DaleAttributeCoordinatePredictor(nn.Module):
     def forward(self, data):
         image, attribute_tensor, *_ = data
 
-        reduced = self.reduction(image)
+        processed_image = self.process_image(image)
 
         embedded = self.embedding(attribute_tensor)
         _, (hidden_state, _) = self.lstm(embedded)
 
-        concatenated = torch.cat((reduced, hidden_state.squeeze()), dim=1)
+        concatenated = torch.cat((processed_image, hidden_state.squeeze()), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted
