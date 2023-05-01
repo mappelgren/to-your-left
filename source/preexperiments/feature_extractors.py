@@ -192,7 +192,7 @@ if __name__ == "__main__":
         feature_extractor = ResnetFeatureExtractor(
             number_blocks=args.num_blocks, avgpool=args.avgpool, fc=args.fc
         ).to(device)
-        preprocess = ResNet101_Weights.IMAGENET1K_V1.transforms()
+        preprocess = ResNet101_Weights.IMAGENET1K_V2.transforms()
     else:
         raise AttributeError("no feature extractor specified")
 
