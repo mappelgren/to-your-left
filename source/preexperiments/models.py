@@ -190,13 +190,23 @@ class DaleAttributeCoordinatePredictor(nn.Module):
             nn.ReLU(),
             nn.LazyConv2d(128, kernel_size=1, padding=0),
             nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
         )
 
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
 
-        self.predictor = nn.Sequential(nn.LazyLinear(1024), nn.ReLU(), nn.LazyLinear(2))
+        self.predictor = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.LazyLinear(1024),
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.LazyLinear(1024),
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.LazyLinear(2),
+        )
 
     def forward(self, data):
         image, attribute_tensor, *_ = data
