@@ -41,6 +41,7 @@ class ResnetFeatureExtractor(FeatureExtractor):
             raise AttributeError("number of blocks need to be between 1 and 3")
 
         self.resnet = nn.Sequential(*list(resnet.children())[:5])
+        print(self.resnet)
         self._feature_shape = (256, 56, 56)
 
         if number_blocks > 1:
@@ -196,7 +197,7 @@ if __name__ == "__main__":
     else:
         raise AttributeError("no feature extractor specified")
 
-    images = os.listdir(args.image_dir)
+    images = sorted(os.listdir(args.image_dir))
     shape = [len(images), *feature_extractor.feature_shape]
 
     with h5py.File(args.out_file, "w") as f:
