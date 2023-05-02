@@ -470,7 +470,7 @@ class CaptionGeneratorDataset(Dataset):
         image_masker: ImageMasker = None,
     ) -> None:
         super().__init__()
-        self.captioner = captioner
+        self.captioner = captioner  
         self.samples: list[CaptionGeneratorSample] = []
 
         scenes = os.listdir(scenes_json_dir)

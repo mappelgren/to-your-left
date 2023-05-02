@@ -273,12 +273,19 @@ class ImageEncoder(nn.Module):
         feature_extractor: FeatureExtractor,
     ) -> None:
         super().__init__()
-        self.feature_extractor = feature_extractor
+        self.process_image = nn.Sequential(
+            feature_extractor,
+            nn.LazyConv2d(128, kernel_size=1, padding=0),
+            nn.ReLU(),
+            nn.LazyConv2d(128, kernel_size=1, padding=0),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
         self.mean_reduction = nn.LazyLinear(encoder_out_dim)
 
     def forward(self, image):
-        extracted_features = self.feature_extractor(image)
-        flattened = torch.flatten(extracted_features, start_dim=2).permute(0, 2, 1)
+        processed_image = self.process_image(image)
+        flattened = torch.flatten(processed_image, start_dim=2).permute(0, 2, 1)
         reduced = self.mean_reduction(flattened.mean(dim=1))
         return reduced
 
