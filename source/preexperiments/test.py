@@ -64,7 +64,7 @@ class BoundingBoxClassifierTester(Tester):
 class CaptionGeneratorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
-        accuracy = MulticlassAccuracy(device=device)
+        accuracy = BinaryAccuracy(device=device)
         hamming_accuracy = MulticlassAccuracy(device=device)
         non_target_accuracy = BinaryAccuracy(device=device)
 
@@ -94,7 +94,9 @@ class CaptionGeneratorTester(Tester):
                 )
 
             for output_sample, ground_truth_sample in zip(output, ground_truth):
-                accuracy.update(output_sample, ground_truth_sample)
+                accuracy.update(
+                    torch.equal(output_sample, ground_truth_sample), torch.tensor(True)
+                )
 
             hamming_accuracy.update(output.flatten(), ground_truth.flatten())
 
