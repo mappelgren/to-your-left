@@ -195,7 +195,7 @@ models = {
             "caption_decoder": CaptionDecoder(
                 len(DaleCaptionAttributeEncoder.vocab),
                 len(DaleCaptionAttributeEncoder.vocab),
-                2048,
+                len(DaleCaptionAttributeEncoder.vocab),
             ),
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
