@@ -94,6 +94,8 @@ class CaptionGeneratorTester(Tester):
 
             test_outputs.extend(zip(image_id, output, ground_truth))
 
+            print(output, ground_truth)
+
             accuracy.update(output, ground_truth)
             hamming_accuracy.update(output, ground_truth)
 
