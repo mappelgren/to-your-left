@@ -94,8 +94,11 @@ class CaptionGeneratorTester(Tester):
                 )
 
             for output_sample, ground_truth_sample in zip(output, ground_truth):
+                hit = torch.equal(output_sample, ground_truth_sample)
+
                 accuracy.update(
-                    torch.equal(output_sample, ground_truth_sample), torch.tensor(True)
+                    torch.tensor(hit).unsqueeze(dim=0),
+                    torch.tensor(True).unsqueeze(dim=0),
                 )
 
             hamming_accuracy.update(output.flatten(), ground_truth.flatten())
