@@ -189,13 +189,13 @@ models = {
         model=CaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
-                2048,
+                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "caption_decoder": CaptionDecoder(
-                len(DaleCaptionAttributeEncoder.vocab),
-                len(DaleCaptionAttributeEncoder.vocab),
-                len(DaleCaptionAttributeEncoder.vocab),
+                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
+                decoder_out_dim=1024,
             ),
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -218,13 +218,13 @@ models = {
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
-                2048,
+                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "caption_decoder": CaptionDecoder(
-                len(DaleCaptionAttributeEncoder.vocab),
-                len(DaleCaptionAttributeEncoder.vocab),
-                4096,
+                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+                embedding_dim=len(DaleCaptionAttributeEncoder.vocab),
+                decoder_out_dim=4096,
             ),
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
