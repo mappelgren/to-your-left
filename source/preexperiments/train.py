@@ -125,8 +125,8 @@ models = {
         model=DaleAttributeCoordinatePredictor,
         model_args={
             "vocab_size": 14,
-            "embedding_dim": 32,
-            "encoder_out_dim": 32,
+            "embedding_dim": 7,
+            "encoder_out_dim": 7,
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
@@ -148,8 +148,8 @@ models = {
         model=DaleAttributeCoordinatePredictor,
         model_args={
             "vocab_size": 14,
-            "embedding_dim": 32,
-            "encoder_out_dim": 32,
+            "embedding_dim": 7,
+            "encoder_out_dim": 7,
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
