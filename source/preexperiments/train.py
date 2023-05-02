@@ -13,16 +13,15 @@ from data_readers import (
     BasicImageMasker,
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
+    Color,
     CoordinatePredictorDataset,
-    DaleAttributeEncoder,
+    DaleCaptionAttributeEncoder,
     OneHotAttributeEncoder,
     PreprocessScratch,
+    Shape,
+    Size,
 )
-from feature_extractors import (
-    DummyFeatureExtractor,
-    ResnetFeatureExtractor,
-    VggFeatureExtractor,
-)
+from feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
 from image_loader import ClevrImageLoader, FeatureImageLoader
 from models import (
     AttributeCoordinatePredictor,
@@ -106,9 +105,9 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeCoordinatePredictor,
         model_args={
-            "number_colors": 8,
-            "number_shapes": 3,
-            "number_sizes": 2,
+            "number_colors": len(Color.names()),
+            "number_shapes": len(Shape.names()),
+            "number_sizes": len(Size.names()),
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
@@ -120,13 +119,13 @@ models = {
     ),
     "dale_attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
-        dataset_args={"attribute_encoder": DaleAttributeEncoder()},
+        dataset_args={"attribute_encoder": DaleCaptionAttributeEncoder()},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=DaleAttributeCoordinatePredictor,
         model_args={
-            "vocab_size": 14,
-            "embedding_dim": 14,
-            "encoder_out_dim": 14,
+            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
@@ -145,9 +144,9 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeLocationCoordinatePredictor,
         model_args={
-            "number_colors": 8,
-            "number_shapes": 3,
-            "number_sizes": 2,
+            "number_colors": len(Color.names()),
+            "number_shapes": len(Shape.names()),
+            "number_sizes": len(Size.names()),
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
@@ -185,7 +184,7 @@ models = {
     ),
     "caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
-        dataset_args={},
+        dataset_args={"captioner": DaleCaptionAttributeEncoder()},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=CaptionGenerator,
         model_args={
@@ -193,8 +192,14 @@ models = {
                 2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "caption_decoder": CaptionDecoder(14, 128, 2048),
-            "encoded_sos": 0,
+            "caption_decoder": CaptionDecoder(
+                len(DaleCaptionAttributeEncoder.vocab),
+                len(DaleCaptionAttributeEncoder.vocab),
+                2048,
+            ),
+            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
+                DaleCaptionAttributeEncoder.SOS_TOKEN
+            ),
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=CaptionGeneratorTester,
@@ -205,7 +210,10 @@ models = {
     ),
     "masked_caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
-        dataset_args={"image_masked": BasicImageMasker()},
+        dataset_args={
+            "captioner": DaleCaptionAttributeEncoder(),
+            "image_masked": BasicImageMasker(),
+        },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCaptionGenerator,
         model_args={
@@ -213,8 +221,14 @@ models = {
                 2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "caption_decoder": CaptionDecoder(14, 128, 4096),
-            "encoded_sos": 0,
+            "caption_decoder": CaptionDecoder(
+                len(DaleCaptionAttributeEncoder.vocab),
+                len(DaleCaptionAttributeEncoder.vocab),
+                4096,
+            ),
+            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
+                DaleCaptionAttributeEncoder.SOS_TOKEN
+            ),
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=CaptionGeneratorTester,

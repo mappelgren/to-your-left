@@ -2,9 +2,10 @@ import itertools
 import json
 import os
 import random
-from abc import ABC, abstractmethod
+from abc import ABC, abstractclassmethod, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
+from uu import encode
 
 import torch
 from image_loader import ImageLoader
@@ -157,10 +158,26 @@ class BoundingBoxClassifierDataset(Dataset):
         return len(self.samples)
 
 
+class Captioner(ABC):
+    @abstractmethod
+    def caption(self, scene, object_index):
+        ...
+
+    @classmethod
+    @abstractmethod
+    def get_encoded_word(cls, word):
+        ...
+
+    @classmethod
+    @abstractmethod
+    def get_decoded_word(cls, search_index):
+        ...
+
+
 class AttributeEncoder(ABC):
     @abstractmethod
     def encode(self, scene, object_index):
-        pass
+        ...
 
 
 class OneHotAttributeEncoder(AttributeEncoder):
@@ -182,16 +199,26 @@ class OneHotAttributeEncoder(AttributeEncoder):
         return tensor
 
 
-class DaleAttributeEncoder(AttributeEncoder):
+class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
     PAD_TOKEN = "<pad>"
+    SOS_TOKEN = "<sos>"
 
-    def __init__(self) -> None:
-        super().__init__()
-        vocab = [
-            self.PAD_TOKEN,
-            *[word.lower() for word in [*Size.names(), *Color.names(), *Shape.names()]],
-        ]
-        self.vocab = {word: index for index, word in enumerate(list(vocab))}
+    # class variable, because vocab is static
+    vocab = {
+        word: index
+        for index, word in enumerate(
+            list(
+                [
+                    PAD_TOKEN,
+                    SOS_TOKEN,
+                    *[
+                        word.lower()
+                        for word in [*Size.names(), *Color.names(), *Shape.names()]
+                    ],
+                ]
+            )
+        )
+    }
 
     def encode(self, scene, object_index):
         target_shape = scene["objects"][object_index]["shape"]
@@ -213,11 +240,31 @@ class DaleAttributeEncoder(AttributeEncoder):
                 caption.insert(0, target_size)
 
         encoded_caption = [self.vocab[word] for word in caption]
+        number_of_attributes = 3
         encoded_caption.extend(
-            [self.vocab[self.PAD_TOKEN]] * (3 - len(encoded_caption))
+            [self.vocab[self.PAD_TOKEN]] * (number_of_attributes - len(encoded_caption))
         )
 
         return torch.tensor(encoded_caption)
+
+    def caption(self, scene, object_index):
+        encoding = self.encode(scene, object_index)
+
+        return torch.cat(
+            (torch.tensor(self.vocab[self.SOS_TOKEN]).unsqueeze(0), encoding)
+        )
+
+    @classmethod
+    def get_encoded_word(cls, word):
+        return cls.vocab[word]
+
+    @classmethod
+    def get_decoded_word(cls, search_index):
+        for word, index in cls.vocab.items():
+            if index == search_index:
+                return word
+
+        raise AttributeError("no word found with this index")
 
 
 class CoordinateEncoder:
@@ -414,30 +461,23 @@ class CaptionGeneratorDataset(Dataset):
      - caption in form of (size, color, shape) e.g. large green sphere
     """
 
-    SOS_TOKEN = "<sos>"
-
     def __init__(
         self,
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
+        captioner: Captioner,
         image_masker: ImageMasker = None,
     ) -> None:
         super().__init__()
-
-        # list instead of set, to make indices deterministic
-        vocab = [
-            self.SOS_TOKEN,
-            *[word.lower() for word in [*Size.names(), *Color.names(), *Shape.names()]],
-        ]
-        self.vocab = {word: index for index, word in enumerate(list(vocab))}
-
+        self.captioner = captioner
         self.samples: list[CaptionGeneratorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         print("sampling scenes...")
         selected_scenes = random.sample(scenes, max_number_samples)
 
+        max_number_of_distractors = 0
         for scene_index, scene_file in enumerate(selected_scenes):
             if scene_index % 50 == 0:
                 print(f"processing scene {scene_index}...", end="\r")
@@ -451,17 +491,16 @@ class CaptionGeneratorDataset(Dataset):
             image, processed_image, _ = image_loader.get_image(image_id)
 
             target_object = scene["groups"]["target"][0]
-            sos = self.get_encoded_word("<sos>")
 
+            number_of_objects = len(scene["objects"])
+            max_number_of_distractors = max(
+                number_of_objects - 1, max_number_of_distractors
+            )
             captions = []
-            for obj in scene["objects"]:
-                size = self.get_encoded_word(obj["size"])
-                color = self.get_encoded_word(obj["color"])
-                shape = self.get_encoded_word(obj["shape"])
-                captions.append(torch.tensor([sos, size, color, shape]))
+            for obj_index in range(number_of_objects):
+                captions.append(captioner.caption(scene, obj_index))
 
             target_caption = captions.pop(target_object)
-            captions.extend([torch.zeros_like(captions[0])] * (10 - len(captions)))
 
             sample = CaptionGeneratorSample(
                 image_id=image_id,
@@ -476,16 +515,22 @@ class CaptionGeneratorDataset(Dataset):
                 )
 
             self.samples.append(sample)
+
+        # pad non-target captions
+        for sample in self.samples:
+            padding = [torch.zeros_like(sample.non_target_captions[0])] * (
+                max_number_of_distractors - len(sample.non_target_captions)
+            )
+            if len(padding) > 0:
+                sample.non_target_captions = torch.cat(
+                    (
+                        sample.non_target_captions,
+                        torch.stack(padding),
+                    )
+                )
+
         print()
         print("loaded data.")
-
-    def get_encoded_word(self, word):
-        return self.vocab[word]
-
-    def get_decoded_word(self, search_index):
-        for word, index in self.vocab.items():
-            if index == search_index:
-                return word
 
     def __getitem__(self, index):
         sample = self.samples[index]

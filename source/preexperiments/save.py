@@ -87,10 +87,16 @@ class CaptionOutputProcessor(StandardOutputProcessor):
                 encoded_caption = torch.max(output, dim=0).indices
 
             decoded_caption = " ".join(
-                [self.dataset.get_decoded_word(index) for index in encoded_caption]
+                [
+                    self.dataset.captioner.get_decoded_word(index)
+                    for index in encoded_caption
+                ]
             )
             decoded_target_caption = " ".join(
-                [self.dataset.get_decoded_word(index) for index in ground_truth]
+                [
+                    self.dataset.captioner.get_decoded_word(index)
+                    for index in ground_truth
+                ]
             )
             processed_output.append((image_id, decoded_caption, decoded_target_caption))
 

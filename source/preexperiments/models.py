@@ -274,7 +274,7 @@ class ImageEncoder(nn.Module):
     ) -> None:
         super().__init__()
         self.feature_extractor = feature_extractor
-        self.mean_reduction = nn.Linear(2048, encoder_out_dim)
+        self.mean_reduction = nn.LazyLinear(encoder_out_dim)
 
     def forward(self, image):
         extracted_features = self.feature_extractor(image)
