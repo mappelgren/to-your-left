@@ -64,8 +64,8 @@ class BoundingBoxClassifierTester(Tester):
 class CaptionGeneratorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
-        accuracy = MultilabelAccuracy(device=device)
-        hamming_accuracy = MultilabelAccuracy(criteria="hamming", device=device)
+        accuracy = MulticlassAccuracy(device=device)
+        hamming_accuracy = MulticlassAccuracy(device=device)
         non_target_accuracy = BinaryAccuracy(device=device)
 
         test_outputs = []
@@ -81,6 +81,7 @@ class CaptionGeneratorTester(Tester):
                 output = model.caption(image, masked_image).detach()
             else:
                 output = model.caption(image).detach()
+
             for sample, output_sample in zip(non_target_captions, output):
                 for caption in sample:
                     described_non_target_object = torch.tensor(False)
@@ -92,10 +93,12 @@ class CaptionGeneratorTester(Tester):
                     torch.tensor(True).unsqueeze(dim=0),
                 )
 
-            test_outputs.extend(zip(image_id, output, ground_truth))
+            for output_sample, ground_truth_sample in zip(output, ground_truth):
+                accuracy.update(output_sample, ground_truth_sample)
 
-            accuracy.update(output, ground_truth)
-            hamming_accuracy.update(output, ground_truth)
+            hamming_accuracy.update(output.flatten(), ground_truth.flatten())
+
+            test_outputs.extend(zip(image_id, output, ground_truth))
 
         return {
             "accuracy": f"{accuracy.compute():.2f}",
