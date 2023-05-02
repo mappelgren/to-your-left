@@ -366,7 +366,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     loss_function = models[args.model].loss_function
 
-    log = [str(args) + "\n"]
+    log = [str(args) + "\n" + str(model) + "\n"]
     print(f"Batches per epoch: {len(train_loader)}")
     for epoch in range(args.epochs):
         total_loss = Mean(device=device)
