@@ -189,7 +189,7 @@ models = {
         model=CaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
-                encoder_out_dim=2048,
+                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "caption_decoder": CaptionDecoder(
