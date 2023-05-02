@@ -103,7 +103,7 @@ models = {
     "attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"attribute_encoder": OneHotAttributeEncoder()},
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeCoordinatePredictor,
         model_args={
             "number_colors": 8,
@@ -121,56 +121,12 @@ models = {
     "dale_attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"attribute_encoder": DaleAttributeEncoder()},
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=DaleAttributeCoordinatePredictor,
         model_args={
             "vocab_size": 14,
-            "embedding_dim": 7,
-            "encoder_out_dim": 7,
-            "feature_extractor": DummyFeatureExtractor(),
-        },
-        loss_function=pixel_loss,
-        tester=CoordinatePredictorTester,
-        output_processor=PixelOutputProcessor,
-        output_processor_args={
-            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
-        },
-    ),
-    "feature_dale_attribute_coordinate_predictor": ModelDefinition(
-        dataset=CoordinatePredictorDataset,
-        dataset_args={
-            "attribute_encoder": DaleAttributeEncoder(),
-            "feature_extractor": ResnetFeatureExtractor(
-                pretrained=True, fine_tune=False
-            ),
-        },
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
-        model=DaleAttributeCoordinatePredictor,
-        model_args={
-            "vocab_size": 14,
-            "embedding_dim": 7,
-            "encoder_out_dim": 7,
-            "feature_extractor": DummyFeatureExtractor(),
-        },
-        loss_function=pixel_loss,
-        tester=CoordinatePredictorTester,
-        output_processor=PixelOutputProcessor,
-        output_processor_args={
-            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
-        },
-    ),
-    "feature_dale_vgg_attribute_coordinate_predictor": ModelDefinition(
-        dataset=CoordinatePredictorDataset,
-        dataset_args={
-            "attribute_encoder": DaleAttributeEncoder(),
-            "feature_extractor": VggFeatureExtractor(pretrained=True, fine_tune=False),
-        },
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
-        model=DaleAttributeCoordinatePredictor,
-        model_args={
-            "vocab_size": 14,
-            "embedding_dim": 32,
-            "encoder_out_dim": 32,
+            "embedding_dim": 14,
+            "encoder_out_dim": 14,
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
@@ -186,7 +142,7 @@ models = {
             "attribute_encoder": OneHotAttributeEncoder(),
             "encode_locations": True,
         },
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeLocationCoordinatePredictor,
         model_args={
             "number_colors": 8,
@@ -204,7 +160,7 @@ models = {
     "masked_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"image_masker": BasicImageMasker()},
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCoordinatePredictor,
         model_args={"feature_extractor": DummyFeatureExtractor()},
         loss_function=pixel_loss,
@@ -230,7 +186,7 @@ models = {
     "caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
         dataset_args={},
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=CaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
@@ -250,7 +206,7 @@ models = {
     "masked_caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
         dataset_args={"image_masked": BasicImageMasker()},
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
