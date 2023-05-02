@@ -285,6 +285,12 @@ if __name__ == "__main__":
         help="Path to the hd5 file containing extracted image features",
     )
     parser.add_argument(
+        "--checkpoint_path",
+        type=str,
+        default=None,
+        help="Path to a saved model state dict",
+    )
+    parser.add_argument(
         "--max_samples", type=int, default=None, help="max samples to load"
     )
 
@@ -353,6 +359,10 @@ if __name__ == "__main__":
     tester = models[args.model].tester()
 
     model = models[args.model].model(**models[args.model].model_args).to(device)
+
+    if args.checkpoint_path is not None:
+        model.load_state_dict(torch.load(args.checkpoint_path))
+
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     loss_function = models[args.model].loss_function
 
