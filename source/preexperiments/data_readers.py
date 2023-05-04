@@ -330,7 +330,7 @@ class BasicImageMasker(ImageMasker):
             ):
                 pixels[i, j] = (0, 0, 0)
             else:
-                pixels[i, j] = (256, 256, 256)
+                pixels[i, j] = (255, 255, 255)
 
         return masked_image
 
