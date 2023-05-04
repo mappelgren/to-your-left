@@ -212,19 +212,19 @@ models = {
         dataset=CaptionGeneratorDataset,
         dataset_args={
             "captioner": DaleCaptionAttributeEncoder(),
-            "image_masked": BasicImageMasker(),
+            "image_masker": BasicImageMasker(),
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ImageEncoder(
-                encoder_out_dim=2048,
+                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=len(DaleCaptionAttributeEncoder.vocab),
-                decoder_out_dim=4096,
+                decoder_out_dim=2048,
             ),
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -242,12 +242,8 @@ models = {
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
-    parser.add_argument(
-        "--scene_json_dir", type=str, default=None, help="Path to the scene json dir"
-    )
-    parser.add_argument(
-        "--image_dir", type=str, default=None, help="Path to the scene image dir"
-    )
+    parser.add_argument("--scene_json_dir", type=str, help="Path to the scene json dir")
+    parser.add_argument("--image_dir", type=str, help="Path to the scene image dir")
     parser.add_argument(
         "--feature_file",
         type=str,
@@ -293,15 +289,15 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    if args.image_dir is not None:
+    if args.feature_file is not None:
+        image_loader = FeatureImageLoader(
+            feature_file=args.feature_file, image_dir=args.image_dir
+        )
+    else:
         image_loader = ClevrImageLoader(
             image_dir=args.image_dir,
             preprocess=models[args.model].preprocess,
         )
-    elif args.feature_file is not None:
-        image_loader = FeatureImageLoader(args.feature_file)
-    else:
-        raise AttributeError("either image path or feature file must be set")
 
     dataset = models[args.model].dataset(
         scenes_json_dir=args.scene_json_dir,

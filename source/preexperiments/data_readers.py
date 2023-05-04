@@ -330,6 +330,8 @@ class BasicImageMasker(ImageMasker):
                 or j > y_center + MASK_SIZE
             ):
                 pixels[i, j] = (0, 0, 0)
+            else:
+                pixels[i, j] = (256, 256, 256)
 
         return masked_image
 
@@ -468,9 +470,10 @@ class CaptionGeneratorDataset(Dataset):
         max_number_samples,
         captioner: Captioner,
         image_masker: ImageMasker = None,
+        preprocess=ResNet50_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
-        self.captioner = captioner  
+        self.captioner = captioner
         self.samples: list[CaptionGeneratorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
@@ -510,8 +513,8 @@ class CaptionGeneratorDataset(Dataset):
             )
 
             if image_masker is not None:
-                sample.masked_image = image_masker.get_masked_image(
-                    image, scene, target_object
+                sample.masked_image = preprocess(
+                    image_masker.get_masked_image(image, scene, target_object)
                 )
 
             self.samples.append(sample)
