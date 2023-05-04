@@ -1,4 +1,4 @@
-import math
+import copy
 
 import torch
 from feature_extractors import FeatureExtractor
@@ -355,9 +355,12 @@ class MaskedCaptionGenerator(nn.Module):
      - image
     """
 
-    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+    def __init__(
+        self, image_encoder, masked_image_encoder, caption_decoder, encoded_sos
+    ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
+        self.masked_image_encoder = masked_image_encoder
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 
@@ -365,7 +368,7 @@ class MaskedCaptionGenerator(nn.Module):
         image, caption, _, masked_image, *_ = data
 
         encoded_image = self.image_encoder(image).unsqueeze(dim=0)
-        encoded_masked_image = self.image_encoder(masked_image).unsqueeze(dim=0)
+        encoded_masked_image = self.masked_image_encoder(masked_image).unsqueeze(dim=0)
         concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
 
         lstm_states = concatenated, concatenated
@@ -377,7 +380,7 @@ class MaskedCaptionGenerator(nn.Module):
         device = image.device
 
         encoded_image = self.image_encoder(image).unsqueeze(dim=0)
-        encoded_masked_image = self.image_encoder(masked_image).unsqueeze(dim=0)
+        encoded_masked_image = self.masked_image_encoder(masked_image).unsqueeze(dim=0)
         concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
 
         caption = []

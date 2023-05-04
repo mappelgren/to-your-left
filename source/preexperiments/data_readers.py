@@ -2,10 +2,9 @@ import itertools
 import json
 import os
 import random
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from uu import encode
 
 import torch
 from image_loader import ImageLoader

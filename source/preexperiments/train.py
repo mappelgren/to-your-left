@@ -221,6 +221,10 @@ models = {
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "masked_image_encoder": ImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=len(DaleCaptionAttributeEncoder.vocab),
