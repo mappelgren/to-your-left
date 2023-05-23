@@ -12,7 +12,7 @@ from models import FeatureExtractor
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
-from torchvision.models import ResNet50_Weights
+from torchvision.models import ResNet101_Weights
 
 
 class Attribute(Enum):
@@ -75,7 +75,7 @@ class BoundingBoxClassifierDataset(Dataset):
         image_path,
         max_number_samples,
         feature_extractor: FeatureExtractor = None,
-        preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.DEFAULT.transforms(),
         device=torch.device("cpu"),
     ) -> None:
         super().__init__()
@@ -240,8 +240,8 @@ class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
 
         encoded_caption = [self.vocab[word] for word in caption]
         number_of_attributes = 3
-        encoded_caption.extend(
-            [self.vocab[self.PAD_TOKEN]] * (number_of_attributes - len(encoded_caption))
+        encoded_caption[:0] = [self.vocab[self.PAD_TOKEN]] * (
+            number_of_attributes - len(encoded_caption)
         )
 
         return torch.tensor(encoded_caption)
@@ -369,7 +369,7 @@ class CoordinatePredictorDataset(Dataset):
         attribute_encoder: AttributeEncoder = None,
         encode_locations=False,
         image_masker: ImageMasker = None,
-        preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
 
@@ -469,7 +469,7 @@ class CaptionGeneratorDataset(Dataset):
         max_number_samples,
         captioner: Captioner,
         image_masker: ImageMasker = None,
-        preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
         self.captioner = captioner
