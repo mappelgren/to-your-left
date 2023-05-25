@@ -200,8 +200,8 @@ class OneHotAttributeEncoder(AttributeEncoder):
 
 class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
     class PaddingPosition(Enum):
-        PREPEND: 0
-        APPEND: 1
+        PREPEND = 0
+        APPEND = 1
 
     PAD_TOKEN = "<pad>"
     SOS_TOKEN = "<sos>"
