@@ -199,6 +199,10 @@ class OneHotAttributeEncoder(AttributeEncoder):
 
 
 class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
+    class PaddingPosition(Enum):
+        PREPEND: 0
+        APPEND: 1
+
     PAD_TOKEN = "<pad>"
     SOS_TOKEN = "<sos>"
 
@@ -218,6 +222,10 @@ class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
             )
         )
     }
+
+    def __init__(self, padding_position: PaddingPosition) -> None:
+        super().__init__()
+        self.padding_position = padding_position
 
     def encode(self, scene, object_index):
         target_shape = scene["objects"][object_index]["shape"]
@@ -240,9 +248,14 @@ class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
 
         encoded_caption = [self.vocab[word] for word in caption]
         number_of_attributes = 3
-        encoded_caption[:0] = [self.vocab[self.PAD_TOKEN]] * (
+
+        padding = [self.vocab[self.PAD_TOKEN]] * (
             number_of_attributes - len(encoded_caption)
         )
+        if self.padding_position == self.PaddingPosition.APPEND:
+            encoded_caption.extend(padding)
+        elif self.padding_position == self.PaddingPosition.PREPEND:
+            encoded_caption[:0] = padding
 
         return torch.tensor(encoded_caption)
 

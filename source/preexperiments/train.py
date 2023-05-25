@@ -119,7 +119,11 @@ models = {
     ),
     "dale_attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
-        dataset_args={"attribute_encoder": DaleCaptionAttributeEncoder()},
+        dataset_args={
+            "attribute_encoder": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.APPEND
+            )
+        },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=DaleAttributeCoordinatePredictor,
         model_args={
@@ -184,7 +188,11 @@ models = {
     ),
     "caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
-        dataset_args={"captioner": DaleCaptionAttributeEncoder()},
+        dataset_args={
+            "captioner": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND
+            )
+        },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=CaptionGenerator,
         model_args={
@@ -211,7 +219,9 @@ models = {
     "masked_caption_generator": ModelDefinition(
         dataset=CaptionGeneratorDataset,
         dataset_args={
-            "captioner": DaleCaptionAttributeEncoder(),
+            "captioner": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND
+            ),
             "image_masker": BasicImageMasker(),
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
