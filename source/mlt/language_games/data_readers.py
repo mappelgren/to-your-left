@@ -5,12 +5,14 @@ import pickle
 import random
 from collections import defaultdict
 from dataclasses import dataclass
+from typing import Iterable, Iterator, Optional, Sequence, Union
 
 import h5py
 import torch
 from mlt.preexperiments.data_readers import CaptionGeneratorDataset
 from PIL import Image
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset, Sampler
+from torch.utils.data.dataloader import _collate_fn_t, _worker_init_fn_t
 from torchvision.models import ResNet50_Weights
 
 
@@ -25,57 +27,100 @@ class ReferentialGameSample:
     target_image: torch.Tensor
 
 
-class LazaridouReferentialGameDataset(Dataset):
-    def __init__(self, feature_file_path, label_file_path, max_number_samples) -> None:
-        super().__init__()
+class _BatchIterator(Iterator):
+    def __init__(self, loader, batch_size, n_batches, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        random.seed(seed)
 
-        self.samples: list[ReferentialGameSample] = []
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        concept_dict = self.loader.dataset.concept_dict
+
+        sender_inputs = []
+        targets = []
+        receiver_inputs = []
+
+        for _ in range(self.batch_size):
+            concepts = random.sample(concept_dict.keys(), 2)
+
+            image_1 = random.choice(concept_dict[concepts[0]])
+            image_2 = random.choice(concept_dict[concepts[1]])
+
+            sender_input = torch.stack((image_1, image_2))
+
+            target_image = torch.tensor(random.randint(0, 1))
+
+            receiver_input = [image_2]
+            receiver_input.insert(target_image, image_1)
+            receiver_input = torch.stack(receiver_input)
+
+            sender_inputs.append(sender_input)
+            targets.append(target_image)
+            receiver_inputs.append(receiver_input)
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(targets),
+            torch.stack(receiver_inputs),
+        )
+
+
+class LazaridouReferentialGameLoader(DataLoader):
+    def __init__(self, batch_size, batches_per_epoch, *args, seed=None, **kwargs):
+        self.batches_per_epoch = batches_per_epoch
+        self.seed = seed
+
+        # batch_size is part of standard DataLoader arguments
+        kwargs["batch_size"] = batch_size
+        super().__init__(*args, **kwargs)
+
+    def __iter__(self):
+        if self.seed is None:
+            seed = random.randint(0, 2**32)
+        else:
+            seed = self.seed
+        return _BatchIterator(
+            self,
+            batch_size=self.batch_size,
+            n_batches=self.batches_per_epoch,
+            seed=seed,
+        )
+
+
+class LazaridouReferentialGameDataset(Dataset):
+    def __init__(self, feature_file_path, label_file_path) -> None:
+        super().__init__()
 
         fc = h5py.File(feature_file_path, "r")
 
         data = torch.FloatTensor(list(fc["dataset_1"]))
 
+        # normalise data
+        img_norm = torch.norm(data, p=2, dim=1, keepdim=True)
+        self.images = data / img_norm
+
         with open(label_file_path, "rb") as f:
             labels = pickle.load(f)
 
-        zipped = list(enumerate(zip(data, labels)))
-        concept_dict = defaultdict(list)
-        for image_id, (data, label) in zipped:
-            concept_dict[label].append((image_id, data))
-
-        for _ in range(max_number_samples):
-            concepts = random.sample(concept_dict.keys(), 2)
-
-            image_1_id, image_1 = random.choice(concept_dict[concepts[0]])
-
-            image_2_id, image_2 = random.choice(concept_dict[concepts[1]])
-
-            target_image = random.randint(0, 1)
-
-            self.samples.append(
-                ReferentialGameSample(
-                    image_1_id=image_1_id,
-                    image_2_id=image_2_id,
-                    image_1=image_1,
-                    image_2=image_2,
-                    target_image=target_image,
-                )
-            )
+        self.concept_dict = defaultdict(list)
+        for data, label in zip(self.images, labels):
+            self.concept_dict[label].append(data)
 
     def __getitem__(self, index):
-        sample = self.samples[index]
-        sender_input = torch.stack((sample.image_1, sample.image_2))
-
-        receiver_input = [sample.image_2]
-        receiver_input.insert(sample.target_image, sample.image_1)
-        receiver_input = torch.stack(receiver_input)
-
-        target = sample.target_image
-
-        return (sender_input, target, receiver_input)
+        return self.images[index]
 
     def __len__(self) -> int:
-        return len(self.samples)
+        return len(self.images)
 
 
 class BoundingBoxReferentialGameDataset(Dataset):

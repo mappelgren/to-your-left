@@ -3,50 +3,30 @@ from torch import nn
 
 
 class ReferentialGameSender(nn.Module):
-    def __init__(self, hidden_size, embedding_dimension=256, vocab_size=100) -> None:
+    def __init__(self, hidden_size, embedding_dimension=256) -> None:
         super().__init__()
         self.image_encoder = nn.LazyLinear(embedding_dimension, bias=False)
 
-        self.conv2 = nn.LazyConv2d(
-            hidden_size,
-            kernel_size=(2, 1),
-            stride=(2, 1),
-            bias=False,
-        )
-
-        self.sigmoid = nn.Sigmoid()
-
-        self.conv3 = nn.LazyConv2d(
-            1, kernel_size=(hidden_size, 1), stride=(hidden_size, 1), bias=False
-        )
-        self.lin4 = nn.LazyLinear(vocab_size, bias=False)
-
-        self.softmax = nn.Softmax(dim=1)
+        self.lin = nn.LazyLinear(hidden_size, bias=False)
 
     def forward(self, x, _aux_input):
         image_1 = self.image_encoder(x[:, 0])
         image_2 = self.image_encoder(x[:, 1])
 
-        concatenated = torch.stack((image_1, image_2), dim=1)
-        conv = self.conv2(concatenated.unsqueeze(dim=1))
+        concatenated = torch.cat((image_1, image_2), dim=1)
+        lin = self.lin(concatenated)
 
-        conv = conv.transpose(1, 2)
-        conv = self.conv3(conv)
-        squeezed = conv.squeeze()
-
-        fc = self.lin4(squeezed)
-
-        return self.softmax(fc)
+        return lin
 
 
 class ReferentialGameReceiver(nn.Module):
-    def __init__(self, hidden_size, embedding_dimension=256) -> None:
+    def __init__(self, embedding_dimension=256) -> None:
         super().__init__()
         self.image_encoder = nn.LazyLinear(embedding_dimension, bias=False)
 
         self.linear_message = nn.LazyLinear(embedding_dimension, bias=False)
 
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, message, x, _aux_input):
         image_1 = self.image_encoder(x[:, 0])
@@ -80,6 +60,7 @@ class MaskedDaleSender(nn.Module):
 
 class DaleReceiver(nn.Module):
     def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+        super().__init__()
         self.image_encoder = image_encoder
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
