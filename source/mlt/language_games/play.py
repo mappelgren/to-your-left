@@ -2,12 +2,15 @@ import argparse
 import sys
 
 import egg.core as core
+import torch
 import torch.nn.functional as F
 from mlt.language_games.data_readers import (
+    DaleTwoReferentialGameDataset,
     LazaridouReferentialGameDataset,
     LazaridouReferentialGameLoader,
 )
 from mlt.language_games.models import ReferentialGameReceiver, ReferentialGameSender
+from mlt.preexperiments.feature_extractors import ResnetFeatureExtractor
 from torch.utils.data import DataLoader, random_split
 
 
@@ -32,13 +35,16 @@ def get_params(params):
 
     # -- DATASET --
     parser.add_argument(
-        "--feature_file_path", type=str, default=None, help="Path to the scene json dir"
+        "--data_root_path", type=str, default=None, help="Path to the scene json dir"
     )
     parser.add_argument(
-        "--label_file_path", type=str, default=None, help="Path to the scene image dir"
+        "--max_samples", type=int, default=100, help="max samples to load"
     )
     parser.add_argument(
-        "--batches_per_epoch", type=int, default=None, help="max samples to load"
+        "--batches_per_epoch",
+        type=int,
+        default=100,
+        help="batches shown to the model every epoch",
     )
 
     parser.add_argument(
@@ -120,23 +126,48 @@ def main(params):
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
 
-    dataset = LazaridouReferentialGameDataset(
-        feature_file_path=opts.feature_file_path,
-        label_file_path=opts.label_file_path,
+    dataset = DaleTwoReferentialGameDataset(
+        data_root_path=opts.data_root_path,
+        feature_extractor=ResnetFeatureExtractor(),
+        max_number_samples=opts.max_samples,
+        device=torch.device("cuda"),
     )
 
-    train_loader = LazaridouReferentialGameLoader(
-        dataset=dataset,
-        batch_size=opts.batch_size,
-        batches_per_epoch=opts.batches_per_epoch,
-        seed=None,
+    train_dataset_length = int(0.8 * len(dataset))
+    test_dataset_length = len(dataset) - train_dataset_length
+    train_dataset, test_dataset = random_split(
+        dataset, (train_dataset_length, test_dataset_length)
     )
-    test_loader = LazaridouReferentialGameLoader(
-        dataset=dataset,
+
+    train_loader = DataLoader(
+        train_dataset,
         batch_size=opts.batch_size,
-        batches_per_epoch=opts.batches_per_epoch,
-        seed=7,
+        shuffle=True,
+        num_workers=1,
     )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=opts.validation_batch_size,
+        shuffle=True,
+        num_workers=1,
+    )
+
+    # dataset = LazaridouReferentialGameDataset(
+    #     data_root_path=opts.data_root_path,
+    # )
+
+    # train_loader = LazaridouReferentialGameLoader(
+    #     dataset=dataset,
+    #     batch_size=opts.batch_size,
+    #     batches_per_epoch=opts.batches_per_epoch,
+    #     seed=None,
+    # )
+    # test_loader = LazaridouReferentialGameLoader(
+    #     dataset=dataset,
+    #     batch_size=opts.validation_batch_size,
+    #     batches_per_epoch=opts.batches_per_epoch,
+    #     seed=7,
+    # )
 
     receiver = ReferentialGameReceiver(opts.receiver_embedding)
     sender = ReferentialGameSender(opts.sender_hidden, opts.sender_embedding)

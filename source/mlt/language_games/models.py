@@ -10,10 +10,11 @@ class ReferentialGameSender(nn.Module):
         self.lin = nn.LazyLinear(hidden_size, bias=False)
 
     def forward(self, x, _aux_input):
-        image_1 = self.image_encoder(x[:, 0])
-        image_2 = self.image_encoder(x[:, 1])
+        encoded_images = []
+        for image_index in range(x.shape[1]):
+            encoded_images.append(self.image_encoder(x[:, image_index]))
 
-        concatenated = torch.cat((image_1, image_2), dim=1)
+        concatenated = torch.cat(encoded_images, dim=1)
         lin = self.lin(concatenated)
 
         return lin
@@ -29,15 +30,14 @@ class ReferentialGameReceiver(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, message, x, _aux_input):
-        image_1 = self.image_encoder(x[:, 0])
-
-        image_2 = self.image_encoder(x[:, 1])
-
         message = self.linear_message(message)
-        dot_product_1 = torch.sum(message * image_1, dim=1)
-        dot_product_2 = torch.sum(message * image_2, dim=1)
 
-        output = torch.stack((dot_product_1, dot_product_2), dim=1)
+        dot_products = []
+        for image_index in range(x.shape[1]):
+            encoded_image = self.image_encoder(x[:, image_index])
+            dot_products.append(torch.sum(message * encoded_image, dim=1))
+
+        output = torch.stack(dot_products, dim=1)
 
         return self.softmax(output)
 

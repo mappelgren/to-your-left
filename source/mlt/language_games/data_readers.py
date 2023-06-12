@@ -5,15 +5,18 @@ import pickle
 import random
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Iterable, Iterator, Optional, Sequence, Union
+from typing import Iterator
 
 import h5py
 import torch
 from mlt.preexperiments.data_readers import CaptionGeneratorDataset
+from mlt.preexperiments.feature_extractors import (
+    DummyFeatureExtractor,
+    FeatureExtractor,
+)
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset, Sampler
-from torch.utils.data.dataloader import _collate_fn_t, _worker_init_fn_t
-from torchvision.models import ResNet50_Weights
+from torch.utils.data import DataLoader, Dataset
+from torchvision.models import ResNet101_Weights
 
 
 @dataclass
@@ -98,8 +101,15 @@ class LazaridouReferentialGameLoader(DataLoader):
 
 
 class LazaridouReferentialGameDataset(Dataset):
-    def __init__(self, feature_file_path, label_file_path) -> None:
+    def __init__(self, data_root_path) -> None:
         super().__init__()
+
+        feature_file_path = os.path.join(
+            data_root_path, "train", "ours_images_single_sm0.h5"
+        )
+        label_file_path = os.path.join(
+            data_root_path, "train", "ours_images_single_sm0.objects"
+        )
 
         fc = h5py.File(feature_file_path, "r")
 
@@ -123,13 +133,140 @@ class LazaridouReferentialGameDataset(Dataset):
         return len(self.images)
 
 
+@dataclass
+class BoundingBoxReferentialGameSample:
+    bounding_boxes: list[torch.Tensor]
+    target_index: int
+    target_order: list[int]
+    image_id: str
+
+
+class DaleTwoReferentialGameDataset(Dataset):
+    def __init__(
+        self,
+        data_root_path,
+        feature_extractor: FeatureExtractor,
+        max_number_samples=100,
+        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        device=torch.device("cpu"),
+    ) -> None:
+        super().__init__()
+
+        feature_extractor = feature_extractor.to(device)
+        feature_extractor.eval()
+
+        self.samples: list[BoundingBoxReferentialGameSample] = []
+
+        scenes_json_dir = os.path.join(data_root_path, "scenes/")
+        image_path = os.path.join(data_root_path, "images/")
+
+        scenes = os.listdir(scenes_json_dir)
+        print("loading scenes...")
+        loaded_scenes = []
+        max_number_objects = 0
+        for scene_file in scenes:
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                loaded_scenes.append(json.load(f))
+                max_number_objects = max(
+                    len(loaded_scenes[-1]["objects"]), max_number_objects
+                )
+
+        if max_number_samples > -1:
+            selected_scenes = random.sample(loaded_scenes, max_number_samples)
+        else:
+            selected_scenes = loaded_scenes
+
+        for scene_index, scene in enumerate(selected_scenes):
+            if scene_index % 100 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
+            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
+            bounding_boxes = []
+            for object_index in range(len(scene["objects"])):
+                bounding_box = preprocess(
+                    self._get_bounding_box(image, scene, object_index)
+                )
+                with torch.no_grad():
+                    bounding_box = (
+                        feature_extractor(bounding_box.to(device).unsqueeze(dim=0))
+                        .squeeze(dim=0)
+                        .cpu()
+                    )
+                bounding_boxes.append(bounding_box)
+
+            target_object = scene["groups"]["target"][0]
+
+            # move target bounding box to first position
+            bounding_boxes = [
+                bounding_boxes[target_object],
+                *[
+                    box
+                    for index, box in enumerate(bounding_boxes)
+                    if index != target_object
+                ],
+            ]
+
+            bounding_boxes.extend(
+                [torch.zeros_like(bounding_boxes[0])]
+                * (max_number_objects - len(bounding_boxes))
+            )
+
+            indices = list(range(len(bounding_boxes)))
+            random.shuffle(indices)
+
+            target_index = indices.index(target_object)
+
+            self.samples.append(
+                BoundingBoxReferentialGameSample(
+                    target_index=target_index,
+                    bounding_boxes=bounding_boxes,
+                    target_order=indices,
+                    image_id=scene["image_filename"].removesuffix(".png"),
+                )
+            )
+        print()
+
+    def _get_bounding_box(self, image, scene, target_index):
+        BOUNDING_BOX_SIZE = image.size[0] / 5
+
+        x_center, y_center, _ = scene["objects"][target_index]["pixel_coords"]
+        bounding_box = image.crop(
+            (
+                x_center - BOUNDING_BOX_SIZE / 2,
+                y_center - BOUNDING_BOX_SIZE / 2,
+                x_center + BOUNDING_BOX_SIZE / 2,
+                y_center + BOUNDING_BOX_SIZE / 2,
+            )
+        )
+
+        return bounding_box
+
+    def __getitem__(self, index):
+        sample = self.samples[index]
+
+        sender_input = torch.stack(sample.bounding_boxes)
+
+        target_index = torch.tensor(sample.target_index)
+
+        receiver_input = torch.stack(
+            [sample.bounding_boxes[i] for i in sample.target_order]
+        )
+
+        return (sender_input, target_index, receiver_input)
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+
 class BoundingBoxReferentialGameDataset(Dataset):
     def __init__(
         self,
         scenes_json_dir,
         image_path="",
         max_number_samples=0,
-        preprocess=ResNet50_Weights.DEFAULT.transforms(),
+        preprocess=ResNet101_Weights.DEFAULT.transforms(),
     ) -> None:
         super().__init__()
 
