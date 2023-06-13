@@ -130,7 +130,7 @@ def main(params):
         data_root_path=opts.data_root_path,
         feature_extractor=ResnetFeatureExtractor(),
         max_number_samples=opts.max_samples,
-        device=torch.device("cuda"),
+        device=opts.device,
     )
 
     train_dataset_length = int(0.8 * len(dataset))
