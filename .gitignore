@@ -4,6 +4,7 @@ out/
 build/
 dist/
 *.egg-info/
+*.h5
 
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:

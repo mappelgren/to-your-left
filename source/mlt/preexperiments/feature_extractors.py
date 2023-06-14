@@ -294,7 +294,9 @@ if __name__ == "__main__":
                         features = feature_extractor(torch.stack(batch)).cpu()
 
                     features_by_image = features.view(
-                        number_images, max_number_objects, -1
+                        number_images,
+                        max_number_objects,
+                        *feature_extractor.feature_shape,
                     )
                     i_end = i_start + number_images
                     feature_dataset[i_start:i_end] = features_by_image
