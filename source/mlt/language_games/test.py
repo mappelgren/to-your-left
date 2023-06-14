@@ -1,17 +1,9 @@
-import sys
-
-import egg
 import torch
-import torchvision.transforms as transforms
-from PIL import Image
 
-interaction = torch.load(sys.argv[1])
+l = [torch.tensor(e) for e in [1, 2, 3, 4, 5, 1, 2, 3, 4, 5]]
 
-transform = transforms.ToPILImage()
+t = torch.stack(l)
+t = t.view(2, 5)
 
-for index, sender_input in enumerate(interaction.sender_input):
-    sender_input -= sender_input.min()
-    sender_input /= sender_input.max()
-
-    image: Image.Image = transform(sender_input)
-    image.save(f"out/images/interaction_{index}.jpg", format="JPEG")
+print(t)
+print(t.shape)

@@ -5,7 +5,7 @@ import egg.core as core
 import torch
 import torch.nn.functional as F
 from mlt.language_games.data_readers import (
-    DaleTwoReferentialGameDataset,
+    DaleReferentialGameDataset,
     LazaridouReferentialGameDataset,
     LazaridouReferentialGameLoader,
 )
@@ -126,7 +126,7 @@ def main(params):
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
 
-    dataset = DaleTwoReferentialGameDataset(
+    dataset = DaleReferentialGameDataset(
         data_root_path=opts.data_root_path,
         feature_extractor=ResnetFeatureExtractor(),
         max_number_samples=opts.max_samples,
@@ -193,6 +193,9 @@ def main(params):
     game = core.SenderReceiverRnnGS(gs_sender, gs_receiver, classification_loss)
 
     callbacks = [core.TemperatureUpdater(agent=gs_sender, decay=0.9, minimum=0.1)]
+    if opts.print_validation_events:
+        callbacks.append(core.PrintValidationEvents(n_epochs=opts.n_epochs))
+
     optimizer = core.build_optimizer(game.parameters())
     trainer = core.Trainer(
         game=game,
@@ -202,7 +205,6 @@ def main(params):
         callbacks=callbacks
         + [
             core.ConsoleLogger(print_train_loss=True, as_json=True),
-            # core.PrintValidationEvents(n_epochs=opts.n_epochs),
         ],
     )
     trainer.train(n_epochs=opts.n_epochs)

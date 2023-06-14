@@ -141,7 +141,7 @@ class BoundingBoxReferentialGameSample:
     image_id: str
 
 
-class DaleTwoReferentialGameDataset(Dataset):
+class DaleReferentialGameDataset(Dataset):
     def __init__(
         self,
         data_root_path,

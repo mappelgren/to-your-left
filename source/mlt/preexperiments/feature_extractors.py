@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 from abc import ABC, abstractmethod
 
@@ -132,6 +133,30 @@ class VggFeatureExtractor(FeatureExtractor):
         return self.vgg(data)
 
 
+def get_bounding_boxes(image, scene, preprocess, max_number_objects):
+    BOUNDING_BOX_SIZE = image.size[0] / 5
+
+    object_bounding_boxes = []
+    for obj in scene["objects"]:
+        x_center, y_center, _ = obj["pixel_coords"]
+        bounding_box = image.crop(
+            (
+                x_center - BOUNDING_BOX_SIZE / 2,
+                y_center - BOUNDING_BOX_SIZE / 2,
+                x_center + BOUNDING_BOX_SIZE / 2,
+                y_center + BOUNDING_BOX_SIZE / 2,
+            )
+        )
+        object_bounding_boxes.append(preprocess(bounding_box))
+
+    object_bounding_boxes.extend(
+        [torch.zeros_like(object_bounding_boxes[0])]
+        * (max_number_objects - len(object_bounding_boxes))
+    )
+
+    return object_bounding_boxes
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
@@ -140,6 +165,18 @@ if __name__ == "__main__":
     )
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
 
+    parser.add_argument(
+        "--bounding_boxes",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="set True, when features for each object in the image should be extracted",
+    )
+    parser.add_argument(
+        "--scene_dir",
+        type=str,
+        default=None,
+        help="Path to the scene dir (required when bounding boxes are extracted)",
+    )
     # -- MODEL --
     parser.add_argument(
         "--feature_extractor",
@@ -202,30 +239,97 @@ if __name__ == "__main__":
     else:
         raise AttributeError("no feature extractor specified")
 
-    images = sorted(os.listdir(args.image_dir))
-    shape = [len(images), *feature_extractor.feature_shape]
+    if args.bounding_boxes:
+        scenes = sorted(os.listdir(args.scene_dir))
 
-    with h5py.File(args.out_file, "w") as f:
-        feature_dataset = f.create_dataset("features", shape, dtype=np.float32)
-        feature_dataset.attrs["image_size"] = Image.open(
-            os.path.join(args.image_dir, images[0])
-        ).size
-        batch = []
-        i_start = 0
-        for image_index, image_file in enumerate(images):
-            if image_index % args.batch_size == 0:
-                print(f"processing image {image_index}...", end="\r")
+        # TODO optimize performance
+        max_number_objects = 0
+        for scene_file in scenes:
+            with open(
+                os.path.join(args.scene_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                scene = json.load(f)
+                max_number_objects = max(len(scene["objects"]), max_number_objects)
 
-            image = Image.open(os.path.join(args.image_dir, image_file)).convert("RGB")
-            preprocessed_image = preprocess(image).to(device)
-            batch.append(preprocessed_image)
+        if args.batch_size % max_number_objects != 0:
+            raise ValueError(
+                f"batch_size must be divisible by the maximum  number of objects '{max_number_objects}' in an image"
+            )
 
-            if len(batch) == args.batch_size or image_index == len(images) - 1:
-                with torch.no_grad():
-                    features = feature_extractor(torch.stack(batch)).cpu()
-                i_end = i_start + len(batch)
-                feature_dataset[i_start:i_end] = features
+        shape = [len(scenes), max_number_objects, *feature_extractor.feature_shape]
 
-                i_start = i_end
-                batch = []
-        print()
+        with h5py.File(args.out_file, "w") as f:
+            feature_dataset = f.create_dataset("features", shape, dtype=np.float32)
+            feature_dataset.attrs["image_size"] = Image.open(
+                os.path.join(args.image_dir, os.listdir(args.image_dir)[0])
+            ).size
+
+            batch = []
+            i_start = 0
+            for image_index, scene_file in enumerate(scenes):
+                if image_index % args.batch_size == 0:
+                    print(f"processing image {image_index}...", end="\r")
+
+                with open(
+                    os.path.join(args.scene_dir, scene_file), "r", encoding="utf-8"
+                ) as s:
+                    scene = json.load(s)
+
+                image = Image.open(
+                    os.path.join(args.image_dir, scene["image_filename"])
+                ).convert("RGB")
+
+                bounding_boxes = get_bounding_boxes(
+                    image, scene, preprocess, max_number_objects
+                )
+
+                batch.extend(
+                    [bounding_box.to(device) for bounding_box in bounding_boxes]
+                )
+
+                if len(batch) == args.batch_size or image_index == len(scenes) - 1:
+                    number_images = int(len(batch) / max_number_objects)
+
+                    with torch.no_grad():
+                        features = feature_extractor(torch.stack(batch)).cpu()
+
+                    features_by_image = features.view(
+                        number_images, max_number_objects, -1
+                    )
+                    i_end = i_start + number_images
+                    feature_dataset[i_start:i_end] = features_by_image
+
+                    i_start = i_end
+                    batch = []
+            print()
+
+    else:
+        images = sorted(os.listdir(args.image_dir))
+        shape = [len(images), *feature_extractor.feature_shape]
+
+        with h5py.File(args.out_file, "w") as f:
+            feature_dataset = f.create_dataset("features", shape, dtype=np.float32)
+            feature_dataset.attrs["image_size"] = Image.open(
+                os.path.join(args.image_dir, images[0])
+            ).size
+            batch = []
+            i_start = 0
+            for image_index, image_file in enumerate(images):
+                if image_index % args.batch_size == 0:
+                    print(f"processing image {image_index}...", end="\r")
+
+                image = Image.open(os.path.join(args.image_dir, image_file)).convert(
+                    "RGB"
+                )
+                preprocessed_image = preprocess(image).to(device)
+                batch.append(preprocessed_image)
+
+                if len(batch) == args.batch_size or image_index == len(images) - 1:
+                    with torch.no_grad():
+                        features = feature_extractor(torch.stack(batch)).cpu()
+                    i_end = i_start + len(batch)
+                    feature_dataset[i_start:i_end] = features
+
+                    i_start = i_end
+                    batch = []
+            print()
