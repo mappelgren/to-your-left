@@ -3,17 +3,16 @@ import json
 import os
 import pickle
 import random
+from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Iterator
 
 import h5py
 import torch
+from mlt.image_loader import ImageLoader
 from mlt.preexperiments.data_readers import CaptionGeneratorDataset
-from mlt.preexperiments.feature_extractors import (
-    DummyFeatureExtractor,
-    FeatureExtractor,
-)
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision.models import ResNet101_Weights
@@ -30,14 +29,81 @@ class ReferentialGameSample:
     target_image: torch.Tensor
 
 
-class _BatchIterator(Iterator):
-    def __init__(self, loader, batch_size, n_batches, seed) -> None:
+class GameBatchIterator(Iterator, ABC):
+    @abstractmethod
+    def __init__(self, loader, batch_size, n_batches, seed):
         self.loader = loader
         self.batch_size = batch_size
         self.n_batches = n_batches
         self.batches_generated = 0
-        random.seed(seed)
+        self.random_seed = random.Random(seed)
 
+
+class GameLoader(DataLoader):
+    def __init__(
+        self,
+        iterator: GameBatchIterator,
+        batch_size,
+        batches_per_epoch,
+        *args,
+        seed=None,
+        **kwargs,
+    ):
+        self.iterator = iterator
+        self.batches_per_epoch = batches_per_epoch
+        self.seed = seed
+
+        # batch_size is part of standard DataLoader arguments
+        kwargs["batch_size"] = batch_size
+        super().__init__(*args, **kwargs)
+
+    def __iter__(self):
+        if self.seed is None:
+            seed = random.randint(0, 2**32)
+        else:
+            seed = self.seed
+        return self.iterator(
+            self,
+            batch_size=self.batch_size,
+            n_batches=self.batches_per_epoch,
+            seed=seed,
+        )
+
+
+class LazaridouReferentialGameDataset(Dataset, Sequence):
+    def __init__(self, data_root_path) -> None:
+        super().__init__()
+
+        feature_file_path = os.path.join(
+            data_root_path, "train", "ours_images_single_sm0.h5"
+        )
+        label_file_path = os.path.join(
+            data_root_path, "train", "ours_images_single_sm0.objects"
+        )
+
+        fc = h5py.File(feature_file_path, "r")
+
+        data = torch.FloatTensor(list(fc["dataset_1"]))
+
+        # normalise data
+        img_norm = torch.norm(data, p=2, dim=1, keepdim=True)
+        self.images = data / img_norm
+
+        with open(label_file_path, "rb") as f:
+            labels = pickle.load(f)
+
+        self.concept_dict = defaultdict(list)
+        for data, label in zip(self.images, labels):
+            self.concept_dict[label].append(data)
+
+    def __getitem__(self, index):
+        return self.images[index]
+
+    def __len__(self) -> int:
+        return len(self.images)
+
+
+class LazaridouReferentialGameBatchIterator(GameBatchIterator):
     def __next__(self):
         if self.batches_generated > self.n_batches:
             raise StopIteration()
@@ -78,63 +144,8 @@ class _BatchIterator(Iterator):
         )
 
 
-class LazaridouReferentialGameLoader(DataLoader):
-    def __init__(self, batch_size, batches_per_epoch, *args, seed=None, **kwargs):
-        self.batches_per_epoch = batches_per_epoch
-        self.seed = seed
-
-        # batch_size is part of standard DataLoader arguments
-        kwargs["batch_size"] = batch_size
-        super().__init__(*args, **kwargs)
-
-    def __iter__(self):
-        if self.seed is None:
-            seed = random.randint(0, 2**32)
-        else:
-            seed = self.seed
-        return _BatchIterator(
-            self,
-            batch_size=self.batch_size,
-            n_batches=self.batches_per_epoch,
-            seed=seed,
-        )
-
-
-class LazaridouReferentialGameDataset(Dataset):
-    def __init__(self, data_root_path) -> None:
-        super().__init__()
-
-        feature_file_path = os.path.join(
-            data_root_path, "train", "ours_images_single_sm0.h5"
-        )
-        label_file_path = os.path.join(
-            data_root_path, "train", "ours_images_single_sm0.objects"
-        )
-
-        fc = h5py.File(feature_file_path, "r")
-
-        data = torch.FloatTensor(list(fc["dataset_1"]))
-
-        # normalise data
-        img_norm = torch.norm(data, p=2, dim=1, keepdim=True)
-        self.images = data / img_norm
-
-        with open(label_file_path, "rb") as f:
-            labels = pickle.load(f)
-
-        self.concept_dict = defaultdict(list)
-        for data, label in zip(self.images, labels):
-            self.concept_dict[label].append(data)
-
-    def __getitem__(self, index):
-        return self.images[index]
-
-    def __len__(self) -> int:
-        return len(self.images)
-
-
 @dataclass
-class BoundingBoxReferentialGameSample:
+class DaleReferentialGameSample:
     bounding_boxes: list[torch.Tensor]
     target_index: int
     target_order: list[int]
@@ -144,57 +155,32 @@ class BoundingBoxReferentialGameSample:
 class DaleReferentialGameDataset(Dataset):
     def __init__(
         self,
-        data_root_path,
-        feature_extractor: FeatureExtractor,
+        scenes_json_dir,
+        image_loader: ImageLoader,
         max_number_samples=100,
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
-        device=torch.device("cpu"),
     ) -> None:
         super().__init__()
 
-        feature_extractor = feature_extractor.to(device)
-        feature_extractor.eval()
-
-        self.samples: list[BoundingBoxReferentialGameSample] = []
-
-        scenes_json_dir = os.path.join(data_root_path, "scenes/")
-        image_path = os.path.join(data_root_path, "images/")
+        self.samples: list[DaleReferentialGameSample] = []
 
         scenes = os.listdir(scenes_json_dir)
-        print("loading scenes...")
-        loaded_scenes = []
-        max_number_objects = 0
-        for scene_file in scenes:
+        print("sampling scenes...")
+        if max_number_samples > -1:
+            selected_scenes = random.sample(scenes, max_number_samples)
+        else:
+            selected_scenes = scenes
+
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
             with open(
                 os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
             ) as f:
-                loaded_scenes.append(json.load(f))
-                max_number_objects = max(
-                    len(loaded_scenes[-1]["objects"]), max_number_objects
-                )
+                scene = json.load(f)
 
-        if max_number_samples > -1:
-            selected_scenes = random.sample(loaded_scenes, max_number_samples)
-        else:
-            selected_scenes = loaded_scenes
-
-        for scene_index, scene in enumerate(selected_scenes):
-            if scene_index % 100 == 0:
-                print(f"processing scene {scene_index}...", end="\r")
-
-            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
-            bounding_boxes = []
-            for object_index in range(len(scene["objects"])):
-                bounding_box = preprocess(
-                    self._get_bounding_box(image, scene, object_index)
-                )
-                with torch.no_grad():
-                    bounding_box = (
-                        feature_extractor(bounding_box.to(device).unsqueeze(dim=0))
-                        .squeeze(dim=0)
-                        .cpu()
-                    )
-                bounding_boxes.append(bounding_box)
+            image_id = scene_file.removesuffix(".json")
+            _, bounding_boxes, _ = image_loader.get_image(image_id)
 
             target_object = scene["groups"]["target"][0]
 
@@ -208,18 +194,13 @@ class DaleReferentialGameDataset(Dataset):
                 ],
             ]
 
-            bounding_boxes.extend(
-                [torch.zeros_like(bounding_boxes[0])]
-                * (max_number_objects - len(bounding_boxes))
-            )
-
             indices = list(range(len(bounding_boxes)))
             random.shuffle(indices)
 
             target_index = indices.index(target_object)
 
             self.samples.append(
-                BoundingBoxReferentialGameSample(
+                DaleReferentialGameSample(
                     target_index=target_index,
                     bounding_boxes=bounding_boxes,
                     target_order=indices,
@@ -228,36 +209,54 @@ class DaleReferentialGameDataset(Dataset):
             )
         print()
 
-    def _get_bounding_box(self, image, scene, target_index):
-        BOUNDING_BOX_SIZE = image.size[0] / 5
-
-        x_center, y_center, _ = scene["objects"][target_index]["pixel_coords"]
-        bounding_box = image.crop(
-            (
-                x_center - BOUNDING_BOX_SIZE / 2,
-                y_center - BOUNDING_BOX_SIZE / 2,
-                x_center + BOUNDING_BOX_SIZE / 2,
-                y_center + BOUNDING_BOX_SIZE / 2,
-            )
-        )
-
-        return bounding_box
-
     def __getitem__(self, index):
-        sample = self.samples[index]
-
-        sender_input = torch.stack(sample.bounding_boxes)
-
-        target_index = torch.tensor(sample.target_index)
-
-        receiver_input = torch.stack(
-            [sample.bounding_boxes[i] for i in sample.target_order]
-        )
-
-        return (sender_input, target_index, receiver_input)
+        return self.samples[index]
 
     def __len__(self) -> int:
         return len(self.samples)
+
+
+class DaleReferentialGameGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[DaleReferentialGameSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        targets = []
+        receiver_inputs = []
+
+        for sample in samples:
+            sender_inputs.append(torch.stack(sample.bounding_boxes))
+            targets.append(torch.tensor(sample.target_index))
+
+            receiver_inputs.append(
+                torch.stack([sample.bounding_boxes[i] for i in sample.target_order])
+            )
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(targets),
+            torch.stack(receiver_inputs),
+        )
 
 
 class BoundingBoxReferentialGameDataset(Dataset):
@@ -357,6 +356,9 @@ class BoundingBoxReferentialGameDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.samples)
+
+    def __iter__(self):
+        return iter(self.samples)
 
 
 class GameCaptionGeneratorDataset(CaptionGeneratorDataset):

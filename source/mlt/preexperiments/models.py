@@ -1,5 +1,5 @@
 import torch
-from mlt.preexperiments.feature_extractors import FeatureExtractor
+from mlt.feature_extractors import FeatureExtractor
 from torch import nn
 
 

@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from typing import Callable
 
 import torch
+from mlt.feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
+from mlt.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     BoundingBoxClassifierDataset,
@@ -15,11 +17,6 @@ from mlt.preexperiments.data_readers import (
     Shape,
     Size,
 )
-from mlt.preexperiments.feature_extractors import (
-    DummyFeatureExtractor,
-    ResnetFeatureExtractor,
-)
-from mlt.preexperiments.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
     AttributeLocationCoordinatePredictor,

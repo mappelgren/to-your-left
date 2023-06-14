@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import torch
-from mlt.preexperiments.image_loader import ImageLoader
+from mlt.image_loader import ImageLoader
 from mlt.preexperiments.models import FeatureExtractor
 from PIL import Image
 from torch.utils.data import Dataset

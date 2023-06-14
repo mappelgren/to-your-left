@@ -4,13 +4,15 @@ import sys
 import egg.core as core
 import torch
 import torch.nn.functional as F
+from mlt.feature_extractors import ResnetFeatureExtractor
+from mlt.image_loader import FeatureImageLoader
 from mlt.language_games.data_readers import (
     DaleReferentialGameDataset,
+    DaleReferentialGameGameBatchIterator,
+    GameLoader,
     LazaridouReferentialGameDataset,
-    LazaridouReferentialGameLoader,
 )
 from mlt.language_games.models import ReferentialGameReceiver, ReferentialGameSender
-from mlt.preexperiments.feature_extractors import ResnetFeatureExtractor
 from torch.utils.data import DataLoader, random_split
 
 
@@ -34,8 +36,13 @@ def get_params(params):
     parser = argparse.ArgumentParser()
 
     # -- DATASET --
+    parser.add_argument("--scene_json_dir", type=str, help="Path to the scene json dir")
+    parser.add_argument("--image_dir", type=str, help="Path to the scene image dir")
     parser.add_argument(
-        "--data_root_path", type=str, default=None, help="Path to the scene json dir"
+        "--feature_file",
+        type=str,
+        default=None,
+        help="Path to the hd5 file containing extracted image features",
     )
     parser.add_argument(
         "--max_samples", type=int, default=100, help="max samples to load"
@@ -127,10 +134,11 @@ def main(params):
     print(opts, flush=True)
 
     dataset = DaleReferentialGameDataset(
-        data_root_path=opts.data_root_path,
-        feature_extractor=ResnetFeatureExtractor(),
+        scenes_json_dir=opts.scene_json_dir,
+        image_loader=FeatureImageLoader(
+            feature_file=opts.feature_file, image_dir=opts.image_dir
+        ),
         max_number_samples=opts.max_samples,
-        device=opts.device,
     )
 
     train_dataset_length = int(0.8 * len(dataset))
@@ -139,17 +147,19 @@ def main(params):
         dataset, (train_dataset_length, test_dataset_length)
     )
 
-    train_loader = DataLoader(
-        train_dataset,
+    train_loader = GameLoader(
+        dataset=train_dataset,
+        iterator=DaleReferentialGameGameBatchIterator,
         batch_size=opts.batch_size,
-        shuffle=True,
-        num_workers=1,
+        batches_per_epoch=opts.batches_per_epoch,
+        seed=None,
     )
-    test_loader = DataLoader(
-        test_dataset,
+    test_loader = GameLoader(
+        dataset=test_dataset,
+        iterator=DaleReferentialGameGameBatchIterator,
         batch_size=opts.validation_batch_size,
-        shuffle=True,
-        num_workers=1,
+        batches_per_epoch=opts.batches_per_epoch,
+        seed=7,
     )
 
     # dataset = LazaridouReferentialGameDataset(
