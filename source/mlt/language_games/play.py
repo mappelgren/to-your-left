@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 from dataclasses import dataclass
 from time import gmtime, strftime
@@ -41,6 +42,7 @@ def classification_loss(
 class ModelDefinition:
     dataset: Dataset
     dataset_args: dict
+    split_dataset: bool
     iterator: GameBatchIterator
     image_loader: ImageLoader
     sender: Module
@@ -54,6 +56,7 @@ models = {
     "lazaridou": ModelDefinition(
         dataset=LazaridouReferentialGameDataset,
         dataset_args={},
+        split_dataset=False,
         image_loader=None,
         iterator=LazaridouReferentialGameBatchIterator,
         sender=ReferentialGameSender,
@@ -65,6 +68,7 @@ models = {
     "dale": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
+        split_dataset=True,
         image_loader=FeatureImageLoader,
         iterator=DaleReferentialGameGameBatchIterator,
         sender=ReferentialGameSender,
@@ -188,6 +192,12 @@ def get_params(params):
         default=False,
         help="save models to checkpoint",
     )
+    parser.add_argument(
+        "--out_dir",
+        type=str,
+        default="out/",
+        help="directory, where the output should be saved",
+    )
     args = core.init(parser, params)
     return args
 
@@ -215,11 +225,14 @@ def main(params):
         **model.dataset_args,
     )
 
-    train_dataset_length = int(0.8 * len(dataset))
-    test_dataset_length = len(dataset) - train_dataset_length
-    train_dataset, test_dataset = random_split(
-        dataset, (train_dataset_length, test_dataset_length)
-    )
+    if model.split_dataset:
+        train_dataset_length = int(0.8 * len(dataset))
+        test_dataset_length = len(dataset) - train_dataset_length
+        train_dataset, test_dataset = random_split(
+            dataset, (train_dataset_length, test_dataset_length)
+        )
+    else:
+        train_dataset = test_dataset = dataset
 
     train_loader = GameLoader(
         dataset=train_dataset,
@@ -265,7 +278,9 @@ def main(params):
     if opts.print_validation_events:
         callbacks.append(core.PrintValidationEvents(n_epochs=opts.n_epochs))
     if opts.save:
-        out_dir = f"out/{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}"
+        out_dir = os.path.join(
+            opts.out_dir, f"{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}"
+        )
         callbacks.extend(
             [
                 core.CheckpointSaver(
@@ -290,7 +305,11 @@ def main(params):
         validation_data=test_loader,
         callbacks=callbacks
         + [
-            core.ProgressBarLogger(n_epochs=opts.n_epochs),
+            core.ProgressBarLogger(
+                n_epochs=opts.n_epochs,
+                train_data_len=opts.batches_per_epoch,
+                test_data_len=opts.batches_per_epoch,
+            ),
         ],
     )
     trainer.train(n_epochs=opts.n_epochs)
