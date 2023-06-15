@@ -5,7 +5,6 @@ import pickle
 import random
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Iterator
 
@@ -14,7 +13,7 @@ import torch
 from mlt.image_loader import ImageLoader
 from mlt.preexperiments.data_readers import CaptionGeneratorDataset
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Subset
 from torchvision.models import ResNet101_Weights
 
 
@@ -32,11 +31,7 @@ class ReferentialGameSample:
 class GameBatchIterator(Iterator, ABC):
     @abstractmethod
     def __init__(self, loader, batch_size, n_batches, seed):
-        self.loader = loader
-        self.batch_size = batch_size
-        self.n_batches = n_batches
-        self.batches_generated = 0
-        self.random_seed = random.Random(seed)
+        ...
 
 
 class GameLoader(DataLoader):
@@ -70,15 +65,15 @@ class GameLoader(DataLoader):
         )
 
 
-class LazaridouReferentialGameDataset(Dataset, Sequence):
-    def __init__(self, data_root_path) -> None:
+class LazaridouReferentialGameDataset(Dataset):
+    def __init__(self, data_root_dir, *args, **kwargs) -> None:
         super().__init__()
 
         feature_file_path = os.path.join(
-            data_root_path, "train", "ours_images_single_sm0.h5"
+            data_root_dir, "train", "ours_images_single_sm0.h5"
         )
         label_file_path = os.path.join(
-            data_root_path, "train", "ours_images_single_sm0.objects"
+            data_root_dir, "train", "ours_images_single_sm0.objects"
         )
 
         fc = h5py.File(feature_file_path, "r")
@@ -104,6 +99,13 @@ class LazaridouReferentialGameDataset(Dataset, Sequence):
 
 
 class LazaridouReferentialGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.random_seed = random.Random(seed)
+
     def __next__(self):
         if self.batches_generated > self.n_batches:
             raise StopIteration()
@@ -113,7 +115,10 @@ class LazaridouReferentialGameBatchIterator(GameBatchIterator):
         return batch_data
 
     def get_batch(self):
-        concept_dict = self.loader.dataset.concept_dict
+        if isinstance(self.loader.dataset, Subset):
+            concept_dict = self.loader.dataset.dataset.concept_dict
+        else:
+            concept_dict = self.loader.dataset.concept_dict
 
         sender_inputs = []
         targets = []
@@ -157,7 +162,9 @@ class DaleReferentialGameDataset(Dataset):
         self,
         scenes_json_dir,
         image_loader: ImageLoader,
+        *args,
         max_number_samples=100,
+        **kwargs,
     ) -> None:
         super().__init__()
 

@@ -1,19 +1,24 @@
 import argparse
 import sys
+from dataclasses import dataclass
+from tkinter import image_names
+from typing import Callable
 
 import egg.core as core
-import torch
 import torch.nn.functional as F
 from mlt.feature_extractors import ResnetFeatureExtractor
-from mlt.image_loader import FeatureImageLoader
+from mlt.image_loader import FeatureImageLoader, ImageLoader
 from mlt.language_games.data_readers import (
     DaleReferentialGameDataset,
     DaleReferentialGameGameBatchIterator,
+    GameBatchIterator,
     GameLoader,
+    LazaridouReferentialGameBatchIterator,
     LazaridouReferentialGameDataset,
 )
 from mlt.language_games.models import ReferentialGameReceiver, ReferentialGameSender
-from torch.utils.data import DataLoader, random_split
+from torch.nn import Module
+from torch.utils.data import DataLoader, Dataset, random_split
 
 
 def classification_loss(
@@ -32,6 +37,49 @@ def classification_loss(
     return loss, {"acc": acc}
 
 
+@dataclass
+class ModelDefinition:
+    dataset: Dataset
+    dataset_args: dict
+    iterator: GameBatchIterator
+    image_loader: ImageLoader
+    # preprocess: Callable
+    sender: Module
+    sender_args: dict
+    receiver: Module
+    receiver_args: dict
+    loss_function: Callable
+    # tester: Tester
+    # output_processor: StandardOutputProcessor
+    # output_processor_args: dict
+
+
+models = {
+    "Lazaridou": ModelDefinition(
+        dataset=LazaridouReferentialGameDataset,
+        dataset_args={},
+        image_loader=None,
+        iterator=LazaridouReferentialGameBatchIterator,
+        sender=ReferentialGameSender,
+        sender_args={},
+        receiver=ReferentialGameReceiver,
+        receiver_args={},
+        loss_function=classification_loss,
+    ),
+    "Dale": ModelDefinition(
+        dataset=DaleReferentialGameDataset,
+        dataset_args={},
+        image_loader=FeatureImageLoader,
+        iterator=DaleReferentialGameGameBatchIterator,
+        sender=ReferentialGameSender,
+        sender_args={},
+        receiver=ReferentialGameReceiver,
+        receiver_args={},
+        loss_function=classification_loss,
+    ),
+}
+
+
 def get_params(params):
     parser = argparse.ArgumentParser()
 
@@ -45,6 +93,12 @@ def get_params(params):
         help="Path to the hd5 file containing extracted image features",
     )
     parser.add_argument(
+        "--data_root_dir",
+        type=str,
+        default=None,
+        help="Path to root dir of the dataset",
+    )
+    parser.add_argument(
         "--max_samples", type=int, default=100, help="max samples to load"
     )
     parser.add_argument(
@@ -53,14 +107,21 @@ def get_params(params):
         default=100,
         help="batches shown to the model every epoch",
     )
-
     parser.add_argument(
         "--validation_batch_size",
         type=int,
         default=0,
         help="Batch size when processing validation data, whereas training data batch_size is controlled by batch_size (default: same as training data batch size)",
     )
-    # arguments concerning the training method
+
+    # -- MODEL --
+    parser.add_argument(
+        "--model",
+        choices=models.keys(),
+        help="model to load",
+    )
+
+    # -- TRAINING --
     parser.add_argument(
         "--mode",
         type=str,
@@ -79,7 +140,7 @@ def get_params(params):
         default=1e-1,
         help="Reinforce entropy regularization coefficient for Sender, only relevant in Reinforce (rf) mode (default: 1e-1)",
     )
-    # arguments concerning the agent architectures
+    # -- AGENTS --
     parser.add_argument(
         "--sender_cell",
         type=str,
@@ -116,7 +177,7 @@ def get_params(params):
         default=10,
         help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
     )
-    # arguments controlling the script output
+    # -- OUTPUT --
     parser.add_argument(
         "--print_validation_events",
         default=False,
@@ -133,13 +194,23 @@ def main(params):
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
 
-    dataset = DaleReferentialGameDataset(
-        scenes_json_dir=opts.scene_json_dir,
-        image_loader=FeatureImageLoader(
+    model = models[opts.model]
+
+    if model.image_loader:
+        image_loader = model.image_loader(
             feature_file=opts.feature_file, image_dir=opts.image_dir
-        ),
-        max_number_samples=opts.max_samples,
-    )
+        )
+    else:
+        image_loader = None
+
+    dataset_args = {
+        "scenes_json_dir": opts.scene_json_dir,
+        "image_loader": image_loader,
+        "max_number_samples": opts.max_samples,
+        "data_root_dir": opts.data_root_dir,
+        **model.dataset_args,
+    }
+    dataset = model.dataset(**dataset_args)
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
@@ -149,14 +220,14 @@ def main(params):
 
     train_loader = GameLoader(
         dataset=train_dataset,
-        iterator=DaleReferentialGameGameBatchIterator,
+        iterator=model.iterator,
         batch_size=opts.batch_size,
         batches_per_epoch=opts.batches_per_epoch,
         seed=None,
     )
     test_loader = GameLoader(
         dataset=test_dataset,
-        iterator=DaleReferentialGameGameBatchIterator,
+        iterator=model.iterator,
         batch_size=opts.validation_batch_size,
         batches_per_epoch=opts.batches_per_epoch,
         seed=7,
@@ -179,8 +250,10 @@ def main(params):
     #     seed=7,
     # )
 
-    receiver = ReferentialGameReceiver(opts.receiver_embedding)
-    sender = ReferentialGameSender(opts.sender_hidden, opts.sender_embedding)
+    receiver = model.receiver(embedding_dimension=opts.receiver_embedding)
+    sender = model.sender(
+        hidden_size=opts.sender_hidden, embedding_dimension=opts.sender_embedding
+    )
 
     gs_sender = core.RnnSenderGS(
         sender,
@@ -200,7 +273,7 @@ def main(params):
         cell=opts.receiver_cell,
     )
 
-    game = core.SenderReceiverRnnGS(gs_sender, gs_receiver, classification_loss)
+    game = core.SenderReceiverRnnGS(gs_sender, gs_receiver, model.loss_function)
 
     callbacks = [core.TemperatureUpdater(agent=gs_sender, decay=0.9, minimum=0.1)]
     if opts.print_validation_events:
