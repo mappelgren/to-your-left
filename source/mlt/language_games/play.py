@@ -1,13 +1,13 @@
 import argparse
 import sys
 from dataclasses import dataclass
-from tkinter import image_names
+from time import gmtime, strftime
 from typing import Callable
 
 import egg.core as core
 import torch.nn.functional as F
-from mlt.feature_extractors import ResnetFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader
+from mlt.language_games.callbacks import LogSaver
 from mlt.language_games.data_readers import (
     DaleReferentialGameDataset,
     DaleReferentialGameGameBatchIterator,
@@ -18,7 +18,7 @@ from mlt.language_games.data_readers import (
 )
 from mlt.language_games.models import ReferentialGameReceiver, ReferentialGameSender
 from torch.nn import Module
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import Dataset, random_split
 
 
 def classification_loss(
@@ -43,15 +43,11 @@ class ModelDefinition:
     dataset_args: dict
     iterator: GameBatchIterator
     image_loader: ImageLoader
-    # preprocess: Callable
     sender: Module
     sender_args: dict
     receiver: Module
     receiver_args: dict
     loss_function: Callable
-    # tester: Tester
-    # output_processor: StandardOutputProcessor
-    # output_processor_args: dict
 
 
 models = {
@@ -140,6 +136,7 @@ def get_params(params):
         default=1e-1,
         help="Reinforce entropy regularization coefficient for Sender, only relevant in Reinforce (rf) mode (default: 1e-1)",
     )
+
     # -- AGENTS --
     parser.add_argument(
         "--sender_cell",
@@ -177,12 +174,19 @@ def get_params(params):
         default=10,
         help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
     )
+
     # -- OUTPUT --
     parser.add_argument(
         "--print_validation_events",
         default=False,
         action="store_true",
         help="If this flag is passed, at the end of training the script prints the input validation data, the corresponding messages produced by the Sender, and the output probabilities produced by the Receiver (default: do not print)",
+    )
+    parser.add_argument(
+        "--save",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="save models to checkpoint",
     )
     args = core.init(parser, params)
     return args
@@ -233,23 +237,6 @@ def main(params):
         seed=7,
     )
 
-    # dataset = LazaridouReferentialGameDataset(
-    #     data_root_path=opts.data_root_path,
-    # )
-
-    # train_loader = LazaridouReferentialGameLoader(
-    #     dataset=dataset,
-    #     batch_size=opts.batch_size,
-    #     batches_per_epoch=opts.batches_per_epoch,
-    #     seed=None,
-    # )
-    # test_loader = LazaridouReferentialGameLoader(
-    #     dataset=dataset,
-    #     batch_size=opts.validation_batch_size,
-    #     batches_per_epoch=opts.batches_per_epoch,
-    #     seed=7,
-    # )
-
     receiver = model.receiver(embedding_dimension=opts.receiver_embedding)
     sender = model.sender(
         hidden_size=opts.sender_hidden, embedding_dimension=opts.sender_embedding
@@ -278,6 +265,23 @@ def main(params):
     callbacks = [core.TemperatureUpdater(agent=gs_sender, decay=0.9, minimum=0.1)]
     if opts.print_validation_events:
         callbacks.append(core.PrintValidationEvents(n_epochs=opts.n_epochs))
+    if opts.save:
+        out_dir = f"out/{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}"
+        callbacks.extend(
+            [
+                core.CheckpointSaver(
+                    checkpoint_path=out_dir,
+                    prefix="checkpoint",
+                    checkpoint_freq=0,
+                ),
+                core.InteractionSaver(
+                    checkpoint_dir=out_dir,
+                    train_epochs=[opts.n_epochs],
+                    test_epochs=[opts.n_epochs],
+                ),
+                LogSaver(out_dir=out_dir, command=str(opts)),
+            ]
+        )
 
     optimizer = core.build_optimizer(game.parameters())
     trainer = core.Trainer(
@@ -287,7 +291,7 @@ def main(params):
         validation_data=test_loader,
         callbacks=callbacks
         + [
-            core.ConsoleLogger(print_train_loss=True, as_json=True),
+            core.ProgressBarLogger(n_epochs=opts.n_epochs),
         ],
     )
     trainer.train(n_epochs=opts.n_epochs)
