@@ -51,7 +51,7 @@ class ModelDefinition:
 
 
 models = {
-    "Lazaridou": ModelDefinition(
+    "lazaridou": ModelDefinition(
         dataset=LazaridouReferentialGameDataset,
         dataset_args={},
         image_loader=None,
@@ -62,7 +62,7 @@ models = {
         receiver_args={},
         loss_function=classification_loss,
     ),
-    "Dale": ModelDefinition(
+    "dale": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
         image_loader=FeatureImageLoader,
@@ -207,14 +207,13 @@ def main(params):
     else:
         image_loader = None
 
-    dataset_args = {
-        "scenes_json_dir": opts.scene_json_dir,
-        "image_loader": image_loader,
-        "max_number_samples": opts.max_samples,
-        "data_root_dir": opts.data_root_dir,
+    dataset = model.dataset(
+        scenes_json_dir=opts.scene_json_dir,
+        image_loader=image_loader,
+        max_number_samples=opts.max_samples,
+        data_root_dir=opts.data_root_dir,
         **model.dataset_args,
-    }
-    dataset = model.dataset(**dataset_args)
+    )
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
