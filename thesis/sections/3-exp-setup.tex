@@ -4,16 +4,6 @@
 \cmtDK[inline]{15 pages}
 \cmtDK[inline]{\\
     - what is ambiguity? \\
-    - control over dataset \\
-    - target object/target group/non-target group: \\
-    ---- 1. how many objects? \\
-    ---- 2. how many shared attributes? \\
-    ---- 3. which shared attributes? \\
-    ---- 4. level of ambiguity \\
-    - as close to CLEVR as possible \\
-    ---- image size \\
-    ---- number (10.000) \\
-    ---- between 3 to 10 objects ??? \\
     - unambigous dataset: \\
     ---- target group = non-target group \\
     ---- all attributes shared, except for the color \\
@@ -73,3 +63,23 @@ Lastly, it is also possible to define exactly \textbf{which} attributes should b
 For all generated datasets in the following sections, the general constraints and settings are as close as possible to the original CLEVR dataset. The size of the generated images is 480x320 pixels. 10.000 images are created for each of the datasets. Each image contains a maximum of 10 objects, that are not intersecting, have the same minimum distance and are partially visible.
 
 \subsection{Description of experiments}
+Language games are very complex setups for machine learning models. The models need to solve multiple tasks at the same time to solve the overall problem. For instance in a simple setup of a game two agents are involved. The first agent, the sender is shown a scene with objects and needs to communicate on target object to the other agent, the receiver. The receiver is shown the same scene and needs to identify the target object with respect to the message of the sender. In this case, the sender first needs to learn to encode the scene as well as the information about the target object into its own \cmtDK{?}{space}. In a next step it needs to learn how to translate this encoding into a message that is sent to the receiver. The receiver then needs to learn to decode this message, after which it needs to learn how to combine the decoded message with its own encoding of the scene. And finally it needs to learn how to identify the target object with this information.
+
+For this reason I decided to divide the main problem and let the models learn simpler subtasks and increase the complexity step by step. This will give me a very detailed overview, where the models struggle to learn and in which ways they can be improved. Mainly, I separated the tasks into language games with two agents (final experiments) and classical machine learning tasks without any communication, namely only one 'agent' that solves the task alone (pre-experiments). With this division, I can analyze the learning of the encodings of the scenes separately from the learning of producing and decoding messages.
+
+\subsubsection{Pre-experiments without language games}
+\paragraph{coordinate predictor}
+\cmtDK[inline]{\\
+    - pretrained ResNet/VGG\\
+    - scratch \\
+    - encoding of attributes (one-hot) \\
+    - encoding of attributes (dale) \\
+    - encoding of locations \\
+    - masking}
+\paragraph{bounding box classifier}
+
+\paragraph{caption generator}
+\cmtDK[inline]{\\
+    - dale \\
+    - masked}
+\subsubsection{Language games}
