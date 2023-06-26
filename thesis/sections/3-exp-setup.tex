@@ -68,7 +68,10 @@ Language games are very complex setups for machine learning models. The models n
 For this reason I decided to divide the main problem and let the models learn simpler subtasks and increase the complexity step by step. This will give me a very detailed overview, where the models struggle to learn and in which ways they can be improved. Mainly, I separated the tasks into language games with two agents (final experiments) and classical machine learning tasks without any communication, namely only one 'agent' that solves the task alone (pre-experiments). With this division, I can analyze the learning of the encodings of the scenes separately from the learning of producing and decoding messages.
 
 \subsubsection{Pre-experiments without language games}
+The final objective of this thesis is to find out, how agents can communicate about relations of objects spatially as well as based on their attributes. Because of that, the first experiments focus on extracting information from images and combining them with structured knowledge. Here, I structured the experiments into three levels. In the first level, the model are trained to learn the position of objects in the image and attend to specific regions of the image. In the second level, the models are trained to differentiate objects in the image from each other. The last level adds language to the experiment, more specifically the models learn to caption and describe objects in and image. These combined experiments should lay the basis for how to build up the agents in the language games.
+
 \paragraph{coordinate predictor}
+\cmtDK[inline]{talk about why coordinates are necessary for language games}
 \cmtDK[inline]{\\
     - pretrained ResNet/VGG\\
     - scratch \\
@@ -76,10 +79,14 @@ For this reason I decided to divide the main problem and let the models learn si
     - encoding of attributes (dale) \\
     - encoding of locations \\
     - masking}
+
+For these experiments, the model is trained to predict the location of an object for a given image. In the simplest setup, the model receives only the image as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object. Here the image is first passed through a \emph{feature extractor}. These feature extractors are a deep neural model that are designed to extract important information from images. Here, I chose ResNet (\cite{He2016}) and VGG (\cite{Simonyan2015}) as a basis. Both of those models can be used with pretrained weights, trained on classifying images from big datasets. Since these pretrained weights are based on a very different task than in this thesis, I experimented with different architectures of these feature extractors. Namely, I used both VGG19 and ResNet101 with random initializations and pretrained on the classifying task. Furthermore, I removed and/or replaced the last layers of either network. The idea behind this was, that \cmtDK{cite}{the models learn more general features in the first layers, while the last layers are fine-tuned more specifically to this task.}
+
 \paragraph{bounding box classifier}
 
 \paragraph{caption generator}
 \cmtDK[inline]{\\
     - dale \\
     - masked}
+
 \subsubsection{Language games}
