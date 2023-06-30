@@ -67,21 +67,57 @@
 \end{abstract}
 
 \section{Introduction}
-
+TODO:
+\begin{itemize}
+  \item how
+\end{itemize}
 \section{Background and previous work}
 
 \section{Materials and methods}
 TODO:
 \begin{itemize}
   \item creation of dataset (CLEVR)
+        \begin{itemize}
+          \item multiple 'real' objects in scene
+          \item 3 attributes (color, size, shape) differentiate objects
+          \item using 'dale' setup to uniquely identify target object
+        \end{itemize}
   \item building a language game using EGG
   \item based on feature extractors ResNet/VGG
+  \item
+  \item setup of discriminating game of objects in image
+  \item message encoder/decoder is auto-encoder
   \item
 \end{itemize}
 
 \section{Results}
+TODO:
+\begin{itemize}
+  \item DaleTwo:
+        \begin{itemize}
+          \item small hidden/embedding dims, small vocab -> high accuracy
+          \item high hidden/embedding dims, small vocav -> low accuracy
+        \end{itemize}
+  \item DaleFive:
+        \begin{itemize}
+          \item small hidden/embedding dims, small vocab -> low accuracy
+          \item small hidden/embedding dims, bigger vocab -> higher accuracy
+        \end{itemize}
+  \item ... test different hidden/embedding dims
+  \item ... test 3/4 objects
+\end{itemize}
 
 \section{Discussion}
+TODO:
+\begin{itemize}
+  \item maybe calculation of loss (multiplicating instead of summing loss per token), unlikely, since sequence length short -> shouldn't result in big differences
+  \item reducing dims of image better the increasing dims of message, increasing dims is not learnable for models
+  \item Vocab:
+        \begin{itemize}
+          \item vocabulary could describe attributes of target image (non-discriminative) or describe only differences (discriminative)
+          \item in second case, two images is a far easier task than five images. Hence, much lower accuracy
+        \end{itemize}
+\end{itemize}
 
 \section{Conclusions and further work}
 
