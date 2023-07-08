@@ -33,7 +33,7 @@
 
 \usepackage{graphicx}
 
-\title{Instructions for *ACL Proceedings}
+\title{Discriminating 3D-objects using }
 
 % Author information can be set in various styles:
 % For several authors from the same institution:
@@ -208,6 +208,9 @@ TODO:
         \end{itemize}
 \end{itemize}
 
+Two interesting conclusions can be drawn. First, the hidden as well as the embedding sizes need not be bigger than the vocabulary size. Even though that means that the image encodings of 4096 or even higher dimensions need to be compressed to fit the vocabulary size, this will still help to produce and interpret more meaningful messages. The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$).
+
+The second conclusion that can be drawn looks at the difference between the two datasets. Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one object. Still the difference in the necessary vocabulary size is striking. There are 48 possible objects. Still a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects. This hints to the fact, that the agents don't describe the complete target object, but only rely on discriminating attributes between the objects. This gets more complex when the agents need to discriminate between five objects. A bigger vocabulary offers a bigger space
 
 
 \section{Conclusions and further work}
