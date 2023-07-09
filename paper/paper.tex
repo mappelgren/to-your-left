@@ -5,7 +5,7 @@
 \documentclass[11pt]{article}
 
 % Remove the "review" option to generate the final version.
-\usepackage{acl}
+\usepackage[review]{acl}
 
 % Standard package includes
 \usepackage{times}
@@ -83,7 +83,7 @@ How can agents achieve this through interactive grounding \citep{Regier:1996,Roy
 
 % SD 2023-07-08 14:11:44 +0200: A tip for writing LateX on Git: write each sentence in a separate line, this way any edits and conflicts will be much easier to spot and edit that comparing entire paragraphs.
 
-\section{Background and previous work}
+% \section{Background and previous work}
 
 Language games with a sender and a receiver \citep{Clark:1996aa,Bartlett:2005aa,Kirby:2008ab,SteelsLoetzsch:2009,Zaslavsky:2018aa} offer an opportunity to examine how neural models condense seen information into a distinct representation of symbols through linguistic interaction.
 A sender describes a perceptual situation that can also be seen by a receiver starting with a random label while
@@ -93,13 +93,16 @@ Interaction is optimized based on the communicative success of the sender and th
 Gradually, both agents converge on a set of symbols that they can use to refer to situations in jointly attended perceptual scenes \citep{Chai:2016aa, Kelleher2020}.
 Communication is successful and grounding converges because learning is constrained by joint attention and the agents are playing following the rule of the communicative games.
 
-In this paper we explore how agents based on artificial neural networks learn referential grounding of entities in images of 3-dimensional scenes where one agent is describing the entities and the other agent learns to interpret the reference of symbols in the scene either by identifying the object in the scene as a bounding box or location of the object based on object attributes such as shape, color and size.
+In this paper we explore how agents based on artificial neural networks learn referential grounding of entities in images of 3-dimensional scenes.
+One agent is describing the entities, more specifically bounding boxes of objects and the other agent learns to interpret the reference of symbols by identifying and referring to one of the bounding boxes based on object attributes such as shape, color and size.
 % studies how the agents can encode real-looking objects into distinct symbols and decode this message to reidentify this object. Specifically, the study explores discrimination games using an extended version of the CLEVR dataset, focusing on the identification and differentiation of objects based on their attributes such as shape, color, and size.
-The novelty of our work compared with the previous work with this setup \citep{Kharitonov2019} is that (i) we extend the popular CLEVR dataset \citep{Johnson2016} with new artificially generated 3-d scenes of objects that can be referred to and discriminated based on the attributes such as shape, color and size whereby the discrimination is based on different overlaps of these attributes between the target and the distractor objects; and (ii) we implement a focused referring to objects either as one of the potential bounding boxes or location of the target.
+The novelty of our work compared with the previous work with this setup \citep{Kharitonov2019,Lazaridou2016} is that (i) we extend the popular CLEVR dataset \citep{Johnson2016} with new artificially generated 3-d scenes of objects that can be referred to and discriminated based on the attributes such as \emph{shape}, \emph{color} and \emph{size} whereby the discrimination is based on different overlaps of these attributes between the target and the distractor objects; and (ii) we implement a focused referring to objects as one of the potential bounding boxes.
 
 % SD 2023-07-08 15:05:37 +0200: This hasn't been studied and implemented by lazaridou and others in the EGG framework, right?
+% DK 2023-07-09: yes, the main addition in my view is the focus on controlles attributes and relations of objects as opposed to discriminating images from different concepts
 
 % SD 2023-07-08 15:15:46 +0200: Just saw that we are only reporting on object from bounding box identification and not location, right?
+% DK 2023-07-09: exactly. we only looked at the locations without language games, and hopefully also in the thesis
 
 % \section{Materials and methods}
 % TODO:
@@ -117,61 +120,72 @@ The novelty of our work compared with the previous work with this setup \citep{K
 %   \item message encoder/decoder is auto-encoder
 % \end{itemize}
 
-\section{Our dataset: CLEVR-Dale-2 and Dale-5}
+\section{Our datasets: CLEVR-Dale-2 and Dale-5}
 
 % SD 2023-07-08 14:58:04 +0200: Rephrase this paragraph to continue from the previous section and emphasise our extension and contribution to the dataset. For our experiments we extend...
 
-The dataset used for these experiments is an extended version of the CLEVR dataset \citep{Johnson2016}.\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis\_clevr-dataset-gen}{https://github.com/DominikKuenkele/MLT\_Master-Thesis\_clevr-dataset-gen}}
-This dataset includes 3D-generated images depicting scenes with different kinds of objects.
-Each of these objects has different combinations of attributes, such as \emph{shape}, \emph{color} and \emph{size}.
-The objects are randomly placed into the scene and assigned with random attributes.
-Figure \ref{fig:clevr-extended_example} shows an example of a generated image of this CLEVR dataset.
-The dataset also contains ground truth information about each image, including attributes and locations for all objects.
-
-\begin{figure}[h]
-  \centering
-  \frame{\includegraphics[width=.8\linewidth]{figures/CLEVR_extended_example.png}}
-  \caption{Example of a generated image in the Dale-5 dataset with the extended code}
-  \label{fig:clevr-extended_example}
-\end{figure}
-
-The extended version of the dataset divides the objects into \emph{target object} and \emph{distractors}.
+For these experiments, we extend the CLEVR dataset, by dividing the objects into a \emph{target object} and \emph{distractors}.\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis\_clevr-dataset-gen}{https://github.com/DominikKuenkele/MLT\_Master-Thesis\_clevr-dataset-gen}}
 The target object is the main object in the scene that should be identified and communicated by the agents.
 The distractors contain similar objects to the target object.
-The number of shared attributes is defined by rules researched in \citet{Dale1995}.
+The number of shared attributes between these groups is defined by rules researched in \citet{Dale1995}.
+The target object is always unique and at least one attribute is different from the distractors.
+First, a random target object is created.
+In the next step, the distractors are created at a random location in the scene.
+Each of the distractors can share a maximum of two attributes with the target object.
+There is no restriction on the relation between distractors, namely it is possible to have multiple identical distractors in one image.
 The target object is therefore always identifiable using either only the \emph{shape} (1), the \emph{shape} and \emph{color} (2) or the \emph{shape}, \emph{color} and \emph{size} (3).
 
 For this research, two datasets are created.
 The \emph{Dale-2} dataset contains one target object and one distractor, while the \emph{Dale-5} dataset contains one target object and four distractors.
+The way, how the distractors are created is the same.
 Both datasets contain 10.000 images.
 For each image fixed size bounding boxes around each object are extracted.
 These bounding boxes are the input for the sender and receiver in the language game.
 
+Figure \ref{fig:clevr-extended_example} shows an example of a generated image of the Dale-5 dataset.
+Both datasets also contain ground truth information about each image, including attributes and locations for all objects.
+
+\begin{figure}[h]
+  \centering
+  \frame{\includegraphics[width=.6\linewidth]{figures/CLEVR_extended_example.png}}
+  \caption{Example of a generated image in the Dale-5 dataset with the extended code}
+  \label{fig:clevr-extended_example}
+\end{figure}
+
 % SD 2023-07-08 15:23:38 +0200: Describe a bit more how Dale-2 and Dale-5 differ, in particular how many attributes are shared and how between the objects in the Dale-5?
+% DK 2023-07-09: Dale-2 and Dale-5 only differ in the number of distractors. The rest is the same. I described in the previous paragrapgh a bit more detailed, how the distractors are created.
 
 \section{Language game}
-The language game was developed and run in the EGG framework \citep{Kharitonov2019}.
-The setup of the game is based on the game described in the paper by \citet{Lazaridou2016}.
-The same multiple images are passed to a sender and a receiver.
-The sender must communicate the target image to the receiver with a message, who needs to identify this target image.
-Instead of distinguishing two images from different concepts, in this experiment the agents need to distinguish two objects with shared attributes.
+The language game was developed and run in the EGG framework \citep{Kharitonov2019}. \footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis}{https://github.com/DominikKuenkele/MLT\_Master-Thesis}}
 Both sender and receiver have a similar architecture to the \emph{agnostic sender} and \emph{receiver} in \citet{Lazaridou2016}.
 One central difference is the production of the message.
-Their paper focuses on the classification of a concept for the input image and therefore produces only one-symbol messages that should correspond to these concepts.
-This research focuses on the identification of attributes for the objects and their combination, which is why our models produce a sequence of symbols for the message (which may correspond to the attributes).
-This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) (see Figure \ref*{todo}).
+This research focuses on the identification of attributes for the objects and their combination, which is why our models produce a sequence of symbols for the message (which may correspond to the attributes) instead of a single symbol (which corresponded to different concepts of the images).
+This is done using an encoder LSTM (sender) and a decoder LSTM (receiver).
 
 % SD 2023-07-08 15:09:29 +0200: We have now already said some of this in the introduction. In the introduction we can describe the general setup of language games and here we say explicitly what is our configuration and emphasise in particular in what ways it is different from the previously implemented games. Including a list of technical details of the models is great. When restructuign sentences, copy those that fit the previous section there (and comment one out if necessary) and keep the rest here. It requires a bit of strategic thinking where to mention things in such a short paper so that we only say it once and save space.
 
-The initial state of the encoder LSTM is the image, passed through ResNet101 and a following linear layer that reduces the dimensions.
+
+The target object is always the first image that is passed to the sender.
+The order of the objects for the receiver is random.
+Figure \ref*{fig:architectures} shows the architectures of the sender and the receiver.
+For the sender, the images are passed through \emph{ResNet101} \citep{He2016} and a following linear layer that reduces the dimensions to an embedding size $e_s$.
+All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
+This is then used as the initial state of the encoder LSTM.
 The sequence is then created through Gumbel-Softmax relaxation \citep{Jang2016}.
 
-The receiver on the other side takes the sequence as input for its decoder LSTM.
-The hidden state is randomly initialized.
-After each step of the LSTM, the receiver calculates the dot product between the hidden state and its own image encoding (calculated as the sender's image encoding).
-The receiver then 'points' to one of the images, while applying the softmax function over the results.
+The receiver also encodes all images using \emph{ResNet101} with a following linear layer, reducing it to $e_r$.
+The sequence received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
+After each step of the LSTM, the receiver calculates the dot product between the hidden state and all of its image encodings.
+The receiver then 'points' to one of the images, by applying the softmax function over the results of the dot products.
 The loss is calculated using the NLL-loss.
-Following, the losses for each token in the message sequence are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
+Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
+
+\begin{figure}[h]
+  \centering
+  \frame{\includegraphics[width=\linewidth]{figures/architecture.png}}
+  \caption{Architectures of the sender and receiver}
+  \label{fig:architectures}
+\end{figure}
 
 There are five variables in the experiments that are adjusted:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver $h_r$ and (5) the size of the vocabulary $|V|$.
@@ -180,21 +194,21 @@ The results will be evaluated using the accuracy if the receiver could identify 
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
 
 \section{Results}
-TODO:
-\begin{itemize}
-  \item Dale-2: \textbf{(done)}
-        \begin{itemize}
-          \item small hidden/embedding dims, small vocab -> high accuracy
-          \item high hidden/embedding dims, small vocab -> low accuracy
-        \end{itemize}
-  \item Dale-5: \textbf{(done)}
-        \begin{itemize}
-          \item small hidden/embedding dims, small vocab -> low accuracy
-          \item small hidden/embedding dims, bigger vocab -> higher accuracy
-        \end{itemize}
-  \item ... test different hidden/embedding dims
-  \item ... test 3/4 objects
-\end{itemize}
+% TODO:
+% \begin{itemize}
+%   \item Dale-2: \textbf{(done)}
+%         \begin{itemize}
+%           \item small hidden/embedding dims, small vocab -> high accuracy
+%           \item high hidden/embedding dims, small vocab -> low accuracy
+%         \end{itemize}
+%   \item Dale-5: \textbf{(done)}
+%         \begin{itemize}
+%           \item small hidden/embedding dims, small vocab -> low accuracy
+%           \item small hidden/embedding dims, bigger vocab -> higher accuracy
+%         \end{itemize}
+%   \item ... test different hidden/embedding dims
+%   \item ... test 3/4 objects
+% \end{itemize}
 
 \begin{table}
   \centering
@@ -214,50 +228,61 @@ TODO:
 \end{table}
 
 The results of the experiments are summarized in Table \ref{tab:results}.
-For the \emph{Dale-2} dataset it can be clearly seen that very small embedding and hidden sizes are beneficial for identifying the correct object.
+For the \emph{Dale-2} dataset it can be clearly seen that an embedding and hidden size that are as high as the vocabulary size are beneficial for identifying the correct object.
 The receiver identifies indeed almost every sample correctly with all sizes of 10.
 When the hidden and embedding sizes are increased, the guesses by the receiver are random.
-Interestingly, a vocab size of 10 is enough to communicate a meaningful message for the \emph{Dale-2} dataset.
+Interestingly, a vocabulary size of 10 is enough to communicate a meaningful message for the \emph{Dale-2} dataset.
 
 % SD 2023-07-08 15:17:45 +0200: The hidden size is related to the vocabulary size. Both have to be optimally selected for the models to converge.
 
-The result change, when using the \emph{Date-5} dataset with four distractors.
+The results change, when using the \emph{Date-5} dataset with four distractors.
 With low hidden, embedding and vocab size, the agents barely pass the random baseline with 23\%.
 Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to 43\%.
 This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 
 % SD 2023-07-08 15:18:24 +0200: So we are not using just two objects to discriminate with as stated in the introduction and the previous section.
+% DK 2023-07-09: only in the Dale-2 dataset. The Dale-5 dataset discriminates 5 objects.
 
 % SD 2023-07-08 15:19:05 +0200: Why is the accuarcy lower? One of the reason of course is that there is more uncertanty and the networks have to learn how different combinations of labels that will be up to n! relate to individual perceptual features that are encoded in the linguistic categories. Since we discrimnate objects based on properties that are also distinguished in human cognition (colour, size, shape) we expect that the vocabulary onto which the agents will converge will reflect these catgories anf therefore be close to human vocabulary. We will imnvestiaget the overlap between the vocabularies in our ongoing and future work.
+% DK 2023-07-09: I added it to the Discussion section
+
 
 \section{Discussion}
-TODO:
-\begin{itemize}
-  \item maybe calculation of loss (multiplicating instead of summing loss per token), unlikely, since sequence length short -> shouldn't result in big differences
-  \item reducing dims of image better the increasing dims of message, increasing dims is not learnable for models
-  \item Vocab:
-        \begin{itemize}
-          \item vocabulary could describe attributes of target image (non-discriminative) or describe only differences (discriminative)
-          \item in second case, two images is a far easier task than five images. Hence, much lower accuracy
-        \end{itemize}
-\end{itemize}
+% TODO:
+% \begin{itemize}
+%   \item maybe calculation of loss (multiplicating instead of summing loss per token), unlikely, since sequence length short -> shouldn't result in big differences
+%   \item reducing dims of image better the increasing dims of message, increasing dims is not learnable for models
+%   \item Vocab:
+%         \begin{itemize}
+%           \item vocabulary could describe attributes of target image (non-discriminative) or describe only differences (discriminative)
+%           \item in second case, two images is a far easier task than five images. Hence, much lower accuracy
+%         \end{itemize}
+% \end{itemize}
 
+% DK 2023-07-09: is the follwoing paragraph necessary? The findings are quite obviuous in the first look, but would need more detailed investigation, why this is happening. This is not the focus of this paper and maybe we can use the space more for other findings.
 Two interesting conclusions can be drawn.
-First, the hidden as well as the embedding sizes need not be bigger than the vocabulary size.
-Even though that means that the image encodings of 4096 or even higher dimensions need to be compressed to fit the vocabulary size, this will still help to produce and interpret more meaningful messages.
-The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$).
+First, the hidden as well as the embedding sizes need to be close to the vocabulary size.
+This even applies for very low vocabulary sizes, which means that the image encodings need to be compressed to the same low dimensions.
+The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$) as opposed to learn how to extract the important information from a vector.
 
-The second conclusion that can be drawn looks at the difference between the two datasets.
+The second conclusion that can be drawn looks at the differences between the two datasets.
 Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one object.
-Still the difference in the necessary vocabulary size is striking.
-There are 48 possible objects.
-Still a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
-This hints to the fact, that the agents don't describe the complete target object, but only rely on discriminating attributes between the objects.
-This gets more complex when the agents need to discriminate between five objects.
-A bigger vocabulary offers a bigger space
-
+Since we discriminate objects based on properties that are also distinguished in human cognition (color, size, shape) we expect that the vocabulary onto which the agents will converge will reflect these categories and therefore be close to human vocabulary.
+There are 48 possible combinations of attributes.
+Still for Dale-2 a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
+This hints to the fact, that the agents don't describe the complete target object, but only rely on discriminative attributes between the objects.
+The need for a more detailed description of discriminative attributes is higher, when more distractors are involved.
+Therefore, the models need to learn more combinations of symbols to attest to this higher level of detail and especially how to relate them to features in the images.
 
 \section{Conclusions and further work}
+In this research, we introduced an extended version of the CLEVR dataset that offers a high control over the relations between generated objects.
+This should help to study, how models can learn these relations and refer to them as well as the objects.
+In our research we used this dataset to study, how agents can learn to communicate and refer to these objects in a language game setup.
+We found that a bigger number of distractors requires a higher vocabulary size.
+This hints to the fact that the agents learned to communicate discriminative attributes between the images.
+
+In future research, we want to investigate deeper the emerged language and the new vocabulary.
+Especially, we want to test if our hypothesis that this emerged language uses similar categories as human language holds true and how these words are combined to form complete messages.
 
 \section*{Acknowledgements}
 
