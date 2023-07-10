@@ -34,7 +34,6 @@
 \usepackage{graphicx}
 
 \title{Discriminating 3D-objects using }
-
 % Author information can be set in various styles:
 % For several authors from the same institution:
 % \author{Author 1 \and ... \and Author n \\
@@ -142,15 +141,8 @@ Both datasets contain 10.000 images.
 For each image fixed size bounding boxes around each object are extracted.
 These bounding boxes are the input for the sender and receiver in the language game.
 
-Figure \ref{fig:clevr-extended_example} shows an example of a generated image of the Dale-5 dataset.
+Appendix \ref{sec:extended-datasets} shows examples of generated images with our extended code.
 Both datasets also contain ground truth information about each image, including attributes and locations for all objects.
-
-\begin{figure}[h]
-  \centering
-  \frame{\includegraphics[width=.6\linewidth]{figures/CLEVR_extended_example.png}}
-  \caption{Example of a generated image in the Dale-5 dataset with the extended code}
-  \label{fig:clevr-extended_example}
-\end{figure}
 
 % SD 2023-07-08 15:23:38 +0200: Describe a bit more how Dale-2 and Dale-5 differ, in particular how many attributes are shared and how between the objects in the Dale-5?
 % DK 2023-07-09: Dale-2 and Dale-5 only differ in the number of distractors. The rest is the same. I described in the previous paragrapgh a bit more detailed, how the distractors are created.
@@ -167,7 +159,7 @@ This is done using an encoder LSTM (sender) and a decoder LSTM (receiver).
 
 The target object is always the first image that is passed to the sender.
 The order of the objects for the receiver is random.
-Figure \ref*{fig:architectures} shows the architectures of the sender and the receiver.
+The figure in Appendix \ref*{sec:setup-language-game} shows the architectures of the sender and the receiver.
 For the sender, the images are passed through \emph{ResNet101} \citep{He2016} and a following linear layer that reduces the dimensions to an embedding size $e_s$.
 All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
 This is then used as the initial state of the encoder LSTM.
@@ -179,13 +171,6 @@ After each step of the LSTM, the receiver calculates the dot product between the
 The receiver then 'points' to one of the images, by applying the softmax function over the results of the dot products.
 The loss is calculated using the NLL-loss.
 Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
-
-\begin{figure}[h]
-  \centering
-  \frame{\includegraphics[width=\linewidth]{figures/architecture.png}}
-  \caption{Architectures of the sender and receiver}
-  \label{fig:architectures}
-\end{figure}
 
 There are five variables in the experiments that are adjusted:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver $h_r$ and (5) the size of the vocabulary $|V|$.
@@ -210,7 +195,7 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the 
 %   \item ... test 3/4 objects
 % \end{itemize}
 
-\begin{table}
+\begin{table}[b]
   \centering
   \begin{tabular}{c|ccccc|c}
     \hline
@@ -260,12 +245,13 @@ This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 % \end{itemize}
 
 % DK 2023-07-09: is the follwoing paragraph necessary? The findings are quite obviuous in the first look, but would need more detailed investigation, why this is happening. This is not the focus of this paper and maybe we can use the space more for other findings.
-Two interesting conclusions can be drawn.
-First, the hidden as well as the embedding sizes need to be close to the vocabulary size.
-This even applies for very low vocabulary sizes, which means that the image encodings need to be compressed to the same low dimensions.
-The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$) as opposed to learn how to extract the important information from a vector.
 
-The second conclusion that can be drawn looks at the differences between the two datasets.
+% Two interesting conclusions can be drawn.
+% First, the hidden as well as the embedding sizes need to be close to the vocabulary size.
+% This even applies for very low vocabulary sizes, which means that the image encodings need to be compressed to the same low dimensions.
+% The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$) as opposed to learn how to extract the important information from a vector.
+
+% The second conclusion that can be drawn looks at the differences between the two datasets.
 Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one object.
 Since we discriminate objects based on properties that are also distinguished in human cognition (color, size, shape) we expect that the vocabulary onto which the agents will converge will reflect these categories and therefore be close to human vocabulary.
 There are 48 possible combinations of attributes.
@@ -284,16 +270,37 @@ This hints to the fact that the agents learned to communicate discriminative att
 In future research, we want to investigate deeper the emerged language and the new vocabulary.
 Especially, we want to test if our hypothesis that this emerged language uses similar categories as human language holds true and how these words are combined to form complete messages.
 
-\section*{Acknowledgements}
-
 % Entries for the entire Anthology, followed by custom entries
 \bibliography{anthology,custom}
 
 
 \appendix
 
-\section{Example Appendix}
+\section{Extended CLEVR datasets}
+\label{sec:extended-datasets}
+\begin{figure}[h]
+  \centering
+  \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-FIVE_example.png}}
+  \caption{Example of a generated image in the Dale-5 dataset with the extended code}
+  \label{fig:clevr-dale-5}
+\end{figure}
 
+\begin{figure}[h]
+  \centering
+  \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-TWO_example.png}}
+  \caption{Example of a generated image in the Dale-2 dataset with the extended code}
+  \label{fig:clevr-dale-2}
+\end{figure}
+
+\section{Setup of the language game}
+\label{sec:setup-language-game}
+
+\begin{figure}[h!]
+  \centering
+  \frame{\includegraphics[width=\linewidth]{figures/architecture.png}}
+  \caption{Architectures of the sender and receiver}
+  \label{fig:architectures}
+\end{figure}
 
 \end{document}
 %%% Local Variables: 
