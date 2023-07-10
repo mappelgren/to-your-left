@@ -71,7 +71,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-  How do artificial agents based on neural networks coordinate on a new language through referential games over 3-dimensional scenes?
+  How do artificial agents based on neural networks coordinate on a new language through referential games over 3-d scenes?
   We extended a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referential grounding learned by the agents.
   % complicated
 \end{abstract}
@@ -82,13 +82,13 @@
 %   \item how can models reidentify attributes (and objects) from learned encodings in an artificial language \textbf{(done)}
 %   \end{itemize}
 
-Agents interact with the physical world through their action and perception, and with other agents through language.
+Agents interact with the physical world through their actions and perception, and with other agents through language.
 Their sensors and actuators % (if they are artificial agents, but the same also holds for natural agents)
-allow them to sample the world and their own state using measures that are continuous in nature such as intensity of light, distance, angles, velocity and other measures which can be measured with a high degree of accuracy.
+allow them to sample the world and their own state using measures that are continuous in nature such as intensity of light, distance, angles, velocity and others which can be measured with a high degree of accuracy.
 On the other hand, the language that is used to communicate with other agents is based on representations that are composed of a limited set of discrete and arbitrarily chosen symbols.
 How can both domains and representations arising from these interactions be combined? How are the ranges of measurements expressed in a continuous domain mapped to discrete linguistic labels?
 How is ambiguity and underspecification resolved?
-How can agents achieve this through interactive grounding \citep{Regier:1996,Roy:2005,Cooper:2023aa}?
+How can agents achieve it through interactive grounding \citep{Regier:1996,Roy:2005,Cooper:2023aa}?
 
 % SD 2023-07-08 14:11:44 +0200: A tip for writing LateX on Git: write each sentence in a separate line, this way any edits and conflicts will be much easier to spot and edit that comparing entire paragraphs.
 
@@ -163,25 +163,25 @@ Appendix \ref{sec:extended-datasets}. % shows examples of generated images with 
 
 \section{Language games}
 The language games were developed and run in the EGG framework \citep{Kharitonov2019}.\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis}{https://github.com/DominikKuenkele/MLT\_Master-Thesis}}
-Both our sender and receiver have a similar architecture to the \emph{agnostic sender} and \emph{receiver} of \citep{Lazaridou2016} as shown in Appendix \ref*{sec:setup-language-game}.
+Both our sender and receiver have a similar architecture to the \emph{agnostic sender} and \emph{receiver} of \citep{Lazaridou2016}, as shown in Appendix \ref*{sec:setup-language-game}.
 One central difference is the production of the message.
 % This research focuses on the identification of attributes for the objects and their combination, which is why
-As we focus on sequences of referring expressions made-up of different attributes, our models produce sequences of symbols for the message % (which may correspond to the attributes)
-instead of a single symbol referring to an image. % (which corresponded to different concepts of the images).
-This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to encode language descriptions.
+As we focus on sequences of referring expressions, made-up of different attributes, our models produce sequences of symbols for the message % (which may correspond to the attributes)
+instead of a single symbol to refer to an image. % (which corresponded to different concepts of the images).
+This is done by using an encoder LSTM (sender) and a decoder LSTM (receiver) to encode language descriptions.
 %
 % SD 2023-07-08 15:09:29 +0200: We have now already said some of this in the introduction. In the introduction we can describe the general setup of language games and here we say explicitly what is our configuration and emphasise in particular in what ways it is different from the previously implemented games. Including a list of technical details of the models is great. When restructuign sentences, copy those that fit the previous section there (and comment one out if necessary) and keep the rest here. It requires a bit of strategic thinking where to mention things in such a short paper so that we only say it once and save space.
 %
 %
 % The target object is always the first image that is passed to the sender
 % The order of the objects for the receiver is random.
-Another difference is that both sender and receiver receive visual input as segmented objects rather than two images.
+Another difference is that both sender and receiver receive visual input as segmented objects rather than as two images.
 The order of the objects is random, except that the first object for the sender is always the target object to be referred to.
 % The figure in Appendix \ref*{sec:setup-language-game} shows the architectures of the sender and the receiver.
 For the sender, the images are passed through \emph{ResNet101} \citep{He2016} and a following linear layer that reduces the dimensions to an embedding size $e_s$.
 All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
 This is then used as the initial state of the encoder LSTM.
-The sequence is then created through Gumbel-Softmax relaxation \citep{Jang2016}.
+After, the sequence is created through Gumbel-Softmax relaxation \citep{Jang2016}.
 %
 The receiver also encodes all images using \emph{ResNet101} with a following linear layer, reducing it to $e_r$.
 The sequence received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
@@ -216,7 +216,7 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the 
 %   \item ... test 3/4 objects
 % \end{itemize}
 
-\begin{table}[b]
+\begin{table}
   \centering
   \begin{tabular}{c|ccccc|c}
     \hline
@@ -234,7 +234,7 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the 
 \end{table}
 
 % The results of the experiments are summarized in Table \ref{tab:results}.
-For the \emph{Dale-2} dataset it can be clearly seen that an embedding and hidden size that are as high as the vocabulary size are beneficial for identifying the correct object.
+For the \emph{Dale-2} dataset it can be clearly seen that an embedding size and hidden size that are as high as the vocabulary size are beneficial for identifying the correct object.
 The receiver identifies almost every sample correctly with all sizes of 10.
 When the hidden and embedding sizes are increased, the guesses by the receiver are random.
 Interestingly, a vocabulary size of 10 is enough to communicate a meaningful message for the \emph{Dale-2} dataset.
@@ -242,8 +242,8 @@ Interestingly, a vocabulary size of 10 is enough to communicate a meaningful mes
 % SD 2023-07-08 15:17:45 +0200: The hidden size is related to the vocabulary size. Both have to be optimally selected for the models to converge.
 %
 % The results change, when using the \emph{Date-5} dataset with four distractors.
-\emph{Date-5} with four distractor objects and with low hidden, embedding and vocabulary size, the agents barely pass the random baseline with 23\%.
-Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to 43\% which is still considerably lower than 95\% of the \emph{Dale-2} dataset.
+Using \emph{Dale-5} with four distractors and with low hidden, embedding and vocabulary sizes, the agents barely pass the random baseline with 23\%.
+Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to 43\% which is still considerably lower than the 95\% of the \emph{Dale-2} dataset.
 % This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 
 % SD 2023-07-08 15:18:24 +0200: So we are not using just two objects to discriminate with as stated in the introduction and the previous section.
@@ -273,13 +273,13 @@ Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to
 % The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$) as opposed to learn how to extract the important information from a vector.
 
 % The second conclusion that can be drawn looks at the differences between the two datasets.
-Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one object.
-Since we discriminate objects based on properties that are also distinguished in human cognition (colour, size, shape), we expect that the vocabulary onto which the agents converge reflects these categories and therefore be close to human vocabulary.
+Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one distractor.
+Since we discriminate objects based on properties that are also distinguished in human cognition (colour, size, shape), we expect that the vocabulary onto which the agents converge reflects these categories and is therefore close to human vocabulary.
 There are 48 possible combinations of attributes.
-Still, for Dale-2 a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
-This hints to the fact, that the agents don't describe the complete target object, but only rely on discriminative attributes between the objects.
-The need for a more detailed description of discriminative attributes is higher, when more distractors are involved.
-Therefore, the models need to learn more combinations of symbols to attest to this higher level of detail and especially how to relate them to features in the images.
+Still, for Dale-2, a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
+This hints to the fact that the agents don't describe the complete target object, but only rely on discriminative attributes between the objects.
+The need for a more detailed description of discriminative attributes is higher when more distractors are involved.
+Therefore, the models need to learn more combinations of symbols in order to attest to this higher level of detail and especially how to relate them to features in the images.
 % SD 2023-07-10 18:04:24 +0200: It would be interesting to compare then the length of messages between Dale-2 and Dale-5 that becomes used.
 % DK 2023-07-10: Yes, especially with a more detailed analysis of the vocabulary. Right now, the average is always 2 symbols, for both Dale-2 and Dale-5 as well as for all different vocabulary sizes. So far, I didn't check if there are sometimes longer messages and sometimes shorter messages.
 
@@ -293,7 +293,7 @@ Therefore, the models need to learn more combinations of symbols to attest to th
 In our ongoing work we are investigating deeper the emerged language and the new vocabulary,
 in particular whether
 it uses similar categories as human language and how its words are combined to form complete messages.
-In our future work we will also extend learning to relations between entities and the features required to capture them.
+In future work we will also extend the learning to the relations between entities and the features required to capture them.
 % Entries for the entire Anthology, followed by custom entries
 \bibliography{anthology,custom}
 
