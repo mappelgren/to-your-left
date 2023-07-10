@@ -153,7 +153,7 @@ For each image fixed size bounding boxes around the centre-point of each object 
 The \emph{Dale-2} dataset contains one target object and one distractor, while the \emph{Dale-5} dataset contains one target object and four distractors.
 % The way, how the distractors are created is the same.
 Both datasets contain 10.000 images.
-Examples are shown in 
+Examples are shown in
 Appendix \ref{sec:extended-datasets}. % shows examples of generated images with our extended code.
 % Both datasets also contain ground truth information about each image, including attributes and locations for all objects.
 
@@ -167,7 +167,7 @@ One central difference is the production of the message.
 % This research focuses on the identification of attributes for the objects and their combination, which is why
 As we focus on sequences of referring expressions made-up of different attributes, our models produce sequences of symbols for the message % (which may correspond to the attributes)
 instead of a single symbol referring to an image. % (which corresponded to different concepts of the images).
-This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to encode language descriptions. 
+This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to encode language descriptions.
 %
 % SD 2023-07-08 15:09:29 +0200: We have now already said some of this in the introduction. In the introduction we can describe the general setup of language games and here we say explicitly what is our configuration and emphasise in particular in what ways it is different from the previously implemented games. Including a list of technical details of the models is great. When restructuign sentences, copy those that fit the previous section there (and comment one out if necessary) and keep the rest here. It requires a bit of strategic thinking where to mention things in such a short paper so that we only say it once and save space.
 %
@@ -175,7 +175,7 @@ This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to enc
 % The target object is always the first image that is passed to the sender
 % The order of the objects for the receiver is random.
 Another difference is that both sender and receiver receive visual input as segmented objects rather than two images.
-The order of objects is random, except that the first order for the sender is always the target object to be referred to.
+The order of objects is random, except that the first object for the sender is always the target object to be referred to.
 % The figure in Appendix \ref*{sec:setup-language-game} shows the architectures of the sender and the receiver.
 For the sender, the images are passed through \emph{ResNet101} \citep{He2016} and a following linear layer that reduces the dimensions to an embedding size $e_s$.
 All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
@@ -188,8 +188,6 @@ After each step of the LSTM, the receiver calculates the dot product between the
 The receiver then `points' to one of the images, by applying the softmax function over the results of the dot products.
 The loss is calculated using the NLL-loss.
 Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
-
-
 
 \section{Experiments and results}
 
@@ -304,30 +302,31 @@ In our future work we will also extend learning to relations between entities an
 \label{sec:extended-datasets}
 \begin{figure}[h]
   \centering
-  \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-FIVE_example.png}}
-  \caption{Example of a generated image in the Dale-5 dataset}
-  \label{fig:clevr-dale-5}
-\end{figure}
-The target object in Figure \ref{fig:clevr-dale-5} is the purple cylinder. It shares the same colour and size with the purple sphere, the same size with the two cubes and no attribute with the turquoise sphere. It can be uniquely identified as the \emph{cylinder}.
-
-\begin{figure}[h]
-  \centering
   \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-TWO_example.png}}
-  \caption{Example of a generated image in the Dale-2 dataset}
+  \caption{An example from the Dale-2 dataset}
   \label{fig:clevr-dale-2}
 \end{figure}
 
 In Figure \ref*{fig:clevr-dale-2}, the small red cube is the target object. Since all attributes except for the size are shared with the distractor, all three attributes are necessary, to identify it following \citet{Dale1995}'s rules, namely the \emph{small red cube}.
 
+
+\begin{figure}[h]
+  \centering
+  \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-FIVE_example.png}}
+  \caption{An example from the Dale-5 dataset}
+  \label{fig:clevr-dale-5}
+\end{figure}
+The target object in Figure \ref{fig:clevr-dale-5} is the purple cylinder. It shares the same colour and size with the purple sphere, the same size with the two cubes and no attribute with the turquoise sphere. It can be uniquely identified as the \emph{cylinder}.
+
+
 \section{Setup of the language game}
 \label{sec:setup-language-game}
-
-\begin{figure}
+%\begin{figure}
   \centering
   \frame{\includegraphics[width=\linewidth]{figures/architecture.png}}
-  \caption{Architectures of the sender and receiver}
-  \label{fig:architectures}
-\end{figure}
+  % \caption{Architectures of the sender and receiver}
+%  \label{fig:architectures}
+% \end{figure}
 
 \end{document}
 %%% Local Variables: 
