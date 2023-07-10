@@ -72,7 +72,7 @@
 \maketitle
 \begin{abstract}
   How do artificial agents based on neural networks coordinate on a new language through referential games over 3-dimensional scenes?
-  We extended a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referrential grounding learned by the agents.
+  We extended a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referential grounding learned by the agents.
 \end{abstract}
 
 \section{Introduction}
@@ -101,12 +101,12 @@ How can agents achieve this through interactive grounding \citep{Regier:1996,Roy
 % Gradually, both agents converge on a set of symbols that they can use to refer to situations in jointly attended perceptual scenes \citep{Chai:2016aa, Kelleher2020}.
 % Communication is successful and grounding converges because learning is constrained by joint attention and the agents are playing following the rule of the communicative games.
 
-In this paper we explore how agents based on artificial neural networks learn referential grounding of entities in images of 3-dimensional scenes through language games \citep{Clark:1996aa,Bartlett:2005aa,Kirby:2008ab,SteelsLoetzsch:2009,Zaslavsky:2018aa}.
-One agent is describing the entities represented as features within bounding boxes of objects, inventing new vocabulary as neccessary, and the other agent learns to interpret the reference of symbols by identifying % and referring to
-one ofthe bounding boxes based on object attributes such as shape, color and size.
+In this paper we explore how agents based on artificial neural networks learn referential grounding of entities in images of 3-dimensional scenes through language games \citep{Clark:1996aa,Bartlett:2005aa,Kirby:2008ab,SteelsLoetzsch:2009,Zaslavsky:2018aa}. % Clark:1986aa
+One agent is describing the entities represented as features within bounding boxes of objects, inventing new vocabulary as necessary, and the other agent learns to interpret the reference of symbols by identifying % and referring to
+one of the bounding boxes based on object attributes such as shape, colour and size.
 % studies how the agents can encode real-looking objects into distinct symbols and decode this message to reidentify this object. Specifically, the study explores discrimination games using an extended version of the CLEVR dataset, focusing on the identification and differentiation of objects based on their attributes such as shape, color, and size.
 Both agents learn through the success of interaction.
-The novelty of our work compared with the previous work with this setup \citep{Kharitonov2019,Lazaridou2016} is that we extend the popular CLEVR dataset \citep{Johnson2016} with new artificially generated 3-d scenes of objects that can be referred to and discriminated based on the attributes such as \emph{shape}, \emph{color} and \emph{size} whereby the discrimination is based on different overlaps of these attributes between the target and the distractor objects. % and (ii) we implement a focused referring to objects as one of the potential bounding boxes.
+The novelty of our work compared with the previous work with this setup \citep{Kharitonov2019,Lazaridou2016} is that we extend the popular CLEVR dataset \citep{Johnson2016} with new artificially generated 3-d scenes of objects that can be referred to and discriminated based on the attributes such as \emph{shape}, \emph{colour} and \emph{size} whereby the discrimination is based on different overlaps of these attributes between the target and the distractor objects. % and (ii) we implement a focused referring to objects as one of the potential bounding boxes.
 
 % SD 2023-07-08 15:05:37 +0200: This hasn't been studied and implemented by lazaridou and others in the EGG framework, right?
 % DK 2023-07-09: yes, the main addition in my view is the focus on controlles attributes and relations of objects as opposed to discriminating images from different concepts
@@ -139,13 +139,13 @@ We extend the CLEVR dataset \citep{Johnson2016}, by dividing the objects into a 
 % The target object is the main object in the scene that should be identified and communicated by the agents.
 % The distractors contain similar objects to the target object.
 and control for the number of shared attributes between these groups as % is defined by rules researched in
-in the GRE algorithim in \citep{Dale1995}.
+in the GRE algorithm in \citep{Dale1995}.
 The target object is always unique and at least one attribute is different from the distractors.
 % First, a random target object is created.
 % In the next step, the distractors are created at a random location in the scene.
 Each of the distractors can share a maximum of two attributes with the target object.
 There is no restriction on the relation between distractors, hence it is possible to have multiple identical distractors in one image.
-Given the ranking of features in the original GRE algorithm the target object is therefore identifiable either by the \emph{shape} (1), the \emph{shape} and \emph{color} (2) or the \emph{shape}, \emph{color} and \emph{size} (3).
+Given the ranking of features in the original GRE algorithm the target object is therefore identifiable either by the \emph{shape} (1), the \emph{shape} and \emph{colour} (2) or the \emph{shape}, \emph{colour} and \emph{size} (3).
 For each image fixed size bounding boxes around the centre-point of each object are extracted.
 % These bounding boxes are the input for the sender and receiver in the language game.
 %
@@ -183,9 +183,9 @@ This is then used as the initial state of the encoder LSTM.
 The sequence is then created through Gumbel-Softmax relaxation \citep{Jang2016}.
 %
 The receiver also encodes all images using \emph{ResNet101} with a following linear layer, reducing it to $e_r$.
-The sequence received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
+The sequence received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialised.
 After each step of the LSTM, the receiver calculates the dot product between the hidden state and all of its image encodings.
-The receiver then 'points' to one of the images, by applying the softmax function over the results of the dot products.
+The receiver then `points' to one of the images, by applying the softmax function over the results of the dot products.
 The loss is calculated using the NLL-loss.
 Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
 
@@ -195,8 +195,9 @@ Following, the losses for all steps are summed up, and all weights of the receiv
 
 There are five variables in the experiments that are adjusted:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver $h_r$ and (5) the size of the vocabulary $|V|$.
-
-The results will be evaluated using the accuracy if the receiver could identify the target object.
+%
+% The results are evaluated using accuracy if the receiver can identify the target object.
+Table \ref{tab:results} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object. 
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
 
 
@@ -229,22 +230,22 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the 
     Dale-5           & {10}    & {10}    & {10}    & {10}    & {100} & {41\%}        \\
     \hline
   \end{tabular}
-  \caption{Result of the experiments with different hidden sizes, embedding sizes and vocabulary sizes}
+  \caption{Results: $h$ are different hidden sizes, $e$ embedding sizes and $|V|$ vocabulary sizes.}
   \label{tab:results}
 \end{table}
 
-The results of the experiments are summarized in Table \ref{tab:results}.
+% The results of the experiments are summarized in Table \ref{tab:results}.
 For the \emph{Dale-2} dataset it can be clearly seen that an embedding and hidden size that are as high as the vocabulary size are beneficial for identifying the correct object.
-The receiver identifies indeed almost every sample correctly with all sizes of 10.
+The receiver identifies almost every sample correctly with all sizes of 10.
 When the hidden and embedding sizes are increased, the guesses by the receiver are random.
 Interestingly, a vocabulary size of 10 is enough to communicate a meaningful message for the \emph{Dale-2} dataset.
-
+%
 % SD 2023-07-08 15:17:45 +0200: The hidden size is related to the vocabulary size. Both have to be optimally selected for the models to converge.
-
-The results change, when using the \emph{Date-5} dataset with four distractors.
-With low hidden, embedding and vocab size, the agents barely pass the random baseline with 23\%.
-Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to 43\%.
-This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
+%
+% The results change, when using the \emph{Date-5} dataset with four distractors.
+\emph{Date-5} with four distractor objects and with low hidden, embedding and vocabulary size, the agents barely pass the random baseline with 23\%.
+Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to 43\% which is still considerably lower than 95\% of the \emph{Dale-2} dataset.
+% This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 
 % SD 2023-07-08 15:18:24 +0200: So we are not using just two objects to discriminate with as stated in the introduction and the previous section.
 % DK 2023-07-09: only in the Dale-2 dataset. The Dale-5 dataset discriminates 5 objects.
@@ -253,7 +254,7 @@ This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 % DK 2023-07-09: I added it to the Discussion section
 
 
-\section{Discussion}
+\section{Discussion and future work}
 % TODO:
 % \begin{itemize}
 %   \item maybe calculation of loss (multiplicating instead of summing loss per token), unlikely, since sequence length short -> shouldn't result in big differences
@@ -274,23 +275,25 @@ This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 
 % The second conclusion that can be drawn looks at the differences between the two datasets.
 Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one object.
-Since we discriminate objects based on properties that are also distinguished in human cognition (color, size, shape) we expect that the vocabulary onto which the agents will converge will reflect these categories and therefore be close to human vocabulary.
+Since we discriminate objects based on properties that are also distinguished in human cognition (colour, size, shape) we expect that the vocabulary onto which the agents converge reflects these categories and therefore be close to human vocabulary.
 There are 48 possible combinations of attributes.
 Still for Dale-2 a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
 This hints to the fact, that the agents don't describe the complete target object, but only rely on discriminative attributes between the objects.
 The need for a more detailed description of discriminative attributes is higher, when more distractors are involved.
 Therefore, the models need to learn more combinations of symbols to attest to this higher level of detail and especially how to relate them to features in the images.
+% SD 2023-07-10 18:04:24 +0200: It would be interesting to compare then the length of messages between Dale-2 and Dale-5 that becomes used.
 
-\section{Conclusions and further work}
-In this research, we introduced an extended version of the CLEVR dataset that offers a high control over the relations between generated objects.
-This should help to study, how models can learn these relations and refer to them as well as the objects.
-In our research we used this dataset to study, how agents can learn to communicate and refer to these objects in a language game setup.
-We found that a bigger number of distractors requires a higher vocabulary size.
-This hints to the fact that the agents learned to communicate discriminative attributes between the images.
+% \section{Conclusions and further work}
+% In this research, we introduced an extended version of the CLEVR dataset that offers a high control over the relations between generated objects.
+% This should help to study, how models can learn these relations and refer to them as well as the objects.
+% In our research we used this dataset to study, how agents can learn to communicate and refer to these objects in a language game setup.
+% We found that a bigger number of distractors requires a higher vocabulary size.
+% This hints to the fact that the agents learned to communicate discriminative attributes between the images.
 
-In future research, we want to investigate deeper the emerged language and the new vocabulary.
-Especially, we want to test if our hypothesis that this emerged language uses similar categories as human language holds true and how these words are combined to form complete messages.
-
+In our ongoing work we are investigating deeper the emerged language and the new vocabulary,
+in particular whether
+this uses similar categories as human language and how its words are combined to form complete messages.
+In our future work we will also extend learning to relations between entities and the features required to capture them.
 % Entries for the entire Anthology, followed by custom entries
 \bibliography{anthology,custom}
 
@@ -305,7 +308,7 @@ Especially, we want to test if our hypothesis that this emerged language uses si
   \caption{Example of a generated image in the Dale-5 dataset}
   \label{fig:clevr-dale-5}
 \end{figure}
-The target object in Figure \ref{fig:clevr-dale-5} is the purple cylinder. It shares the same color and size with the purple sphere, the same size with the two cubes and no attribute with the turquoise sphere. It can be uniquely identified as the \emph{cylinder}.
+The target object in Figure \ref{fig:clevr-dale-5} is the purple cylinder. It shares the same colour and size with the purple sphere, the same size with the two cubes and no attribute with the turquoise sphere. It can be uniquely identified as the \emph{cylinder}.
 
 \begin{figure}[h]
   \centering
