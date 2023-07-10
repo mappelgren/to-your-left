@@ -281,21 +281,24 @@ Especially, we want to test if our hypothesis that this emerged language uses si
 \begin{figure}[h]
   \centering
   \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-FIVE_example.png}}
-  \caption{Example of a generated image in the Dale-5 dataset with the extended code}
+  \caption{Example of a generated image in the Dale-5 dataset}
   \label{fig:clevr-dale-5}
 \end{figure}
+The target object in Figure \ref{fig:clevr-dale-5} is the purple cylinder. It shares the same color and size with the purple sphere, the same size with the two cubes and no attribute with the turquoise sphere. It can be uniquely identified as the \emph{cylinder}.
 
 \begin{figure}[h]
   \centering
   \frame{\includegraphics[width=\linewidth]{figures/CLEVR_DALE-TWO_example.png}}
-  \caption{Example of a generated image in the Dale-2 dataset with the extended code}
+  \caption{Example of a generated image in the Dale-2 dataset}
   \label{fig:clevr-dale-2}
 \end{figure}
+
+In Figure \ref*{fig:clevr-dale-2}, the small red cube is the target object. Since all attributes except for the size are shared with the distractor, all three attributes are necessary, to identify it following \citet{Dale1995}'s rules, namely the \emph{small red cube}.
 
 \section{Setup of the language game}
 \label{sec:setup-language-game}
 
-\begin{figure}[h!]
+\begin{figure}
   \centering
   \frame{\includegraphics[width=\linewidth]{figures/architecture.png}}
   \caption{Architectures of the sender and receiver}
