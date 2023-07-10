@@ -136,7 +136,7 @@ The novelty of our work, compared with the previous work with this setup \citep{
 % SD 2023-07-08 14:58:04 +0200: Rephrase this paragraph to continue from the previous section and emphasise our extension and contribution to the dataset. For our experiments we extend...
 
 % For these experiments,
-We extend the CLEVR dataset \citep{Johnson2016}, by dividing the objects into one \emph{target object} and \emph{distractors}
+We extend the CLEVR dataset \citep{Johnson2016} by dividing the objects into one \emph{target object} and \emph{distractors}
 % The target object is the main object in the scene that should be identified and communicated by the agents.
 % The distractors contain similar objects to the target object.
 and by controlling for the number of shared attributes between these groups as % is defined by rules researched in
@@ -184,11 +184,11 @@ This is then used as the initial state of the encoder LSTM.
 After, the sequence is created through Gumbel-Softmax relaxation \citep{Jang2016}.
 %
 The receiver also encodes all images using \emph{ResNet101} with a following linear layer, reducing it to $e_r$.
-The sequence received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
+The sequence, received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
 After each step of the LSTM, the receiver calculates the dot product between the hidden state and all of its image encodings.
-The receiver then `points' to one of the images, by applying the softmax function over the results of the dot products.
+The receiver then `points' to one of the images by applying the softmax function over the results of the dot products.
 The loss is calculated using the NLL-loss.
-Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
+Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated based on this summed loss.
 
 \section{Experiments and results}
 
