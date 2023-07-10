@@ -72,7 +72,7 @@
 \maketitle
 \begin{abstract}
   How do artificial agents based on neural networks coordinate on a new language through referential games over 3-dimensional scenes?
-  We extended a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referrential grounding learned by the agents.
+  We extended a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referential grounding learned by the agents.
 \end{abstract}
 
 \section{Introduction}
@@ -102,8 +102,8 @@ How can agents achieve this through interactive grounding \citep{Regier:1996,Roy
 % Communication is successful and grounding converges because learning is constrained by joint attention and the agents are playing following the rule of the communicative games.
 
 In this paper we explore how agents based on artificial neural networks learn referential grounding of entities in images of 3-dimensional scenes through language games \citep{Clark:1996aa,Bartlett:2005aa,Kirby:2008ab,SteelsLoetzsch:2009,Zaslavsky:2018aa}.
-One agent is describing the entities represented as features within bounding boxes of objects, inventing new vocabulary as neccessary, and the other agent learns to interpret the reference of symbols by identifying % and referring to
-one ofthe bounding boxes based on object attributes such as shape, color and size.
+One agent is describing the entities represented as features within bounding boxes of objects, inventing new vocabulary as necessary, and the other agent learns to interpret the reference of symbols by identifying % and referring to
+one of the bounding boxes based on object attributes such as shape, color and size.
 % studies how the agents can encode real-looking objects into distinct symbols and decode this message to reidentify this object. Specifically, the study explores discrimination games using an extended version of the CLEVR dataset, focusing on the identification and differentiation of objects based on their attributes such as shape, color, and size.
 Both agents learn through the success of interaction.
 The novelty of our work compared with the previous work with this setup \citep{Kharitonov2019,Lazaridou2016} is that we extend the popular CLEVR dataset \citep{Johnson2016} with new artificially generated 3-d scenes of objects that can be referred to and discriminated based on the attributes such as \emph{shape}, \emph{color} and \emph{size} whereby the discrimination is based on different overlaps of these attributes between the target and the distractor objects. % and (ii) we implement a focused referring to objects as one of the potential bounding boxes.
@@ -139,21 +139,21 @@ We extend the CLEVR dataset \citep{Johnson2016}, by dividing the objects into a 
 % The target object is the main object in the scene that should be identified and communicated by the agents.
 % The distractors contain similar objects to the target object.
 and control for the number of shared attributes between these groups as % is defined by rules researched in
-in the GRE algorithim in \citep{Dale1995}.
+in the GRE algorithm in \citep{Dale1995}.
 The target object is always unique and at least one attribute is different from the distractors.
 % First, a random target object is created.
 % In the next step, the distractors are created at a random location in the scene.
 Each of the distractors can share a maximum of two attributes with the target object.
 There is no restriction on the relation between distractors, hence it is possible to have multiple identical distractors in one image.
 Given the ranking of features in the original GRE algorithm the target object is therefore identifiable either by the \emph{shape} (1), the \emph{shape} and \emph{color} (2) or the \emph{shape}, \emph{color} and \emph{size} (3).
-For each image fixed size bounding boxes around the centre-point of each object are extracted.
+For each image fixed size bounding boxes around the center point of each object are extracted.
 % These bounding boxes are the input for the sender and receiver in the language game.
 %
 % For this research, two datasets are created.
 The \emph{Dale-2} dataset contains one target object and one distractor, while the \emph{Dale-5} dataset contains one target object and four distractors.
 % The way, how the distractors are created is the same.
 Both datasets contain 10.000 images.
-Examples are shown in 
+Examples are shown in
 Appendix \ref{sec:extended-datasets}. % shows examples of generated images with our extended code.
 % Both datasets also contain ground truth information about each image, including attributes and locations for all objects.
 
@@ -167,7 +167,7 @@ One central difference is the production of the message.
 % This research focuses on the identification of attributes for the objects and their combination, which is why
 As we focus on sequences of referring expressions made-up of different attributes, our models produce sequences of symbols for the message % (which may correspond to the attributes)
 instead of a single symbol referring to an image. % (which corresponded to different concepts of the images).
-This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to encode language descriptions. 
+This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to encode language descriptions.
 %
 % SD 2023-07-08 15:09:29 +0200: We have now already said some of this in the introduction. In the introduction we can describe the general setup of language games and here we say explicitly what is our configuration and emphasise in particular in what ways it is different from the previously implemented games. Including a list of technical details of the models is great. When restructuign sentences, copy those that fit the previous section there (and comment one out if necessary) and keep the rest here. It requires a bit of strategic thinking where to mention things in such a short paper so that we only say it once and save space.
 %
@@ -175,7 +175,7 @@ This is done using an encoder LSTM (sender) and a decoder LSTM (receiver) to enc
 % The target object is always the first image that is passed to the sender
 % The order of the objects for the receiver is random.
 Another difference is that both sender and receiver receive visual input as segmented objects rather than two images.
-The order of objects is random, except that the first order for the sender is always the target object to be referred to.
+The order of objects is random, except that the first object for the sender is always the target object to be referred to.
 % The figure in Appendix \ref*{sec:setup-language-game} shows the architectures of the sender and the receiver.
 For the sender, the images are passed through \emph{ResNet101} \citep{He2016} and a following linear layer that reduces the dimensions to an embedding size $e_s$.
 All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
@@ -189,14 +189,12 @@ The receiver then 'points' to one of the images, by applying the softmax functio
 The loss is calculated using the NLL-loss.
 Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated, based on this summed loss.
 
-
-
 \section{Experiments and results}
 
 There are five variables in the experiments that are adjusted:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver $h_r$ and (5) the size of the vocabulary $|V|$.
 
-The results will be evaluated using the accuracy if the receiver could identify the target object.
+The results are evaluated using the accuracy if the receiver could identify the target object.
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
 
 
