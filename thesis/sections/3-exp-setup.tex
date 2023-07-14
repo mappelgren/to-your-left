@@ -104,6 +104,7 @@ The receiver then needs to learn to decode this message, after which it needs to
 And finally it needs to learn how to identify the target object with this information.
 
 For this reason, I decided to divide the main problem and let the models learn simpler subtasks and increase the complexity step by step.
+\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis}{https://github.com/DominikKuenkele/MLT\_Master-Thesis}}
 This will give me a very detailed overview, where the models struggle to learn and in which ways they can be improved.
 Mainly, I separated the tasks into language games with two agents (final experiments) and classical machine learning tasks without any communication, namely only one 'agent' that solves the task alone (pre-experiments).
 With this division, I can analyze the learning of the encodings of the scenes separately from the learning of producing and decoding messages.
@@ -242,7 +243,7 @@ The image is passed through a feature extractor, before it is passed through two
 A \emph{ReLU} function is applied, after both convolutional layers.
 As before, the resulting vector is pooled, using max pooling with both a kernel size and stride of 2.
 In the second part, the caption is encoded, using an LSTM.
-Here, the learned embedding of each token is parsed by the LSTM and its final hidden state is then used as a summary of the complete caption.
+Here, the learned embeddings of each token are parsed by the LSTM and its final hidden state is then used as a summary of the complete caption.
 The third part is again the predictor of the coordinates of the target object.
 Both the processed image and the final hidden state of the LSTM are flattened and concatenated.
 The resulting vector is passed through three linear layers reducing to 1024, 1024 and 2 dimensions respectively.
@@ -260,17 +261,101 @@ It therefore can only rely on its own extracted visual features when looking at 
 
 The model is presented with both the original image and the masked image.
 Both are passed through a feature extractor and afterwards passed through a linear layer, reducing the dimensions to 2048.
-The resulting vectors are concatenated and passes to another linear layer that predicts the coordinates.
+The resulting vectors are concatenated and passed through another linear layer that predicts the coordinates.
 
+\cmtDK{test accuracies}
 
 \paragraph{Level 2 - bounding box classifier:}
 
+One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
+Feature extractors like VGG or ResNet are trained on extracting visual information.
+In this process, absolute locations of these features in the images may get lost in the resulting vectors, since they are not important for this task.
+To address this challenge, I restructured the task in this experiment.
+Instead of predicting two coordinates of a target object, the model now needs to classify between all available objects.
+This will take all positional information out and just focus on the attributes and discriminating factors between the objects.
+To do this, fixed-size bounding boxes are extracted around each of the object in the image.
+As for the masking, the bounding boxes are a square of 192x192 pixels, to capture the complete object. \cmtDK{preprocess bounding box}
+The bounding boxes of all objects are padded to a number of 10 bounding boxes, the maximum number of objects in an image with a matrix of zeros.
+These bounding boxes are shuffled.
+
+The model passes each of the bounding boxes through a feature extractor.
+The resulting vectors are concatenated, which basically is a concatenation of the extracted features of each object.
+This long vector is passed through a linear layer with 4096 with a subsequent \emph{ReLU} function.
+Afterwards, a linear layer reduces the dimensions to 10, corresponding to the 10 bounding boxes in the input.
+With a final \emph{softmax} function, the model then points to one of the bounding boxes as the target bounding box.
+The loss is calculated using cross entropy.
+
 \paragraph{Level 3 - caption generator:}
-\cmtDK[inline]{\\
-    - dale \\
-    - - different paddings (back, front, reversed) \\
-    - masked}
 
+As the bounding box classifier, the caption generator only acts as a learning step towards understanding, how the model can learn the attributes of objects.
+It is used the same way to create the captions for each image as in the section above with the GRE-algorithm.
+This method focuses even more on human knowledge and structure of language than the experiment above, since it is even the final task of the model.
+There are some minor additions concerning the padding of the caption.
+As before, the caption is padded to a number of three tokens, corresponding to the maximum of three attributes.
 
+However, there are three different ways how the padding is applied.
+First, the captions are, as usual in captioning tasks padded at the end with a specified padding token.
+A problem could arise when the caption is not viewed as a natural language sentence, but as slots filled with tokens.
+More specifically, following the GRE-algorithm, the last token in the caption is always the shape.
+The second last token if existing describes the color, while the third last token if existing describes the size.
+As soon as this sequence is padded at the end, these slots suddenly disappear.
+A caption that only describes the shape, such as \emph{cube} will be padded to \emph{cube <pad> <pad>}, where the third last slot is filled up with the shape instead of the size.
+Since in this task we are not focussing on producing natural language with a correct grammar, but focus instead of extracting attributes, having a slot structure could help the model to express the extracted attributes correctly.
+For this reason, the second method of padding the caption is prepending the caption with padding tokens.
+By this, the positions of the slots are preserved and if not specified just filled with a padding token.
+The last variation concerns the order of producing each token.
+When the captions are prepended, the model would need first produce two padding tokens, before it finally can produce a much more meaningful token for the shape.
+This could be difficult to learn for a model, as the longer a sequence of tokens is, the more information about the beginning of the sequence gets lost.
+Even though a sequence of just three tokens may not be long enough for this factor to be a problem, I experimented to reverse the caption.
+Instead of producing for instance \emph{<pad> green sphere} as correct in English, the model would now need to produce \emph{sphere green <pad>}.
+Notice that the padding token is again at the end of the generation, but the order of slots as well as the amount of information in the caption are still preserved.
+
+Nonetheless, this helps to understand more detailed if and how the model discriminates objects.
+Does it rely on the same attributes, humans are using, or does it find other important differences, or is it able to solve the task at all?
+
+I compare two different models against each other.
+The first model just takes the image as the input.
+During training, also the ground truth caption is passed to the model.
+The image is processed as in the section before.
+First, it is passed through a feature extractor with two following 2d convolutional layers, reducing the channels to 128.
+After each convolutional layer the \emph{ReLU} function is applied.
+The result is pooled using max pooling and then reduced to 1024 dimension using a linear layer.
+The such encoded image serves as the initial hidden state of an LSTM, which generates the caption.
+During training the input sequence for the LSTM at each time step are embeddings of the tokens in the ground truth caption.
+No teacher forcing is applied.
+The output of the LSTM is passed through a linear layer at each step to determine logits over the symbols of the vocabulary.
+The loss is calculated using cross entropy.
+When testing, the LSTM always generates three tokens, with a start-of-sequence token as first input to the LSTM.
+Each token in the sequence is determined, by selecting the highest logit in the output of each step in the LSTM.
+
+Since with this approach, the model doesn't have any information about the target object, I extend it with a masked image.
+As in the section above, a masked version of the image is created and passed to the model.
+The model works exactly the same, except for the additional separate image encoder that encodes the masked image in the same way as the original image.
+Both encodings are concatenated and then used as the initial hidden state for the LSTM.
+This should point the model to which object to describe and discriminate from the other objects.
+
+To test the success of the model, three measures are calculated.
+The first measure is the \textbf{accuracy} if the model predicted every word in the caption correctly.
+This gives a hint, how the model fares in general and also able to predict actually any of the attributes at all.
+However, a 'false' prediction doesn't give much insight into why the model predicted a wrong caption.
+
+It could be the case that the model predicted the correct shape, but wrong color.
+Even worse, the model could have predicted more attributes than necessarily to uniquely identify the target object and didn't follow the rules of the GRE-algorithm.
+For instance, consider the scene in Figure \ref*{fig:clevr-extended_example}.
+The correct caption is \emph{cylinder}.
+If the model would predict \emph{purple cylinder}, the accuracy determines it as false as captioning \emph{large purple cylinder} as well \emph{small green cube}.
+The first two descriptions identify the target object perfectly, but the model only didn't learn yet to leave unnecessary attributes out.
+To mitigate this, I also include a \textbf{word-by-word accuracy}.
+This measure calculates the accuracy not on sentence level, but on word level.
+The first predicted caption of the model would yield a word-by-word accuracy of 66\% (including padding tokens), the second 33\%, while the third prediction would
+yield 0\%.
+This can give a better understanding of the errors the model makes.
+
+With the \textbf{non-target accuracy}, I identify if the model described another object, which is not the target image.
+This is basically an inverted accuracy score; the lower the score, the better the model fares.
+For this I generated captions for all the non-target objects and distractors in the images using the GRE-algorithm.
+If the generated description of the model describes an object that is not the target object, it gets assigned 100\%.
+If not, independently of describing the target object, no object, or one of the objects insufficiently, it gets assigned 0\%.
+Using this measure, I can get a quick overview if the model's problem lies in extracting and relating attributes or in understanding which of the presented objects is the target object.
 
 \subsubsection{Language games}
