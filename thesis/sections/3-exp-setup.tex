@@ -6,10 +6,10 @@
 In this section I will describe which experiments were conducted to answer the \cmtDK{?}{questions} from the previous sections as well as the setup of these experiments.
 This will be done in two parts.
 The first part contains the creation of the datasets that will be used in the experiments.
-In the second part I will go deeper into discussing each experiment, including the necessity of the experiment, the specifities of the dataset, as well as the final architecture of the models.
+In the second part I will go deeper into discussing each experiment, including the necessity of the experiment, which datasets the model is trained on, as well as the final architecture of the models.
 
 \subsection{Creation of the dataset}
-The basis for my datasets is the CLEVR dataset (\cite{Johnson2016}).
+The basis for my datasets is the CLEVR dataset \citep{Johnson2016}.
 This dataset includes 3D-generated images depicting scenes with different kinds of objects.
 Each of these objects has different combinations attributes, such as \emph{shape}, \emph{color}, \emph{size} and \emph{material}.
 The possible values of these attributes are listed in Table \ref{tab:clevr-attributes}.
@@ -92,7 +92,7 @@ Each image contains a maximum of 10 objects, that are not intersecting, have the
         \includegraphics[width=0.42\linewidth]{figures/CLEVR_single.png}
         \label{fig:clevr-single}
     }
-    \subfigure['CLEVR unambigous', \emph{large green sphere}]{
+    \subfigure['CLEVR unambiguous', \emph{large green sphere}]{
         \includegraphics[width=0.42\linewidth]{figures/CLEVR_unambiguous.png}
         \label{fig:clevr-unambiguous}
     }
@@ -163,7 +163,7 @@ Natural language emerged that can refer to distinct attributes of these objects 
 This emergence of referring attributes and their combination is studied deeper in this work.
 
 For this, I created a dataset that allows almost any relation between a target object and the distractors.
-The relations are only restricted by the incremental algorithm for the Generation of Referring Expressions (GRE) described in \cite{Dale1995}.
+The relations are only restricted by the incremental algorithm for the Generation of Referring Expressions (GRE) described in \citet{Dale1995}.
 This algorithm ensures that every scene contains a unique object in respect to its and the distractors' attributes.
 Using the algorithm, one can refer to an object using its attributes to discriminate it from all other objects as efficiently as possible.
 In other words, the object is described unambiguously using the lowest number of words.
@@ -180,6 +180,7 @@ Consider Figure \ref{fig:clevr-dale-5}, with the target object being the \emph{l
 These two datasets allow a more realistic look in how models can acquire knowledge about attributes of objects.
 More specifically how models learn to discriminate objects from each other, since the model may only need to learn discriminative features of objects and not all features of the whole object.
 
+\cmtDK{probabilities of shared attributes for both Dale-2 and Dale-5}
 
 \subsection{Description of experiments}
 Language games are very complex setups for machine learning models.
@@ -200,12 +201,12 @@ With this division, I can analyze the learning of the encodings of the scenes se
 
 \subsubsection{Feature extractors}
 To extract features from the images, I make use of different deep neural network architectures that are developed for this task.
-First, I use the \cmtDK{why ResNet/VGG?} VGG19 (\cite{Simonyan2015}) which is an architecture based on many convolutional layers.
+First, I use the \cmtDK{why ResNet/VGG?} VGG19 \citep{Simonyan2015} which is an architecture based on many convolutional layers.
 After the convolutional layers, the data is passed first through an average pooling layer which outputs 512x7x7 dimensions.
 Next follow three linear layers with \emph{ReLU} non-linearities in between.
 After flattening the input, these classification layers output 4069, 4069 and 1000 dimensions respectively.
 
-Secondly, I include the ResNet-101 (\cite{He2016}) that tries to overcome problems of very deep networks, using \cmtDK{needs to be explained deeper?}{residual blocks}.
+Secondly, I include the ResNet-101 \citep{He2016} that tries to overcome problems of very deep networks, using \cmtDK{needs to be explained deeper?}{residual blocks}.
 There are four blocks that output 256x56x56, 512x28x28, 1024x14x14 and 2048x1x1 dimensions.
 A following average pooling layer outputs 2048x1x1 dimensions as well.
 The final linear layer reduces the flattened data to 1000 dimensions, corresponding to the ImageNet classes.
@@ -252,7 +253,7 @@ In the second level, the models are trained to differentiate objects in the scen
 The last level adds language to the experiment, more specifically the models learn to caption and describe objects in the image.
 These combined experiments should lay the basis for how to build up the agents in the language games.
 
-\paragraph{Level 1 - coordinate predictor:}
+\paragraph{Level 1 - Coordinate predictor:}
 
 This level should help to analyze, how the final task of the language game should look like, in especially what the receiver is tasked to predict.
 As described before, the sender should communicate an object in the image and the receiver needs to identify it.
@@ -296,14 +297,14 @@ All the center coordinates are simply extracted and shuffled.
 Since there are varying numbers of objects in the image, this vector of variable length is padded to 10 objects, resulting in a vector with a length of 20.
 The padding objects have zeros for both coordinates, which no other real object can have.
 For this model, I also made use of a more complex way to encode the image.
-Here, I based the approach on code that implements baselines for the CLEVR dataset (\cite{Johnson2017}). \cmtDK{why?}
+Here, I based the approach on code that implements baselines for the CLEVR dataset \citep{Johnson2017}. \cmtDK{why?}
 The image is first passed through the feature extractor.
 Afterwards, a 2-dimensional convolutional layer, reduces the channels from 2048 to 512 channels with a kernel size of 1.
 After applying the \emph{ReLU} function, the resulting matrix is max pooled over two dimensions with both a kernel size and a stride of 2.
 The resulting matrix is flattened and concatenated with both the attribute encodings and the shuffled coordinates of all objects.
 This is then passed again through a final linear layer to predict x- and y-coordinates.
 
-The third method encodes the attributes of the target object with human language using the \textbf{incremental algorithm for the Generation of Referring Expressions (GRE)} described in \cite{Dale1995}.
+The third method encodes the attributes of the target object with human language using the \textbf{incremental algorithm for the Generation of Referring Expressions (GRE)} described in \citet{Dale1995}.
 This opposes the idea described before, to share as few human knowledge as possible with the model.
 Still, this approach can help to understand and analyze if the model was able to extract information about the objects and more specifically their attributes from the image.
 If the model is able to match parts of the image with human words it would show that the model learned this attribute.
@@ -337,7 +338,7 @@ The third part is again the predictor of the coordinates of the target object.
 Both the processed image and the final hidden state of the LSTM are flattened and concatenated.
 The resulting vector is passed through three linear layers reducing to 1024, 1024 and 2 dimensions respectively.
 Between each linear layer, the \emph{ReLU} function is applied.
-This architecture is also inspired by the baselines described in \cite{Johnson2017}.
+This architecture is also inspired by the baselines described in \citet{Johnson2017}.
 
 The forth method, to encode the target object utilizes \textbf{masking} of the image.
 For this, the image is separated into a fixed size squared area containing the target object and the rest of the image.
@@ -354,7 +355,17 @@ The resulting vectors are concatenated and passed through another linear layer t
 
 \cmtDK{test accuracies}
 
-\paragraph{Level 2 - bounding box classifier:}
+The coordinate predictors are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
+The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.
+Since the model relies on the extracted features of either VGG or ResNet, locational information about the image could have gone lost.
+Training on this dataset should make sure that the model can converge towards the correct pixels, utilizing these features.
+In a next step, the 'Dale' datasets provide the actual problem of discriminating objects from each other and afterwards pointing to the correct one.
+Here, the models should make use of the additional given information about the scene, as one-hot encodings of the attributes, descriptions using the GRE-algorithm or the encoded locations.
+'Dale-2' and 'Dale-5' provide two different difficulties for the model, where it needs to discriminate a target object from one or four distractors.
+Latter task is assumed to be significantly harder.
+
+\paragraph{Level 2 - Bounding box classifier:}
+\cmtDK{better discriminators?}
 
 One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
 Feature extractors like VGG or ResNet are trained on extracting visual information.
@@ -374,7 +385,12 @@ Afterwards, a linear layer reduces the dimensions to 10, corresponding to the 10
 With a final \emph{softmax} function, the model then points to one of the bounding boxes as the target bounding box.
 The loss is calculated using cross entropy.
 
-\paragraph{Level 3 - caption generator:}
+The bounding box classifier is trained on all datasets excluding the 'CLEVR single'.
+The 'CLEVR unambiguous' and 'CLEVR color' datasets are directly comparable to each other for the similar setup of their creation.
+Especially interesting is the effect of the number of shared attributes. Does it help the model if the target object is unique in every attribute or does it help if there is only one specific attribute that is shared?
+A similar assumption can be made for the 'Dale' datasets. How big is the effect of increasing the number of distractors and the growing number of attributes that are needed to discriminate the objects.
+
+\paragraph{Level 3 - Caption generator:}
 
 As the bounding box classifier, the caption generator only acts as a learning step towards understanding, how the model can learn the attributes of objects.
 It is used the same way to create the captions for each image as in the section above with the GRE-algorithm.
@@ -447,4 +463,99 @@ If the generated description of the model describes an object that is not the ta
 If not, independently of describing the target object, no object, or one of the objects insufficiently, it gets assigned 0\%.
 Using this measure, I can get a quick overview if the model's problem lies in extracting and relating attributes or in understanding which of the presented objects is the target object.
 
+The caption generator models are trained on both 'Dale' datasets.
+Again, each of these datasets increases the complexity of the description.
+While the referring expression for the 'Dale-2' datasets are generally shorter, expressions of the 'Dale-5' datasets need to be more specific and use more attributes.
+Furthermore, the model needs to attend to many more locations in the image at the same time to find discriminating factors between those.
+
+\cmtDK{align 'description', 'caption' and 'referring expression' over the whole section}
+
 \subsubsection{Language games}
+The experiments that are executed using language games have a similar structure as the pre-experiments, since those lied the basis for the language games.
+
+The language games in this research have an asymmetric setup.
+One agent, the sender is shown some information and needs to generate a message.
+This message is received by the second agent, the receiver.
+The receiver needs to parse this message and combine it with the information they are given as well.
+The receiver then makes a prediction, which is compared to the ground truth.
+The game is set up prosocial, which means that both agents receive the same loss based on the receiver's prediction.
+All weights of the agents are adapted in the same way.
+\cmtDK{Gumbel-Softmax vs REINFORCE}
+\cmtDK{better in theoretical background?}
+\cmtDK{vocabulary?}
+
+All language games are set up and run in the EGG framework \citep{Kharitonov2019}, developed in PyTorch.
+This framework consists of heavy configurable core that controls the generating and parsing of the message, the calculation of the loss and the rules, for how the weights of all neural models are trained.
+The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, a choice between Gumbel-Softmax relaxation and REINFORCE algorithms to learn neural models containing discrete symbols or an easy switch between different loss functions.
+Furthermore, runs of games can be saved to analyze the used messages of the agents and how they change over the duration of the learning.
+
+The framework is hereby setup in three levels.
+Part of the lowest level are the \emph{agents} themselves.
+The agents are neural models that need to be developed from scratch and define how, the agents process their input and combine it with the message (in case of the receiver) and what they output.
+The second level are \emph{wrappers} that take care of generating and parsing the message.
+The sender wrapper uses the output of the sender agent, to produce a message.
+The receiver on the other hand parses the message received by the sender and passes the result as an additional input to the receiver agent.
+The third level, the \emph{game} links all described parts together.
+It provides the agents with the input and passes the message from the sender to the receiver.
+Furthermore, it uses the output of the receiver and calculates the loss, which is then the basis for the adaption of the weights for both wrappers and agents.
+
+For the following language games, the sender will always produce a sequence of symbols as a message, which the receiver will parse.
+Gumbel-Softmax relaxation is applied to produce discrete symbols.
+This is done using two LSTMs, an encoder LSTM in the sender wrapper and a decoder LSTM in the receiver wrapper.
+The output of the sender agent is used as the initial hidden state for the encoder LSTM.
+This LSTM is then producing symbols until it generates an end-of-sequence symbol.
+This sequence is then passed to the receiver wrapper with its decoder LSTM.
+Its hidden state is initialized randomly.
+The received message sequence is processed symbol by symbol.
+After each time, a symbol is processed by the LSTM, the resulting new hidden state is passed to the receiver agent as the parsed message.
+The receiver agent is combining it with its representation of the image input and predicting an output.
+The \emph{game} is afterwards calculating a loss for each of these outputs separately.
+These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
+
+First, I will discuss \emph{discrimination games}, because they have the simplest setup.
+Furthermore, other language games that research this topic use a very similar setup.
+In the next step, I will look into caption generators that are set up as a language game.
+Here, the sender describes the scene, while the receiver needs to generate a caption.
+In the last step, I try to lose as much human bias as possible and the models are trained on just 'pointing' towards the target object, by again predicting its center coordinates.
+
+\paragraph{Discrimination games:}
+In a discrimination game, the agents are presented with two or more images, one of these being the target image.
+The sender needs to communicate this target image to the receiver by discriminating it from the other distractor images.
+The receiver then needs to decide based on the message, which of the images is the target image.
+
+The discrimination games in this research have a very similar setup as described in \citet{Lazaridou2016}.
+The agents in this research resemble their \emph{agnostic sender} as well as their \emph{receiver}.
+One central difference is the production of the message.
+The main goal of their language game was the identification of the concept that and image was related to.
+Therefore, the sender communicated only single-symbol messages to the receiver, which should describe the concept of the target image.
+Opposed to that in this research, the agents are tasked to discriminate objects from each other based on their attributes.
+It is therefore assumed that the sender will communicate these discriminative attributes.
+For that reason, the sender is allowed to generate sequences as a message.
+
+Both 'Dale' datasets are used to train the agents in this mode.
+Similarly to the bounding box classifier, bounding boxes around each of the objects are extracted and fed to the game.
+As in \citet{Lazaridou2016}, the sender receives the bounding box of the target object as the first image, while the rest of the bounding boxes are shuffled.
+The sender is assumed to learn which of the input images is the target images by this approach.
+The receiver receives the images in completely shuffled order.
+
+For the sender, the images are passed through a feature extractor and a following linear layer that reduces the dimensions to an embedding size $e_s$.
+All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
+This is then used as the initial state of the encoder LSTM in the sender wrapper.
+
+The receiver also encodes all images using a feature extractor with a following linear layer, reducing it to $e_r$.
+The sequence, received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
+As mentioned above, the receiver combines this image representation with the hidden state of each symbol separately.
+This is done by passing the hidden state through a linear layer to scale its dimensions to the same $e_r$.
+This allows the calculation of the dot product between it and the image representation.
+If the message describes an object well, the resulting dot product should be higher.
+The receiver then `points' to one of the images by applying the \emph{softmax} function over the results of the dot products.
+The loss is calculated using the NLL-loss.
+
+During the experiments, five variables are adjusted to compare their effects:
+(1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender wrapper $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver wrapper $h_r$ and (5) the size of the vocabulary $|V|$.
+
+\paragraph{Caption generators:}
+
+\paragraph{Coordinate predictors:}
+
+
