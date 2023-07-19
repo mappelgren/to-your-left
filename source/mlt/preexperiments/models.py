@@ -126,7 +126,7 @@ class AttributeLocationCoordinatePredictor(nn.Module):
         super().__init__()
         self.cnn = nn.Sequential(
             feature_extractor,
-            nn.Conv2d(2048, 512, kernel_size=1, padding=0),
+            nn.LazyConv2d(512, kernel_size=1, padding=0),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
