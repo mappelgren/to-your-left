@@ -138,8 +138,7 @@ class AttributeLocationCoordinatePredictor(nn.Module):
 
         self.reduction = nn.LazyLinear(2048)
 
-        self.predictor = nn.Linear(
-            4608 + number_colors + number_shapes + number_sizes + (number_objects * 2),
+        self.predictor = nn.LazyLinear(
             2,
         )
 
