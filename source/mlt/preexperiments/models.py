@@ -139,7 +139,7 @@ class AttributeLocationCoordinatePredictor(nn.Module):
         )
 
     def forward(self, data):
-        image, attribute_tensor, locations = data
+        image, attribute_tensor, locations, *_ = data
 
         cnn = self.cnn(image)
 
