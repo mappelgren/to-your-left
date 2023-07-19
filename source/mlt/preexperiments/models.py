@@ -121,10 +121,6 @@ class AttributeLocationCoordinatePredictor(nn.Module):
 
     def __init__(
         self,
-        number_colors,
-        number_shapes,
-        number_sizes,
-        number_objects,
         feature_extractor: FeatureExtractor,
     ) -> None:
         super().__init__()

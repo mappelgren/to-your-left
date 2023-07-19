@@ -149,9 +149,6 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeLocationCoordinatePredictor,
         model_args={
-            "number_colors": len(Color.names()),
-            "number_shapes": len(Shape.names()),
-            "number_sizes": len(Size.names()),
             "feature_extractor": DummyFeatureExtractor(),
         },
         loss_function=pixel_loss,
