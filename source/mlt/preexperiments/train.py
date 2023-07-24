@@ -1,5 +1,4 @@
 import argparse
-from audioop import avg
 from dataclasses import dataclass
 from typing import Callable
 
@@ -174,14 +173,14 @@ models = {
     ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
-        dataset_args={},
-        preprocess=PreprocessScratch(50),
-        model=BoundingBoxClassifier,
-        model_args={
+        dataset_args={
             "feature_extractor": ResnetFeatureExtractor(
                 number_blocks=4, avgpool=False, fc=False
             )
         },
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=BoundingBoxClassifier,
+        model_args={"feature_extractor": DummyFeatureExtractor()},
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
         output_processor=BoundingBoxOutputProcessor,

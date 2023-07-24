@@ -27,11 +27,14 @@ class BoundingBoxClassifier(nn.Module):
     def forward(self, data):
         data = data.permute(1, 0, 2, 3, 4)
 
-        after_feature_extractor = []
-        for bounding_box in data:
-            after_feature_extractor.append(self.feature_extractor(bounding_box))
-        stacked = torch.stack(after_feature_extractor)
-        stacked = stacked.permute(1, 0, 2, 3, 4)
+        # if self.inputs_are_feature:
+        stacked = data
+        # else:
+        #     after_feature_extractor = []
+        #     for bounding_box in data:
+        #         after_feature_extractor.append(self.feature_extractor(bounding_box))
+        #     stacked = torch.stack(after_feature_extractor)
+        #     stacked = stacked.permute(1, 0, 2, 3, 4)
 
         classified = self.classifier(stacked)
 
