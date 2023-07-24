@@ -72,7 +72,7 @@ class BoundingBoxClassifierDataset(Dataset):
     def __init__(
         self,
         scenes_json_dir,
-        image_path,
+        image_loader: ImageLoader,
         max_number_samples,
         feature_extractor: FeatureExtractor = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
@@ -99,7 +99,9 @@ class BoundingBoxClassifierDataset(Dataset):
             ) as f:
                 scene = json.load(f)
 
-            image = Image.open(image_path + scene["image_filename"]).convert("RGB")
+            image_id = scene_file.removesuffix(".json")
+            image, _, _ = image_loader.get_image(image_id)
+            # image = Image.open(image_path + scene["image_filename"]).convert("RGB")
 
             bounding_boxes = self._get_bounding_boxes(image, scene, preprocess)
 
