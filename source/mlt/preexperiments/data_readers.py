@@ -385,10 +385,12 @@ class CoordinatePredictorDataset(Dataset):
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
+        *_args,
         attribute_encoder: AttributeEncoder = None,
         encode_locations=False,
         image_masker: ImageMasker = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        **kwargs,
     ) -> None:
         super().__init__()
 
