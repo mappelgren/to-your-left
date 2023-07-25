@@ -112,7 +112,7 @@ Each image contains a maximum of 10 objects, that are not intersecting, have the
     \label{fig:clevr-examples}
 \end{figure}
 
-\subsubsection{CLEVR single}
+\subsubsection*{CLEVR single}
 The simplest dataset is called 'CLEVR single'.
 This is a very simple dataset and has the purpose to simplify the problem the model needs to learn as much as possible.
 Each scene in the dataset contains only one single object, the target object.
@@ -124,7 +124,7 @@ There are no objects that distract the model from extracting features from the t
 This helps to understand if the models are actually able to assign features or learn locations of these features in an image.
 Figure \ref{fig:clevr-single} shows an example with the only object being the \emph{large yellow sphere}.
 
-\subsubsection{CLEVR unambiguous}
+\subsubsection*{CLEVR unambiguous}
 The second dataset that is created is called 'CLEVR unambiguous'.
 The purpose of this dataset is to create scenes, where the target object is completely unique and as easily identifiable as possible.
 For this reason, there exist only two groups in the scene, the target object and distractors.
@@ -138,7 +138,7 @@ Consider the scene in Figure \ref{fig:clevr-unambiguous}.
 The target object can be completely described as the \emph{large green sphere}.
 On the other hand, also descriptions like the \emph{green object}, the \emph{large object} or the \emph{sphere} would be unambiguously referring to the target object.
 
-\subsubsection{CLEVR color}
+\subsubsection*{CLEVR color}
 This task could on the other hand be difficult to learn for neural models.
 Although the target object is unique in the scene with resect to the distractors, the description isn't.
 Considering all unordered combinations of the three attributes and a composite referring expression, there are $\binom{3}{3} + \binom{3}{2} + \binom{3}{1} = 7$ possible descriptions of the target object.
@@ -154,7 +154,7 @@ As seen in Figure \ref{fig:clevr-color}, the \emph{small brown cylinder} is uniq
 The number of possible descriptions is lowered to three, since the color \emph{brown} needs to be part of it.
 Notice as well that this restriction doesn't apply to the distractors, where multiple objects with the same color are allowed.
 
-\subsubsection{CLEVR Dale datasets}
+\subsubsection*{CLEVR Dale datasets}
 Both of the above described datasets are very restrictive on the disambiguating relations between the target object and the rest of the objects.
 Either no attribute or only one attribute is shared.
 More realistically would be if objects can share a variable number of attributes.
@@ -353,7 +353,18 @@ The model is presented with both the original image and the masked image.
 Both are passed through a feature extractor and afterwards passed through a linear layer, reducing the dimensions to 2048.
 The resulting vectors are concatenated and passed through another linear layer that predicts the coordinates.
 
-\cmtDK{test accuracies}
+The test dataset is again evaluated on the euclidean distance of the predicted coordinates to the ground truth coordinates.
+This distance needs to be minimized.
+The mean of all calculated distances is calculated across the whole epoch, which results in a mean distance score per epoch.
+Since this score only takes the average of all predictions into account it can't evaluate every prediction individually.
+If for instance the prediction of one object is getting more precise with growing number of epochs, but the precision of another object gets worse, the mean distance will stay the same.
+It doesn't reflect this change.
+For that reason, I also introduced an accuracy score.
+For that I defined a fixed size circle with a radius of 20 pixels around the center of each object.
+If the model's prediction lies in this circle, it will be counted as a correct prediction, if it lies outside, it is a false prediction.
+These scores are averaged for the epoch and result in an accuracy score, where 100\% means that all predictions were very close to the center coordinates and 0\% means that no predictions were close to the center coordinates.
+This of course doesn't give a perfect representation since the size of the objects varies, but it will still show, how precise each individual prediction is.
+A high accuracy may indicate that the model could identify this specific object better.
 
 The coordinate predictors are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
 The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.
@@ -365,7 +376,7 @@ Here, the models should make use of the additional given information about the s
 Latter task is assumed to be significantly harder.
 
 \paragraph{Level 2 - Bounding box classifier:}
-\cmtDK{better discriminators?}
+\cmtDK{better to call it discriminators?}
 
 One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
 Feature extractors like VGG or ResNet are trained on extracting visual information.
