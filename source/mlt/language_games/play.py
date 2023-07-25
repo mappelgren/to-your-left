@@ -101,19 +101,10 @@ models = {
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "caption_decoder": CaptionDecoder(
-                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
-                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
-                decoder_out_dim=1024,
-            ),
         },
         receiver=CaptionGeneratorReceiver,
         receiver_args={
             "image_encoder": ImageEncoder(
-                encoder_out_dim=1024,
-                feature_extractor=DummyFeatureExtractor(),
-            ),
-            "masked_image_encoder": ImageEncoder(
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
@@ -142,8 +133,6 @@ models = {
         sender=DaleAttributeCoordinatePredictorSender,
         sender_args={
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
             "feature_extractor": DummyFeatureExtractor(),
         },
         receiver=CoordinatePredictorReceiver,
@@ -271,6 +260,12 @@ def get_params(params):
         default=10,
         help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
     )
+    parser.add_argument(
+        "--sender_encoder_dim",
+        type=int,
+        default=10,
+        help="Size of the LSMT encoder of Sender when attributes are encoded with descriptions (default: 10)",
+    )
 
     # -- OUTPUT --
     parser.add_argument(
@@ -347,6 +342,7 @@ def main(params):
     sender_args = model.sender_args
     sender_args["embedding_dimension"] = opts.sender_embedding
     sender_args["hidden_size"] = opts.sender_hidden
+    sender_args["encoder_out_dim"] = opts.sender_encoder_dim
 
     receiver_args = model.receiver_args
     receiver_args["embedding_dimension"] = opts.receiver_embedding

@@ -1,7 +1,5 @@
 import torch
 from mlt.feature_extractors import FeatureExtractor
-from mlt.preexperiments.data_readers import CaptionGeneratorDataset
-from numpy import concatenate
 from torch import nn
 
 
@@ -74,13 +72,7 @@ class CaptionGeneratorSender(nn.Module):
 
 class CaptionGeneratorReceiver(nn.Module):
     def __init__(
-        self,
-        image_encoder,
-        masked_image_encoder,
-        caption_decoder,
-        encoded_sos,
-        *_args,
-        **_kwargs
+        self, image_encoder, caption_decoder, encoded_sos, *_args, **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -188,7 +180,12 @@ class MaskedCoordinatePredictorSender(nn.Module):
     """
 
     def __init__(
-        self, feature_extractor: FeatureExtractor, hidden_size, *_args, **_kwargs
+        self,
+        feature_extractor: FeatureExtractor,
+        hidden_size,
+        embedding_dim,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.process_image = nn.Sequential(
@@ -199,10 +196,14 @@ class MaskedCoordinatePredictorSender(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
+            nn.LazyLinear(embedding_dim),
         )
 
         self.process_masked_image = nn.Sequential(
-            feature_extractor, nn.Flatten(), nn.Dropout(0.2), nn.LazyLinear(2048)
+            feature_extractor,
+            nn.Flatten(),
+            nn.Dropout(0.2),
+            nn.LazyLinear(embedding_dim),
         )
 
         self.linear = nn.LazyLinear(hidden_size)
@@ -212,6 +213,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
         masked_image = aux_input["masked_image"]
 
         reduced = self.process_image(image)
+
         masked_reduced = self.process_masked_image(masked_image)
 
         concatenated = torch.cat(
