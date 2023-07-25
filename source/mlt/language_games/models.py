@@ -129,7 +129,7 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
     def __init__(
         self,
         vocab_size,
-        embedding_dim,
+        embedding_dimension,
         encoder_out_dim,
         feature_extractor: FeatureExtractor,
         hidden_size,
@@ -147,8 +147,8 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
             nn.Flatten(),
         )
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
+        self.embedding = nn.Embedding(vocab_size, embedding_dimension)
+        self.lstm = nn.LSTM(embedding_dimension, encoder_out_dim, batch_first=True)
 
         self.linear = nn.LazyLinear(hidden_size)
 
