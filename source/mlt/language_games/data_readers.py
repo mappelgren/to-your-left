@@ -321,7 +321,7 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
             captions.append(sample.caption)
             non_target_captions.append(sample.non_target_captions)
             train_modes.append(self.train_mode)
-            image_ids.append(sample.image_id)
+            image_ids.append(int(sample.image_id[-6:]))
 
         return (
             torch.stack(sender_inputs),
@@ -332,7 +332,7 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
                 "caption": torch.stack(captions),
                 "non_target_captions": torch.stack(non_target_captions),
                 "train_mode": torch.tensor(train_modes),
-                "image_id": torch.stack(image_ids),
+                "image_id": torch.tensor(image_ids),
             },
         )
 
@@ -381,7 +381,7 @@ class CoordinatePredictorGameBatchIterator(GameBatchIterator):
             receiver_inputs.append(sample.image)
             masked_images.append(sample.masked_image)
             attibute_tensors.append(sample.attribute_tensor)
-            image_ids.append(sample.image_id)
+            image_ids.append(int(sample.image_id[-6:]))
 
         return (
             torch.stack(sender_inputs),
@@ -390,6 +390,6 @@ class CoordinatePredictorGameBatchIterator(GameBatchIterator):
             {
                 "masked_image": torch.stack(masked_images),
                 "attribute_tensor": torch.stack(attibute_tensors),
-                "image_id": torch.stack(image_ids),
+                "image_id": torch.tensor(image_ids),
             },
         )
