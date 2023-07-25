@@ -25,6 +25,7 @@ from mlt.language_games.models import (
     ReferentialGameReceiver,
     ReferentialGameSender,
 )
+from mlt.language_games.test import captioning_loss, classification_loss
 from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     DaleCaptionAttributeEncoder,
