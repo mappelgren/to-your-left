@@ -60,7 +60,7 @@ def captioning_loss(
     _aux_input,
 ):
     loss = F.cross_entropy(receiver_output, labels)
-    return loss, {}
+    return loss, {"acc": 0}
 
 
 @dataclass
