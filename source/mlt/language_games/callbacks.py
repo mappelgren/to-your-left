@@ -47,7 +47,7 @@ class ExcludingInteractionSaver(InteractionSaver):
         dump_dir = pathlib.Path(dump_dir) / mode / f"epoch_{epoch}"
         dump_dir.mkdir(exist_ok=True, parents=True)
 
-        # exclude space intesive information that is retrievable from the dataset
+        # exclude space intensive information that is retrievable from the dataset
         logs.sender_input = torch.tensor(0)
         logs.receiver_input = torch.tensor(0)
 

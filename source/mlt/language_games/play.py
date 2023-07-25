@@ -26,6 +26,7 @@ from mlt.language_games.models import (
     CaptionGeneratorSender,
     CoordinatePredictorReceiver,
     DaleAttributeCoordinatePredictorSender,
+    MaskedCoordinatePredictorSender,
     ReferentialGameReceiver,
     ReferentialGameSender,
 )
@@ -143,6 +144,24 @@ models = {
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "feature_extractor": DummyFeatureExtractor(),
+        },
+        receiver=CoordinatePredictorReceiver,
+        receiver_args={
+            "feature_extractor": DummyFeatureExtractor(),
+        },
+        loss_function=pixel_loss,
+    ),
+    "masked_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "image_masker": BasicImageMasker(),
+        },
+        split_dataset=True,
+        image_loader=FeatureImageLoader,
+        iterator=CoordinatePredictorGameBatchIterator,
+        sender=MaskedCoordinatePredictorSender,
+        sender_args={
             "feature_extractor": DummyFeatureExtractor(),
         },
         receiver=CoordinatePredictorReceiver,

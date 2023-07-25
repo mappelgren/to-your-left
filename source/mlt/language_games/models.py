@@ -187,7 +187,9 @@ class MaskedCoordinatePredictorSender(nn.Module):
      - center coordinates of all objects
     """
 
-    def __init__(self, feature_extractor: FeatureExtractor, *_args, **_kwargs) -> None:
+    def __init__(
+        self, feature_extractor: FeatureExtractor, hidden_size, *_args, **_kwargs
+    ) -> None:
         super().__init__()
         self.process_image = nn.Sequential(
             feature_extractor,
@@ -203,6 +205,8 @@ class MaskedCoordinatePredictorSender(nn.Module):
             feature_extractor, nn.Flatten(), nn.Dropout(0.2), nn.LazyLinear(2048)
         )
 
+        self.linear = nn.LazyLinear(hidden_size)
+
     def forward(self, x, aux_input):
         image = x
         masked_image = aux_input["masked_image"]
@@ -215,7 +219,9 @@ class MaskedCoordinatePredictorSender(nn.Module):
             dim=1,
         )
 
-        return concatenated
+        hidden = self.linear(concatenated)
+
+        return hidden
 
 
 class CoordinatePredictorReceiver(nn.Module):
