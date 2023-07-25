@@ -324,6 +324,6 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
             {
                 "masked_image": torch.stack(masked_images),
                 "caption": torch.stack(captions),
-                "train_mode": train_modes,
+                "train_mode": torch.tensor(train_modes),
             },
         )
