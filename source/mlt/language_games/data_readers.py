@@ -372,7 +372,7 @@ class CoordinatePredictorGameBatchIterator(GameBatchIterator):
 
         for sample in samples:
             sender_inputs.append(sample.image)
-            targets.append(sample.caption[1:])
+            targets.append(sample.target_pixels)
 
             receiver_inputs.append(sample.image)
             masked_images.append(sample.masked_image)
