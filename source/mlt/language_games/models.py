@@ -104,6 +104,7 @@ class CaptionGeneratorReceiver(nn.Module):
             lstm_states = linear, linear
             predicted, lstm_states = self.caption_decoder(captions[:, :-1], lstm_states)
 
+            print(predicted)
             return predicted.permute(0, 2, 1)
 
         else:
@@ -124,8 +125,8 @@ class CaptionGeneratorReceiver(nn.Module):
                     word, lstm_states
                 )
                 word = torch.max(predicted_word_layer, dim=2).indices
-                predicted.append(predicted_word_layer)
+                predicted.append(predicted_word_layer.squeeze(dim=1))
 
             print(torch.stack(predicted).shape)
 
-            return torch.stack(predicted).permute(0, 2, 1)
+            return torch.stack(predicted).permute(1, 0, 2)
