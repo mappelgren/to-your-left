@@ -12,6 +12,8 @@ from mlt.language_games.callbacks import LogSaver
 from mlt.language_games.data_readers import (
     CaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameDataset,
+    CoordinatePredictorGameBatchIterator,
+    CoordinatePredictorGameDataset,
     DaleReferentialGameBatchIterator,
     DaleReferentialGameDataset,
     GameBatchIterator,
@@ -22,10 +24,12 @@ from mlt.language_games.data_readers import (
 from mlt.language_games.models import (
     CaptionGeneratorReceiver,
     CaptionGeneratorSender,
+    CoordinatePredictorReceiver,
+    DaleAttributeCoordinatePredictorSender,
     ReferentialGameReceiver,
     ReferentialGameSender,
 )
-from mlt.language_games.test import captioning_loss, classification_loss
+from mlt.language_games.test import captioning_loss, classification_loss, pixel_loss
 from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     DaleCaptionAttributeEncoder,
@@ -122,6 +126,30 @@ models = {
             ),
         },
         loss_function=captioning_loss,
+    ),
+    "dale_attribute_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "attribute_encoder": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.APPEND,
+                reversed_caption=False,
+            )
+        },
+        split_dataset=True,
+        image_loader=FeatureImageLoader,
+        iterator=CoordinatePredictorGameBatchIterator,
+        sender=DaleAttributeCoordinatePredictorSender,
+        sender_args={
+            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "feature_extractor": DummyFeatureExtractor(),
+        },
+        receiver=CoordinatePredictorReceiver,
+        receiver_args={
+            "feature_extractor": DummyFeatureExtractor(),
+        },
+        loss_function=pixel_loss,
     ),
 }
 
