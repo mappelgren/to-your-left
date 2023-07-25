@@ -140,6 +140,8 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         embedding_dim,
         encoder_out_dim,
         feature_extractor: FeatureExtractor,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.process_image = nn.Sequential(
@@ -180,10 +182,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
      - center coordinates of all objects
     """
 
-    def __init__(
-        self,
-        feature_extractor: FeatureExtractor,
-    ) -> None:
+    def __init__(self, feature_extractor: FeatureExtractor, *_args, **_kwargs) -> None:
         super().__init__()
         self.process_image = nn.Sequential(
             feature_extractor,
@@ -215,8 +214,8 @@ class MaskedCoordinatePredictorSender(nn.Module):
 
 
 class CoordinatePredictorReceiver(nn.Module):
-    def __init__(self, feature_extractor: FeatureExtractor, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, feature_extractor: FeatureExtractor, *_args, **_kwargs) -> None:
+        super().__init__()
         self.process_image = nn.Sequential(
             feature_extractor,
             nn.LazyConv2d(128, kernel_size=1, padding=0),
