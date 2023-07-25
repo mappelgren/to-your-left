@@ -104,6 +104,8 @@ class CaptionGeneratorReceiver(nn.Module):
             lstm_states = linear, linear
             predicted, lstm_states = self.caption_decoder(captions[:, :-1], lstm_states)
 
+            return predicted.permute(0, 2, 1)
+
         else:
             encoded_image = self.image_encoder(image)
             encoded_masked_image = self.masked_image_encoder(masked_image)
