@@ -67,7 +67,7 @@ models = {
         receiver_args={},
         loss_function=classification_loss,
     ),
-    "dale": ModelDefinition(
+    "discriminator": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
         split_dataset=True,
