@@ -140,6 +140,7 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         embedding_dim,
         encoder_out_dim,
         feature_extractor: FeatureExtractor,
+        hidden_size,
         *_args,
         **_kwargs
     ) -> None:
@@ -157,6 +158,8 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
 
+        self.linear = nn.LazyLinear(hidden_size)
+
     def forward(self, x, aux_input):
         image = x
         attribute_tensor = aux_input["attribute_tensor"]
@@ -168,7 +171,9 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
 
         concatenated = torch.cat((processed_image, hidden_state.squeeze()), dim=1)
 
-        return concatenated
+        hidden = self.linear(concatenated)
+
+        return hidden
 
 
 class MaskedCoordinatePredictorSender(nn.Module):
@@ -240,7 +245,7 @@ class CoordinatePredictorReceiver(nn.Module):
         image = x
         processed_image = self.process_image(image)
 
-        concatenated = torch.cat(processed_image, message, dim=1)
+        concatenated = torch.cat((processed_image, message), dim=1)
         predicted = self.predictor(concatenated)
 
         return predicted

@@ -78,14 +78,12 @@ def pixel_loss(
 ):
     device = receiver_output.device
     accuracy = BinaryAccuracy(device=device)
-    mean = Mean(device=device)
 
     distances = torch.diagonal(torch.cdist(receiver_output, labels.float()))
-    mean.update(distances)
 
     positives = torch.where(distances < 20, distances, 0)
     accuracy.update(positives, torch.ones_like(positives))
 
-    return mean.compute(), {
+    return distances, {
         "accuracy": accuracy.compute().detach().clone().float(),
     }

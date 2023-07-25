@@ -384,6 +384,6 @@ class CoordinatePredictorGameBatchIterator(GameBatchIterator):
             torch.stack(receiver_inputs),
             {
                 "masked_image": torch.stack(masked_images),
-                "attribute_tensors": torch.stack(attibute_tensors),
+                "attribute_tensor": torch.stack(attibute_tensors),
             },
         )
