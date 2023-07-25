@@ -59,7 +59,7 @@ class CaptionGeneratorSender(nn.Module):
 
     def forward(self, x, aux_input):
         image = x
-        masked_image = torch.stack([sample["masked_image"] for sample in aux_input])
+        masked_image = aux_input["masked_image"]
 
         encoded_image = self.image_encoder(image)
         encoded_masked_image = self.masked_image_encoder(masked_image)
@@ -89,11 +89,11 @@ class CaptionGeneratorReceiver(nn.Module):
 
     def forward(self, message, x, aux_input):
         image = x
-        masked_image = torch.stack([sample["masked_image"] for sample in aux_input])
-        captions = torch.stack([sample["caption"] for sample in aux_input])
+        masked_image = aux_input["masked_image"]
+        captions = aux_input["caption"]
         device = image.device
 
-        if aux_input[0]["train_mode"]:
+        if aux_input["train_mode"][0]:
             encoded_image = self.image_encoder(image)
             encoded_masked_image = self.masked_image_encoder(masked_image)
 
@@ -103,8 +103,6 @@ class CaptionGeneratorReceiver(nn.Module):
             linear = self.linear(concatenated)
             lstm_states = linear, linear
             predicted, lstm_states = self.caption_decoder(captions[:, :-1], lstm_states)
-
-            print(predicted.shape)
 
             return predicted.permute(0, 2, 1)
 
