@@ -8,7 +8,7 @@ from typing import Callable
 import egg.core as core
 from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader
-from mlt.language_games.callbacks import LogSaver
+from mlt.language_games.callbacks import ExcludingInteractionSaver, LogSaver
 from mlt.language_games.data_readers import (
     CaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameDataset,
@@ -369,7 +369,7 @@ def main(params):
                     prefix="checkpoint",
                     checkpoint_freq=0,
                 ),
-                core.InteractionSaver(
+                ExcludingInteractionSaver(
                     checkpoint_dir=out_dir,
                     train_epochs=[opts.n_epochs],
                     test_epochs=[opts.n_epochs],
