@@ -61,7 +61,7 @@ def captioning_loss(
     loss = F.cross_entropy(receiver_output, labels)
 
     return loss, {
-        "accuracy": accuracy.compute(),
-        "hamming_accuracy": hamming_accuracy.compute(),
-        "non_target_accuracy": non_target_accuracy.compute(),
+        "accuracy": accuracy.compute().detach().float(),
+        "hamming_accuracy": hamming_accuracy.compute().detach().float(),
+        "non_target_accuracy": non_target_accuracy.compute().detach().float(),
     }
