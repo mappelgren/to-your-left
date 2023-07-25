@@ -126,4 +126,6 @@ class CaptionGeneratorReceiver(nn.Module):
                 word = torch.max(predicted_word_layer, dim=2).indices
                 predicted.append(predicted_word_layer)
 
+            print(torch.stack(predicted).shape)
+
             return torch.stack(predicted).permute(0, 2, 1)
