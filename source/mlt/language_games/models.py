@@ -104,6 +104,8 @@ class CaptionGeneratorReceiver(nn.Module):
             lstm_states = linear, linear
             predicted, lstm_states = self.caption_decoder(captions[:, :-1], lstm_states)
 
+            print(predicted.shape)
+
             return predicted.permute(0, 2, 1)
 
         else:

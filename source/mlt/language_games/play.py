@@ -59,10 +59,8 @@ def captioning_loss(
     labels,
     _aux_input,
 ):
-    acc = (receiver_output.argmax(dim=1) == labels).detach().float()
-    # similarly, the loss computes cross-entropy between the Receiver-produced target-position probability distribution and the labels
     loss = F.cross_entropy(receiver_output, labels)
-    return loss, {"acc": acc}
+    return loss, {}
 
 
 @dataclass
