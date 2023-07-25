@@ -306,6 +306,7 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
         receiver_inputs = []
         masked_images = []
         captions = []
+        non_target_captions = []
         train_modes = []
 
         for sample in samples:
@@ -315,6 +316,7 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
             receiver_inputs.append(sample.image)
             masked_images.append(sample.masked_image)
             captions.append(sample.caption)
+            non_target_captions.append(sample.non_target_captions)
             train_modes.append(self.train_mode)
 
         return (
@@ -324,6 +326,7 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
             {
                 "masked_image": torch.stack(masked_images),
                 "caption": torch.stack(captions),
+                "non_target_captions": torch.stack(non_target_captions),
                 "train_mode": torch.tensor(train_modes),
             },
         )

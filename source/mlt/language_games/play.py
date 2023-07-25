@@ -6,7 +6,6 @@ from time import gmtime, strftime
 from typing import Callable
 
 import egg.core as core
-import torch.nn.functional as F
 from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader
 from mlt.language_games.callbacks import LogSaver
@@ -33,34 +32,6 @@ from mlt.preexperiments.data_readers import (
 from mlt.preexperiments.models import CaptionDecoder, ImageEncoder
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
-
-
-def classification_loss(
-    _sender_input,
-    _message,
-    _receiver_input,
-    receiver_output,
-    labels,
-    _aux_input,
-):
-    # in the discriminative case, accuracy is computed by comparing the index with highest score in Receiver output (a distribution of unnormalized
-    # probabilities over target poisitions) and the corresponding label read from input, indicating the ground-truth position of the target
-    acc = (receiver_output.argmax(dim=1) == labels).detach().float()
-    # similarly, the loss computes cross-entropy between the Receiver-produced target-position probability distribution and the labels
-    loss = F.nll_loss(receiver_output, labels, reduction="none")
-    return loss, {"acc": acc}
-
-
-def captioning_loss(
-    _sender_input,
-    _message,
-    _receiver_input,
-    receiver_output,
-    labels,
-    _aux_input,
-):
-    loss = F.cross_entropy(receiver_output, labels)
-    return loss, {"acc": 0}
 
 
 @dataclass
