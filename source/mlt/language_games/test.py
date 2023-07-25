@@ -31,7 +31,7 @@ def captioning_loss(
 ):
     device = receiver_output.device
     accuracy = BinaryAccuracy(device=device)
-    hamming_accuracy = MulticlassAccuracy(device=device)
+    word_by_word_accuracy = MulticlassAccuracy(device=device)
     non_target_accuracy = BinaryAccuracy(device=device)
 
     predicted_captions = receiver_output.max(dim=1).indices
@@ -56,12 +56,15 @@ def captioning_loss(
             torch.tensor(True).unsqueeze(dim=0),
         )
 
-    hamming_accuracy.update(predicted_captions.flatten(), labels.flatten())
+    word_by_word_accuracy.update(predicted_captions.flatten(), labels.flatten())
 
     loss = F.cross_entropy(receiver_output, labels)
 
     return loss, {
         "accuracy": accuracy.compute().detach().clone().float(),
-        "hamming_accuracy": hamming_accuracy.compute().detach().clone().float(),
+        "word-by-word_accuracy": word_by_word_accuracy.compute()
+        .detach()
+        .clone()
+        .float(),
         "non_target_accuracy": non_target_accuracy.compute().detach().clone().float(),
     }
