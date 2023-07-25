@@ -9,7 +9,6 @@ from enum import Enum
 import torch
 from mlt.image_loader import ImageLoader
 from mlt.preexperiments.models import FeatureExtractor
-from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.models import ResNet101_Weights
@@ -488,8 +487,10 @@ class CaptionGeneratorDataset(Dataset):
         image_loader: ImageLoader,
         max_number_samples,
         captioner: Captioner,
+        *_args,
         image_masker: ImageMasker = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        **_kwargs,
     ) -> None:
         super().__init__()
         self.captioner = captioner

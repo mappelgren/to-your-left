@@ -1,9 +1,10 @@
 import torch
+from mlt.preexperiments.data_readers import CaptionGeneratorDataset
 from torch import nn
 
 
 class ReferentialGameSender(nn.Module):
-    def __init__(self, hidden_size, embedding_dimension=256) -> None:
+    def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
         super().__init__()
         self.image_encoder = nn.Sequential(
             nn.Flatten(), nn.LazyLinear(embedding_dimension, bias=False)
@@ -23,7 +24,7 @@ class ReferentialGameSender(nn.Module):
 
 
 class ReferentialGameReceiver(nn.Module):
-    def __init__(self, embedding_dimension=256) -> None:
+    def __init__(self, *_args, embedding_dimension=256, **_kwargs) -> None:
         super().__init__()
         self.image_encoder = nn.Sequential(
             nn.Flatten(), nn.LazyLinear(embedding_dimension, bias=False)
@@ -46,51 +47,83 @@ class ReferentialGameReceiver(nn.Module):
         return self.softmax(output)
 
 
-class MaskedDaleSender(nn.Module):
-    def __init__(self, image_encoder, masked_image_encoder) -> None:
+class CaptionGeneratorSender(nn.Module):
+    def __init__(
+        self, image_encoder, masked_image_encoder, hidden_size, *_args, **_kwargs
+    ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
 
-    def forward(self, x, _aux_input):
-        image, masked_image = x
+        self.linear = nn.LazyLinear(hidden_size)
 
-        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
-        encoded_masked_image = self.masked_image_encoder(masked_image).unsqueeze(dim=0)
-        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
+    def forward(self, x, aux_input):
+        image = x
+        masked_image = torch.stack([sample["masked_image"] for sample in aux_input])
 
-        return concatenated
+        encoded_image = self.image_encoder(image)
+        encoded_masked_image = self.masked_image_encoder(masked_image)
+
+        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=1)
+
+        linear = self.linear(concatenated)
+        return linear
 
 
-class DaleReceiver(nn.Module):
-    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+class CaptionGeneratorReceiver(nn.Module):
+    def __init__(
+        self,
+        image_encoder,
+        masked_image_encoder,
+        caption_decoder,
+        encoded_sos,
+        *_args,
+        **_kwargs
+    ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
+        self.masked_image_encoder = masked_image_encoder
         self.caption_decoder = caption_decoder
+        self.linear = nn.LazyLinear(1024)
         self.encoded_sos = torch.tensor(encoded_sos)
 
-    def forward(self, x, _input, _aux_input):
-        image, caption = _input
-
-        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
-        lstm_states = encoded_image, encoded_image
-        predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
-
-        return predicted.permute(0, 2, 1)
-
-    def caption(self, image):
+    def forward(self, message, x, aux_input):
+        image = x
+        masked_image = torch.stack([sample["masked_image"] for sample in aux_input])
+        captions = torch.stack([sample["caption"] for sample in aux_input])
         device = image.device
 
-        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
+        if aux_input[0]["train_mode"]:
+            encoded_image = self.image_encoder(image)
+            encoded_masked_image = self.masked_image_encoder(masked_image)
 
-        caption = []
-        lstm_states = encoded_image, encoded_image
+            concatenated = torch.cat(
+                (encoded_image, encoded_masked_image, message), dim=1
+            ).unsqueeze(dim=0)
+            linear = self.linear(concatenated)
+            lstm_states = linear, linear
+            predicted, lstm_states = self.caption_decoder(captions[:, :-1], lstm_states)
 
-        # shape: batch, sequence length
-        word = torch.full((image.shape[0], 1), self.encoded_sos, device=device)
-        for _ in range(3):
-            predicted_word_layer, lstm_states = self.caption_decoder(word, lstm_states)
-            word = torch.max(predicted_word_layer, dim=2).indices
-            caption.append(word)
+            return predicted.permute(0, 2, 1)
 
-        return torch.cat(caption, dim=1)
+        else:
+            encoded_image = self.image_encoder(image)
+            encoded_masked_image = self.masked_image_encoder(masked_image)
+
+            concatenated = torch.cat(
+                (encoded_image, encoded_masked_image, message), dim=1
+            ).unsqueeze(dim=0)
+            linear = self.linear(concatenated)
+            lstm_states = linear, linear
+
+            predicted = []
+            # shape: batch, sequence length
+            word = torch.full((image.shape[0], 1), self.encoded_sos, device=device)
+            for _ in range(3):
+                predicted_word_layer, lstm_states = self.caption_decoder(
+                    word, lstm_states
+                )
+                word = torch.max(predicted_word_layer, dim=2).indices
+                predicted.append(predicted_word_layer)
+
+            return torch.stack(predicted).permute(0, 2, 1)

@@ -494,7 +494,7 @@ All weights of the agents are adapted in the same way.
 \cmtDK{Gumbel-Softmax vs REINFORCE}
 \cmtDK{better in theoretical background?}
 \cmtDK{vocabulary?}
-
+\cmtDK{batch iterator}
 All language games are set up and run in the EGG framework \citep{Kharitonov2019}, developed in PyTorch.
 This framework consists of heavy configurable core that controls the generating and parsing of the message, the calculation of the loss and the rules, for how the weights of all neural models are trained.
 The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, a choice between Gumbel-Softmax relaxation and REINFORCE algorithms to learn neural models containing discrete symbols or an easy switch between different loss functions.

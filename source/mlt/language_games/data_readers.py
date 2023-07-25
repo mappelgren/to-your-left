@@ -1,4 +1,3 @@
-import itertools
 import json
 import os
 import pickle
@@ -11,10 +10,11 @@ from typing import Iterator
 import h5py
 import torch
 from mlt.image_loader import ImageLoader
-from mlt.preexperiments.data_readers import CaptionGeneratorDataset
-from PIL import Image
+from mlt.preexperiments.data_readers import (
+    CaptionGeneratorDataset,
+    CaptionGeneratorSample,
+)
 from torch.utils.data import DataLoader, Dataset, Subset
-from torchvision.models import ResNet101_Weights
 
 
 @dataclass
@@ -30,7 +30,7 @@ class ReferentialGameSample:
 
 class GameBatchIterator(Iterator, ABC):
     @abstractmethod
-    def __init__(self, loader, batch_size, n_batches, seed):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed):
         ...
 
 
@@ -40,6 +40,7 @@ class GameLoader(DataLoader):
         iterator: GameBatchIterator,
         batch_size,
         batches_per_epoch,
+        train_mode,
         *args,
         seed=None,
         **kwargs,
@@ -47,6 +48,7 @@ class GameLoader(DataLoader):
         self.iterator = iterator
         self.batches_per_epoch = batches_per_epoch
         self.seed = seed
+        self.train_mode = train_mode
 
         # batch_size is part of standard DataLoader arguments
         kwargs["batch_size"] = batch_size
@@ -61,12 +63,13 @@ class GameLoader(DataLoader):
             self,
             batch_size=self.batch_size,
             n_batches=self.batches_per_epoch,
+            train_mode=self.train_mode,
             seed=seed,
         )
 
 
 class LazaridouReferentialGameDataset(Dataset):
-    def __init__(self, data_root_dir, *args, **kwargs) -> None:
+    def __init__(self, data_root_dir, *_args, **_kwargs) -> None:
         super().__init__()
 
         feature_file_path = os.path.join(
@@ -99,11 +102,12 @@ class LazaridouReferentialGameDataset(Dataset):
 
 
 class LazaridouReferentialGameBatchIterator(GameBatchIterator):
-    def __init__(self, loader, batch_size, n_batches, seed) -> None:
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
         self.loader = loader
         self.batch_size = batch_size
         self.n_batches = n_batches
         self.batches_generated = 0
+        self.train_mode = train_mode
         self.random_seed = random.Random(seed)
 
     def __next__(self):
@@ -162,9 +166,9 @@ class DaleReferentialGameDataset(Dataset):
         self,
         scenes_json_dir,
         image_loader: ImageLoader,
-        *args,
+        *_args,
         max_number_samples=100,
-        **kwargs,
+        **_kwargs,
     ) -> None:
         super().__init__()
 
@@ -223,12 +227,13 @@ class DaleReferentialGameDataset(Dataset):
         return len(self.samples)
 
 
-class DaleReferentialGameGameBatchIterator(GameBatchIterator):
-    def __init__(self, loader, batch_size, n_batches, seed) -> None:
+class DaleReferentialGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
         self.loader = loader
         self.batch_size = batch_size
         self.n_batches = n_batches
         self.batches_generated = 0
+        self.train_mode = train_mode
         self.random_seed = random.Random(seed)
 
     def __next__(self):
@@ -266,115 +271,57 @@ class DaleReferentialGameGameBatchIterator(GameBatchIterator):
         )
 
 
-class BoundingBoxReferentialGameDataset(Dataset):
-    def __init__(
-        self,
-        scenes_json_dir,
-        image_path="",
-        max_number_samples=0,
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
-    ) -> None:
-        super().__init__()
+class CaptionGeneratorGameDataset(CaptionGeneratorDataset):
+    def __getitem__(self, index):
+        return self.samples[index]
 
-        self.samples: list[ReferentialGameSample] = []
 
-        scenes = os.listdir(scenes_json_dir)
-        print("loading scenes...")
-        loaded_scenes = []
-        for scene_file in scenes:
-            with open(
-                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
-            ) as f:
-                loaded_scenes.append(json.load(f))
+class CaptionGeneratorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
 
-        print("creating combinations...")
-        scene_combinations = list(
-            itertools.product(range(len(loaded_scenes)), repeat=2)
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
         )
-        print("shuffling...")
-        random.shuffle(scene_combinations)
+        samples: list[CaptionGeneratorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
 
-        print("looping...")
+        sender_inputs = []
+        targets = []
+        receiver_inputs = []
+        aux_inputs = []
 
-        for scene_1_index, scene_2_index in scene_combinations:
-            if len(self.samples) == max_number_samples:
-                break
+        for sample in samples:
+            sender_inputs.append(sample.image)
+            targets.append(sample.caption[1:])
 
-            scene_1 = loaded_scenes[scene_1_index]
-            scene_2 = loaded_scenes[scene_2_index]
-
-            target_object_1_index = scene_1["groups"]["target"][0]
-            target_object_2_index = scene_2["groups"]["target"][0]
-
-            target_object_1 = scene_1["objects"][target_object_1_index]
-            target_object_2 = scene_2["objects"][target_object_2_index]
-
-            # no matching attribute
-            if (
-                target_object_1["color"] == target_object_2["color"]
-                or target_object_1["shape"] == target_object_2["shape"]
-                or target_object_1["size"] == target_object_2["size"]
-            ):
-                continue
-
-            image_1 = Image.open(image_path + scene_1["image_filename"]).convert("RGB")
-            image_2 = Image.open(image_path + scene_2["image_filename"]).convert("RGB")
-            target_image = random.randint(0, 1)
-
-            self.samples.append(
-                ReferentialGameSample(
-                    image_1_id=scene_1["image_filename"].removesuffix(".png"),
-                    image_2_id=scene_2["image_filename"].removesuffix(".png"),
-                    image_1=preprocess(
-                        self._get_bounding_box(image_1, scene_1, target_object_1_index)
-                    ),
-                    image_2=preprocess(
-                        self._get_bounding_box(image_2, scene_2, target_object_2_index)
-                    ),
-                    target_image=torch.tensor(target_image),
-                )
+            receiver_inputs.append(sample.image)
+            aux_inputs.append(
+                {
+                    "masked_image": sample.masked_image,
+                    "caption": sample.caption,
+                    "train_mode": self.train_mode,
+                }
             )
 
-    def _get_bounding_box(self, image, scene, target_index):
-        BOUNDING_BOX_SIZE = image.size[0] / 5
-
-        x_center, y_center, _ = scene["objects"][target_index]["pixel_coords"]
-        bounding_box = image.crop(
-            (
-                x_center - BOUNDING_BOX_SIZE / 2,
-                y_center - BOUNDING_BOX_SIZE / 2,
-                x_center + BOUNDING_BOX_SIZE / 2,
-                y_center + BOUNDING_BOX_SIZE / 2,
-            )
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(targets),
+            torch.stack(receiver_inputs),
+            aux_inputs,
         )
-
-        return bounding_box
-
-    def __getitem__(self, index):
-        sample = self.samples[index]
-        sender_input = torch.stack((sample.image_1, sample.image_2))
-
-        receiver_input = [sample.image_2]
-        receiver_input.insert(sample.target_image, sample.image_1)
-        receiver_input = torch.stack(receiver_input)
-
-        target = sample.target_image
-        return (sender_input, target, receiver_input)
-
-    def __len__(self) -> int:
-        return len(self.samples)
-
-    def __iter__(self):
-        return iter(self.samples)
-
-
-class GameCaptionGeneratorDataset(CaptionGeneratorDataset):
-    def __getitem__(self, index):
-        sample = self.samples[index]
-        sender_input = torch.stack((sample.image, sample.masked_image))
-
-        receiver_input = sample.image
-
-        target = sample.caption[1:]
-
-        return (sender_input, target, receiver_input)

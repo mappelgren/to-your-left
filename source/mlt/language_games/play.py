@@ -7,17 +7,30 @@ from typing import Callable
 
 import egg.core as core
 import torch.nn.functional as F
+from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader
 from mlt.language_games.callbacks import LogSaver
 from mlt.language_games.data_readers import (
+    CaptionGeneratorGameBatchIterator,
+    CaptionGeneratorGameDataset,
+    DaleReferentialGameBatchIterator,
     DaleReferentialGameDataset,
-    DaleReferentialGameGameBatchIterator,
     GameBatchIterator,
     GameLoader,
     LazaridouReferentialGameBatchIterator,
     LazaridouReferentialGameDataset,
 )
-from mlt.language_games.models import ReferentialGameReceiver, ReferentialGameSender
+from mlt.language_games.models import (
+    CaptionGeneratorReceiver,
+    CaptionGeneratorSender,
+    ReferentialGameReceiver,
+    ReferentialGameSender,
+)
+from mlt.preexperiments.data_readers import (
+    BasicImageMasker,
+    DaleCaptionAttributeEncoder,
+)
+from mlt.preexperiments.models import CaptionDecoder, ImageEncoder
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -35,6 +48,20 @@ def classification_loss(
     acc = (receiver_output.argmax(dim=1) == labels).detach().float()
     # similarly, the loss computes cross-entropy between the Receiver-produced target-position probability distribution and the labels
     loss = F.nll_loss(receiver_output, labels, reduction="none")
+    return loss, {"acc": acc}
+
+
+def captioning_loss(
+    _sender_input,
+    _message,
+    _receiver_input,
+    receiver_output,
+    labels,
+    _aux_input,
+):
+    acc = (receiver_output.argmax(dim=1) == labels).detach().float()
+    # similarly, the loss computes cross-entropy between the Receiver-produced target-position probability distribution and the labels
+    loss = F.cross_entropy(receiver_output, labels)
     return loss, {"acc": acc}
 
 
@@ -70,12 +97,61 @@ models = {
         dataset_args={},
         split_dataset=True,
         image_loader=FeatureImageLoader,
-        iterator=DaleReferentialGameGameBatchIterator,
+        iterator=DaleReferentialGameBatchIterator,
         sender=ReferentialGameSender,
         sender_args={},
         receiver=ReferentialGameReceiver,
         receiver_args={},
         loss_function=classification_loss,
+    ),
+    "caption_generator": ModelDefinition(
+        dataset=CaptionGeneratorGameDataset,
+        dataset_args={
+            "captioner": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
+                reversed_caption=False,
+            ),
+            "image_masker": BasicImageMasker(),
+        },
+        split_dataset=True,
+        image_loader=FeatureImageLoader,
+        iterator=CaptionGeneratorGameBatchIterator,
+        sender=CaptionGeneratorSender,
+        sender_args={
+            "image_encoder": ImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": ImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "caption_decoder": CaptionDecoder(
+                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
+                decoder_out_dim=1024,
+            ),
+        },
+        receiver=CaptionGeneratorReceiver,
+        receiver_args={
+            "image_encoder": ImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": ImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "caption_decoder": CaptionDecoder(
+                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
+                decoder_out_dim=1024,
+            ),
+            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
+                DaleCaptionAttributeEncoder.SOS_TOKEN
+            ),
+        },
+        loss_function=captioning_loss,
     ),
 }
 
@@ -239,6 +315,7 @@ def main(params):
         iterator=model.iterator,
         batch_size=opts.batch_size,
         batches_per_epoch=opts.batches_per_epoch,
+        train_mode=True,
         seed=None,
     )
     test_loader = GameLoader(
@@ -246,13 +323,19 @@ def main(params):
         iterator=model.iterator,
         batch_size=opts.validation_batch_size,
         batches_per_epoch=opts.batches_per_epoch,
+        train_mode=False,
         seed=7,
     )
 
-    receiver = model.receiver(embedding_dimension=opts.receiver_embedding)
-    sender = model.sender(
-        hidden_size=opts.sender_hidden, embedding_dimension=opts.sender_embedding
-    )
+    sender_args = model.sender_args
+    sender_args["embedding_dimension"] = opts.sender_embedding
+    sender_args["hidden_size"] = opts.sender_hidden
+
+    receiver_args = model.receiver_args
+    receiver_args["embedding_dimension"] = opts.receiver_embedding
+
+    receiver = model.receiver(**receiver_args)
+    sender = model.sender(**sender_args)
 
     gs_sender = core.RnnSenderGS(
         sender,
