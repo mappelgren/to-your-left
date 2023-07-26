@@ -523,11 +523,15 @@ The receiver agent is combining it with its representation of the image input an
 The \emph{game} is afterwards calculating a loss for each of these outputs separately.
 These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
 
+\cmtDK{always ResNet-3}
+
 First, I will discuss \emph{discrimination games}, because they have the simplest setup.
 Furthermore, other language games that research this topic use a very similar setup.
 In the next step, I will look into caption generators that are set up as a language game.
 Here, the sender describes the scene, while the receiver needs to generate a caption.
 In the last step, I try to lose as much human bias as possible and the models are trained on just 'pointing' towards the target object, by again predicting its center coordinates.
+
+\cmtDK{look at emerged language: distribution of vocab/ngrams, how do they relate to the images (clustering?)}
 
 \paragraph{Discrimination games:}
 In a discrimination game, the agents are presented with two or more images, one of these being the target image.
@@ -566,7 +570,83 @@ During the experiments, five variables are adjusted to compare their effects:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender wrapper $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver wrapper $h_r$ and (5) the size of the vocabulary $|V|$.
 
 \paragraph{Caption generators:}
+In a next step, it is tested if the agents can learn to extract features of the objects together.
+For this, the receiver is tasked to describe the target object in natural language, while the sender needs to communicate, which object is the target.
+Again, the setup is asymmetrical: the sender receives the image and information, which of the objects in the image is the target object in form of a masked image.
+The receiver only sees the image without additional information.
+\cmtDK{human bias vs emergent language}
+
+This setup is based on the single neural model described above.
+The target caption for each image is created using the GRE-algorithm of \citet{Dale1995}.
+Since the results of the experiments show that the position of the padding doesn't have an effect on the final converging scores, the padding tokens are only prepended to the caption.
+
+The sender is built up of two image encoders, one encodes the original target image and one encodes the masked image.
+The image encoders are set up as described in \citet{Johnson2017}.
+A feature extractor extracts basic features of the images.
+Two following convolutional layers with a \emph{ReLU} function are trained to condense the most important information from the resulting matrices.
+A max pooling layer and a linear layer reduce the dimensions to 1024 dimensions.
+This size was found to have the best results during the experiments.
+The two resulting encoded images are flattened and concatenated.
+A final linear layer reduces this long vector to the hidden size of the message LSTM $h_s$, which is used as the initial hidden state of this LSTM.
+
+The receiver uses the same architecture to encode the original image as the sender.
+The resulting flattened vector is concatenated with the decoded message of hidden size $h_r$.
+This is then passed through a linear layer, again reducing it to 1024 dimensions and is then used as the initial state of the captioning LSTM.
+During training, the ground truth caption is used as the input to the LSTM without teacher forcing.
+When presented with test data, the LSTM always produces three tokens, by using its own predicted words as the input for the next step.
+The loss is calculated with cross entropy.
+
+Since the agents are trained to describe the target object discriminatively based on the described GRE-algorithm, they are trained on the 'Dale-2' and 'Dale-5' dataset.
+The 'Dale-5' should be again much harder to learn, since there are more objects that the agents need to discriminate the target object from.
+
+During the experiments, the following variables are adjusted, and the results are compared:
+(1) the vocabulary size $|V|$,
+(2) the LSTM hidden size of the sender wrapper $h_s$ and
+(3) the LSTM hidden size of the receiver wrapper $h_r$.
+The same metrics as in the pre-experiments are used to evaluate the results.
 
 \paragraph{Coordinate predictors:}
+In the final experiments, it is tried to eliminate as much human knowledge as possible.
+For that reason, the agents are tasked to only predict the location of the target object.
+This task is approached in two steps.
+In the first step the sender is still shown human knowledge in form of a description of the target object, since the previous experiments showed that the models were able to relate them to their own extracted features.
+The receiver doesn't come in contact with any human knowledge, not as input nor as output.
+This approach acts as a sanity check if the agents are able to converge together on the correct target object coordinates.
+In the second step, the caption is also removed from the sender.
+Instead, a masked image points the sender towards the target object.
+In this setup, no human knowledge is explicitly present, that can bias the emerged language to form similarly to human language, except for the implicit information in the image itself.
+With this, it can be analyzed, how the language between the agents emerges and which features or patterns are represented with symbols.
 
+The agents are both set up in the same way as the single neural model, predicting the target object's coordinates.
+The sender encodes the original image the same as in the previous paragraph.
+In the first setup, the description of the target object is encoded, using an LSTM.
+For this, an embedding with $emb_{descr}$ dimensions is learned to represent each word.
+These embeddings are the input for the LSTM.
+The final hidden state of $LSTM_{descr}$ dimensions is used as the representation of the whole description.
+The vocabulary that is used for the descriptions is based on 14 symbols, including the padding token.
+For the LSTM to learn a representation of each token as well as of the complete description, both $emb_{descr}$ and $LSTM_{descr}$ need to be smaller than the size of this vocabulary.
+Choosing a size of 10 for both variables proved to give good results in the experiments.
+In a next step, the image encoding and the final hidden state of the description are concatenated and passed through a linear layer to reduce the dimension to the hidden size $h_s$.
+The resulting vector is passed to the sender wrapper LSTM, to generate the message.
 
+For the second approach, the masked image is passed only through a feature extractor.
+Both the resulting encoding of the masked image and the encoding of the original image are each passed through separate linear layer to adjust their dimensions to the same embedding size $e_s$.
+These embeddings are subsequently concatenated and reduced to the hidden size $h_s$ with a final linear layer.
+
+The receiver contains of two parts.
+First, the original image is encoded with an image encode of the same setup.
+This encoded image is flattened and concatenated with the final hidden state of the wrapper LSTM encoding the message received by the receiver.
+The resulting vector is the passed through the second part of the receiver, the predictor.
+This predictor contains of three linear layers, reducing the dimensions to 1024, 1024 and 2 respectively.
+A \emph{ReLU} function is applied in between.
+This setup is trained to combine the important information from both the image and the message of the sender.
+The euclidean distance between the resulting prediction of the center point and the true center of the target object is calculated and the weights of both agents are adapted accordingly.
+
+As in the pre-experiments, the agents are trained first the 'CLEVR single' dataset to understand if they are capable of predicting locations in an image together.
+In a next step, the 'Dale-2' and 'Dale-5' datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
+
+During the experiments, the effects of the following variables are compared:
+(1) the vocabulary size $|V|$,
+(2) the LSTM hidden size of the sender wrapper $h_s$,
+(3) the LSTM hidden size of the receiver wrapper $h_r$ and
+(4) the embedding size of the sender $e_s$.
