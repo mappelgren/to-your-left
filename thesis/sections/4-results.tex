@@ -245,6 +245,26 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the 
 
 \begin{table}[h]
     \centering
+    \begin{tabular}{ccccc|cc|cc|cc|cc}
+        \toprule
+              &         &         &         &         & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-4}} & \multicolumn{2}{c}{\textbf{CLEVR color}} & \multicolumn{2}{c}{\textbf{CLEVR unambiguous}}                                                                     \\\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(lr){12-13}
+        $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & $e_{r}$ & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Acc.}                            & \textbf{length}                                & \textbf{Acc.} & \textbf{length} & \textbf{Acc.} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}    & {10}    & {10}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {10}  & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {13}  & {10}    & {10}    & {10}    & {10}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {13}  & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {20}  & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {100} & {10}    & {10}    & {10}    & {10}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {100} & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        {100} & {100}   & {100}   & {100}   & {100}   & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the discriminators: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
+    \label{tab:results_discriminator}
+\end{table}
+
+\begin{table}[h]
+    \centering
     \begin{tabular}{c|ccccc|c}
         \hline
         \textbf{Dataset} & $h_{s}$ & $e_{s}$ & $h_{r}$ & $e_{r}$ & $|V|$ & \textbf{Acc.} \\
@@ -292,6 +312,56 @@ Therefore, the models need to learn more combinations of symbols in order to att
 \cmtDK{similarity to bounding box classifier}
 
 \subsubsection{Caption generators}
-
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ccc|ccc|ccc}
+        \toprule
+              &         &         & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                             \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+        $|V|$ & $h_{s}$ & $h_{r}$ & \textbf{Acc.}                       & \textbf{word-by-word}               & \textbf{length} & \textbf{Acc.} & \textbf{word-by-word} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}    & {22,9\%}                            & {62,8\%}                            & {2}             & {7,1\%}       & {40\%}                & {2}             \\
+        {13}  & {10}    & {10}    & {22,8\%}                            & {62,9\%}                            & {1}             & {7,3\%}       & {38,7\%}              & {2}             \\
+        {20}  & {10}    & {10}    & {24,6\%}                            & {64\%}                              & {2}             & {6,7\%}       & {38,7\%}              & {2}             \\
+        {100} & {10}    & {10}    & {24,4\%}                            & {62\%}                              & {2}             & {7,8\%}       & {40\%}                & {2}             \\
+        {100} & {100}   & {100}   & {21\%}                              & {62\%}                              & {2}             & {6,5\%}       & {37,8\%}              & {2}             \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the caption generator: $|V|$ are different vocabulary sizes and $h$ hidden sizes.}
+    \label{tab:results_caption_generator_game}
+\end{table}
 
 \subsubsection{Coordinate predictors}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ccc|ccc|ccc|ccc}
+        \toprule
+              &         &         & \multicolumn{3}{c}{\textbf{Single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+        $|V|$ & $h_{s}$ & $h_{r}$ & \textbf{Dist.}                      & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}    & {10,1}                              & {98,5\%}                            & {2}                                 & {36,5}         & {19,9\%}      & {2}             & {45,7}         & {14,4\%}      & {2}             \\
+        {13}  & {10}    & {10}    & {6}                                 & {99\%}                              & {1}                                 & {38}           & {20,4\%}      & {2}             & {47,3}         & {10,8\%}      & {2}             \\
+        {20}  & {10}    & {10}    & {9,7}                               & {96,7\%}                            & {2}                                 & {37,3}         & {21,2\%}      & {2}             & {47,3}         & {11,3\%}      & {1}             \\
+        {100} & {10}    & {10}    & {7,7}                               & {98,4\%}                            & {2}                                 & {40,4}         & {21,7\%}      & {2}             & {45,4}         & {10,8\%}      & {2}             \\
+        {100} & {100}   & {100}   & {7,5}                               & {96,9\%}                            & {2}                                 & {40,1}         & {17,8\%}      & {2}             & {44,3}         & {11,8\%}      & {1}             \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the description coordinate predictor: $|V|$ are different vocabulary sizes and $h$ hidden sizes.}
+    \label{tab:results_dale_predictor_game}
+\end{table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{cccc|ccc|ccc|ccc}
+        \toprule
+              &         &         &         & \multicolumn{3}{c}{\textbf{Single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
+        $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & \textbf{Dist.}                      & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {34,8}         & {24,3\%}      & {1}             & {}             & {\%}          & {}              \\
+        {10}  & {10}    & {10}    & {512}   & {}                                  & {\%}                                & {}                                  & {36,3}         & {19,9\%}      & {1
+        ,7}   & {}      & {\%}    & {}                                                                                                                                                                                                                              \\
+        {13}  & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {36,3}         & {20,2\%}      & {1}             & {}             & {\%}          & {}              \\
+        {20}  & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {37,8}         & {16,1\%}      & {2}             & {}             & {\%}          & {}              \\
+        {100} & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {37,4}         & {20,1\%}      & {2}             & {}             & {\%}          & {}              \\
+        {100} & {100}   & {100}   & {1024}  & {}                                  & {\%}                                & {}                                  & {36,5}         & {20,7\%}      & {2}             & {}             & {\%}          & {}              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the masked coordinate predictor: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
+    \label{tab:results_masked_predictor_game}
+\end{table}
