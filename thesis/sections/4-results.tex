@@ -329,6 +329,28 @@ Therefore, the models need to learn more combinations of symbols in order to att
     \label{tab:results_caption_generator_game}
 \end{table}
 
+The results of the caption generator game are summarized in Table \ref{tab:results_caption_generator_game}.
+In general, it can be seen that the agents have much bigger problems, to solve the task together than a single neural network.
+The highest accuracy for descriptions, the agents manage to predict correctly is at 24,6\% for images of the 'Dale-2' dataset.
+Compared to the (masked) accuracy of the single model with 72\%, the agents predict 47,4\% points less correct descriptions.
+A similar worse performance can be seen for the 'Dale-5' dataset.
+Here, the agents only manage to produce for 7,8\% of the images correct descriptions, 13,2\% points less than the single neural model.
+The same effect can be seen for the word-by-word accuracy, which is much lower than the metric for the single neural model for both datasets.
+
+When looking, how the different variables affect the performance, it can be seen that a bigger vocabulary size tends to help the agents.
+This is only visible for the 'Dale-2' dataset.
+With constant hidden sizes of 10, the agents score around 22,9\% with only 10 and 13 available symbols.
+When this is increased to 20 and respectively 100 symbols, the agents can increase their accuracy to around 24,5\%.
+However, the increase is relatively small.
+Interestingly, this effect only occurs, when the hidden sizes are small with only 10 dimensions.
+As soon as they are increased to 100 dimensions with a vocabulary size of 100 symbols, the accuracy drops to 21\%.
+
+Looking at the 'Dale-5' dataset, the increase is still there, when the vocabulary is increased to 100 symbols.
+Nonetheless, the difference is with 0,5\% points even smaller and the reason may be due to other influences, such as the random initialization of the weights of the agents.
+This would need to be confirmed int the future.
+
+
+
 \subsubsection{Coordinate predictors}
 \begin{table}[h]
     \centering
@@ -351,15 +373,15 @@ Therefore, the models need to learn more combinations of symbols in order to att
     \centering
     \begin{tabular}{cccc|ccc|ccc|ccc}
         \toprule
-              &         &         &         & \multicolumn{3}{c}{\textbf{Single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
-        $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & \textbf{Dist.}                      & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {34,8}         & {24,3\%}      & {1}             & {}             & {\%}          & {}              \\
-        {10}  & {10}    & {10}    & {512}   & {}                                  & {\%}                                & {}                                  & {36,3}         & {19,9\%}      & {1
-        ,7}   & {}      & {\%}    & {}                                                                                                                                                                                                                              \\
-        {13}  & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {36,3}         & {20,2\%}      & {1}             & {}             & {\%}          & {}              \\
-        {20}  & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {37,8}         & {16,1\%}      & {2}             & {}             & {\%}          & {}              \\
-        {100} & {10}    & {10}    & {1024}  & {}                                  & {\%}                                & {}                                  & {37,4}         & {20,1\%}      & {2}             & {}             & {\%}          & {}              \\
-        {100} & {100}   & {100}   & {1024}  & {}                                  & {\%}                                & {}                                  & {36,5}         & {20,7\%}      & {2}             & {}             & {\%}          & {}              \\
+              &         &          &         & \multicolumn{3}{c}{\textbf{Single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
+        $|V|$ & $h_{s}$ & $h_{r}$  & $e_{s}$ & \textbf{Dist.}                      & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}     & {1024}  & {19,8}                              & {55,1\%}                            & {2}                                 & {34,8}         & {24,3\%}      & {1}             & {44,3}         & {11,8\%}      & {2}             \\
+        {10}  & {10}    & {10}     & {512}   & {9,3}                               & {92\%}                              & {2}                                 & {36,3}         & {19,9\%}      & {1
+        ,7}   & {45,9}  & {12,7\%} & {2}                                                                                                                                                                                                                             \\
+        {13}  & {10}    & {10}     & {1024}  & {7,8}                               & {96,8\%}                            & {2}                                 & {36,3}         & {20,2\%}      & {1}             & {45,4}         & {11,4\%}      & {2}             \\
+        {20}  & {10}    & {10}     & {1024}  & {6,6}                               & {98,3\%}                            & {2}                                 & {37,8}         & {16,1\%}      & {2}             & {45,2}         & {11\%}        & {2}             \\
+        {100} & {10}    & {10}     & {1024}  & {5,2}                               & {98,5\%}                            & {2}                                 & {37,4}         & {20,1\%}      & {2}             & {43,6}         & {16,7\%}      & {2}             \\
+        {100} & {100}   & {100}    & {1024}  & {12,5}                              & {92,1\%}                            & {2}                                 & {36,5}         & {20,7\%}      & {2}             & {44,6}         & {12,7\%}      & {2}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the masked coordinate predictor: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
