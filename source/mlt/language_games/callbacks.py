@@ -51,9 +51,10 @@ class ExcludingInteractionSaver(InteractionSaver):
         logs.sender_input = torch.tensor(0)
         logs.receiver_input = torch.tensor(0)
 
-        to_remove = ["masked_image", "caption", "train_mode", "attribute_tensor"]
-        for key in to_remove:
-            if key in logs.aux_input:
-                logs.aux_input[key] = torch.tensor(0)
+        if logs.aux_input is not None:
+            to_remove = ["masked_image", "caption", "train_mode", "attribute_tensor"]
+            for key in to_remove:
+                if key in logs.aux_input:
+                    logs.aux_input[key] = torch.tensor(0)
 
         torch.save(logs, dump_dir / f"interaction_gpu{rank}")
