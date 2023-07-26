@@ -183,7 +183,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
         self,
         feature_extractor: FeatureExtractor,
         hidden_size,
-        embedding_dim,
+        embedding_dimension,
         *_args,
         **_kwargs
     ) -> None:
@@ -196,14 +196,14 @@ class MaskedCoordinatePredictorSender(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.LazyLinear(embedding_dim),
+            nn.LazyLinear(embedding_dimension),
         )
 
         self.process_masked_image = nn.Sequential(
             feature_extractor,
             nn.Flatten(),
             nn.Dropout(0.2),
-            nn.LazyLinear(embedding_dim),
+            nn.LazyLinear(embedding_dimension),
         )
 
         self.linear = nn.LazyLinear(hidden_size)
