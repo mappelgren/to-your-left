@@ -262,6 +262,7 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the 
     \caption{Results of the discriminators: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
     \label{tab:results_discriminator}
 \end{table}
+\cmtDK{insert results of new experiments}
 
 \begin{table}[h]
     \centering
@@ -347,43 +348,83 @@ As soon as they are increased to 100 dimensions with a vocabulary size of 100 sy
 
 Looking at the 'Dale-5' dataset, the increase is still there, when the vocabulary is increased to 100 symbols.
 Nonetheless, the difference is with 0,5\% points even smaller and the reason may be due to other influences, such as the random initialization of the weights of the agents.
-This would need to be confirmed int the future.
+This would need to be confirmed in future experiments.
 
+An interesting observation can be made about the length of the messages, the sender generates.
+In almost all cases, the average length is 2 symbols.
+Only in one configuration, the sender produces single symbol messages.
+This happens, when the vocabulary size is 13, the same number as possible features the objects can have.
+In this case, the accuracy, as well as the word-by-word accuracy stay the same compared to the configuration with a vocabulary of only 10 symbols.
 
+\cmtDK{look at language more detailed}
 
 \subsubsection{Coordinate predictors}
+In the final setup, the agents are tasked with communicating objects with fewer infused human knowledge.
+Table \ref{tab:results_dale_predictor_game} shows the results for the setup, in which the sender is pointed towards the target object with a human description based on the GRE algorithm.
+Hereby, the 'CLEVR single' dataset acts as a baseline, to test if the agents are able to predict coordinates of objects at all.
+In every configuration of the variables, the agents achieve a very high performance.
+The worst average distance across the test dataset is 10 pixels, which still points on an object.
+Also the accuracy, which evaluates how many guesses of the receiver were pointing on an object reflects this fact.
+All configuration achieve an accuracy higher than 96,7\%.
+This aligns also with the results from the single neural models, where the average distance was similarly low.
+In general, this shows that the agents are able to predict coordinates together.
+However, the question arises if the message by the sender has actually an effect on the receivers' decision, or if the receiver learns to point towards the target coordinates on his own and the message is ignored.
+When a different sender is used that is receiving the masked image as input, the results indicate that the message has in fact an influence and the receiver learns how to interpret the message.
+The results for this setup are summarized in \ref{tab:results_masked_predictor_game}.
+In three of six experiments, the agents predict much higher average distances.
+In one case, the mean distance lies at 19,8 pixels, while the accuracy is only at 55,1\%.
+Since the receiver is the same in both setups, this observation indicates that a meaningful message is communicated between the agents.
+
 \begin{table}[h]
     \centering
     \begin{tabular}{ccc|ccc|ccc|ccc}
         \toprule
-              &         &         & \multicolumn{3}{c}{\textbf{Single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
-        $|V|$ & $h_{s}$ & $h_{r}$ & \textbf{Dist.}                      & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {10,1}                              & {98,5\%}                            & {2}                                 & {36,5}         & {19,9\%}      & {2}             & {45,7}         & {14,4\%}      & {2}             \\
-        {13}  & {10}    & {10}    & {6}                                 & {99\%}                              & {1}                                 & {38}           & {20,4\%}      & {2}             & {47,3}         & {10,8\%}      & {2}             \\
-        {20}  & {10}    & {10}    & {9,7}                               & {96,7\%}                            & {2}                                 & {37,3}         & {21,2\%}      & {2}             & {47,3}         & {11,3\%}      & {1}             \\
-        {100} & {10}    & {10}    & {7,7}                               & {98,4\%}                            & {2}                                 & {40,4}         & {21,7\%}      & {2}             & {45,4}         & {10,8\%}      & {2}             \\
-        {100} & {100}   & {100}   & {7,5}                               & {96,9\%}                            & {2}                                 & {40,1}         & {17,8\%}      & {2}             & {44,3}         & {11,8\%}      & {1}             \\
+              &         &         & \multicolumn{3}{c}{\textbf{CLEVR single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+        $|V|$ & $h_{s}$ & $h_{r}$ & \textbf{Dist.}                            & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}    & {10,1}                                    & {98,5\%}                            & {2}                                 & {36,5}         & {19,9\%}      & {2}             & {45,7}         & {14,4\%}      & {2}             \\
+        {13}  & {10}    & {10}    & {6}                                       & {99\%}                              & {1}                                 & {38}           & {20,4\%}      & {2}             & {47,3}         & {10,8\%}      & {2}             \\
+        {20}  & {10}    & {10}    & {9,7}                                     & {96,7\%}                            & {2}                                 & {37,3}         & {21,2\%}      & {2}             & {47,3}         & {11,3\%}      & {1}             \\
+        {100} & {10}    & {10}    & {7,7}                                     & {98,4\%}                            & {2}                                 & {40,4}         & {21,7\%}      & {2}             & {45,4}         & {10,8\%}      & {2}             \\
+        {100} & {100}   & {100}   & {7,5}                                     & {96,9\%}                            & {2}                                 & {40,1}         & {17,8\%}      & {2}             & {44,3}         & {11,8\%}      & {1}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the description coordinate predictor: $|V|$ are different vocabulary sizes and $h$ hidden sizes.}
     \label{tab:results_dale_predictor_game}
 \end{table}
 
+When the experiments are run, using the 'Dale-2' dataset, the results are much worse.
+For the \emph{description coordinate predictor}, the average distance ranges from 36,5 pixels to 40,4 pixels.
+The configuration with a vocabulary size of only 10 symbols fares the best, while a vocabulary of 100 symbols produces the worst results.
+Still, the accuracy shows that around 19,9\% to 21,7\% of the guesses are on the target object.
+Here, the configurations with higher vocabulary sizes fare better, even though the differences are very small and may be due to other factors.
+Interestingly, when comparing the two configurations with a vocabulary size of 100 symbols one can see that the average distance is similar, but the accuracy is significantly higher when the hidden sizes are lower.
+In other words, with lower hidden sizes the agents can make more correct guesses.
+Overall, it can be seen that a higher vocabulary size lets the agents' guesses get in general closer to the target object, but they are less precise on the object itself.
+
+The results for 'Dale-5' dataset are even worse, but are comparable with the results with a single neural model.
+Apparently, the agents are not able to communicate the target object, and the predictions by the receiver are general in the middle of the image, which results in an average distance of around 45 to 50 pixels.
+The differences of the mean distances are not very significant in this range, to allow an analysis of the different configurations.
+The only metric that stands out is the accuracy of the configuration with a vocabulary size of 10 symbols.
+With 14,4\%, it is 2,6\% points higher than the next best accuracy.
+It is able to predict the center coordinates of the target object the most precise.
+
 \begin{table}[h]
     \centering
     \begin{tabular}{cccc|ccc|ccc|ccc}
         \toprule
-              &         &          &         & \multicolumn{3}{c}{\textbf{Single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
-        $|V|$ & $h_{s}$ & $h_{r}$  & $e_{s}$ & \textbf{Dist.}                      & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}     & {1024}  & {19,8}                              & {55,1\%}                            & {2}                                 & {34,8}         & {24,3\%}      & {1}             & {44,3}         & {11,8\%}      & {2}             \\
-        {10}  & {10}    & {10}     & {512}   & {9,3}                               & {92\%}                              & {2}                                 & {36,3}         & {19,9\%}      & {1
-        ,7}   & {45,9}  & {12,7\%} & {2}                                                                                                                                                                                                                             \\
-        {13}  & {10}    & {10}     & {1024}  & {7,8}                               & {96,8\%}                            & {2}                                 & {36,3}         & {20,2\%}      & {1}             & {45,4}         & {11,4\%}      & {2}             \\
-        {20}  & {10}    & {10}     & {1024}  & {6,6}                               & {98,3\%}                            & {2}                                 & {37,8}         & {16,1\%}      & {2}             & {45,2}         & {11\%}        & {2}             \\
-        {100} & {10}    & {10}     & {1024}  & {5,2}                               & {98,5\%}                            & {2}                                 & {37,4}         & {20,1\%}      & {2}             & {43,6}         & {16,7\%}      & {2}             \\
-        {100} & {100}   & {100}    & {1024}  & {12,5}                              & {92,1\%}                            & {2}                                 & {36,5}         & {20,7\%}      & {2}             & {44,6}         & {12,7\%}      & {2}             \\
+              &         &          &         & \multicolumn{3}{c}{\textbf{CLEVR single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
+        $|V|$ & $h_{s}$ & $h_{r}$  & $e_{s}$ & \textbf{Dist.}                            & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}     & {1024}  & {19,8}                                    & {55,1\%}                            & {2}                                 & {34,8}         & {24,3\%}      & {1}             & {44,3}         & {11,8\%}      & {2}             \\
+        {10}  & {10}    & {10}     & {512}   & {9,3}                                     & {92\%}                              & {2}                                 & {36,3}         & {19,9\%}      & {1
+        ,7}   & {45,9}  & {12,7\%} & {2}                                                                                                                                                                                                                                   \\
+        {13}  & {10}    & {10}     & {1024}  & {7,8}                                     & {96,8\%}                            & {2}                                 & {36,3}         & {20,2\%}      & {1}             & {45,4}         & {11,4\%}      & {2}             \\
+        {20}  & {10}    & {10}     & {1024}  & {6,6}                                     & {98,3\%}                            & {2}                                 & {37,8}         & {16,1\%}      & {2}             & {45,2}         & {11\%}        & {2}             \\
+        {100} & {10}    & {10}     & {1024}  & {5,2}                                     & {98,5\%}                            & {2}                                 & {37,4}         & {20,1\%}      & {2}             & {43,6}         & {16,7\%}      & {2}             \\
+        {100} & {100}   & {100}    & {1024}  & {12,5}                                    & {92,1\%}                            & {2}                                 & {36,5}         & {20,7\%}      & {2}             & {44,6}         & {12,7\%}      & {2}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the masked coordinate predictor: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
     \label{tab:results_masked_predictor_game}
+
+    Finally looking at the
 \end{table}
