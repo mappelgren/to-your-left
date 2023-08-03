@@ -72,7 +72,7 @@
 \maketitle
 \begin{abstract}
   How do artificial agents based on neural networks coordinate on a new language through referential games over 3-d scenes?
-  We extended a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referential grounding learned by the agents.
+  We extend a popular CLEVR dataset to control for different combinations of features of target and distractor objects and examine the success of referential grounding learned by the agents.
   % complicated
 \end{abstract}
 
@@ -146,7 +146,7 @@ The target object is always unique, because at least one attribute is different 
 % In the next step, the distractors are created at a random location in the scene.
 Each distractor can share a maximum of two attributes with the target object.
 There is no restriction on the relation between distractors, hence it is possible to have multiple identical distractors in one image.
-Given the ranking of features in the original GRE algorithm, the target object is therefore identifiable either by the \emph{shape} (1), the \emph{shape} and \emph{colour} (2) or the \emph{shape}, \emph{colour} and \emph{size} (3).
+Given the ranking of features in the original GRE algorithm, the target object is therefore identifiable either by \emph{shape} (1), \emph{shape} and \emph{colour} (2) or \emph{shape}, \emph{colour} and \emph{size} (3).
 For each image, fixed-size bounding boxes are extracted around the centre-point of each object.
 % These bounding boxes are the input for the sender and receiver in the language game.
 %
@@ -181,12 +181,12 @@ The order of the objects is random, except that the first object for the sender 
 For the sender, the images are passed through \emph{ResNet101} \citep{He2016} and a following linear layer that reduces the dimensions to an embedding size $e_s$.
 All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
 This is then used as the initial state of the encoder LSTM.
-After, the sequence is created through Gumbel-Softmax relaxation \citep{Jang2016}.
+After, the sequence of labels is generated through Gumbel-Softmax relaxation \citep{Jang2016}.
 %
 The receiver also encodes all images using \emph{ResNet101} with a following linear layer, reducing it to $e_r$.
-The sequence, received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
-After each step of the LSTM, the receiver calculates the dot product between the hidden state and all of its image encodings.
-The receiver then `points' to one of the images by applying the softmax function over the results of the dot products.
+The sequence, received from the sender is the input for its decoder LSTM, where a hidden state with a dimension of $h_r$ is randomly initialised.
+After each step of the LSTM, the receiver calculates a dot product between the hidden state and all of its image encodings.
+The receiver then `points' to one of the images by applying a softmax function over the results of the dot products.
 The loss is calculated using the NLL-loss.
 Following, the losses for all steps are summed up, and all weights of the receiver as well as the sender are updated based on this summed loss.
 
@@ -196,7 +196,7 @@ There are five variables in the experiments that are adjusted:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver $h_r$ and (5) the size of the vocabulary $|V|$.
 %
 % The results are evaluated using accuracy if the receiver can identify the target object.
-Table \ref{tab:results} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
+Table \ref{tab:results} shows the accuracy of the models calculated on the basis of the success of communication if the receiver can identify the target object.
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
 
 
@@ -242,7 +242,7 @@ Interestingly, a vocabulary size of 10 is enough to communicate a meaningful mes
 % SD 2023-07-08 15:17:45 +0200: The hidden size is related to the vocabulary size. Both have to be optimally selected for the models to converge.
 %
 % The results change, when using the \emph{Date-5} dataset with four distractors.
-Using \emph{Dale-5} with four distractors and with low hidden, embedding and vocabulary sizes, the agents barely pass the random baseline with 23\%.
+Using \emph{Dale-5} with four distractors and with low hidden, embedding and vocabulary sizes, the agents barely pass the random baseline at 23\%.
 Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% to 43\% which is still considerably lower than the 95\% of the \emph{Dale-2} dataset.
 % This accuracy is still far lower than the 95\% with the \emph{Dale-2} dataset.
 
@@ -279,7 +279,7 @@ There are 48 possible combinations of attributes.
 Still, for Dale-2, a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
 This hints to the fact that the agents don't describe the complete target object, but only rely on discriminative attributes between the objects.
 The need for a more detailed description of discriminative attributes is higher when more distractors are involved.
-Therefore, the models need to learn more combinations of symbols in order to attest to this higher level of detail and especially how to relate them to features in the images.
+Therefore, the models must learn more combinations of symbols in order to attest to this higher level of detail and how to relate them to features in the images.
 % SD 2023-07-10 18:04:24 +0200: It would be interesting to compare then the length of messages between Dale-2 and Dale-5 that becomes used.
 % DK 2023-07-10: Yes, especially with a more detailed analysis of the vocabulary. Right now, the average is always 2 symbols, for both Dale-2 and Dale-5 as well as for all different vocabulary sizes. So far, I didn't check if there are sometimes longer messages and sometimes shorter messages.
 
@@ -290,10 +290,9 @@ Therefore, the models need to learn more combinations of symbols in order to att
 % We found that a bigger number of distractors requires a higher vocabulary size.
 % This hints to the fact that the agents learned to communicate discriminative attributes between the images.
 
-In our ongoing work we are investigating deeper the emerged language and the new vocabulary,
-in particular whether
-it uses similar categories as human language and how its words are combined to form complete messages.
-In future work we will also extend the learning to the relations between entities and the features required to capture them.
+In our ongoing work we are extending our analysis of features and agent configurations as well as we are investigating the emerged language and the new vocabulary, whether
+it consists of similar categories as human language and how its words are combined to form complete messages.
+In our future work we will extend the learning to relations between entities which introduce a high level referential underspecification. % and the features required to capture them.
 % Entries for the entire Anthology, followed by custom entries
 \bibliography{anthology,custom}
 
