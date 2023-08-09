@@ -376,7 +376,23 @@ def main(params):
 
     callbacks = [core.TemperatureUpdater(agent=gs_sender, decay=0.9, minimum=0.1)]
     if opts.print_validation_events:
-        callbacks.append(PrintMessages(n_epochs=opts.n_epochs))
+        callbacks.extend(
+            [
+                PrintMessages(n_epochs=opts.n_epochs),
+                core.ConsoleLogger(
+                    print_train_loss=True,
+                ),
+            ]
+        )
+    else:
+        callbacks.append(
+            core.ProgressBarLogger(
+                n_epochs=opts.n_epochs,
+                train_data_len=opts.batches_per_epoch,
+                test_data_len=opts.batches_per_epoch,
+            )
+        )
+
     if opts.save:
         out_dir = os.path.join(
             opts.out_dir, f"{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}"
@@ -403,17 +419,7 @@ def main(params):
         optimizer=optimizer,
         train_data=train_loader,
         validation_data=test_loader,
-        callbacks=callbacks
-        + [
-            # core.ProgressBarLogger(
-            #     n_epochs=opts.n_epochs,
-            #     train_data_len=opts.batches_per_epoch,
-            #     test_data_len=opts.batches_per_epoch,
-            # ),
-            core.ConsoleLogger(
-                print_train_loss=True,
-            ),
-        ],
+        callbacks=callbacks,
     )
     trainer.train(n_epochs=opts.n_epochs)
 
