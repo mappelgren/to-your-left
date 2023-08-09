@@ -31,7 +31,7 @@ def save_csv(run_dir, dataset, split, file_name):
         train_interaction.aux_input["image_id"],
         train_interaction.labels,
         train_interaction.receiver_output,
-        train_interaction.aux["length"],
+        train_interaction.message_length,
     ):
         final_output = receiver_output[int(length) - 1].tolist()
         label = label.tolist()

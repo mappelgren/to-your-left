@@ -401,10 +401,13 @@ def main(params):
         validation_data=test_loader,
         callbacks=callbacks
         + [
-            core.ProgressBarLogger(
-                n_epochs=opts.n_epochs,
-                train_data_len=opts.batches_per_epoch,
-                test_data_len=opts.batches_per_epoch,
+            # core.ProgressBarLogger(
+            #     n_epochs=opts.n_epochs,
+            #     train_data_len=opts.batches_per_epoch,
+            #     test_data_len=opts.batches_per_epoch,
+            # ),
+            core.ConsoleLogger(
+                print_train_loss=True,
             ),
         ],
     )
