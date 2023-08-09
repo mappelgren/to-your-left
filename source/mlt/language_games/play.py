@@ -8,7 +8,11 @@ from typing import Callable
 import egg.core as core
 from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader
-from mlt.language_games.callbacks import ExcludingInteractionSaver, LogSaver
+from mlt.language_games.callbacks import (
+    ExcludingInteractionSaver,
+    LogSaver,
+    PrintMessages,
+)
 from mlt.language_games.data_readers import (
     CaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameDataset,
@@ -372,7 +376,7 @@ def main(params):
 
     callbacks = [core.TemperatureUpdater(agent=gs_sender, decay=0.9, minimum=0.1)]
     if opts.print_validation_events:
-        callbacks.append(core.PrintValidationEvents(n_epochs=opts.n_epochs))
+        callbacks.append(PrintMessages(n_epochs=opts.n_epochs))
     if opts.save:
         out_dir = os.path.join(
             opts.out_dir, f"{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}"
