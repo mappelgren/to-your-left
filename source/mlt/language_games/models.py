@@ -1,6 +1,5 @@
 import torch
 from mlt.feature_extractors import FeatureExtractor
-from numpy import dot
 from torch import nn
 
 

@@ -194,7 +194,6 @@ class DaleReferentialGameDataset(Dataset):
 
             image_id = scene_file.removesuffix(".json")
             _, bounding_boxes, _ = image_loader.get_image(image_id)
-            print(bounding_boxes.shape)
 
             target_object = scene["groups"]["target"][0]
 
