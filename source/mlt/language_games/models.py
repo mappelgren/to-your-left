@@ -46,7 +46,7 @@ class ReferentialGameReceiver(nn.Module):
 
     def forward(self, message, x, _aux_input):
         message = self.linear_message(message)
-
+        print(x.shape)
         dot_products = []
         for image_index in range(x.shape[1]):
             encoded_image = self.image_encoder(x[:, image_index])
