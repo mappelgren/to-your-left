@@ -345,16 +345,6 @@ def main(params):
     else:
         train_dataset = test_dataset = dataset
 
-    train_ids = set(train_dataset.indices)
-    test_ids = set(test_dataset.indices)
-
-    intersection = train_ids.intersection(test_ids)
-
-    if len(intersection) > 0:
-        print(intersection)
-    else:
-        print("no intersection")
-
     train_loader = GameLoader(
         dataset=train_dataset,
         iterator=model.iterator,

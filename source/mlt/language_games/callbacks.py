@@ -69,8 +69,8 @@ class PrintMessages(Callback):
     def print_events(logs: Interaction):
         print("MESSAGES")
         print([m.tolist() for m in logs.message], sep="\n")
-        print("OUTPUTS")
-        print([m.tolist() for m in logs.receiver_output], sep="\n")
+        # print("OUTPUTS")
+        # print([m.tolist() for m in logs.receiver_output], sep="\n")
 
     def on_validation_end(self, _loss, logs: Interaction, epoch: int):
         if epoch == self.n_epochs:

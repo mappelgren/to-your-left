@@ -52,8 +52,9 @@ class ReferentialGameReceiver(nn.Module):
             dot_products.append(torch.sum(message * encoded_image, dim=1))
 
         output = torch.stack(dot_products, dim=1)
-
-        return self.softmax(output)
+        softmax = self.softmax(output)
+        print(softmax)
+        return softmax
 
 
 class CaptionGeneratorSender(nn.Module):
