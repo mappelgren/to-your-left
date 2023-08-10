@@ -340,8 +340,8 @@ def main(params):
     else:
         train_dataset = test_dataset = dataset
 
-    train_ids = set(sample.image_id for sample in train_dataset.samples)
-    test_ids = set(sample.image_id for sample in test_dataset.samples)
+    train_ids = set(sample.image_id for sample in train_dataset.dataset.samples)
+    test_ids = set(sample.image_id for sample in test_dataset.dataset.samples)
 
     intersection = train_ids.intersection(test_ids)
     if len(intersection) > 0:
