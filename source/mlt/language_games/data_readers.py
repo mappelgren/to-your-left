@@ -257,6 +257,7 @@ class DaleReferentialGameBatchIterator(GameBatchIterator):
         sender_inputs = []
         targets = []
         receiver_inputs = []
+        image_ids = []
 
         for sample in samples:
             sender_inputs.append(torch.stack(sample.bounding_boxes))
@@ -266,10 +267,15 @@ class DaleReferentialGameBatchIterator(GameBatchIterator):
                 torch.stack([sample.bounding_boxes[i] for i in sample.target_order])
             )
 
+            image_ids.append(int(sample.image_id[-6:]))
+
         return (
             torch.stack(sender_inputs),
             torch.stack(targets),
             torch.stack(receiver_inputs),
+            {
+                "image_id": torch.tensor(image_ids),
+            },
         )
 
 

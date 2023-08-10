@@ -16,3 +16,5 @@ python source/preexperiments/feature_extractors.py --image_dir $image_dir --out_
 python source/preexperiments/feature_extractors.py --image_dir $image_dir --out_file "$out_dir"vgg_avgpool_1.h5 --feature_extractor VGG --avgpool --classifier_layers 1 --device $device --batch_size $batch_size
 python source/preexperiments/feature_extractors.py --image_dir $image_dir --out_file "$out_dir"vgg_avgpool_2.h5 --feature_extractor VGG --avgpool --classifier_layers 2 --device $device --batch_size $batch_size
 python source/preexperiments/feature_extractors.py --image_dir $image_dir --out_file "$out_dir"vgg_avgpool_3.h5 --feature_extractor VGG --avgpool --classifier_layers 3 --device $device --batch_size $batch_size
+
+python source/preexperiments/feature_extractors.py --image_dir /scratch/guskunkdo/clevr-images-unambigous-colour/images/ --scene_dir /scratch/guskunkdo/clevr-images-unambigous-colour/scenes/ --out_file /scratch/guskunkdo/clevr-images-unambigous-colour/features/bounding_box_resnet_4_avgpool_no-fc.h5 --feature_extractor ResNet --avgpool --no-fc --num_blocks 4 --device cuda --batch_size 200 --bounding_boxes
