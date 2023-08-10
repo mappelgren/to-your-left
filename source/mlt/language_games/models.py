@@ -9,7 +9,7 @@ class DummyReferentialSender(nn.Module):
         self.hidden_size = hidden_size
 
     def forward(self, x, _aux_input):
-        return torch.rand((x.shape[0], self.hidden_size))
+        return torch.rand((x.shape[0], self.hidden_size), device=x.device)
 
 
 class ReferentialGameSender(nn.Module):
