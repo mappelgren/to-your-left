@@ -332,7 +332,9 @@ def main(params):
     )
 
     print(f"len dataset: {len(dataset.samples)}")
-    print(f"unique len dataset: {len(set(dataset.samples))}")
+    print(
+        f"unique len dataset: {len(set(sample.image_id for sample in dataset.samples))}"
+    )
 
     if model.split_dataset:
         train_dataset_length = int(0.8 * len(dataset))
