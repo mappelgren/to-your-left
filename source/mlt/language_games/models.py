@@ -46,18 +46,14 @@ class ReferentialGameReceiver(nn.Module):
 
     def forward(self, message, x, _aux_input):
         message = self.linear_message(message)
-        print(x.shape)
         dot_products = []
         for image_index in range(x.shape[1]):
             encoded_image = self.image_encoder(x[:, image_index])
             dot_products.append(torch.sum(message * encoded_image, dim=1))
 
-        print(dot_products)
-
         output = torch.stack(dot_products, dim=1)
-        softmax = self.softmax(output)
-        print(softmax.shape)
-        return softmax
+
+        return self.softmax(output)
 
 
 class CaptionGeneratorSender(nn.Module):

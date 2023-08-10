@@ -282,7 +282,7 @@ def get_params(params):
         "--sender_encoder_dim",
         type=int,
         default=10,
-        help="Size of the LSMT encoder of Sender when attributes are encoded with descriptions (default: 10)",
+        help="Size of the LSTM encoder of Sender when attributes are encoded with descriptions (default: 10)",
     )
 
     # -- OUTPUT --
