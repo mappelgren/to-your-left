@@ -3,6 +3,15 @@ from mlt.feature_extractors import FeatureExtractor
 from torch import nn
 
 
+class DummyReferentialSender(nn.Module):
+    def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
+        super().__init__()
+        self.hidden_size = hidden_size
+
+    def forward(self, x, _aux_input):
+        return torch.rand((x.shape[0], self.hidden_size))
+
+
 class ReferentialGameSender(nn.Module):
     def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
         super().__init__()
