@@ -53,7 +53,7 @@ class ReferentialGameReceiver(nn.Module):
 
         output = torch.stack(dot_products, dim=1)
         softmax = self.softmax(output)
-        print(softmax)
+        print(softmax.shape)
         return softmax
 
 
