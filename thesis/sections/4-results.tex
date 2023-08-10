@@ -49,14 +49,13 @@ One factor that now has a much higher impact is the feature extractor that is us
 Table \ref{tab:feature-extractor-mean-distances} compares the mean distances the models predict for the different feature extractors.
 The results are shown for the models trained on the Dale-2 and Dale-5 datasets for training and test data.
 First, a big difference can be seen between the datasets.
-The model doesn't converge on the correct coordinates for the Dale-5 dataset at all, looking at the test data.
-All resulting mean distances are in a similar range around 50 pixels.
+The model only converge to a minimum mean distance of around 46 pixels to the correct coordinates for the Dale-5 dataset, looking at the test data.
+In most cases, it stays above 50 pixels.
 Using the Dale-2 dataset, the behavior is a little different.
-All ResNet extractors with four residual blocks and optionally additional average pooling and classifier layers reach similar scores as the experiments before without any one-hot encodings.
-Interestingly, using less residual layers, the model doesn't converge at all and the mean distances jump up and down between the epochs.
+All ResNet extractors with four residual blocks and an additional average pooling and optionally a classifier layers reach similar scores as the experiments before without any one-hot encodings.
+Interestingly, without the classifier layer, the model doesn't converge at all and the mean distances jump up and down between the epochs.
 This effect also applies when using less residual blocks.
-Using the VGG, both using VGG-avg and VGG-cls2 achieve a similar performance, while the others predict coordinates between 43 and 46 pixels away.
-\cmtDK{compare to scratch}
+Using the VGG, only VGG-cls2 achieve a similar performance, while the others predict coordinates between 43 and 46 pixels away.
 
 \begin{table}[h]
     \centering
@@ -64,29 +63,29 @@ Using the VGG, both using VGG-avg and VGG-cls2 achieve a similar performance, wh
         \toprule
                             & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}}                                   \\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
                             & train                               & test                                & train          & test           \\\midrule
-        \textbf{VGG-0}      & 30,26                               & 46,2                                & \textbf{10,81} & 48,33          \\
-        \textbf{VGG-avg}    & \textbf{9,96}                       & 36,9                                & 32,17          & 54,40          \\
+        \textbf{VGG-0}      & 30,27                               & 46,20                               & \textbf{32,17} & 54,40          \\
+        \textbf{VGG-avg}    & \textbf{29,99}                      & 45,08                               & 32,32          & 52,67          \\
         \textbf{VGG-cls1}   & 37,99                               & 43,28                               & 46,57          & 50,75          \\
-        \textbf{VGG-cls2}   & 34,95                               & \textbf{36,32}                      & 47,63          & \textbf{46,38} \\
-        \textbf{VGG-cls3}   & 39,99                               & 44,32                               & 47,26          & 46,77          \\\midrule
-        \textbf{ResNet-3}   & 92,07                               & 91,12                               & 11,52          & 48,52          \\
-        \textbf{ResNet-4}   & \textbf{8,09}                       & \textbf{36,78}                      & \textbf{9,05}  & 46,84          \\
-        \textbf{ResNet-avg} & 29,21                               & 38,94                               & 37,10          & 48,71          \\
-        \textbf{ResNet-cls} & 33,29                               & 38,83                               & 41,57          & \textbf{46,57} \\
+        \textbf{VGG-cls2}   & 38,87                               & \textbf{39,02}                      & 47,48          & 49,91          \\
+        \textbf{VGG-cls3}   & 39,99                               & 44,32                               & 47,26          & \textbf{46,77} \\\midrule
+        \textbf{ResNet-3}   & 78,26                               & 65,23                               & 92,07          & 91,12          \\
+        \textbf{ResNet-4}   & 44,14                               & 55,24                               & \textbf{36,48} & 58,28          \\
+        \textbf{ResNet-avg} & \textbf{33,06}                      & \textbf{39,18}                      & 47,64          & 46,38          \\
+        \textbf{ResNet-cls} & 37,57                               & 38,10                               & 44,72          & \textbf{45,92} \\
         \bottomrule
     \end{tabular}
     \caption{Mean test losses for different feature extractors with one-hot attribute encodings after 20 epochs}
     \label{tab:feature-extractor-mean-distances}
 \end{table}
-\cmtDK{wrong numbers}
+
 Secondly, the training loss now looks also different.
-In almost no cases, the models converge to a very low mean distance, meaning a high precision in their predictions, as they did in the experiment before.
-There are only exceptions when ResNet-4 is used or respectively VGG-avg for Dale-2 and VGG-0 for Dale-5.
-In other words, that means that the models are again not able to generalize, but in specific cases to learn the patterns in the train data by heart.
+In almost no cases, the models converge to a lower mean distance than with the test data, meaning a higher precision in their predictions, as they did in the experiment before.
+The only exception is ResNet-3 as a feature extractor.
+In other words, the models are again not able to generalize, but in specific cases memorize the patterns in the train data.
 This hints to the fact that only specific layers of the feature extractors contain information that is generally usable to identify and discriminate objects.
-Especially high layers, like the classifier layers and in the case of ResNet also the average pooling layers seem to already encode to task specific knowledge that was learned during the pre-training of these deep neural models.
-This information can't be utilized for the tasks in this research and earlier layers with more abstract information need to be used.
-The experiments in the following sections are set up using these lower layers as ResNet-3, ResNet-4, VGG-0 and VGG-avg.
+Especially the lower layers with fewer residual blocks in the case of ResNet and no classifier layers for the VGG seem to not encode knowledge that can be utilized for this task.
+Higher layers, with more specific encoded information need to be used for this research.
+The experiments in the following sections are set up using these higher layers.
 
 Adding \textbf{information about the center coordinates} of all objects should have helped the models to get a list of possible predictions.
 In theory, the model could learn to choose between these coordinates by relating them to the extracted features of the image.
@@ -96,8 +95,8 @@ The problem therefore doesn't seem to lie in predicting coordinates in general, 
 The model is still not able to understand, which object is the target object.
 For that reason, a better representation of the target object is necessary.
 
-In a next step, information about the attributes is included using the \emph{GRE-algorithm} from \citet{Dale1995}.
-\cmtDK{change}
+In a next step, information about the attributes is included using the \textbf{\emph{GRE-algorithm}} from \citet{Dale1995}.
+Again, the mean distance of the predictions as well as the accuracy doesn't improve compared to the previous experiments.
 
 \begin{figure}[h]
     \centering
@@ -169,10 +168,15 @@ Also the combined visualization shows the same clustering of predictions in the 
 \end{figure}
 
 These results allow two conclusions.
-First, the models are biased to predict
+First, the models are biased to predict coordinates in the center of the image.
+The reason for this is likely that the model can produce a relatively low loss, without relying on many extracted features of the objects.
+Since all objects are always located in the center of the image and never in its corners, a prediction of any coordinate in the center is on average closer to the target object than any random prediction or predictions of coordinates at the borders of the image.
+The model therefore learns only, where any object is likely located and can minimize the mean distance to a certain extent with this strategy.
 
-Second, even though the models are biased towards the center of the image, the predictions are still often leaning in the direction of the target object.
-This indicates that it is still able to
+Second, even though the models are biased towards the center of the image, the predictions are still often leaning towards the location where many objects lie.
+This can be seen for the 'Dale-5' dataset, especially in left and central image in Figure \ref{fig:visualizations_dale-5_test}.
+Again, by this strategy, the model can minimize the mean distance, since the probability is high that the target object lies in this cluster of objects.
+Concluding, the model is able to extract, where objects are located in the image, but can't decide, which of these objects is the target object.
 
 \subsubsection{Bounding Box classifier}
 
@@ -240,45 +244,39 @@ These are harder to generate for the model, since it needs to take more attribut
 There are five variables in the experiments that are adjusted:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver $h_r$ and (5) the size of the vocabulary $|V|$.
 
-Table \ref{tab:results} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
+Table \ref{tab:results_discriminator} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
+Four different vocabulary sizes $|V|$ are tested.
+A size of 13 symbols corresponds to the 13 attributes the objects can have and align with human language.
+If the symbols were similarly used, messages would have lengths between one and three symbols.
+Opposed to that a slightly smaller vocabulary with 10 symbols is used to create a smaller bottleneck with a higher pressure to condense the information.
+Similarly, a bigger vocabulary consisting of 20 symbols tests how a bigger bottleneck changes the results.
+Lastly, a big vocabulary of 100 symbols should give the model all options to encode the information, including one symbol per attribute or one symbol describing a combination of attributes.
+
+The hidden sizes $h_s$ and $h_r$ as well as the embedding sizes $e_s$ and $e_r$ are chosen in alignment with the vocabulary size.
+The hidden sizes are always smaller or equal to the vocabulary size since the information about each word needs to be compressed in a smaller dimension to learn meaning.
+Hereby, hidden sizes of 10 and 100 are tested.
+On the other hand, three different embedding sizes are tested: 10, 50 and 100.
+The reason for this is to experiment, what is the optimal middle ground between compressing features of an image encoded in high dimension vectors and upscaling encoded messages in low dimension vectors.
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{ccccc|cc|cc|cc|cc}
+    \begin{tabular}{ccccc|cc|cc|cc}
         \toprule
-              &         &         &         &         & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-4}} & \multicolumn{2}{c}{\textbf{CLEVR color}} & \multicolumn{2}{c}{\textbf{CLEVR unambiguous}}                                                                     \\\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(lr){12-13}
-        $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & $e_{r}$ & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Acc.}                            & \textbf{length}                                & \textbf{Acc.} & \textbf{length} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {10}    & {10}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {10}  & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {13}  & {10}    & {10}    & {10}    & {10}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {13}  & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {20}  & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {100} & {10}    & {10}    & {10}    & {10}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {100} & {10}    & {10}    & {50}    & {50}    & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
-        {100} & {100}   & {100}   & {100}   & {100}   & {\%}                                & {}                                  & {\%}                                     & {}                                             & {\%}          & {}              & {\%}          & {}              \\
+              &         &         &         &         & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                         \\\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
+        $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & $e_{r}$ & \textbf{Accuracy}                   & \textbf{length}                     & \textbf{Accuracy}                        & \textbf{length} & \textbf{Accuracy} & \textbf{length} \\\midrule
+        {10}  & {10}    & {10}    & {10}    & {10}    & {96,4\%}                            & {1,99}                              & {24,7\%}                                 & {1}             & {17,3\%}          & {2}             \\
+        {10}  & {50}    & {50}    & {50}    & {50}    & {50\%}                              & {2}                                 & {21,4\%}                                 & {2}             & {17,8\%}          & {1}             \\
+        {13}  & {10}    & {10}    & {10}    & {10}    & {94,9\%}                            & {2}                                 & {24,8\%}                                 & {2}             & {17,1\%}          & {2}             \\
+        {13}  & {10}    & {10}    & {50}    & {50}    & {49,6\%}                            & {2}                                 & {21,9\%}                                 & {2}             & {17,9\%}          & {1}             \\
+        {20}  & {10}    & {10}    & {50}    & {50}    & {50,9\%}                            & {1}                                 & {23\%}                                   & {2}             & {15,9\%}          & {2}             \\
+        {100} & {10}    & {10}    & {10}    & {10}    & {97,3\%}                            & {2}                                 & {24\%}                                   & {2}             & {18,1\%}          & {2}             \\
+        {100} & {10}    & {10}    & {50}    & {50}    & {49,9\%}                            & {2}                                 & {24,4\%}                                 & {2}             & {15,8\%}          & {2}             \\
+        {100} & {100}   & {100}   & {100}   & {100}   & {49\%}                              & {1}                                 & {25,3\%}                                 & {2}             & {15,6\%}          & {1}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the discriminators: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
     \label{tab:results_discriminator}
-\end{table}
-\cmtDK{insert results of new experiments}
-
-\begin{table}[h]
-    \centering
-    \begin{tabular}{c|ccccc|c}
-        \hline
-        \textbf{Dataset} & $h_{s}$ & $e_{s}$ & $h_{r}$ & $e_{r}$ & $|V|$ & \textbf{Acc.} \\
-        \hline
-        Dale-2           & {10}    & {10}    & {10}    & {10}    & {10}  & {95\%}        \\
-        Dale-2           & {50}    & {50}    & {128}   & {128}   & {10}  & {50\%}        \\
-        Dale-5           & {10}    & {10}    & {10}    & {10}    & {10}  & {23\%}        \\
-        Dale-5           & {10}    & {10}    & {10}    & {10}    & {20}  & {23\%}        \\
-        Dale-5           & {10}    & {10}    & {10}    & {10}    & {100} & {41\%}        \\
-        \hline
-    \end{tabular}
-    \caption{Results: $h$ are different hidden sizes, $e$ embedding sizes and $|V|$ vocabulary sizes.}
-    \label{tab:results}
 \end{table}
 
 For the \emph{Dale-2}, a clear correlation between the hidden sizes, embedding sizes and the size of the vocabulary can be identified.
@@ -291,8 +289,10 @@ The results change, when using the \emph{Dale-5} dataset with four distractors.
 With four distractors and with low hidden, embedding and vocabulary sizes, the agents barely pass the random baseline with 23\%.
 Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% points to 43\%.
 This is still considerably lower than the 95\% of the \emph{Dale-2} dataset.
+The same applies to the 'CLEVR color' dataset, where all models achieve a very low accuracy of around 15 to 17\%, corresponding to random guesses.
 
 \cmtDK{calculation of loss?}
+\cmtDK{length}
 
 Two conclusions can be drawn.
 First, the hidden as well as the embedding sizes need to be close to the vocabulary size.
@@ -309,7 +309,6 @@ The need for a more detailed description of discriminative attributes is higher 
 Therefore, the models need to learn more combinations of symbols in order to attest to this higher level of detail and especially how to relate them to features in the images.
 
 \cmtDK{look at language}
-\cmtDK{test different sizes}
 \cmtDK{similarity to bounding box classifier}
 
 \subsubsection{Caption generators}
@@ -425,6 +424,6 @@ It is able to predict the center coordinates of the target object the most preci
     \end{tabular}
     \caption{Results of the masked coordinate predictor: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
     \label{tab:results_masked_predictor_game}
-
-    Finally looking at the
 \end{table}
+
+Finally looking at the

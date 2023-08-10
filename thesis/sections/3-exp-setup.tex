@@ -89,23 +89,19 @@ Each image contains a maximum of 10 objects, that are not intersecting, have the
 \begin{figure}[h]
     \centering
     \subfigure['CLEVR single', \emph{large yellow sphere}]{
-        \includegraphics[width=0.42\linewidth]{figures/CLEVR_single.png}
+        \includegraphics[width=0.43\linewidth]{figures/CLEVR_single.png}
         \label{fig:clevr-single}
     }
-    \subfigure['CLEVR unambiguous', \emph{large green sphere}]{
-        \includegraphics[width=0.42\linewidth]{figures/CLEVR_unambiguous.png}
-        \label{fig:clevr-unambiguous}
-    }
     \subfigure['CLEVR color', \emph{small brown cylinder}]{
-        \includegraphics[width=0.42\linewidth]{figures/CLEVR_color.png}
+        \includegraphics[width=0.43\linewidth]{figures/CLEVR_color.png}
         \label{fig:clevr-color}
     }
     \subfigure['Dale-2', \emph{small green cylinder}]{
-        \includegraphics[width=0.42\linewidth]{figures/CLEVR_dale-2.png}
+        \includegraphics[width=0.43\linewidth]{figures/CLEVR_dale-2.png}
         \label{fig:clevr-dale-2}
     }
     \subfigure['Dale-5', \emph{large purple cylinder}]{
-        \includegraphics[width=0.42\linewidth]{figures/CLEVR_dale-5.png}
+        \includegraphics[width=0.43\linewidth]{figures/CLEVR_dale-5.png}
         \label{fig:clevr-dale-5}
     }
     \caption{Example images of each dataset, with the target object specified}
@@ -123,20 +119,6 @@ With this dataset, neural models can focus on only the features, as well as the 
 There are no objects that distract the model from extracting features from the target object.
 This helps to understand if the models are actually able to assign features or learn locations of these features in an image.
 Figure \ref{fig:clevr-single} shows an example with the only object being the \emph{large yellow sphere}.
-
-\subsubsection*{CLEVR unambiguous}
-The second dataset that is created is called 'CLEVR unambiguous'.
-The purpose of this dataset is to create scenes, where the target object is completely unique and as easily identifiable as possible.
-For this reason, there exist only two groups in the scene, the target object and distractors.
-The distractor group can contain in between 6 and 9 objects.
-The target object doesn't share any attributes with the distractors.
-Namely, if the target is for instance green, no other object in the scene is green as well.
-This also applies to the other attributes.
-When referring to this target object, it is therefore enough to only describe one of the attributes.
-
-Consider the scene in Figure \ref{fig:clevr-unambiguous}.
-The target object can be completely described as the \emph{large green sphere}.
-On the other hand, also descriptions like the \emph{green object}, the \emph{large object} or the \emph{sphere} would be unambiguously referring to the target object.
 
 \subsubsection*{CLEVR color}
 This task could on the other hand be difficult to learn for neural models.
@@ -397,9 +379,8 @@ With a final \emph{softmax} function, the model then points to one of the boundi
 The loss is calculated using cross entropy.
 
 The bounding box classifier is trained on all datasets excluding the 'CLEVR single'.
-The 'CLEVR unambiguous' and 'CLEVR color' datasets are directly comparable to each other for the similar setup of their creation.
-Especially interesting is the effect of the number of shared attributes. Does it help the model if the target object is unique in every attribute or does it help if there is only one specific attribute that is shared?
-A similar assumption can be made for the 'Dale' datasets. How big is the effect of increasing the number of distractors and the growing number of attributes that are needed to discriminate the objects.
+The 'Dale' datasets are directly comparable to each other for the similar setup of their creation.
+Especially interesting is the effect of the increasing the number of distractors and the growing number of attributes that are needed to discriminate the objects.
 
 \paragraph{Level 3 - Caption generator:}
 
@@ -553,6 +534,14 @@ As in \citet{Lazaridou2016}, the sender receives the bounding box of the target 
 The sender is assumed to learn which of the input images is the target images by this approach.
 The receiver receives the images in completely shuffled order.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.8\linewidth]{figures/discriminator.png}
+    \caption{Sender and receiver architectures in the discrimination game}
+    \label{fig:discriminator_architecture}
+\end{figure}
+
+Figure \ref{fig:discriminator_architecture} shows, how the sender and the receiver of the discriminator are built up.
 For the sender, the images are passed through a feature extractor and a following linear layer that reduces the dimensions to an embedding size $e_s$.
 All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
 This is then used as the initial state of the encoder LSTM in the sender wrapper.

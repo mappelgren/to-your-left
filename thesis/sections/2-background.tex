@@ -1,16 +1,82 @@
 \section{Background and Related Work}
 \label{sec:background}
-% subsections are \subsection{title}
-%% subssubsections are \subsubsection{title}
-%% numbering will work automatically 
 
 \cmtDK[inline]{7 pages}
 
 \subsection{Language Games}
-\cmtDK[inline]{\\
-    - EGG \\
-    - Resnet \\
-}
+% \begin{itemize}
+%     \item why language games?
+%           \begin{itemize}
+%               \item origins of language
+%               \item flexibility
+%               \item efficiency
+%           \end{itemize}
+%     \item setup of language game
+%           \begin{itemize}
+%               \item cooperative vs self-interested
+%               \item asymetry
+%               \item gumbel softmax vs reinforce
+%               \item EGG
+%               \item bottleneck
+%           \end{itemize}
+%     \item how does emerged language look?
+%           \begin{itemize}
+%               \item compositionality
+%               \item generalization
+%               \item efficiency
+%               \item referring expressions
+%               \item discriminative vs description
+%               \item entropy minimization
+%           \end{itemize}
+%     \item why relating objects?
+% \end{itemize}
+
+The center of this thesis evolves around language games between deep neural models.
+Hereby, multiple deep neural agents need to solve a task, by communicating with symbols, which initially are not associated with any meaning.
+By using and interpreting these symbols in there communication, the agents start to give these symbols and their combinations meaning.
+After this process, a new artificial language emerged, with which the agents can communicate with each other.
+
+In section \ref{sec:aims_languages}, I will explain reasons, why research in this field is conducted and how it may help in further research.
+Section \ref{sec:setup-lg} shows in more detail, how the language games are set up and how exactly agents can communicate and the language emerges.
+In section \ref{sec:properties-el}, I will discuss, how the emerged languages can be built up.
+Finally, section \ref{sec:referring} discusses, how the language games will be used in this thesis, to explore how agents can refer to objects in images.
+
+\subsubsection{Aims of emerged languages}
+\label{sec:aims_languages}
+The setup of language games allows for very controlled rules of how agents can behave.
+
+
+\subsubsection{Setup of language games}
+\label{sec:setup-lg}
+The term of 'language games' was first introduced by \citet{Wittgenstein1953}.
+The author describes language games as uses of language between multiple interlocutors.
+These can be any small parts of conversations, for instance between a teacher and a student teaching a new concept or between two persons, discussing a topic.
+The rules in each of these situations differ and therefore the meanings and semantics of words and sentences may differ from situation to situation.
+An interjection 'Water!' may be a warning, an answer to a question, a request or something else, depending on the context.
+The meanings are bound to the rules of the language games.
+
+This reasoning was taken up, when trying to train artificial entities to produce a language.
+One of the original games is the signaling game, proposed by \citet{Lewis1969}.
+In this game, a sender needs to send a message to a receiver, based on information only available to the sender.
+Based on the message, the receiver proposes an action.
+Both sender and receiver are rewarded in the same way if the proposed action was correct.
+Hence, both agents need to invent a language together, fit to the conditions of the game.
+
+The entities can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge (\citet{Kirby2002}).
+Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
+Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
+
+% This reasoning was taken up, when trying to train deep neural models to produce language.
+% These models need to be set into an interactive situation, a language game, that meaning and a language can emerge (\citet{Baroni2020}).
+% Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
+% Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
+
+\subsubsection{Properties of the emerged language}
+\label{sec:properties-el}
+
+
+\subsubsection{Referring to objects and grounding}
+\label{sec:referring}
 
 \subsection{Dataset}
 \cmtDK[inline]{\\
@@ -19,3 +85,6 @@
     ---- simple objects \\
     - CLEVR baselines \\
 }
+
+\subsection{Computational methods}
+
