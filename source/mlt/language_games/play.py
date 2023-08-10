@@ -36,6 +36,7 @@ from mlt.language_games.models import (
     ReferentialGameSender,
 )
 from mlt.language_games.test import captioning_loss, classification_loss, pixel_loss
+from mlt.preexperiments import train
 from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     DaleCaptionAttributeEncoder,
@@ -338,6 +339,15 @@ def main(params):
         )
     else:
         train_dataset = test_dataset = dataset
+
+    train_ids = set(sample.image_id for sample in train_dataset.samples)
+    test_ids = set(sample.image_id for sample in test_dataset.samples)
+
+    intersection = train_ids.intersection(test_ids)
+    if len(intersection) > 0:
+        print(intersection)
+    else:
+        print("no intersection")
 
     train_loader = GameLoader(
         dataset=train_dataset,
