@@ -331,6 +331,9 @@ def main(params):
         **model.dataset_args,
     )
 
+    print(f"len dataset: {len(dataset.samples)}")
+    print(f"unique len dataset: {len(set(dataset.samples))}")
+
     if model.split_dataset:
         train_dataset_length = int(0.8 * len(dataset))
         test_dataset_length = len(dataset) - train_dataset_length
@@ -340,10 +343,11 @@ def main(params):
     else:
         train_dataset = test_dataset = dataset
 
-    train_ids = set(sample.image_id for sample in train_dataset.dataset.samples)
-    test_ids = set(sample.image_id for sample in test_dataset.dataset.samples)
+    train_ids = set(train_dataset.indices)
+    test_ids = set(test_dataset.indices)
 
     intersection = train_ids.intersection(test_ids)
+
     if len(intersection) > 0:
         print(intersection)
     else:
