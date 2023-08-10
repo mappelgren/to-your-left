@@ -1,5 +1,6 @@
 import torch
 from mlt.feature_extractors import FeatureExtractor
+from numpy import dot
 from torch import nn
 
 
@@ -50,6 +51,8 @@ class ReferentialGameReceiver(nn.Module):
         for image_index in range(x.shape[1]):
             encoded_image = self.image_encoder(x[:, image_index])
             dot_products.append(torch.sum(message * encoded_image, dim=1))
+
+        print(dot_products)
 
         output = torch.stack(dot_products, dim=1)
         softmax = self.softmax(output)
