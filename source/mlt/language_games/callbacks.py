@@ -60,12 +60,6 @@ class ExcludingInteractionSaver(InteractionSaver):
         torch.save(logs, dump_dir / f"interaction_gpu{rank}")
 
 
-# The PrintValidationEvents callback function checks that we are at the
-# last epoch (either the last epoch required by the user, or because
-# of early stopping), and it prints sender_input, labels, message and
-# receiver_output for all data points in the validation set.
-# These data are stored in an Interaction object (see interaction.py
-# under core), that logs various data about each game data point.
 class PrintMessages(Callback):
     def __init__(self, n_epochs):
         super().__init__()
@@ -75,13 +69,12 @@ class PrintMessages(Callback):
     def print_events(logs: Interaction):
         print("MESSAGES")
         print([m.tolist() for m in logs.message], sep="\n")
+        print("OUTPUTS")
+        print([m.tolist() for m in logs.receiver_output], sep="\n")
 
-    # here is where we make sure we are printing the validation set (on_validation_end, not on_epoch_end)
     def on_validation_end(self, _loss, logs: Interaction, epoch: int):
-        # here is where we check that we are at the last epoch
         if epoch == self.n_epochs:
             self.print_events(logs)
 
-    # same behaviour if we reached early stopping
     def on_early_stopping(self, _train_loss, _train_logs, epoch, _test_loss, test_logs):
         self.print_events(test_logs)
