@@ -20,6 +20,7 @@ from mlt.preexperiments.data_readers import (
 from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
     AttributeLocationCoordinatePredictor,
+    BoundingBoxAttributeClassifier,
     BoundingBoxClassifier,
     CaptionDecoder,
     CaptionGenerator,
@@ -192,7 +193,7 @@ models = {
             "attribute_encoder": OneHotAttributeEncoder(),
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
-        model=BoundingBoxClassifier,
+        model=BoundingBoxAttributeClassifier,
         model_args={
             "embedding_dimension": 10,
         },

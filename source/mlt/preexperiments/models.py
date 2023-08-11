@@ -19,6 +19,37 @@ class BoundingBoxClassifier(nn.Module):
             nn.Flatten(), nn.LazyLinear(embedding_dimension)
         )
 
+        self.softmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, data):
+        bounding_boxes, *_ = data
+
+        encoded_images = []
+        for image_index in range(bounding_boxes.shape[1]):
+            encoded_image = self.image_encoder(bounding_boxes[:, image_index])
+            encoded_images.append(encoded_image)
+
+        output = torch.stack(encoded_images, dim=1)
+
+        return self.softmax(output)
+
+
+class BoundingBoxAttributeClassifier(nn.Module):
+    """
+    Output:
+     - classified bounding box (10 dimensions)
+
+    Input:
+     - bounding boxes of objects
+    """
+
+    def __init__(self, embedding_dimension) -> None:
+        super().__init__()
+
+        self.image_encoder = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(embedding_dimension)
+        )
+
         self.linear_attributes = nn.LazyLinear(embedding_dimension)
 
         self.softmax = nn.LogSoftmax(dim=1)
