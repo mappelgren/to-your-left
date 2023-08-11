@@ -177,9 +177,7 @@ models = {
         dataset_args={},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxClassifier,
-        model_args={
-            "embedding_dimension": 10,
-        },
+        model_args={},
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
         output_processor=BoundingBoxOutputProcessor,
