@@ -173,6 +173,21 @@ models = {
     ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
+        dataset_args={},
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=BoundingBoxClassifier,
+        model_args={
+            "embedding_dimension": 10,
+        },
+        loss_function=nn.CrossEntropyLoss(),
+        tester=BoundingBoxClassifierTester,
+        output_processor=BoundingBoxOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "bounding_box", "target_bounding_box")
+        },
+    ),
+    "bounding_box_classifier_attributes": ModelDefinition(
+        dataset=BoundingBoxClassifierDataset,
         dataset_args={
             "attribute_encoder": OneHotAttributeEncoder(),
         },
