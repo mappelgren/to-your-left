@@ -25,11 +25,11 @@ class BoundingBoxClassifier(nn.Module):
         bounding_boxes, *_ = data
 
         if bounding_boxes.shape[1] == 2:
-            output = self.classifiers_2(bounding_boxes)
+            output = self.classifier_2(bounding_boxes)
         elif bounding_boxes.shape[1] == 5:
-            output = self.classifiers_5(bounding_boxes)
+            output = self.classifier_5(bounding_boxes)
         elif bounding_boxes.shape[1] == 10:
-            output = self.classifiers_10(bounding_boxes)
+            output = self.classifier_10(bounding_boxes)
 
         return self.softmax(output)
 
