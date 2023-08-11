@@ -15,18 +15,21 @@ class BoundingBoxClassifier(nn.Module):
     def __init__(self) -> None:
         super().__init__()
 
-        self.classifiers = {
-            2: nn.Sequential(nn.Flatten(), nn.LazyLinear(2)),
-            5: nn.Sequential(nn.Flatten(), nn.LazyLinear(5)),
-            10: nn.Sequential(nn.Flatten(), nn.LazyLinear(10)),
-        }
+        self.classifier_2 = nn.Sequential(nn.Flatten(), nn.LazyLinear(2))
+        self.classifier_5 = nn.Sequential(nn.Flatten(), nn.LazyLinear(5))
+        self.classifier_10 = nn.Sequential(nn.Flatten(), nn.LazyLinear(10))
 
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, data):
         bounding_boxes, *_ = data
 
-        output = self.classifiers[bounding_boxes.shape[1]](bounding_boxes)
+        if bounding_boxes.shape[1] == 2:
+            output = self.classifiers_2(bounding_boxes)
+        elif bounding_boxes.shape[1] == 5:
+            output = self.classifiers_5(bounding_boxes)
+        elif bounding_boxes.shape[1] == 10:
+            output = self.classifiers_10(bounding_boxes)
 
         return self.softmax(output)
 
