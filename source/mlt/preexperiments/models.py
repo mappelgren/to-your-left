@@ -15,21 +15,19 @@ class BoundingBoxClassifier(nn.Module):
     def __init__(self, embedding_dimension) -> None:
         super().__init__()
 
-        self.image_encoder = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(embedding_dimension)
-        )
+        self.classifier = None
 
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, data):
         bounding_boxes, *_ = data
 
-        encoded_images = []
-        for image_index in range(bounding_boxes.shape[1]):
-            encoded_image = self.image_encoder(bounding_boxes[:, image_index])
-            encoded_images.append(encoded_image)
+        if self.classifier == None:
+            self.classifier = nn.Sequential(
+                nn.Flatten(), nn.LazyLinear(bounding_boxes.shape[1])
+            )
 
-        output = torch.stack(encoded_images, dim=1)
+        output = self.classifier(bounding_boxes)
 
         return self.softmax(output)
 
