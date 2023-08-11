@@ -181,6 +181,20 @@ Since there is not necessarily a pattern for which object in the image is the co
 Therefore, the models need to receive more information.
 Here, I try out four different ways to encode the target object.
 
+
+\begin{figure}[h]
+    \centering
+    \subfigure[Model including one-hot encoded attributes and locations]{
+        \includegraphics[width=0.35\linewidth]{figures/arch_coordinate_predictor.png}
+        \label{fig:coordinate_predictor_architecture}
+    }
+    \subfigure[Model including GRE description]{
+        \includegraphics[width=0.35\linewidth]{figures/arch_coordinate_predictor_dale.png}
+        \label{fig:coordinate_predictor_dale_architecture}
+    }
+    \caption{Simplified architecture of the coordinate predictors}
+\end{figure}
+
 In the first method, I encode the attributes of the target object as \textbf{one-hot encodings}.
 There is a three-dimensional vector encoding the \emph{shape}, an eight-dimensional vector encoding the color and a two-dimensional vector encoding the two different sizes.
 The dimensions of these vectors can either be zero or one, depending on the attributes of the target object.
@@ -457,6 +471,13 @@ The bounding boxes of all objects are padded to the maximum number of object pre
 These bounding boxes are shuffled.
 Furthermore, the attributes of the target object are encoded as on-hot vectors to point the model towards it.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{figures/arch_bounding_box_classifier.png}
+    \caption{Simplified architecture of the bounding box classifier}
+    \label{fig:bounding_box_classifier_architecture}
+\end{figure}
+
 The model passes each of the bounding boxes through a linear layer to compress it to an embedding vector of 10 dimensions.
 The same is done with the one-hot vector of the target attributes.
 In the next step, the dot product between each embedded image and the embedded attributes are calculated.
@@ -531,6 +552,13 @@ Notice that the padding token is again at the end of the generation, but the ord
 Nonetheless, this helps to understand more detailed if and how the model discriminates objects.
 Does it rely on the same attributes, humans are using, or does it find other important differences, or is it able to solve the task at all?
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.5\linewidth]{figures/arch_caption_generator.png}
+    \caption{Simplified architecture of the masked caption generator}
+    \label{fig:caption_generator_architecture}
+\end{figure}
+
 I compare two different models against each other.
 The first model just takes the image as the input.
 During training, also the ground truth caption is passed to the model.
@@ -548,6 +576,7 @@ Each token in the sequence is determined, by selecting the highest logit in the 
 
 Since with this approach, the model doesn't have any information about the target object, I extend it with a masked image.
 As in the section above, a masked version of the image is created and passed to the model.
+This is shown in Figure \ref{fig:caption_generator_architecture}.
 The model works exactly the same, except for the additional separate image encoder that encodes the masked image in the same way as the original image.
 Both encodings are concatenated and then used as the initial hidden state for the LSTM.
 This should point the model to which object to describe and discriminate from the other objects.
@@ -716,7 +745,7 @@ The receiver receives the images in completely shuffled order.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=.8\linewidth]{figures/discriminator.png}
+    \includegraphics[width=.8\linewidth]{figures/arch_discriminator.png}
     \caption{Sender and receiver architectures in the discrimination game}
     \label{fig:discriminator_architecture}
 \end{figure}
@@ -817,6 +846,13 @@ This setup is based on the single neural model described above.
 The target caption for each image is created using the GRE-algorithm of \citet{Dale1995}.
 Since the results of the experiments show that the position of the padding doesn't have an effect on the final converging scores, the padding tokens are only prepended to the caption.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.7\linewidth]{figures/arch_caption_generator_game.png}
+    \caption{Simplified architecture of the caption generator game}
+    \label{fig:caption_generator_game_architecture}
+\end{figure}
+
 The sender is built up of two image encoders, one encodes the original target image and one encodes the masked image.
 The image encoders are set up as described in \citet{Johnson2017}.
 A feature extractor extracts basic features of the images.
@@ -911,6 +947,13 @@ For the LSTM to learn a representation of each token as well as of the complete 
 Choosing a size of 10 for both variables proved to give good results in the experiments.
 In a next step, the image encoding and the final hidden state of the description are concatenated and passed through a linear layer to reduce the dimension to the hidden size $h_s$.
 The resulting vector is passed to the sender wrapper LSTM, to generate the message.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.7\linewidth]{figures/arch_coordinate_predictor_game.png}
+    \caption{Simplified architecture of the masked coordinate predictor game}
+    \label{fig:coordinate_predictor_game_architecture}
+\end{figure}
 
 For the second approach, the masked image is passed only through a feature extractor.
 Both the resulting encoding of the masked image and the encoding of the original image are each passed through separate linear layer to adjust their dimensions to the same embedding size $e_s$.
