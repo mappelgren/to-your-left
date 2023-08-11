@@ -8,7 +8,6 @@ from enum import Enum
 
 import torch
 from mlt.image_loader import ImageLoader
-from mlt.preexperiments.models import FeatureExtractor
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.models import ResNet101_Weights
@@ -57,105 +56,6 @@ class PreprocessScratch:
 
     def __call__(self, image):
         return self.transform(image)
-
-
-class BoundingBoxClassifierDataset(Dataset):
-    """
-    Input:
-     - bounding boxes of all objects
-
-    Ouput:
-     - index of target bounding box
-    """
-
-    def __init__(
-        self,
-        scenes_json_dir,
-        image_loader: ImageLoader,
-        max_number_samples,
-        feature_extractor: FeatureExtractor = None,
-        preprocess=ResNet101_Weights.DEFAULT.transforms(),
-        device=torch.device("cpu"),
-    ) -> None:
-        super().__init__()
-
-        if feature_extractor is not None:
-            feature_extractor = feature_extractor.to(device)
-            feature_extractor.eval()
-
-        self.samples = []
-
-        scenes = os.listdir(scenes_json_dir)
-        print("sampling scenes...")
-        selected_scenes = random.sample(scenes, max_number_samples)
-
-        for scene_index, scene_file in enumerate(selected_scenes):
-            if scene_index % 50 == 0:
-                print(f"processing scene {scene_index}...", end="\r")
-
-            with open(
-                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
-            ) as f:
-                scene = json.load(f)
-
-            image_id = scene_file.removesuffix(".json")
-            image, _, _ = image_loader.get_image(image_id)
-            # image = Image.open(image_path + scene["image_filename"]).convert("RGB")
-
-            bounding_boxes = self._get_bounding_boxes(image, scene, preprocess)
-
-            if feature_extractor is not None:
-                with torch.no_grad():
-                    bounding_boxes = [
-                        feature_extractor(bounding_box.to(device).unsqueeze(dim=0))
-                        .squeeze(dim=0)
-                        .cpu()
-                        for bounding_box in bounding_boxes
-                    ]
-
-            target_object = scene["groups"]["target"][0]
-            enumerated = list(enumerate(bounding_boxes))
-            random.shuffle(enumerated)
-
-            input_boxes = torch.stack([bounding_box for _, bounding_box in enumerated])
-            indices, _ = zip(*enumerated)
-            target_index = torch.tensor(indices.index(target_object))
-
-            self.samples.append(
-                (input_boxes, target_index, scene_file.removesuffix(".json"))
-            )
-        print()
-        print("loaded data.")
-
-    def _get_bounding_boxes(self, image, scene, preprocess):
-        BOUNDING_BOX_SIZE = image.size[0] / 5
-
-        object_bounding_boxes = []
-        for obj in scene["objects"]:
-            x_center, y_center, _ = obj["pixel_coords"]
-            bounding_box = image.crop(
-                (
-                    x_center - BOUNDING_BOX_SIZE / 2,
-                    y_center - BOUNDING_BOX_SIZE / 2,
-                    x_center + BOUNDING_BOX_SIZE / 2,
-                    y_center + BOUNDING_BOX_SIZE / 2,
-                )
-            )
-            object_bounding_boxes.append(preprocess(bounding_box))
-
-        # magic number 10 (max objects in scene)
-        object_bounding_boxes.extend(
-            [torch.zeros_like(object_bounding_boxes[0])]
-            * (10 - len(object_bounding_boxes))
-        )
-
-        return object_bounding_boxes
-
-    def __getitem__(self, index):
-        return self.samples[index]
-
-    def __len__(self) -> int:
-        return len(self.samples)
 
 
 class Captioner(ABC):
@@ -352,6 +252,91 @@ class BasicImageMasker(ImageMasker):
                 pixels[i, j] = (255, 255, 255)
 
         return masked_image
+
+
+@dataclass
+class BoundingBoxClassifierSample:
+    image_id: str
+    bounding_boxes: torch.Tensor
+
+    # target
+    target_index: torch.Tensor
+
+    # addtional (optional) information
+    attribute_tensor: torch.Tensor = torch.tensor(0)
+
+
+class BoundingBoxClassifierDataset(Dataset):
+    """
+    Input:
+     - bounding boxes of all objects
+
+    Ouput:
+     - index of target bounding box
+    """
+
+    def __init__(
+        self,
+        scenes_json_dir,
+        image_loader: ImageLoader,
+        max_number_samples,
+        *args,
+        attribute_encoder: AttributeEncoder = None,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+
+        self.samples: list[BoundingBoxClassifierSample] = []
+
+        scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
+        selected_scenes = random.sample(scenes, max_number_samples)
+
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                scene = json.load(f)
+
+            image_id = scene_file.removesuffix(".json")
+            _, bounding_boxes, _ = image_loader.get_image(image_id)
+
+            target_object = scene["groups"]["target"][0]
+
+            shuffled_indices = torch.randperm(bounding_boxes.shape[0])
+            shuffled_bounding_boxes = bounding_boxes[shuffled_indices]
+
+            target_index = torch.where(shuffled_indices == target_object)[0][0]
+
+            sample = BoundingBoxClassifierSample(
+                image_id=scene_file.removesuffix(".json"),
+                bounding_boxes=shuffled_bounding_boxes,
+                target_index=target_index,
+            )
+
+            if attribute_encoder is not None:
+                sample.attribute_tensor = attribute_encoder.encode(scene, target_object)
+
+            self.samples.append(sample)
+        print()
+        print("loaded data.")
+
+    def __getitem__(self, index):
+        sample = self.samples[index]
+        return (
+            (
+                sample.bounding_boxes,
+                sample.attribute_tensor,
+            ),
+            sample.target_index,
+            sample.image_id,
+        )
+
+    def __len__(self) -> int:
+        return len(self.samples)
 
 
 @dataclass

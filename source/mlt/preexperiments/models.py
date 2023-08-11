@@ -12,33 +12,29 @@ class BoundingBoxClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(self, feature_extractor: FeatureExtractor) -> None:
+    def __init__(self, embedding_dimension) -> None:
         super().__init__()
-        self.feature_extractor = feature_extractor
 
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.LazyLinear(4096),
-            nn.ReLU(),
-            nn.Linear(4096, 10),
-            nn.Softmax(dim=1),
+        self.image_encoder = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(embedding_dimension)
         )
 
+        self.linear_attributes = nn.LazyLinear(embedding_dimension)
+
+        self.softmax = nn.LogSoftmax(dim=1)
+
     def forward(self, data):
-        data = data.permute(1, 0, 2, 3, 4)
+        bounding_boxes, attribute_tensor, *_ = data
 
-        # if self.inputs_are_feature:
-        stacked = data
-        # else:
-        #     after_feature_extractor = []
-        #     for bounding_box in data:
-        #         after_feature_extractor.append(self.feature_extractor(bounding_box))
-        #     stacked = torch.stack(after_feature_extractor)
-        #     stacked = stacked.permute(1, 0, 2, 3, 4)
+        attribute_tensor = self.linear_attributes(attribute_tensor)
+        dot_products = []
+        for image_index in range(bounding_boxes.shape[1]):
+            encoded_image = self.image_encoder(bounding_boxes[:, image_index])
+            dot_products.append(torch.sum(attribute_tensor * encoded_image, dim=1))
 
-        classified = self.classifier(stacked)
+        output = torch.stack(dot_products, dim=1)
 
-        return classified
+        return self.softmax(output)
 
 
 class CoordinatePredictor(nn.Module):

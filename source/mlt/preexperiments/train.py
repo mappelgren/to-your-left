@@ -174,13 +174,13 @@ models = {
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
         dataset_args={
-            "feature_extractor": ResnetFeatureExtractor(
-                number_blocks=4, avgpool=False, fc=False
-            )
+            "attribute_encoder": OneHotAttributeEncoder(),
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxClassifier,
-        model_args={"feature_extractor": DummyFeatureExtractor()},
+        model_args={
+            "embedding_dimension": 10,
+        },
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
         output_processor=BoundingBoxOutputProcessor,

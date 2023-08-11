@@ -48,7 +48,7 @@ class BoundingBoxClassifierTester(Tester):
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
-            model_input = model_input.to(device)
+            model_input = [t.to(device) for t in model_input]
             ground_truth = ground_truth.to(device)
             output = model(model_input).detach()
             max_indices = torch.max(output, dim=1)[1]
