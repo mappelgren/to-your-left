@@ -1,4 +1,4 @@
-\section{Experimental Setup}
+\section{Experimentals}
 \label{sec:exp-setup}
 
 \cmtDK[inline]{15 pages}
@@ -151,6 +151,7 @@ The last level adds language to the experiment, more specifically the models lea
 These combined experiments should lay the basis for how to build up the agents in the language games.
 
 \subsubsection{Coordinate predictor}
+\subsubsection*{Setup}
 
 This level should help to analyze, how the final task of the language game should look like, in especially what the receiver is tasked to predict.
 As described before, the sender should communicate an object in the image and the receiver needs to identify it.
@@ -189,7 +190,7 @@ Here, I try out four different ways to encode the target object.
         \label{fig:coordinate_predictor_architecture}
     }
     \subfigure[Model including GRE description]{
-        \includegraphics[width=0.35\linewidth]{figures/arch_coordinate_predictor_dale.png}
+        \includegraphics[width=0.315\linewidth]{figures/arch_coordinate_predictor_dale.png}
         \label{fig:coordinate_predictor_dale_architecture}
     }
     \caption{Simplified architecture of the coordinate predictors}
@@ -286,7 +287,7 @@ Here, the models should make use of the additional given information about the s
 'Dale-2' and 'Dale-5' provide two different difficulties for the model, where it needs to discriminate a target object from one or four distractors.
 Latter task is assumed to be significantly harder.
 
-\paragraph*{Results:}
+\subsubsection*{Results}
 
 \begin{figure}[h]
     \centering
@@ -457,6 +458,7 @@ Again, by this strategy, the model can minimize the mean distance, since the pro
 Concluding, the model is able to extract, where objects are located in the image, but can't decide, which of these objects is the target object.
 
 \subsubsection{Bounding box classifier}
+\subsubsection*{Setup}
 \cmtDK{better to call it discriminators?}
 
 One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
@@ -494,7 +496,7 @@ The bounding box classifier is trained on all datasets excluding the 'CLEVR sing
 The 'Dale' datasets are directly comparable to each other for the similar setup of their creation.
 Especially interesting is the effect of the increasing the number of distractors and the growing number of attributes that are needed to discriminate the objects.
 
-\paragraph*{Results:}
+\subsubsection*{Results}
 As expected, all baselines achieve a random accuracy for each of the datasets.
 The accuracy lies at 50\% for the 'Dale-2' dataset, 22\% for the 'Dale-5' dataset and 12\% for the 'CLEVR color' dataset.
 This changes however, when information about the target object is included.
@@ -525,6 +527,7 @@ In this architecture, the model doesn't compare the objects directly to each oth
 A more complex architecture, in which the model is additionally tasked to discriminate the objects directly from each other might even improve the results.
 
 \subsubsection{Caption generator}
+\subsubsection*{Setup}
 
 As the bounding box classifier, the caption generator only acts as a learning step towards understanding, how the model can learn the attributes of objects.
 It is used the same way to create the captions for each image as in the section above with the GRE-algorithm.
@@ -612,7 +615,7 @@ Furthermore, the model needs to attend to many more locations in the image at th
 
 \cmtDK{align 'description', 'caption' and 'referring expression' over the whole section}
 
-\paragraph*{Results:}
+\subsubsection*{Results}
 In the next paragraphs, the results of the caption generator will be discussed.
 Table \ref{tab:results_caption-generator} shows the different scores of the models, when trained on 'Dale-2' and 'Dale-5'.
 ResNet-3 produced the best results, when it was used as a feature extractor.
@@ -672,6 +675,7 @@ With four distractors the algorithm is much more likely to produce longer captio
 These are harder to generate for the model, since it needs to take more attributes into account to discriminate the target object from the distractors.
 
 \subsection{Language games}
+
 The experiments that are executed using language games have a similar structure as the pre-experiments, since those lied the basis for the language games.
 
 The language games in this research have an asymmetric setup.
@@ -724,6 +728,8 @@ In the last step, I try to lose as much human bias as possible and the models ar
 \cmtDK{look at emerged language: distribution of vocab/ngrams, how do they relate to the images (clustering?)}
 
 \subsubsection{Discrimination games}
+\subsubsection*{Setup}
+
 In a discrimination game, the agents are presented with two or more images, one of these being the target image.
 The sender needs to communicate this target image to the receiver by discriminating it from the other distractor images.
 The receiver then needs to decide based on the message, which of the images is the target image.
@@ -767,7 +773,7 @@ The loss is calculated using the NLL-loss.
 During the experiments, five variables are adjusted to compare their effects:
 (1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender wrapper $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver wrapper $h_r$ and (5) the size of the vocabulary $|V|$.
 
-\paragraph*{Results:}
+\subsubsection*{Results}
 Table \ref{tab:results_discriminator} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
 Four different vocabulary sizes $|V|$ are tested.
@@ -789,14 +795,14 @@ The reason for this is to experiment, what is the optimal middle ground between 
         \toprule
               &         &         &         &         & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                         \\\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
         $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & $e_{r}$ & \textbf{Accuracy}                   & \textbf{length}                     & \textbf{Accuracy}                        & \textbf{length} & \textbf{Accuracy} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {10}    & {10}    & {96,4\%}                            & {1,99}                              & {24,7\%}                                 & {1}             & {17,3\%}          & {2}             \\
-        {10}  & {50}    & {50}    & {50}    & {50}    & {50\%}                              & {2}                                 & {21,4\%}                                 & {2}             & {17,8\%}          & {1}             \\
-        {13}  & {10}    & {10}    & {10}    & {10}    & {94,9\%}                            & {2}                                 & {24,8\%}                                 & {2}             & {17,1\%}          & {2}             \\
-        {13}  & {10}    & {10}    & {50}    & {50}    & {49,6\%}                            & {2}                                 & {21,9\%}                                 & {2}             & {17,9\%}          & {1}             \\
-        {20}  & {10}    & {10}    & {50}    & {50}    & {50,9\%}                            & {1}                                 & {23\%}                                   & {2}             & {15,9\%}          & {2}             \\
-        {100} & {10}    & {10}    & {10}    & {10}    & {97,3\%}                            & {2}                                 & {24\%}                                   & {2}             & {18,1\%}          & {2}             \\
-        {100} & {10}    & {10}    & {50}    & {50}    & {49,9\%}                            & {2}                                 & {24,4\%}                                 & {2}             & {15,8\%}          & {2}             \\
-        {100} & {100}   & {100}   & {100}   & {100}   & {49\%}                              & {1}                                 & {25,3\%}                                 & {2}             & {15,6\%}          & {1}             \\
+        {10}  & {10}    & {10}    & {10}    & {10}    & {96,4\%}                            & {0,99}                              & {24,7\%}                                 & {0}             & {17,3\%}          & {1}             \\
+        {10}  & {50}    & {50}    & {50}    & {50}    & {50\%}                              & {1}                                 & {21,4\%}                                 & {1}             & {17,8\%}          & {0}             \\
+        {13}  & {10}    & {10}    & {10}    & {10}    & {96,16\%}                           & {1}                                 & {24,8\%}                                 & {1}             & {17,1\%}          & {1}             \\
+        {13}  & {10}    & {10}    & {50}    & {50}    & {49,6\%}                            & {1}                                 & {21,9\%}                                 & {1}             & {17,9\%}          & {0}             \\
+        {20}  & {10}    & {10}    & {50}    & {50}    & {50,9\%}                            & {0}                                 & {23\%}                                   & {1}             & {15,9\%}          & {1}             \\
+        {100} & {10}    & {10}    & {10}    & {10}    & {97,3\%}                            & {1}                                 & {24\%}                                   & {1}             & {18,1\%}          & {1}             \\
+        {100} & {10}    & {10}    & {50}    & {50}    & {49,9\%}                            & {1}                                 & {24,4\%}                                 & {1}             & {15,8\%}          & {1}             \\
+        {100} & {100}   & {100}   & {100}   & {100}   & {49\%}                              & {0}                                 & {25,3\%}                                 & {1}             & {15,6\%}          & {0}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the discriminators: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
@@ -835,7 +841,76 @@ Therefore, the models need to learn more combinations of symbols in order to att
 \cmtDK{look at language}
 \cmtDK{similarity to bounding box classifier}
 
+\subsubsection*{Analysis of the emerged languages}
+In the above experiments, only three configurations lead to success, where a language emerged that the agents used to exchange information: languages with vocabulary sizes of 10, 13 and 100.
+In this section, these three emerged languages is analyzed in more detail.
+This is done in two parts.
+The first part is a qualitative analysis, to understand, which symbols are used to transfer which information.
+In the second part, the emerged languages are compared to English.
+More specifically, it is tested if the messages of the sender align with English referring expressions of the target object.
+
+\cmtDK{first part}
+
+To compare the emerged language to English, a probing approach is used.
+Probing can be used to analyze and interpret the hidden representations in neural networks.
+Hereby, a second neural model is trained to predict selected linguistic properties on the basis of the hidden representations.
+If this model is successfully able to predict the linguistic properties, the hidden representations are connected to them.
+If second model can't be trained, it indicates that there is no correlation between the hidden representation and the linguistic property.
+In the case of the emerged language, a neural model is trained to translate the messages of the sender into English referring expressions, based on the GRE algorithm by \cite{Dale1995}.
+Hereby, the model consists of an encoder LSTM, one linear layer and a decoder LSTM.
+The encoder LSTM encodes the messages of the emerged language.
+The final hidden state is used as the meaning of the complete sentence and passed through the linear layer, which should learn an abstract representation of the message.
+The resulting vector is used as the initial state of the decoder LSTM.
+The decoder LSTM is then trained to produce the English referring expression.
+While decoding, teacher forcing is applied.
+The success of the model is validated calculating cross entropy between the models predictions and the target English referring expression.
+Since generalization doesn't play a role for probing, no dropout is applied and the model is trained and validated on the complete dataset; no test or validation split is used.
+
+In the sections above, the attributes are ordered by importance in the way, it is usually used in English: shape > color > size.
+Since the agents do not necessarily need to follow this, all possible orders of importance for the attributes are compared to each other.
+
+The translation model with this setup can learn two characteristics.
+First, it can learn to find correlations between the emerged language and the English referring expressions.
+Secondly, it can learn patterns in the English referring expressions that are independent of the emerged language.
+For instance, it can learn that the referring expressions are likely to be two symbols long, or that 'cube' is the most common shape.
+This second characteristic can lead to a low loss of the model, even though there are no connections to the emerged language.
+In this test, only the first characteristic is interesting and would show the correlation between the emerged language and English referring expressions.
+For that reason, two reference key numbers are calculated for each of the attribute importance order.
+The first reference uses a non-informative input for the encoder LSTM, more specifically it always receives a vector of zeros and therefore can't learn any meaningful representation in the linear layer; the input for the decoder LSTM is the same for every sample.
+By this, the model is trained to learn the patterns in the English referring expressions.
+The resulting loss is the highest possible loss the model can achieve, independent of the input.
+Resulting, if the emergent language is connected to English, the loss will be lower than this baseline.
+If not, the loss will be as high as this baseline.
+On the other side, I calculated the lowest loss possible, by using the English referring expressions as both input and target.
+This verifies that the model is able to learn an abstract representation from the input and the resulting loss should be close to zero (since input is perfectly correlated to the target).
+These two references are used, to normalize the results of the actual emergent languages $L_{emergent}$, using the formula $L_{norm} = \frac{L_{emergent}-L_{English}}{L_{baseline} - L_{English}}$.
+A loss close as $L_{baseline}$ will lead to 100\%, while a loss as $L_{English}$ will lead to 0\%.
+By doing this, all configurations can be compared directly to each other.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{c|cc|cc|cc|cc}
+        \toprule
+        \textbf{Order}          & \textbf{Baseline} & \textbf{English} & \multicolumn{2}{c}{$|V| = 10$} & \multicolumn{2}{c}{$|V| = 13$} & \multicolumn{2}{c}{$|V| = 100$}                                                           \\\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+                                &                   &                  & \textbf{org.}                  & \textbf{norm.}                 & \textbf{org.}                   & \textbf{norm.}     & \textbf{org.} & \textbf{norm.}     \\\midrule
+        {shape > color > size}  & {0,659}           & {0,0001}         & {0,569}                        & \textbf{86,19\%}               & {0,622}                         & {94,24\%}          & {0,597}       & {90,4\%}           \\
+        {shape > size > color}  & {0,589}           & {0,0002}         & {0,489}                        & \textbf{83,09\%}               & {0,531}                         & {90,21\%}          & {0,47}        & {\textbf{79,78\%}} \\
+        {color > shape > size}  & {0,849}           & {0,0}            & {0,802}                        & 94,49\%                        & {0,801}                         & {94,36\%}          & {0,791}       & {93,15\%}          \\
+        {color  > size > shape} & {0,836}           & {0,0}            & {0,819}                        & 98,01\%                        & {0,772}                         & {92,35\%}          & {0,786}       & {94\%}             \\
+        {size > shape > color}  & {0,532}           & {0,0052}         & {0,492}                        & 92,26\%                        & {0,437}                         & {\textbf{81,95\%}} & {0,457}       & {\textbf{85,61\%}} \\
+        {size > color > shape}  & {0,599}           & {0,0001}         & {0,573}                        & 95,71\%                        & {0,495}                         & {\textbf{82,67\%}} & {0,538}       & {\textbf{89,87\%}} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Cross entropy losses while probing with emerged languages successful on 'Dale-2'}
+    \label{tab:probing_discrimnator_language}
+\end{table}
+
+Table \ref{tab:probing_discrimnator_language} shows the results for all different languages.
+
+
 \subsubsection{Caption generator games}
+\subsubsection*{Setup}
+
 In a next step, it is tested if the agents can learn to extract features of the objects together.
 For this, the receiver is tasked to describe the target object in natural language, while the sender needs to communicate, which object is the target.
 Again, the setup is asymmetrical: the sender receives the image and information, which of the objects in the image is the target object in form of a masked image.
@@ -878,18 +953,18 @@ During the experiments, the following variables are adjusted, and the results ar
 (3) the LSTM hidden size of the receiver wrapper $h_r$.
 The same metrics as in the pre-experiments are used to evaluate the results.
 
-\paragraph*{Results:}
+\subsubsection*{Results}
 \begin{table}[h]
     \centering
     \begin{tabular}{ccc|ccc|ccc}
         \toprule
               &         &         & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                             \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}
         $|V|$ & $h_{s}$ & $h_{r}$ & \textbf{Acc.}                       & \textbf{word-by-word}               & \textbf{length} & \textbf{Acc.} & \textbf{word-by-word} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {22,9\%}                            & {62,8\%}                            & {2}             & {7,1\%}       & {40\%}                & {2}             \\
-        {13}  & {10}    & {10}    & {22,8\%}                            & {62,9\%}                            & {1}             & {7,3\%}       & {38,7\%}              & {2}             \\
-        {20}  & {10}    & {10}    & {24,6\%}                            & {64\%}                              & {2}             & {6,7\%}       & {38,7\%}              & {2}             \\
-        {100} & {10}    & {10}    & {24,4\%}                            & {62\%}                              & {2}             & {7,8\%}       & {40\%}                & {2}             \\
-        {100} & {100}   & {100}   & {21\%}                              & {62\%}                              & {2}             & {6,5\%}       & {37,8\%}              & {2}             \\
+        {10}  & {10}    & {10}    & {22,9\%}                            & {62,8\%}                            & {1}             & {7,1\%}       & {40\%}                & {1}             \\
+        {13}  & {10}    & {10}    & {22,8\%}                            & {62,9\%}                            & {0}             & {7,3\%}       & {38,7\%}              & {1}             \\
+        {20}  & {10}    & {10}    & {24,6\%}                            & {64\%}                              & {1}             & {6,7\%}       & {38,7\%}              & {1}             \\
+        {100} & {10}    & {10}    & {24,4\%}                            & {62\%}                              & {1}             & {7,8\%}       & {40\%}                & {1}             \\
+        {100} & {100}   & {100}   & {21\%}                              & {62\%}                              & {1}             & {6,5\%}       & {37,8\%}              & {1}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the caption generator: $|V|$ are different vocabulary sizes and $h$ hidden sizes.}
@@ -925,6 +1000,7 @@ In this case, the accuracy, as well as the word-by-word accuracy stay the same c
 \cmtDK{look at language more detailed}
 
 \subsubsection{Coordinate predictor games}
+\subsubsection*{Setup}
 In the final experiments, it is tried to eliminate as much human knowledge as possible.
 For that reason, the agents are tasked to only predict the location of the target object.
 This task is approached in two steps.
@@ -978,7 +1054,7 @@ During the experiments, the effects of the following variables are compared:
 (4) the embedding size of the sender $e_s$.
 As before, the metrics to evaluate the results are the same as in the pre-experiments.
 
-\paragraph*{Results:}
+\subsubsection*{Results}
 In the final setup, the agents are tasked with communicating objects with fewer infused human knowledge.
 Table \ref{tab:results_dale_predictor_game} shows the results for the setup, in which the sender is pointed towards the target object with a human description based on the GRE algorithm.
 Hereby, the 'CLEVR single' dataset acts as a baseline, to test if the agents are able to predict coordinates of objects at all.
@@ -1001,11 +1077,11 @@ Since the receiver is the same in both setups, this observation indicates that a
         \toprule
               &         &         & \multicolumn{3}{c}{\textbf{CLEVR single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
         $|V|$ & $h_{s}$ & $h_{r}$ & \textbf{Dist.}                            & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {10,1}                                    & {98,5\%}                            & {2}                                 & {36,5}         & {19,9\%}      & {2}             & {45,7}         & {14,4\%}      & {2}             \\
-        {13}  & {10}    & {10}    & {6}                                       & {99\%}                              & {1}                                 & {38}           & {20,4\%}      & {2}             & {47,3}         & {10,8\%}      & {2}             \\
-        {20}  & {10}    & {10}    & {9,7}                                     & {96,7\%}                            & {2}                                 & {37,3}         & {21,2\%}      & {2}             & {47,3}         & {11,3\%}      & {1}             \\
-        {100} & {10}    & {10}    & {7,7}                                     & {98,4\%}                            & {2}                                 & {40,4}         & {21,7\%}      & {2}             & {45,4}         & {10,8\%}      & {2}             \\
-        {100} & {100}   & {100}   & {7,5}                                     & {96,9\%}                            & {2}                                 & {40,1}         & {17,8\%}      & {2}             & {44,3}         & {11,8\%}      & {1}             \\
+        {10}  & {10}    & {10}    & {10,1}                                    & {98,5\%}                            & {1}                                 & {36,5}         & {19,9\%}      & {1}             & {45,7}         & {14,4\%}      & {1}             \\
+        {13}  & {10}    & {10}    & {6}                                       & {99\%}                              & {0}                                 & {38}           & {20,4\%}      & {1}             & {47,3}         & {10,8\%}      & {1}             \\
+        {20}  & {10}    & {10}    & {9,7}                                     & {96,7\%}                            & {1}                                 & {37,3}         & {21,2\%}      & {1}             & {47,3}         & {11,3\%}      & {0}             \\
+        {100} & {10}    & {10}    & {7,7}                                     & {98,4\%}                            & {1}                                 & {40,4}         & {21,7\%}      & {1}             & {45,4}         & {10,8\%}      & {1}             \\
+        {100} & {100}   & {100}   & {7,5}                                     & {96,9\%}                            & {1}                                 & {40,1}         & {17,8\%}      & {1}             & {44,3}         & {11,8\%}      & {0}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the description coordinate predictor: $|V|$ are different vocabulary sizes and $h$ hidden sizes.}
@@ -1034,13 +1110,13 @@ It is able to predict the center coordinates of the target object the most preci
         \toprule
               &         &          &         & \multicolumn{3}{c}{\textbf{CLEVR single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
         $|V|$ & $h_{s}$ & $h_{r}$  & $e_{s}$ & \textbf{Dist.}                            & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}     & {1024}  & {19,8}                                    & {55,1\%}                            & {2}                                 & {34,8}         & {24,3\%}      & {1}             & {44,3}         & {11,8\%}      & {2}             \\
-        {10}  & {10}    & {10}     & {512}   & {9,3}                                     & {92\%}                              & {2}                                 & {36,3}         & {19,9\%}      & {1
-        ,7}   & {45,9}  & {12,7\%} & {2}                                                                                                                                                                                                                                   \\
-        {13}  & {10}    & {10}     & {1024}  & {7,8}                                     & {96,8\%}                            & {2}                                 & {36,3}         & {20,2\%}      & {1}             & {45,4}         & {11,4\%}      & {2}             \\
-        {20}  & {10}    & {10}     & {1024}  & {6,6}                                     & {98,3\%}                            & {2}                                 & {37,8}         & {16,1\%}      & {2}             & {45,2}         & {11\%}        & {2}             \\
-        {100} & {10}    & {10}     & {1024}  & {5,2}                                     & {98,5\%}                            & {2}                                 & {37,4}         & {20,1\%}      & {2}             & {43,6}         & {16,7\%}      & {2}             \\
-        {100} & {100}   & {100}    & {1024}  & {12,5}                                    & {92,1\%}                            & {2}                                 & {36,5}         & {20,7\%}      & {2}             & {44,6}         & {12,7\%}      & {2}             \\
+        {10}  & {10}    & {10}     & {1024}  & {19,8}                                    & {55,1\%}                            & {1}                                 & {34,8}         & {24,3\%}      & {0}             & {44,3}         & {11,8\%}      & {1}             \\
+        {10}  & {10}    & {10}     & {512}   & {9,3}                                     & {92\%}                              & {1}                                 & {36,3}         & {19,9\%}      & {0
+        ,7}   & {45,9}  & {12,7\%} & {1}                                                                                                                                                                                                                                   \\
+        {13}  & {10}    & {10}     & {1024}  & {7,8}                                     & {96,8\%}                            & {1}                                 & {36,3}         & {20,2\%}      & {0}             & {45,4}         & {11,4\%}      & {1}             \\
+        {20}  & {10}    & {10}     & {1024}  & {6,6}                                     & {98,3\%}                            & {1}                                 & {37,8}         & {16,1\%}      & {1}             & {45,2}         & {11\%}        & {1}             \\
+        {100} & {10}    & {10}     & {1024}  & {5,2}                                     & {98,5\%}                            & {1}                                 & {37,4}         & {20,1\%}      & {1}             & {43,6}         & {16,7\%}      & {1}             \\
+        {100} & {100}   & {100}    & {1024}  & {12,5}                                    & {92,1\%}                            & {1}                                 & {36,5}         & {20,7\%}      & {1}             & {44,6}         & {12,7\%}      & {1}             \\
         \bottomrule
     \end{tabular}
     \caption{Results of the masked coordinate predictor: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}

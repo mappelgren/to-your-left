@@ -3,6 +3,30 @@
 
 \cmtDK[inline]{7 pages}
 
+\subsection{Referring expressions}
+Even though, recent large language models (LLMs) such as BERT (\citet{Devlin2018}) or GPT-3 (\citet{Brown2020}) produce impressive results on many tasks in Natural Language Processing, they are often only trained on big amounts of text corpora.
+In this way, their only way of learning, how to generate language as well as solve these tasks is to find patterns of how words and sentences are used in these large corpora.
+Many researchers criticize this approach, by arguing that these model can't learn meaning just by learning on text.
+In \citet{Bender2020}, the authors argue that meaning is bound to a communicative intent.
+These are the purposes of, why humans are using language.
+This intent is connected to the real world that exists outside of language, in other words it is grounded in the world.
+This grounding is missing, when models only train on abstract textual representations of the world.
+\citet{Bisk2020} argues that a multimodal approach, including for instance perception as well as social context, is needed to learn meaning in a broader context.
+One added modality to ground language is often vision. \cmtDK{cite}
+Hereby, the model needs to learn how to associate linguistic concepts in text corpora with features, extracted from visual input.
+For instance, a model can learn to associate the noun "dog" with an animal seen in an image or associate the action of "jumping over" with the animal being above an object.
+
+In a first step, models can combine linguistic knowledge with visual input, by referring to objects, seen in an image, with so called referring expressions.
+\cmtDK{write more}
+By doing this, the models ground parts of their language in another perception of the real world and get a step closer to learn the actual meaning.
+The learning of referring expressions is split in two fields.
+In the referring expression generation, models learn how to produce referring expressions, when presented with visual input.
+In the referring expression understanding, sometimes referred to as coreference, models are trained on interpreting referring expressions and link them to visual input.
+
+
+
+A major challenge in natural language processing is, how machines can
+
 \subsection{Language Games}
 % \begin{itemize}
 %     \item why language games?
@@ -78,7 +102,7 @@ Guided by the task and the rules, how agents can generate and interpret symbols,
 \subsubsection{Referring to objects and grounding}
 \label{sec:referring}
 
-\subsection{Dataset}
+\subsection{Artificial dataset}
 \cmtDK[inline]{\\
     - CLEVR \\
     ---- 3D objects \\
@@ -86,5 +110,5 @@ Guided by the task and the rules, how agents can generate and interpret symbols,
     - CLEVR baselines \\
 }
 
-\subsection{Computational methods}
+\subsection{Research question}
 
