@@ -1,31 +1,32 @@
-\section{Experimentals}
+\section{Experiments}
 \label{sec:exp-setup}
 
-\cmtDK[inline]{15 pages}
+In this section I will describe which experiments were conducted to answer the research questions described in the previous chapters.
+Hereby, the setup of these experiments is detailed, and the results are discussed afterwards.
+This is done in three parts.
+Chapter \ref{sec:creation-dataset} contains the creation of the datasets that will be used in the experiments.
+In chapter \ref{sec:preexperiments} multiple experiments are conducted to evaluate the created datasets.
+Furthermore, these experiments provide the basis for the language games, which are then described in chapter \ref{sec:language-games}.
 
-In this section I will describe which experiments were conducted to answer the \cmtDK{?}{questions} from the previous sections as well as the setup of these experiments.
-This will be done in two parts.
-The first part contains the creation of the datasets that will be used in the experiments.
-In the second part I will go deeper into discussing each experiment, including the necessity of the experiment, which datasets the model is trained on, as well as the final architecture of the models.
 
 \subsection{Creation of the dataset}
+\label{sec:creation-dataset}
 \cmtDK{ambiguity}
-\cmtDK{referring expressions}
 
 This research investigates how agents communicate about the relations of objects seen in images.
 For that reason, the original CLEVR dataset offers too little control over how the objects are created and in which relation they stand to each other.
 Following, I extended the source code to generate images for the CLEVR dataset.\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis\_clevr-dataset-gen}{https://github.com/DominikKuenkele/MLT\_Master-Thesis\_clevr-dataset-gen}}
-To simplify the generation and the later learning of the models, I only focused on the attributes with a high impact on the appearance of the object, namely the \emph{shape}, \emph{size} and \emph{color}.
+To simplify the generation and the succeeding training of the models, I only focused on the attributes with a high impact on the appearance of the object, namely the \emph{shape}, \emph{size} and \emph{color}.
 The \emph{material} is always the same for all objects in a generated image.
 There were three main extensions to the code:
 
 First, objects in the scene were separated into three categories: one \emph{target object}, objects in a \emph{target group} and \emph{distractor} objects.
-The target object is the main object in the scene that should be identified and communicated by the agents.
+The target object is the main object in the scene and the models are trained to identify and communicate between each other.
 All other objects and their relations are based on this target object.
 The target group contains similar objects to the target object.
 These are objects that the agents need to discriminate the target object from.
-Finally, the distractors are objects that add noise to the scene and should make it more complex. They expected to teach the agents more precise descriptions of the target object.
-The number of the objects in both group can be controlled.
+Finally, the distractors are objects that add noise to the scene and should make it more complex. They are expected to teach the agents more precise descriptions of the target object.
+The number of the objects in both groups can be controlled.
 
 In a second step, when generating the images it is possible to define the relations between \emph{target object}/\emph{target group} and \emph{target object}/\emph{distractors}.
 The relation is defined as \textbf{how many} attributes of the target object are identical with the attributes of a single object in the target group and distractors respectively.
@@ -45,7 +46,7 @@ There are no distractor objects.
 For all generated datasets in the following sections, the general constraints and settings are as close as possible to the original CLEVR dataset.
 The size of the generated images is 480x320 pixels.
 10.000 images are created for each of the datasets.
-Each image contains a maximum of 10 objects, that are not intersecting, have the same minimum distance between objects and are partially visible from the camera.
+Each image contains a maximum of 10 objects, that are not intersecting, have the same minimum distance between objects and are at least partially visible from the camera.
 
 \begin{figure}[h]
     \centering
@@ -70,7 +71,7 @@ Each image contains a maximum of 10 objects, that are not intersecting, have the
 \end{figure}
 
 \subsubsection*{CLEVR single}
-The simplest dataset is called 'CLEVR single'.
+The simplest new dataset is called 'CLEVR single'.
 This is a very simple dataset and has the purpose to simplify the problem the model needs to learn as much as possible.
 Each scene in the dataset contains only one single object, the target object.
 There are neither objects in the target nor in the distractor group.
@@ -82,26 +83,25 @@ This helps to understand if the models are actually able to assign features or l
 Figure \ref{fig:clevr-single} shows an example with the only object being the \emph{large yellow sphere}.
 
 \subsubsection*{CLEVR color}
-This task could on the other hand be difficult to learn for neural models.
-Although the target object is unique in the scene with resect to the distractors, the description isn't.
-Considering all unordered combinations of the three attributes and a composite referring expression, there are $\binom{3}{3} + \binom{3}{2} + \binom{3}{1} = 7$ possible descriptions of the target object.
-This can propose a difficulty, when the models try to converge towards one representation.
-For this reason, I created the 'CLEVR color' dataset.
-It has a similar setup as the previous dataset, containing between 6 and 9 distractors.
-But instead of the target object sharing no attribute with the distractors, they share exactly two attributes.
+The second dataset that is created is called 'CLEVR color'.
+The purpose of this dataset is to create scenes, where the target object is completely unique and as easily identifiable as possible.
+For this reason, there exist only two groups in the scene, the target object and distractors.
+The distractor group can contain in between 6 and 9 objects.
+To make the discrimination as simple as possible the target object and the objects in the target group share exactly two attributes.
 Furthermore, to simplify the relation between target object and distractors over the whole dataset, it is also controlled which attributes are shared.
-The distractors have always the same size and shape as the target object, but the color is always different.
+The distractors have always the same size and shape as the target object, but the color is different.
 The reason for choosing the color as the only discriminating attribute is that it is assumed that the color is easier to learn for neural models as opposed to for instance abstract shapes.
 
 As seen in Figure \ref{fig:clevr-color}, the \emph{small brown cylinder} is unique.
-The number of possible descriptions is lowered to three, since the color \emph{brown} needs to be part of it.
+By this, it is possible to refer to the target object using the attributes with four different combinations: the \emph{brown} object, the \emph{brown cylinder}, the \emph{small brown} object and the \emph{small brown cylinder}.
+All attributes, apart from the color are not discriminating the target object from the distractors.
 Notice as well that this restriction doesn't apply to the distractors, where multiple objects with the same color are allowed.
 
 \subsubsection*{CLEVR Dale datasets}
-Both of the above described datasets are very restrictive on the disambiguating relations between the target object and the rest of the objects.
-Either no attribute or only one attribute is shared.
+The above described dataset is very restrictive on the disambiguating relations between the target object and the rest of the objects.
+The number and the type of shared attributes are controlled exactly.
 More realistically would be if objects can share a variable number of attributes.
-In real situations, there is no restriction at all, how objects or things relate to each other.
+In real situations, there is no restriction at all how objects or things relate to each other.
 Natural language emerged that can refer to distinct attributes of these objects to discriminate them from each other.
 This emergence of referring attributes and their combination is studied deeper in this work.
 
@@ -116,38 +116,45 @@ On the other side, it is not controlled which attributes are shared.
 These are assigned randomly.
 There is again no control over the relations between distractors, which means that distractors can appear multiple times.
 
-Two datasets, following these rules are created.
+Two datasets following these rules are created.
 The Dale-2 dataset contains one target object and one distractor (see Figure \ref{fig:clevr-dale-2}), while the Dale-5 dataset contains one target object and exactly four distractors.
 Consider Figure \ref{fig:clevr-dale-5}, with the target object being the \emph{large purple cylinder}. The large purple sphere shares the size and color, the two cubes only share the size, and the small turquoise sphere doesn't share any attribute.
 
 These two datasets allow a more realistic look in how models can acquire knowledge about attributes of objects.
-More specifically how models learn to discriminate objects from each other, since the model may only need to learn discriminative features of objects and not all features of the whole object.
+More specifically it helps to understand how models learn to discriminate objects from each other, since the model may only need to learn discriminative features of objects and not all features of the whole object.
 
 \cmtDK{probabilities of shared attributes for both Dale-2 and Dale-5}
 
 \subsection{Generating and understanding referring expressions}
+\label{sec:preexperiments}
+This chapter serves two purposes.
+First, the generated dataset from the precious section is validated.
+For this, models are trained to both generate referring expressions of the target object and understand existing referring expressions.
+A success of these experiments indicates that the target objects in the datasets are possible to refer to and the datasets can be used in more complex setups in language games.
+
+Secondly, the experiments in this chapter provide the basis for the setup of the agents in the language games.
 Language games are very complex setups for machine learning models.
-The models need to solve multiple tasks at the same time to solve the overall problem.
+The models need to solve multiple tasks at the same time in order to solve the overall problem.
 For instance, in a simple setup of a game two agents are involved.
 The first agent, the sender, is shown a scene with objects and needs to communicate one target object to the other agent, the receiver.
 The receiver is shown the same scene and needs to identify the target object with respect to the message of the sender.
-In this case, the sender first needs to learn to encode the scene, all objects and their attributes, as well as the information about the target object into its own \cmtDK{?}{space}.
+In this case, the sender first needs to learn to encode the scene, all objects and their attributes, as well as the information about the target object into its own game specific space.
 In a next step it needs to learn how to translate this encoding into a message that is sent to the receiver.
 The receiver then needs to learn to decode this message, after which it needs to learn how to combine the decoded message with its own encoding of the scene and objects.
 And finally it needs to learn how to identify the target object with this information.
+There are many points of possible failure to train the agents.
 
-For this reason, I decided to divide the main problem and let the models learn simpler subtasks and increase the complexity step by step.
-\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis}{https://github.com/DominikKuenkele/MLT\_Master-Thesis}}
-This will give me a very detailed overview, where the models struggle to learn and in which ways they can be improved.
-Mainly, I separated the tasks into language games with two agents (final experiments) and classical machine learning tasks without any communication, namely only one 'agent' that solves the task alone (pre-experiments).
+For this reason, I decided to divide the main problem and let the models learn simpler subtasks and increase the complexity step by step.\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis}{https://github.com/DominikKuenkele/MLT\_Master-Thesis}}
+This will give a very detailed overview where the models struggle to learn and in which ways they can be improved.
+Mainly, the tasks are I separated into language games with two agents and classical machine learning tasks without any communication, namely only one 'agent' that solves the task alone.
 With this division, I can analyze the learning of the encodings of the scenes separately from the learning of producing and decoding messages.
 
-The final objective of this thesis is to find out, how agents can communicate about relations of objects spatially as well as based on their attributes.
-Because of that, the first experiments focus on extracting information from images and combining them with structured knowledge.
+The final objective of this thesis is to find out, how agents can communicate about relations of objects based on their attributes, namely how to generate and understand referring expressions.
+Because of that, the first experiments focus on extracting information from images and combining them with structured knowledge about the objects.
 Here, I structured the experiments into three levels.
-In the first level, the model are trained to learn the position of objects in the image and attend to specific regions of the image.
-In the second level, the models are trained to differentiate objects in the scene from each other.
-The last level adds language to the experiment, more specifically the models learn to caption and describe objects in the image.
+In the first level, the models are trained to learn the position of objects in the image and attend to specific regions of the image, by understanding a referring expression of the target object.
+In the second level, the models are trained to differentiate objects in the scene from each other, again by understanding referring expressions.
+In the last level, the models are trained to generate referring expressions, more specifically the models learn to caption and describe objects in the image.
 These combined experiments should lay the basis for how to build up the agents in the language games.
 
 \subsubsection{Coordinate predictor}
@@ -159,29 +166,27 @@ The challenge lies in how the receiver refers to the identified object.
 There are multiple possibilities, how it can be done.
 One of them could be to describe the target object with human language, using the attributes.
 The main goal however is to let the language of the agents emerge as natural as possible.
-Including human knowledge into the task would bias also the emerged language towards attributes and words, humans are using.
+Including human knowledge into the task would bias also the emerged language towards attributes and words, used in natural language.
 For this reason, the final task of the receiver will be to 'point' to the target object.
-Since also positional information of the objects should be part of the discrimination, the image will not be separated into several bounding boxes around the objects, but instead the whole image is the basis.
 The models are therefore tasked to predict the center coordinates of the target object.
 With this approach, the models receive few human knowledge, but are still able to rely on all information present in the image to discriminate the objects.
 
 To achieve this goal, multiple setups of models are tested.
 In the simplest setup, the model receives only the image \cmtDK{preprocess image} as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
 Here the image is first passed through one of the \emph{feature extractors}.
-Next, the extracted feature vector is flattened and passed through two linear layers with a \emph{ReLU} non-linearity between.
+Next, the extracted feature vector is flattened and passed through two linear layers with a \emph{ReLU} non-linearity in between.
 These reduce the dimensions first to 1024 and finally to 2.
 
 To determine the loss, the euclidean distance between the resulting predicted point on the image and the ground truth point are calculated.
 This distance is learned to be minimized.
-By doing that, the model learns to focus and attend on a specific part in the image, in a perfect model the center of the target object.
+By doing that, the model learns to focus and attend on a specific part in the image, in a perfect model the center of the target objects.
 
-With this simple setup, the model is in theory able to focus on an object in the image.
+With this simple setup, the model is theoretically able to focus on an object in the image.
 The problem arises as soon as multiple objects are present in the image.
 There is no information available for the model to understand which one of these objects is the actual target object, except for the final calculation of the loss.
-Since there is not necessarily a pattern for which object in the image is the correct target object over the whole dataset, the models will likely fail to generalize. \cmtDK{go deeper, why}
+Since there is not necessarily a pattern for which object in the image is the correct target object over the whole dataset, the models will likely fail to generalize.
 Therefore, the models need to receive more information.
-Here, I try out four different ways to encode the target object.
-
+Here, I try out four different ways to encode and refer to the target object.
 
 \begin{figure}[h]
     \centering
@@ -198,7 +203,7 @@ Here, I try out four different ways to encode the target object.
 
 In the first method, I encode the attributes of the target object as \textbf{one-hot encodings}.
 There is a three-dimensional vector encoding the \emph{shape}, an eight-dimensional vector encoding the color and a two-dimensional vector encoding the two different sizes.
-The dimensions of these vectors can either be zero or one, depending on the attributes of the target object.
+The values of each dimension of these vectors can either be zero or one, depending on the attributes of the target object.
 These three encodings of the attributes are then concatenated.
 The image is again passed through a feature extractor, before the flattened vector is reduced to 2048 dimensions with a linear layer.
 The result is concatenated with the encoded attributes and passed to a final linear layer to predict the coordinates.
@@ -206,10 +211,10 @@ The result is concatenated with the encoded attributes and passed to a final lin
 In an extension to this method, I also include the \textbf{center coordinates of all objects} in the image.
 This should help the model to identify all possible options to chose from, when predicting the target object.
 All the center coordinates are simply extracted and shuffled.
-Since there are varying numbers of objects in the image, this vector of variable length is padded to 10 objects, resulting in a vector with a length of 20.
-The padding objects have zeros for both coordinates, which no other real object can have.
+Since there are varying numbers of objects in the image, this vector of variable length is padded to the maximum number of objects in the dataset.
+The padded locations consist of two zeros for both coordinates.
 For this model, I also made use of a more complex way to encode the image.
-Here, I based the approach on code that implements baselines for the CLEVR dataset \citep{Johnson2017}. \cmtDK{why?}
+Here, I based the approach on code that implements baselines for the CLEVR dataset \citep{Johnson2017}.
 The image is first passed through the feature extractor.
 Afterwards, a 2-dimensional convolutional layer, reduces the channels from 2048 to 512 channels with a kernel size of 1.
 After applying the \emph{ReLU} function, the resulting matrix is max pooled over two dimensions with both a kernel size and a stride of 2.
@@ -220,22 +225,23 @@ The third method encodes the attributes of the target object with human language
 This opposes the idea described before, to share as few human knowledge as possible with the model.
 Still, this approach can help to understand and analyze if the model was able to extract information about the objects and more specifically their attributes from the image.
 If the model is able to match parts of the image with human words it would show that the model learned this attribute.
-If the model in a next step can learn this over the whole dataset, this would mean that it could generalize over these attributes and assign them to certain regions in an image.
-This insight could help then to design another model that makes use of these learnings without human language.
+If the model in a next step can learn this for the whole dataset, this would mean that it could generalize over these attributes and assign them to certain regions in an image.
+This insight would help for succeeding models that make use of these learnings without human language.
 
 Using the algorithm, one can describe an object using its attributes to discriminate it from other objects as efficiently as possible.
 In other words, the object is described unambiguously using the lowest number of words.
 The algorithm assumes that there is an order of importance for attributes, such as shape, color and size.
-This order defines, which attributes can be left, while still identifying the object uniquely.
-For our research, we rely on the following order from most important to least important: shape, color, size
+This order defines, which attributes can be left out, while still identifying the object uniquely.
+This research relies on the following order from most important to least important: shape, color, size
 Given for example the scene from \ref{fig:clevr-dale-5} with the target object being the \emph{big purple cylinder}.
 Using all three attributes, this description identifies the object perfectly and uniquely.
 Following the algorithm, we could make the description shorter by removing the least important attribute \emph{size} without loosing unambiguity, describing it as the \emph{purple cylinder}.
 This can be taken even one step further by removing also the \emph{color}.
-Describing it as the \emph{cylinder} still doesn't describe any other object, since the target object is the only cylinder in the scene.
+Describing it as the \emph{cylinder} still doesn't describe any distractor, since the target object is the only cylinder in the scene.
 
-For the experiments, each every image is captioned, by a description of the target object using the described algorithm.
-To use it in the model, the caption needs to be padded to an equal length, in this case to a length of 3, which is the maximum number of attributes that can be used.
+For the experiments, each image is captioned with a description of the target object using the described algorithm.
+To include it in the model, the captions need to be padded to an equal length.
+In this case they are padded to a length of 3, which is the maximum number of attributes that can be used.
 For this, as standard practice in captioning tasks, the captions are padded at the end with a specified padding token.
 
 The model is made up of three parts:
@@ -255,12 +261,11 @@ This architecture is also inspired by the baselines described in \citet{Johnson2
 The forth method, to encode the target object utilizes \textbf{masking} of the image.
 For this, the image is separated into a fixed size squared area containing the target object and the rest of the image.
 The side of the square is always two fifth of the image width, in this case 192 pixels.
-This size always includes the whole object if it is large or small, while not being cut of if the target object is too close to the border of the image.
+This size always includes the whole object if it is large or small, while not being cut off if the target object is too close to the border of the image.
 The square is filled in white, while the rest of the image is filled in black.
 This approach has the advantage of providing as few as possible human bias to the model.
 While even the one-hot encodings contain human knowledge by explicitly encoding human chosen attributes, masking the image will only point the model towards the target object without giving more information.
-It therefore can only rely on its own extracted visual features when looking at masked images.\cmtDK{can just rely on masked image when predicting coords, more useful for captioning or language game}
-
+It therefore can only rely on its own extracted visual features when looking at masked images.
 The model is presented with both the original image and the masked image.
 Both are passed through a feature extractor and afterwards passed through a linear layer, reducing the dimensions to 2048.
 The resulting vectors are concatenated and passed through another linear layer that predicts the coordinates.
@@ -268,7 +273,7 @@ The resulting vectors are concatenated and passed through another linear layer t
 The test dataset is again evaluated on the euclidean distance of the predicted coordinates to the ground truth coordinates.
 This distance needs to be minimized.
 The mean of all calculated distances is calculated across the whole epoch, which results in a mean distance score per epoch.
-Since this score only takes the average of all predictions into account it can't evaluate every prediction individually.
+Since this score only takes the average of all predictions into account it doesn't show how every prediction fared individually.
 If for instance the prediction of one object is getting more precise with growing number of epochs, but the precision of another object gets worse, the mean distance will stay the same.
 It doesn't reflect this change.
 For that reason, I also introduced an accuracy score.
@@ -283,7 +288,7 @@ The 'CLEVR single' dataset should test the model if it can actually learn locati
 Since the model relies on the extracted features of either VGG or ResNet, locational information about the image could have gone lost.
 Training on this dataset should make sure that the model can converge towards the correct pixels, utilizing these features.
 In a next step, the 'Dale' datasets provide the actual problem of discriminating objects from each other and afterwards pointing to the correct one.
-Here, the models should make use of the additional given information about the scene, as one-hot encodings of the attributes, descriptions using the GRE-algorithm or the encoded locations.
+Here, the models should make use of the additional given referring expressions about the scene, as one-hot encodings of the attributes, descriptions using the GRE-algorithm or the encoded locations.
 'Dale-2' and 'Dale-5' provide two different difficulties for the model, where it needs to discriminate a target object from one or four distractors.
 Latter task is assumed to be significantly harder.
 
@@ -297,26 +302,26 @@ Latter task is assumed to be significantly harder.
 \end{figure}
 
 Figure \ref{fig:coordinate-predictor_loss} shows the results of the coordinate predictor that doesn't include any information about the target object.
-The used feature extractor for these results is \emph{Resnet-3}, but the results don't differ significantly with other feature extractors.
-As can be seen, the success between the different datasets differ significantly.
+The used feature extractor for these results is \emph{Resnet-3}, but the results don't differ meaningfully from results with other feature extractors.
+As can be seen, the success between the different datasets are significant.
 The more objects are present in an image, the worse the model performs.
 The model converges for the CLEVR single dataset after around 20 epochs to a mean distance of around 2 pixels.
 This prediction even though not perfectly on the center point is always on the object.
-Opposed to that, using the Dale-2 dataset with two objects, the mean distance is from the first epoch between 37 and 38 pixels.
+Opposed to that, using the Dale-2 dataset with two objects, the mean distance lies between 37 and 38 pixels already after the first epoch and doesn't drop with increasing number of epochs.
 With five objects in the Dale-5 dataset, the model only predicts a mean distance of around 45 pixels in the beginning, which worsens with a rising number of epochs to 48 pixels.
 
 An interesting observation is the difference of the mean distances between training and testing data.
 The training distance is constantly approaching zero, while the testing loss is staying constant or even getting higher.
-This points to the fact that the model is not generalizing the task and learning abstract patterns that can be applied to unseen data, but instead learning the training data by heart.
+This points to the fact that the model is not generalizing the task by learning abstract patterns that can be applied to unseen data, but is instead memorizing the training data.
 That is especially visible for the Dale-5 dataset, where learning the patterns of the training data looses even the ability to interpret some patterns in the testing data.
 Applying a higher dropout didn't have an impact on the results.
 
 This behavior is indeed not very surprising.
-First, these results show that the model is able to derive geometrical information from abstract feature, extracted by a feature extractor.
+First, results with the 'CLEVR single' dataset show that the model is able to derive geometrical information from abstract feature, extracted by a feature extractor.
 Geometrical information therefore doesn't get lost during this abstraction, but the model is able to point to a specific object, as long as only one object is part of the image.
-Secondly, more than one objects present in an image confuse the model, and it is not able to consistently point to one of them.
-This can have multiple reasons, for instance that models lacks the ability to separate objects in the extracted features.
-But even given, the model is able to do that and could determine the location of each object in the scene given the feature, it would not be able to tell, which of these is the actual target object.
+Secondly, more than one objects present in an image confuses the model, and it is not able to consistently point to one of them.
+This can have multiple reasons, for instance that the models lacks the ability to separate objects in the extracted features.
+But even in case, the model is able to do that and could determine the location of each object in the scene given the feature, it would not be able to tell, which of these is the actual target object.
 The guess is then more or less random.
 This especially applies to the Dale-2 dataset, where an identification of the target object just based on one distractor is impossible; both of the present objects are unique.
 For the Dale-5 dataset, the model could in theory learn that the target object is always the one object which is unique in respect to its and the distractors' attributes.
@@ -328,7 +333,7 @@ One factor that now has a much higher impact is the feature extractor that is us
 Table \ref{tab:feature-extractor-mean-distances} compares the mean distances the models predict for the different feature extractors.
 The results are shown for the models trained on the Dale-2 and Dale-5 datasets for training and test data.
 First, a big difference can be seen between the datasets.
-The model only converge to a minimum mean distance of around 46 pixels to the correct coordinates for the Dale-5 dataset, looking at the test data.
+The models only converge to a minimum mean distance of around 46 pixels to the correct coordinates for the Dale-5 dataset, looking at the test data.
 In most cases, it stays above 50 pixels.
 Using the Dale-2 dataset, the behavior is a little different.
 All ResNet extractors with four residual blocks and an additional average pooling and optionally a classifier layers reach similar scores as the experiments before without any one-hot encodings.
@@ -403,9 +408,9 @@ An interesting pattern appears when doing a qualitative analysis of the models' 
 Here, I visualized the predicted coordinates compared to the ground truth coordinates.
 Figure \ref{fig:visualizations_dale-2_train} shows random examples of predictions for images in the train dataset of Dale-2.
 The green circle shows the ground truth center coordinates of the target object, while the red circle shows the prediction of the model.
-As can be seen, the prediction are very precise.
+As can be seen, the predictions are very precise.
 Figure \ref{fig:visualizations_dale-2_complete_train} combines the predictions and ground truths across all images in the train dataset.
-Here, all predicted coordinates are placed as red circles into the image, while all ground truth coordinates are places as green circles.
+Here, all predicted coordinates are placed as red circles into the image, while all ground truth coordinates are placed as green circles.
 The resulting shape is a rhombus, which reflects that all objects are placed usually central into the scene.
 As expected the green and red rhombus align mostly in the same area for the train split of the 'Dale-2' dataset.
 
@@ -422,7 +427,7 @@ They form roughly the shape of a smaller rhombus.
 This behavior can be observed for all datasets and architectures of the model.
 Figures \ref{fig:visualizations_dale-5_train}, \ref{fig:visualizations_dale-5_test}, \ref{fig:visualizations_dale-5_complete_train} and \ref{fig:visualizations_dale-5_complete_test} show the results for the 'Dale-5' dataset.
 Here, the model more likely predicts the center coordinates of a distractor object as seen in the right image, which is also reflected in the lower score of the mean distance.
-Also the combined visualization shows the same clustering of predictions in the center of the scene, but pattern of the smaller rhombus is better visible.
+Also the combined visualization shows the same clustering of predictions in the center of the scene, but the pattern of the smaller rhombus is more visible.
 
 \begin{figure}[h]
     \centering
@@ -455,7 +460,7 @@ The model therefore learns only, where any object is likely located and can mini
 Second, even though the models are biased towards the center of the image, the predictions are still often leaning towards the location where many objects lie.
 This can be seen for the 'Dale-5' dataset, especially in left and central image in Figure \ref{fig:visualizations_dale-5_test}.
 Again, by this strategy, the model can minimize the mean distance, since the probability is high that the target object lies in this cluster of objects.
-Concluding, the model is able to extract, where objects are located in the image, but can't decide, which of these objects is the target object.
+Concluding, the model is able to extract, where objects are located in the image, but can't make use of the referring expressions, to decide which of these objects is the target object.
 
 \subsubsection{Bounding box classifier}
 \subsubsection*{Setup}
@@ -675,6 +680,7 @@ With four distractors the algorithm is much more likely to produce longer captio
 These are harder to generate for the model, since it needs to take more attributes into account to discriminate the target object from the distractors.
 
 \subsection{Language games}
+\label{sec:language-games}
 
 The experiments that are executed using language games have a similar structure as the pre-experiments, since those lied the basis for the language games.
 
@@ -685,37 +691,7 @@ The receiver needs to parse this message and combine it with the information the
 The receiver then makes a prediction, which is compared to the ground truth.
 The game is set up prosocial, which means that both agents receive the same loss based on the receiver's prediction.
 All weights of the agents are adapted in the same way.
-\cmtDK{Gumbel-Softmax vs REINFORCE}
-\cmtDK{better in theoretical background?}
 \cmtDK{vocabulary?}
-\cmtDK{batch iterator}
-All language games are set up and run in the EGG framework \citep{Kharitonov2019}, developed in PyTorch.
-This framework consists of heavy configurable core that controls the generating and parsing of the message, the calculation of the loss and the rules, for how the weights of all neural models are trained.
-The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, a choice between Gumbel-Softmax relaxation and REINFORCE algorithms to learn neural models containing discrete symbols or an easy switch between different loss functions.
-Furthermore, runs of games can be saved to analyze the used messages of the agents and how they change over the duration of the learning.
-
-The framework is hereby setup in three levels.
-Part of the lowest level are the \emph{agents} themselves.
-The agents are neural models that need to be developed from scratch and define how, the agents process their input and combine it with the message (in case of the receiver) and what they output.
-The second level are \emph{wrappers} that take care of generating and parsing the message.
-The sender wrapper uses the output of the sender agent, to produce a message.
-The receiver on the other hand parses the message received by the sender and passes the result as an additional input to the receiver agent.
-The third level, the \emph{game} links all described parts together.
-It provides the agents with the input and passes the message from the sender to the receiver.
-Furthermore, it uses the output of the receiver and calculates the loss, which is then the basis for the adaption of the weights for both wrappers and agents.
-
-For the following language games, the sender will always produce a sequence of symbols as a message, which the receiver will parse.
-Gumbel-Softmax relaxation is applied to produce discrete symbols.
-This is done using two LSTMs, an encoder LSTM in the sender wrapper and a decoder LSTM in the receiver wrapper.
-The output of the sender agent is used as the initial hidden state for the encoder LSTM.
-This LSTM is then producing symbols until it generates an end-of-sequence symbol.
-This sequence is then passed to the receiver wrapper with its decoder LSTM.
-Its hidden state is initialized randomly.
-The received message sequence is processed symbol by symbol.
-After each time, a symbol is processed by the LSTM, the resulting new hidden state is passed to the receiver agent as the parsed message.
-The receiver agent is combining it with its representation of the image input and predicting an output.
-The \emph{game} is afterwards calculating a loss for each of these outputs separately.
-These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
 
 \cmtDK{always ResNet-3}
 
@@ -849,9 +825,32 @@ The first part is a qualitative analysis, to understand, which symbols are used 
 In the second part, the emerged languages are compared to English.
 More specifically, it is tested if the messages of the sender align with English referring expressions of the target object.
 
-\cmtDK{first part}
 
-To compare the emerged language to English, a probing approach is used.
+\begin{figure}[h]
+    \centering
+    \subfigure[$|V| = 10$]{
+        \includegraphics[width=0.31\linewidth]{figures/relative_frequencies_v10.png}
+        \label{fig:relative_frequencies_v10}
+    }
+    \subfigure[$|V| = 13$]{
+        \includegraphics[width=0.31\linewidth]{figures/relative_frequencies_v13.png}
+        \label{fig:relative_frequencies_v13}
+    }
+    \subfigure[$|V| = 100$, (13 most frequent messages)]{
+        \includegraphics[width=0.31\linewidth]{figures/relative_frequencies_v100.png}
+        \label{fig:relative_frequencies_v100}
+    }
+    \caption{Relative frequencies of messages (ordered by frequency in test dataset)}
+    \label{fig:relative_frequencies_vocabularies}
+\end{figure}
+
+When looking at the emerged vocabulary, a few properties can be seen.
+First, when a message is transferred, it consists of only one symbol.
+In some rare cases, an empty message is communicated.
+The models therefore don't learn to combine symbols to create new meaning, but rather encode everything in separate symbols.
+First, in all three emerged languages, very few symbols are used
+
+To compare the emerged language to English in a quantitative way, a probing approach is used.
 Probing can be used to analyze and interpret the hidden representations in neural networks.
 Hereby, a second neural model is trained to predict selected linguistic properties on the basis of the hidden representations.
 If this model is successfully able to predict the linguistic properties, the hidden representations are connected to them.
@@ -883,7 +882,7 @@ Resulting, if the emergent language is connected to English, the loss will be lo
 If not, the loss will be as high as this baseline.
 On the other side, I calculated the lowest loss possible, by using the English referring expressions as both input and target.
 This verifies that the model is able to learn an abstract representation from the input and the resulting loss should be close to zero (since input is perfectly correlated to the target).
-These two references are used, to normalize the results of the actual emergent languages $L_{emergent}$, using the formula $L_{norm} = \frac{L_{emergent}-L_{English}}{L_{baseline} - L_{English}}$.
+These two references are used, to normalize the results of the actual emergent languages $L_{em}$, using the formula $L_{norm} = \frac{L_{em}-L_{English}}{L_{baseline} - L_{English}}$.
 A loss close as $L_{baseline}$ will lead to 100\%, while a loss as $L_{English}$ will lead to 0\%.
 By doing this, all configurations can be compared directly to each other.
 
@@ -891,14 +890,14 @@ By doing this, all configurations can be compared directly to each other.
     \centering
     \begin{tabular}{c|cc|cc|cc|cc}
         \toprule
-        \textbf{Order}          & \textbf{Baseline} & \textbf{English} & \multicolumn{2}{c}{$|V| = 10$} & \multicolumn{2}{c}{$|V| = 13$} & \multicolumn{2}{c}{$|V| = 100$}                                                           \\\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
-                                &                   &                  & \textbf{org.}                  & \textbf{norm.}                 & \textbf{org.}                   & \textbf{norm.}     & \textbf{org.} & \textbf{norm.}     \\\midrule
-        {shape > color > size}  & {0,659}           & {0,0001}         & {0,569}                        & \textbf{86,19\%}               & {0,622}                         & {94,24\%}          & {0,597}       & {90,4\%}           \\
-        {shape > size > color}  & {0,589}           & {0,0002}         & {0,489}                        & \textbf{83,09\%}               & {0,531}                         & {90,21\%}          & {0,47}        & {\textbf{79,78\%}} \\
-        {color > shape > size}  & {0,849}           & {0,0}            & {0,802}                        & 94,49\%                        & {0,801}                         & {94,36\%}          & {0,791}       & {93,15\%}          \\
-        {color  > size > shape} & {0,836}           & {0,0}            & {0,819}                        & 98,01\%                        & {0,772}                         & {92,35\%}          & {0,786}       & {94\%}             \\
-        {size > shape > color}  & {0,532}           & {0,0052}         & {0,492}                        & 92,26\%                        & {0,437}                         & {\textbf{81,95\%}} & {0,457}       & {\textbf{85,61\%}} \\
-        {size > color > shape}  & {0,599}           & {0,0001}         & {0,573}                        & 95,71\%                        & {0,495}                         & {\textbf{82,67\%}} & {0,538}       & {\textbf{89,87\%}} \\
+        \textbf{Order}          & $L_{baseline}$ & $L_{English}$ & \multicolumn{2}{c}{$|V| = 10$} & \multicolumn{2}{c}{$|V| = 13$} & \multicolumn{2}{c}{$|V| = 100$}                                                      \\\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+                                &                &               & $L_{em}$                       & $L_{norm}$                     & $L_{em}$                        & $L_{norm}$         & $L_{em}$ & $L_{norm}$         \\\midrule
+        {shape > color > size}  & {0,659}        & {0,0001}      & {0,569}                        & \textbf{86,19\%}               & {0,622}                         & {94,24\%}          & {0,597}  & {90,4\%}           \\
+        {shape > size > color}  & {0,589}        & {0,0002}      & {0,489}                        & \textbf{83,09\%}               & {0,531}                         & {90,21\%}          & {0,47}   & {\textbf{79,78\%}} \\
+        {color > shape > size}  & {0,849}        & {0,0}         & {0,802}                        & 94,49\%                        & {0,801}                         & {94,36\%}          & {0,791}  & {93,15\%}          \\
+        {color  > size > shape} & {0,836}        & {0,0}         & {0,819}                        & 98,01\%                        & {0,772}                         & {92,35\%}          & {0,786}  & {94\%}             \\
+        {size > shape > color}  & {0,532}        & {0,0052}      & {0,492}                        & 92,26\%                        & {0,437}                         & {\textbf{81,95\%}} & {0,457}  & {\textbf{85,61\%}} \\
+        {size > color > shape}  & {0,599}        & {0,0001}      & {0,573}                        & 95,71\%                        & {0,495}                         & {\textbf{82,67\%}} & {0,538}  & {\textbf{89,87\%}} \\
         \bottomrule
     \end{tabular}
     \caption{Cross entropy losses while probing with emerged languages successful on 'Dale-2'}
@@ -906,6 +905,17 @@ By doing this, all configurations can be compared directly to each other.
 \end{table}
 
 Table \ref{tab:probing_discrimnator_language} shows the results for all different languages.
+First, it can be seen for all emerged languages, the model is able to find correlations between natural language referring expressions and the messages by the sender.
+Still, all losses stay high and closer to the loss of the baseline, namely where the model only learns the patterns in the English referring expressions.
+This fact concludes that all emerged languages don't rely on the GRE algorithm by \cite{Dale1995}.
+Nonetheless, it may be possible that a different algorithm is used to create referring expressions in the artificial language.
+
+Secondly, it can be seen that the correlation between the emerged language and the natural language referring expressions differ for each of the languages.
+The vocabulary consisting of 10 symbols is the closest related to the orders \emph{shape > size > color} and \emph{shape > color > size}, the vocabulary based on 13 symbols on the other hand to the orders \emph{size > shape > color} and \emph{size > color > shape}.
+With 100 symbols, the vocabulary resembles mostly \emph{shape > size > color} and \emph{size > shape > color}.
+Striking here is that even though the related orders are different, the most important attributes are either the \emph{size} or \emph{shape} across all three emerged languages.
+The attribute \emph{color} seems to be less important.
+This is reinforced by the fact that the losses are closer to the baseline, when the \emph{color} is the most or second most important attribute in the order.
 
 
 \subsubsection{Caption generator games}
