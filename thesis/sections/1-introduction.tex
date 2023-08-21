@@ -1,12 +1,62 @@
 \section{Introduction}
 \label{sec:introduction}
 
-\cmtDK[inline]{2 pages}
+The study of emergent languages, in other words artificial languages created by agents to communicate and solve a goal are studied deeply in the recent years \citep{Kirby2002,Kirby2008,Steels2009,Lazaridou2017,Baroni2020,Baroni2022}.
+The motivation behind this is twofold.
+First, the study of the emergence of artificial language can help to shed light into why and how natural languages evolved.
+This is done in a controlled environment, where researchers can regulate exactly, which information the agents receive, how and what they are able to communicate and which goals they are trained on.
+This approach allows a deep study of the constraints and restrictions that are necessary for language and meanings of symbols to evolve.
+Insights in this field might give indications, under which circumstances natural language evolves.
 
-\subsection{Research Question}
+Secondly, emergent languages can have benefits over predefined communication protocols.
+Currently, machines communicate, by using protocols based on predefined rules of how messages can be built up.
+These are developed for specific scenarios and goals and don't allow flexible usages if the goal or the environment, machines act in are changing.
+Furthermore, these protocols are often based on readability for humans and include overhead that is not necessary to communicate a specific meaning, but is rather used for transparency.
+A language that emerges, rather than being predefined could mitigate these problems.
+Agents can for instance learn a compositional language that allows them to combine already learned symbols to create new meaning, when presented with a changed environment and unseen situations \citep{Kharitonov2020,Lazaridou2018,Gupta2020}.
+Additionally, emergent languages can be learned to encode meaning in efficient ways \citep{Chaabouni2019,Zaslavsky2018}.
 
-\subsection{Motivation}
+Different studies conclude that meaning of symbols and sentences in language can only be bound to the real world, both in the literal sense, but also for abstract concepts \citep{Harnad1999,Bender2020,Bisk2020}.
+They need to be grounded.
+One way of grounding meaning can be achieved in multimodal systems, where models need to combine language with another modality for instance visual input.
+Hereby, a task can be to learn how to refer to objects or actions in the visual input, using referring expressions.
+Both generating referring expressions, based on the visual input and understanding given referring expressions by linking them to the visual input ground the meaning of the used language in vision.
+Following these arguments, also artificial emergent languages need to be grounded that the used symbols contain meaning.
+
+\subsection{Research Questions}
+In this thesis, a deeper look is taken into how agents can ground their emerged language in vision.
+The focus hereby lies on referring expressions and how agents are able to generate and understand them.
+Multiple experiments are designed in a way that agents need to use referring expressions in their messages that are communicated.
+These messages are analyzed with respect to the visual input to answer the two following questions:
+\begin{enumerate}
+    \item Are cooperative agents in language games able to generate and understand artificial referring expressions based on visual input?
+    \item If a language emerges, how similar are the referring expressions to referring expressions that are used in English?
+\end{enumerate}
+
 
 \subsection{Contribution}
+This thesis aims to add three contributions to the field of research.
+First, new artificial visual datasets are created, consisting of images, depicting objects and their attribute and spatial relations.
+Many existing datasets that are used to study referring expressions that use real images are based on photos taking by humans.
+This adds a lot of inherent bias to the dataset, since these photos often focus on similar objects and actions.
+Additionally, they require external knowledge about the world and the functions of objects which is not present in the image.
+Furthermore, information about the objects and their relations in the image are not present in a structured way.
+The datasets that are created in this thesis aim to reduce this bias and provide all information about the scene and objects in the image.
+
+Secondly, the thesis evaluates these datasets, by training separate models to generate and understand referring expressions, describing objects in the images.
+By doing this, it is tested if first the models are able to extract useful visual information that doesn't rely on bias and latent patterns in the dataset and secondly shows the impact of different levels of ambiguity in the datasets on the performance of generating and understanding of referring expressions.
+
+Lastly, the thesis brings the separate tasks of generating and understanding of referring expressions together into on single task.
+In language games, one agent needs to extract visual information from an image and generate a referring expression that is sent to the second agent.
+The second agent on the other hand needs to understand this referring expressions and combine it with its visual input.
+Only if both of these subtasks succeed, a new artificial language can emerge and the overall task can be solved.
+The emerging language is then analyzed to understand, how the artificial referring expressions are built up and compare to natural language.
 
 \subsection{Scope}
+The focus of this thesis is the study of referring expressions.
+Referring expressions can hereby be based on attributes of objects, as well as their spatial relations towards other objects.
+In the present study, only attribute relations are studied.
+Spatial relations add another level of complexity and may be studied in future work.
+Furthermore, the emerged language will be interpreted by comparing it to referring expressions in natural language.
+This analysis focuses on the emerged meaning of symbols and if they align with natural language.
+A deeper study of its compositionality or complexity is out of scope.

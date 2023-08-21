@@ -1,4 +1,4 @@
-\section{Experiments}
+\section{Experimental setup and results}
 \label{sec:exp-setup}
 
 In this section I will describe which experiments were conducted to answer the research questions described in the previous chapters.
@@ -682,7 +682,7 @@ These are harder to generate for the model, since it needs to take more attribut
 \subsection{Language games}
 \label{sec:language-games}
 
-The experiments that are executed using language games have a similar structure as the pre-experiments, since those lied the basis for the language games.
+The experiments that are executed using language games have a similar structure as the experiments in the previous chapters, since those provided the basis for the language games.
 
 The language games in this research have an asymmetric setup.
 One agent, the sender is shown some information and needs to generate a message.
@@ -697,11 +697,14 @@ All weights of the agents are adapted in the same way.
 
 First, I will discuss \emph{discrimination games}, because they have the simplest setup.
 Furthermore, other language games that research this topic use a very similar setup.
-In the next step, I will look into caption generators that are set up as a language game.
+In the next step, I will look into \emph{caption generators} that are set up as a language game.
 Here, the sender describes the scene, while the receiver needs to generate a caption.
 In the last step, I try to lose as much human bias as possible and the models are trained on just 'pointing' towards the target object, by again predicting its center coordinates.
 
-\cmtDK{look at emerged language: distribution of vocab/ngrams, how do they relate to the images (clustering?)}
+The languages that emerge are analyzed in two ways.
+An analysis of the frequency of used symbols and messages, as well as an examination for which images and objects they are used indicates the structure of the language and meanings of the symbols.
+In a second step, the language is compared to several referring expressions in natural language.
+By doing this, it can be seen if the models learned to use similar ways of referring to objects as humans do, or if they rely on different approaches.
 
 \subsubsection{Discrimination games}
 \subsubsection*{Setup}
@@ -710,7 +713,7 @@ In a discrimination game, the agents are presented with two or more images, one 
 The sender needs to communicate this target image to the receiver by discriminating it from the other distractor images.
 The receiver then needs to decide based on the message, which of the images is the target image.
 
-The discrimination games in this research have a very similar setup as described in \citet{Lazaridou2016}.
+The discrimination games in this research have a very similar setup as described in \citet{Lazaridou2017}.
 The agents in this research resemble their \emph{agnostic sender} as well as their \emph{receiver}.
 One central difference is the production of the message.
 The main goal of their language game was the identification of the concept that and image was related to.
@@ -721,7 +724,7 @@ For that reason, the sender is allowed to generate sequences as a message.
 
 Both 'Dale' datasets are used to train the agents in this mode.
 Similarly to the bounding box classifier, bounding boxes around each of the objects are extracted and fed to the game.
-As in \citet{Lazaridou2016}, the sender receives the bounding box of the target object as the first image, while the rest of the bounding boxes are shuffled.
+As in \citet{Lazaridou2017}, the sender receives the bounding box of the target object as the first image, while the rest of the bounding boxes are shuffled.
 The sender is assumed to learn which of the input images is the target images by this approach.
 The receiver receives the images in completely shuffled order.
 
@@ -814,7 +817,6 @@ This hints to the fact that the agents don't describe the complete target object
 The need for a more detailed description of discriminative attributes is higher when more distractors are involved.
 Therefore, the models need to learn more combinations of symbols in order to attest to this higher level of detail and especially how to relate them to features in the images.
 
-\cmtDK{look at language}
 \cmtDK{similarity to bounding box classifier}
 
 \subsubsection*{Analysis of the emerged languages}
@@ -855,7 +857,7 @@ Probing can be used to analyze and interpret the hidden representations in neura
 Hereby, a second neural model is trained to predict selected linguistic properties on the basis of the hidden representations.
 If this model is successfully able to predict the linguistic properties, the hidden representations are connected to them.
 If second model can't be trained, it indicates that there is no correlation between the hidden representation and the linguistic property.
-In the case of the emerged language, a neural model is trained to translate the messages of the sender into English referring expressions, based on the GRE algorithm by \cite{Dale1995}.
+In the case of the emerged language, a neural model is trained to translate the messages of the sender into English referring expressions, based on the GRE algorithm by \citet{Dale1995}.
 Hereby, the model consists of an encoder LSTM, one linear layer and a decoder LSTM.
 The encoder LSTM encodes the messages of the emerged language.
 The final hidden state is used as the meaning of the complete sentence and passed through the linear layer, which should learn an abstract representation of the message.
@@ -907,7 +909,7 @@ By doing this, all configurations can be compared directly to each other.
 Table \ref{tab:probing_discrimnator_language} shows the results for all different languages.
 First, it can be seen for all emerged languages, the model is able to find correlations between natural language referring expressions and the messages by the sender.
 Still, all losses stay high and closer to the loss of the baseline, namely where the model only learns the patterns in the English referring expressions.
-This fact concludes that all emerged languages don't rely on the GRE algorithm by \cite{Dale1995}.
+This fact concludes that all emerged languages don't rely on the GRE algorithm by \citet{Dale1995}.
 Nonetheless, it may be possible that a different algorithm is used to create referring expressions in the artificial language.
 
 Secondly, it can be seen that the correlation between the emerged language and the natural language referring expressions differ for each of the languages.

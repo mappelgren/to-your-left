@@ -2,7 +2,7 @@
 \label{sec:methodology}
 
 \subsection{CLEVR dataset}
-The basis for my datasets is the Visual Question Answering (VQA) dataset CLEVR \citep{Johnson2016}.
+The basis for my datasets is the Visual Question Answering (VQA) dataset CLEVR \citep{Johnson2017a}.
 This dataset is split in two parts: a collection of images, and a set of questions and answers that refer and describe each image.
 Many of the existing VQA datasets come with two problems.
 First, they include many biases, such as biases in the base images and biases in the linguistic properties of the questions and answers.
@@ -64,7 +64,7 @@ In computer vision tasks, machines need to analyze images and extract informatio
 To do this, machines often rely on feature extractors.
 Features are important parts or patterns in an image, which can have different levels of abstractions.
 They can for example be low-level features, as geometric information about lines and edges in an image, or also very abstract information about whole objects.
-Traditional approaches involve extracting key points and descriptors from an image and using them to represent the image (\cite{Harris1988}, \cite{Lowe1999}, \cite{Bay2006}).
+Traditional approaches involve extracting key points and descriptors from an image and using them to represent the image \citep{Harris1988,Lowe1999,Bay2006}.
 More recently, convolutional neural networks (CNN) became popular due to their ability to learn complex features automatically from raw image data.
 These are also used in this thesis as a first layer to extract important information from the image. Hereby, two different architectures are tested.
 
@@ -152,3 +152,24 @@ These losses are summed up to a total loss that is used to adapt the weights in 
 \cmtDK{Gumbel-Softmax vs REINFORCE}
 
 \subsection{Ethical considerations}
+In the field of natural language processing (NLP) ethical issues often play major roles.
+These can be part of the used datasets, the created models and their training as well as the application of the models.
+For datasets, the role data privacy is increasing with the necessity of larger amounts of data \citep{Klymenko2022}.
+Furthermore, datasets often contain biases, based for instance on the authors of the collected natural language texts. Often they also contain biases such as overrepresentations and underrepresentations.
+Even though some of these biases are inherent to the data and not necessarily negative, much research is indicating that undetected and unaddressed biases in datasets might lead to negative consequences \citep{Shah2020,Field2021,Bender2021}.
+Training neural models can also lead to environmental issues, as large models need to process huge amounts of data and require a lot of energy \citep{Bender2021}.
+Finally, the application of trained models can create harm.
+This applies for example to easy accessible large language model (LLMs) that can be used to create information hazard \citep{Weidinger2022}.
+
+The research in this thesis tries to reduce these risks.
+Looking at the datasets that are used in this thesis, all data is created artificially and contains therefore no personal information.
+Even further, the aim of the creation of these datasets is to reduce biases.
+It doesn't include any social information, but on the other hand consists only of abstract scenes.
+The choice of which attributes the objects are made up is inherently biased towards human cognition, but doesn't have a social impact.
+The models and agents are therefore trained, by including as few human biases as possible.
+
+Looking at the environmental issues, the models used in this thesis consist of only few trained layers and the training is therefore short and doesn't require much energy.
+Larger models as the feature extractors are already pretrained and add no additional consumption.
+
+Finally, the purpose of this thesis is to analyze the results and the emerged language and draw conclusions, how emerged languages can be grounded better in the environment.
+For that reason, the final models can't be uses in any real world applications and produce potential harm.

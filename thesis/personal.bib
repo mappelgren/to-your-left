@@ -44,6 +44,7 @@
 
 @article{Baroni2020,
   author        = {Baroni, Marco},
+  journal       = {ArXiv preprint},
   title         = {Rat big, cat eaten! Ideas for a useful deep-agent protolanguage},
   year          = {2020},
   month         = mar,
@@ -58,7 +59,8 @@
   primaryclass  = {cs.CL},
   priority      = {prio2},
   publisher     = {arXiv},
-  readstatus    = {read}
+  readstatus    = {read},
+  url           = {https://arxiv.org/abs/2003.11922}
 }
 
 @inproceedings{Baroni2022,
@@ -138,7 +140,7 @@
   copyright     = {arXiv.org perpetual, non-exclusive license},
   doi           = {10.48550/ARXIV.1612.03801},
   eprint        = {1612.03801},
-  file          = {:Beattie2016 - DeepMind Lab.pdf:PDF},
+  file          = {:papers/Beattie2016 - DeepMind Lab.pdf:PDF},
   groups        = {MLT Thesis},
   keywords      = {Artificial Intelligence (cs.AI), FOS: Computer and information sciences},
   primaryclass  = {cs.AI},
@@ -158,6 +160,24 @@
   doi       = {10.18653/v1/2020.acl-main.463},
   file      = {:papers/Bender2020 - Climbing Towards NLU_ on Meaning, Form, and Understanding in the Age of Data.pdf:PDF},
   url       = {https://aclanthology.org/2020.acl-main.463}
+}
+
+@inproceedings{Bender2021,
+  author    = {Bender, Emily M. and Gebru, Timnit and McMillan-Major, Angelina and Shmitchell, Shmargaret},
+  booktitle = {Proceedings of the 2021 ACM Conference on Fairness, Accountability, and Transparency},
+  title     = {On the Dangers of Stochastic Parrots: Can Language Models Be Too Big? 🦜},
+  year      = {2021},
+  address   = {New York, NY, USA},
+  pages     = {610–623},
+  publisher = {Association for Computing Machinery},
+  series    = {FAccT '21},
+  abstract  = {The past 3 years of work in NLP have been characterized by the development and deployment of ever larger language models, especially for English. BERT, its variants, GPT-2/3, and others, most recently Switch-C, have pushed the boundaries of the possible both through architectural innovations and through sheer size. Using these pretrained models and the methodology of fine-tuning them for specific tasks, researchers have extended the state of the art on a wide array of tasks as measured by leaderboards on specific benchmarks for English. In this paper, we take a step back and ask: How big is too big? What are the possible risks associated with this technology and what paths are available for mitigating those risks? We provide recommendations including weighing the environmental and financial costs first, investing resources into curating and carefully documenting datasets rather than ingesting everything on the web, carrying out pre-development exercises evaluating how the planned approach fits into research and development goals and supports stakeholder values, and encouraging research directions beyond ever larger language models.},
+  doi       = {10.1145/3442188.3445922},
+  file      = {:papers/Bender2021 - On the Dangers of Stochastic Parrots_ Can Language Models Be Too Big_.pdf:PDF},
+  isbn      = {9781450383097},
+  location  = {Virtual Event, Canada},
+  numpages  = {14},
+  url       = {https://doi.org/10.1145/3442188.3445922}
 }
 
 @inproceedings{Bisk2020,
@@ -210,10 +230,13 @@
   readstatus    = {read}
 }
 
-@misc{Brown2020,
+@article{Brown2020,
   author        = {Tom B. Brown and Benjamin Mann and Nick Ryder and Melanie Subbiah and Jared Kaplan and Prafulla Dhariwal and Arvind Neelakantan and Pranav Shyam and Girish Sastry and Amanda Askell and Sandhini Agarwal and Ariel Herbert-Voss and Gretchen Krueger and Tom Henighan and Rewon Child and Aditya Ramesh and Daniel M. Ziegler and Jeffrey Wu and Clemens Winter and Christopher Hesse and Mark Chen and Eric Sigler and Mateusz Litwin and Scott Gray and Benjamin Chess and Jack Clark and Christopher Berner and Sam McCandlish and Alec Radford and Ilya Sutskever and Dario Amodei},
+  journal       = {Advances in neural information processing systems},
   title         = {Language Models are Few-Shot Learners},
   year          = {2020},
+  pages         = {1877-1901},
+  volume        = {33},
   archiveprefix = {arXiv},
   eprint        = {2005.14165},
   file          = {:papers/Brown2020 - Language Models Are Few Shot Learners.pdf:PDF},
@@ -294,9 +317,11 @@
 
 @article{Chaabouni2019,
   author        = {Chaabouni, Rahma and Kharitonov, Eugene and Dupoux, Emmanuel and Baroni, Marco},
+  journal       = {Advances in Neural Information Processing Systems},
   title         = {Anti-efficient encoding in emergent communication},
   year          = {2019},
   month         = may,
+  volume        = {32},
   abstract      = {Despite renewed interest in emergent language simulations with neural networks, little is known about the basic properties of the induced code, and how they compare to human language. One fundamental characteristic of the latter, known as Zipf's Law of Abbreviation (ZLA), is that more frequent words are efficiently associated to shorter strings. We study whether the same pattern emerges when two neural networks, a "speaker" and a "listener", are trained to play a signaling game. Surprisingly, we find that networks develop an \emph{anti-efficient} encoding scheme, in which the most frequent inputs are associated to the longest messages, and messages in general are skewed towards the maximum length threshold. This anti-efficient code appears easier to discriminate for the listener, and, unlike in human communication, the speaker does not impose a contrasting least-effort pressure towards brevity. Indeed, when the cost function includes a penalty for longer messages, the resulting message distribution starts respecting ZLA. Our analysis stresses the importance of studying the basic features of emergent communication in a highly controlled setup, to ensure the latter will not strand too far from human language. Moreover, we present a concrete illustration of how different functional pressures can lead to successful communication codes that lack basic properties of human language, thus highlighting the role such pressures play in the latter.},
   archiveprefix = {arXiv},
   copyright     = {arXiv.org perpetual, non-exclusive license},
@@ -361,14 +386,17 @@
 
 @article{Dale1995,
   author    = {Dale, Robert and Reiter, Ehud},
+  journal   = {Cognitive science},
   title     = {Computational Interpretations of the Gricean Maxims in the Generation of Referring Expressions},
   year      = {1995},
-  copyright = {Assumed arXiv.org perpetual, non-exclusive license to distribute this article for submissions made before January 2004},
+  number    = {2},
+  pages     = {233--263},
+  volume    = {19},
   doi       = {10.48550/ARXIV.CMP-LG/9504020},
   file      = {:papers/Dale1995 - Computational Interpretations of the Gricean Maxims in the Generation of Referring Expressions.pdf:PDF},
   groups    = {AI: Cognitive System, Emergent Languages},
   keywords  = {Computation and Language (cs.CL), FOS: Computer and information sciences},
-  publisher = {arXiv}
+  publisher = {Elsevier}
 }
 
 @article{Dasgupta2023,
@@ -422,15 +450,21 @@
   readstatus = {skimmed}
 }
 
-@article{Devlin2018,
-  author     = {Jacob Devlin and Ming-Wei Chang and Kenton Lee and Kristina Toutanova and Google AI and Language},
+@inproceedings{Devlin2019,
+  author     = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  booktitle  = {Proceedings of the 2019 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)},
   title      = {BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding},
-  year       = {2018},
-  abstract   = {There are two existing strategies for apply-
-                ing pre-trained language representations to down-},
-  file       = {:papers/Devlin2018 - BERT_ Pre Training of Deep Bidirectional Transformers for Language Understanding.pdf:PDF},
+  year       = {2019},
+  address    = {Minneapolis, Minnesota},
+  month      = jun,
+  pages      = {4171--4186},
+  publisher  = {Association for Computational Linguistics},
+  abstract   = {We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models (Peters et al., 2018a; Radford et al., 2018), BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5 (7.7 point absolute improvement), MultiNLI accuracy to 86.7{\%} (4.6{\%} absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).},
+  doi        = {10.18653/v1/N19-1423},
+  file       = {:papers/Devlin2019 - BERT_ Pre Training of Deep Bidirectional Transformers for Language Understanding.pdf:PDF},
   priority   = {prio1},
-  readstatus = {read}
+  readstatus = {read},
+  url        = {https://aclanthology.org/N19-1423}
 }
 
 @inproceedings{Dobnik2017,
@@ -520,6 +554,21 @@
   url       = {https://openreview.net/forum?id=rJGZq6g0-}
 }
 
+@inproceedings{Field2021,
+  author    = {Field, Anjalie and Blodgett, Su Lin and Waseem, Zeerak and Tsvetkov, Yulia},
+  booktitle = {Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers)},
+  title     = {A Survey of Race, Racism, and Anti-Racism in {NLP}},
+  year      = {2021},
+  address   = {Online},
+  month     = aug,
+  pages     = {1905--1925},
+  publisher = {Association for Computational Linguistics},
+  abstract  = {Despite inextricable ties between race and language, little work has considered race in NLP research and development. In this work, we survey 79 papers from the ACL anthology that mention race. These papers reveal various types of race-related bias in all stages of NLP model development, highlighting the need for proactive consideration of how NLP systems can uphold racial hierarchies. However, persistent gaps in research on race and NLP remain: race has been siloed as a niche topic and remains ignored in many NLP tasks; most work operationalizes race as a fixed single-dimensional variable with a ground-truth label, which risks reinforcing differences produced by historical racism; and the voices of historically marginalized people are nearly absent in NLP literature. By identifying where and how NLP literature has and has not considered race, especially in comparison to related fields, our work calls for inclusion and racial justice in NLP research practices.},
+  doi       = {10.18653/v1/2021.acl-long.149},
+  file      = {:papers/Field2021 - A Survey of Race, Racism, and Anti Racism in NLP.pdf:PDF},
+  url       = {https://aclanthology.org/2021.acl-long.149}
+}
+
 @misc{Foerster2016,
   author        = {Jakob N. Foerster and Yannis M. Assael and Nando de Freitas and Shimon Whiteson},
   title         = {Learning to Communicate with Deep Multi-Agent Reinforcement Learning},
@@ -542,11 +591,50 @@
   groups    = {AI: Cognitive System, Project}
 }
 
+@inproceedings{Gupta2020,
+  author        = {Gupta, Abhinav and Resnick, Cinjon and Foerster, Jakob and Dai, Andrew and Cho, Kyunghyun},
+  booktitle     = {Proceedings of the 5th Workshop on Representation Learning for NLP},
+  title         = {Compositionality and Capacity in Emergent Languages},
+  year          = {2020},
+  month         = jul,
+  pages         = {34--38},
+  publisher     = {Association for Computational Linguistics},
+  abstract      = {Many recent works have discussed the propensity, or lack thereof, for emergent languages to exhibit properties of natural languages. A favorite in the literature is learning compositionality. We note that most of those works have focused on communicative bandwidth as being of primary importance. While important, it is not the only contributing factor. In this paper, we investigate the learning biases that affect the efficacy and compositionality of emergent languages. Our foremost contribution is to explore how capacity of a neural network impacts its ability to learn a compositional language. We additionally introduce a set of evaluation metrics with which we analyze the learned languages. Our hypothesis is that there should be a specific range of model capacity and channel bandwidth that induces compositional structure in the resulting language and consequently encourages systematic generalization. While we empirically see evidence for the bottom of this range, we curiously do not find evidence for the top part of the range and believe that this is an open question for the community.},
+  archiveprefix = {arXiv},
+  copyright     = {arXiv.org perpetual, non-exclusive license},
+  doi           = {10.48550/ARXIV.1910.11424},
+  eprint        = {1910.11424},
+  file          = {:papers/Gupta2020 - Compositionality and Capacity in Emergent Languages.pdf:PDF},
+  groups        = {Emergent Languages},
+  keywords      = {Computation and Language (cs.CL), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Multiagent Systems (cs.MA), Machine Learning (stat.ML), FOS: Computer and information sciences},
+  primaryclass  = {cs.CL},
+  readstatus    = {read}
+}
+
+@article{Harnad1999,
+  author        = {Stevan Harnad},
+  journal       = {Physica D 42: 335-346},
+  title         = {The Symbol Grounding Problem},
+  year          = {1999},
+  month         = jun,
+  abstract      = {How can the semantic interpretation of a formal symbol system be made intrinsic to the system, rather than just parasitic on the meanings in our heads? How can the meanings of the meaningless symbol tokens, manipulated solely on the basis of their (arbitrary) shapes, be grounded in anything but other meaningless symbols? The problem is analogous to trying to learn Chinese from a Chinese/Chinese dictionary alone. A candidate solution is sketched: Symbolic representations must be grounded bottom-up in nonsymbolic representations of two kinds: (1) "iconic representations," which are analogs of the proximal sensory projections of distal objects and events, and (2) "categorical representations," which are learned and innate feature-detectors that pick out the invariant features of object and event categories from their sensory projections. Elementary symbols are the names of these object and event categories, assigned on the basis of their (nonsymbolic) categorical representations. Higher-order (3) "symbolic representations," grounded in these elementary symbols, consist of symbol strings describing category membership relations (e.g., "An X is a Y that is Z").},
+  archiveprefix = {arXiv},
+  doi           = {10.1016/0167-2789(90)90087-6},
+  eprint        = {cs/9906002},
+  file          = {:papers/Harnad1999 - The Symbol Grounding Problem.pdf:PDF},
+  groups        = {AI: Cognitive System},
+  keywords      = {cs.AI, I.2.0},
+  primaryclass  = {cs.AI},
+  readstatus    = {read}
+}
+
 @inproceedings{Harris1988,
   author    = {Christopher G. Harris and M. J. Stephens},
   booktitle = {Alvey Vision Conference},
   title     = {A Combined Corner and Edge Detector},
   year      = {1988},
+  number    = {50},
+  volume    = {15},
   file      = {:papers/Harris1988 - A Combined Corner and Edge Detector.pdf:PDF},
   url       = {https://api.semanticscholar.org/CorpusID:1694378}
 }
@@ -666,13 +754,14 @@
   url       = {https://aclanthology.org/2022.emnlp-main.38}
 }
 
-@article{Johnson2016,
+@inproceedings{Johnson2017a,
   author        = {Johnson, Justin and Hariharan, Bharath and van der Maaten, Laurens and Fei-Fei, Li and Zitnick, C. Lawrence and Girshick, Ross},
-  journal       = {CoRR},
+  booktitle     = {Proceedings of the IEEE conference on computer vision and pattern recognition},
   title         = {CLEVR: A Diagnostic Dataset for Compositional Language and Elementary Visual Reasoning},
-  year          = {2016},
+  year          = {2017},
   month         = dec,
-  volume        = {abs/1612.06890},
+  pages         = {2901--2910},
+  publisher     = {arXiv},
   abstract      = {When building artificial intelligence systems that can reason and answer questions about visual data, we need diagnostic tests to analyze our progress and discover shortcomings. Existing benchmarks for visual question answering can help, but have strong biases that models can exploit to correctly answer questions without reasoning. They also conflate multiple sources of error, making it hard to pinpoint model weaknesses. We present a diagnostic dataset that tests a range of visual reasoning abilities. It contains minimal biases and has detailed annotations describing the kind of reasoning each question requires. We use this dataset to analyze a variety of modern visual reasoning systems, providing novel insights into their abilities and limitations.},
   archiveprefix = {arXiv},
   bibsource     = {dblp computer science bibliography, https://dblp.org},
@@ -680,20 +769,21 @@
   copyright     = {arXiv.org perpetual, non-exclusive license},
   doi           = {10.48550/ARXIV.1612.06890},
   eprint        = {1612.06890},
-  file          = {:papers/Johnson2016 - CLEVR_ a Diagnostic Dataset for Compositional Language and Elementary Visual Reasoning.pdf:PDF},
+  file          = {:papers/Johnson2017a - CLEVR_ a Diagnostic Dataset for Compositional Language and Elementary Visual Reasoning.pdf:PDF},
   groups        = {Emergent Languages},
+  journal       = {CoRR},
   keywords      = {Computer Vision and Pattern Recognition (cs.CV), Computation and Language (cs.CL), Machine Learning (cs.LG), FOS: Computer and information sciences},
   primaryclass  = {cs.CV},
-  publisher     = {arXiv},
   timestamp     = {Sat, 19 Oct 2019 16:30:04 +0200},
   url           = {http://arxiv.org/abs/1612.06890}
 }
 
 @inproceedings{Johnson2017,
   author    = {Johnson, Justin and Hariharan, Bharath and van der Maaten, Laurens and Hoffman, Judy and Fei-Fei, Li and Zitnick, C Lawrence and Girshick, Ross},
-  booktitle = {ICCV},
+  booktitle = {Proceedings of the IEEE international conference on computer vision},
   title     = {Inferring and Executing Programs for Visual Reasoning},
   year      = {2017},
+  pages     = {2989--2998},
   file      = {:papers/Johnson2017 - Inferring and Executing Programs for Visual Reasoning.pdf:PDF}
 }
 
@@ -710,41 +800,19 @@
   url       = {https://gup.ub.gu.se/publication/294891?lang=en}
 }
 
-@article{Kharitonov2020,
-  author        = {Kharitonov, Eugene and Baroni, Marco},
-  title         = {Emergent Language Generalization and Acquisition Speed are not tied to Compositionality},
-  year          = {2020},
-  month         = apr,
-  abstract      = {Studies of discrete languages emerging when neural agents communicate to solve a joint task often look for evidence of compositional structure. This stems for the expectation that such a structure would allow languages to be acquired faster by the agents and enable them to generalize better. We argue that these beneficial properties are only loosely connected to compositionality. In two experiments, we demonstrate that, depending on the task, non-compositional languages might show equal, or better, generalization performance and acquisition speed than compositional ones. Further research in the area should be clearer about what benefits are expected from compositionality, and how the latter would lead to them.},
-  archiveprefix = {arXiv},
-  copyright     = {arXiv.org perpetual, non-exclusive license},
-  doi           = {10.48550/ARXIV.2004.03420},
-  eprint        = {2004.03420},
-  file          = {:papers/Kharitonov2020 - Emergent Language Generalization and Acquisition Speed Are Not Tied to Compositionality.pdf:PDF},
-  groups        = {Emergent Languages},
-  keywords      = {Computation and Language (cs.CL), Machine Learning (cs.LG), FOS: Computer and information sciences},
-  primaryclass  = {cs.CL},
-  publisher     = {arXiv},
-  readstatus    = {read}
-}
-
-@article{Kharitonov2019,
-  author        = {Kharitonov, Eugene and Chaabouni, Rahma and Bouchacourt, Diane and Baroni, Marco},
-  title         = {EGG: a toolkit for research on Emergence of lanGuage in Games},
-  year          = {2019},
-  month         = jul,
-  abstract      = {There is renewed interest in simulating language emergence among deep neural agents that communicate to jointly solve a task, spurred by the practical aim to develop language-enabled interactive AIs, as well as by theoretical questions about the evolution of human language. However, optimizing deep architectures connected by a discrete communication channel (such as that in which language emerges) is technically challenging. We introduce EGG, a toolkit that greatly simplifies the implementation of emergent-language communication games. EGG's modular design provides a set of building blocks that the user can combine to create new games, easily navigating the optimization and architecture space. We hope that the tool will lower the technical barrier, and encourage researchers from various backgrounds to do original work in this exciting area.},
-  archiveprefix = {arXiv},
-  copyright     = {arXiv.org perpetual, non-exclusive license},
-  doi           = {10.48550/ARXIV.1907.00852},
-  eprint        = {1907.00852},
-  file          = {:papers/Kharitonov2019 - EGG_ a Toolkit for Research on Emergence of LanGuage in Games.pdf:PDF},
-  groups        = {MLT Thesis, Emergent Languages},
-  keywords      = {Computation and Language (cs.CL), Artificial Intelligence (cs.AI), FOS: Computer and information sciences},
-  primaryclass  = {cs.CL},
-  priority      = {prio2},
-  publisher     = {arXiv},
-  readstatus    = {read}
+@inproceedings{Kharitonov2020,
+  author    = {Kharitonov, Eugene and Baroni, Marco},
+  booktitle = {Proceedings of the Third BlackboxNLP Workshop on Analyzing and Interpreting Neural Networks for NLP},
+  title     = {Emergent Language Generalization and Acquisition Speed are not tied to Compositionality},
+  year      = {2020},
+  address   = {Online},
+  month     = nov,
+  pages     = {11--15},
+  publisher = {Association for Computational Linguistics},
+  abstract  = {Studies of discrete languages emerging when neural agents communicate to solve a joint task often look for evidence of compositional structure. This stems for the expectation that such a structure would allow languages to be acquired faster by the agents and enable them to generalize better. We argue that these beneficial properties are only loosely connected to compositionality. In two experiments, we demonstrate that, depending on the task, non-compositional languages might show equal, or better, generalization performance and acquisition speed than compositional ones. Further research in the area should be clearer about what benefits are expected from compositionality, and how the latter would lead to them.},
+  doi       = {10.18653/v1/2020.blackboxnlp-1.2},
+  file      = {:papers/Kharitonov2020 - Emergent Language Generalization and Acquisition Speed Are Not Tied to Compositionality.pdf:PDF},
+  url       = {https://aclanthology.org/2020.blackboxnlp-1.2}
 }
 
 @article{Kharitonov2019a,
@@ -764,6 +832,21 @@
   priority      = {prio2},
   publisher     = {arXiv},
   readstatus    = {read}
+}
+
+@inproceedings{Kharitonov2019,
+  author    = {Kharitonov, Eugene and Chaabouni, Rahma and Bouchacourt, Diane and Baroni, Marco},
+  booktitle = {Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP): System Demonstrations},
+  title     = {{EGG}: a toolkit for research on Emergence of lan{G}uage in Games},
+  year      = {2019},
+  address   = {Hong Kong, China},
+  month     = nov,
+  pages     = {55--60},
+  publisher = {Association for Computational Linguistics},
+  abstract  = {There is renewed interest in simulating language emergence among deep neural agents that communicate to jointly solve a task, spurred by the practical aim to develop language-enabled interactive AIs, as well as by theoretical questions about the evolution of human language. However, optimizing deep architectures connected by a discrete communication channel (such as that in which language emerges) is technically challenging. We introduce EGG, a toolkit that greatly simplifies the implementation of emergent-language communication games. EGG{'}s modular design provides a set of building blocks that the user can combine to create new games, easily navigating the optimization and architecture space. We hope that the tool will lower the technical barrier, and encourage researchers from various backgrounds to do original work in this exciting area.},
+  doi       = {10.18653/v1/D19-3010},
+  file      = {:papers/Kharitonov2019 - EGG_ a Toolkit for Research on Emergence of LanGuage in Games.pdf:PDF},
+  url       = {https://aclanthology.org/D19-3010}
 }
 
 @article{Kirby2002,
@@ -793,6 +876,21 @@
   file     = {:papers/Kirby2008 - Cumulative Cultural Evolution in the Laboratory_ an Experimental Approach to the Origins of Structure in Human Language.pdf:PDF},
   groups   = {Emergent Languages},
   url      = {https://www.pnas.org/doi/abs/10.1073/pnas.0707835105}
+}
+
+@inproceedings{Klymenko2022,
+  author    = {Klymenko, Oleksandra and Meisenbacher, Stephen and Matthes, Florian},
+  booktitle = {Proceedings of the Fourth Workshop on Privacy in Natural Language Processing},
+  title     = {Differential Privacy in Natural Language Processing The Story So Far},
+  year      = {2022},
+  address   = {Seattle, United States},
+  month     = jul,
+  pages     = {1--11},
+  publisher = {Association for Computational Linguistics},
+  abstract  = {As the tide of Big Data continues to influence the landscape of Natural Language Processing (NLP), the utilization of modern NLP methods has grounded itself in this data, in order to tackle a variety of text-based tasks. These methods without a doubt can include private or otherwise personally identifiable information. As such, the question of privacy in NLP has gained fervor in recent years, coinciding with the development of new Privacy- Enhancing Technologies (PETs). Among these PETs, Differential Privacy boasts several desirable qualities in the conversation surrounding data privacy. Naturally, the question becomes whether Differential Privacy is applicable in the largely unstructured realm of NLP. This topic has sparked novel research, which is unified in one basic goal how can one adapt Differential Privacy to NLP methods? This paper aims to summarize the vulnerabilities addressed by Differential Privacy, the current thinking, and above all, the crucial next steps that must be considered.},
+  doi       = {10.18653/v1/2022.privatenlp-1.1},
+  file      = {:papers/Klymenko2022 - Differential Privacy in Natural Language Processing the Story so Far.pdf:PDF},
+  url       = {https://aclanthology.org/2022.privatenlp-1.1}
 }
 
 @article{Kottur2017,
@@ -849,15 +947,16 @@
   readstatus    = {read}
 }
 
-@article{Lazaridou2016,
+@inproceedings{Lazaridou2017,
   author        = {Angeliki Lazaridou and Alexander Peysakhovich and Marco Baroni},
+  booktitle     = {International Conference on Learning Representations},
   title         = {Multi-Agent Cooperation and the Emergence of (Natural) Language},
-  year          = {2016},
+  year          = {2017},
   month         = dec,
   abstract      = {The current mainstream approach to train natural language systems is to expose them to large amounts of text. This passive learning is problematic if we are interested in developing interactive machines, such as conversational agents. We propose a framework for language learning that relies on multi-agent communication. We study this learning in the context of referential games. In these games, a sender and a receiver see a pair of images. The sender is told one of them is the target and is allowed to send a message from a fixed, arbitrary vocabulary to the receiver. The receiver must rely on this message to identify the target. Thus, the agents develop their own language interactively out of the need to communicate. We show that two networks with simple configurations are able to learn to coordinate in the referential game. We further explore how to make changes to the game environment to cause the "word meanings" induced in the game to better reflect intuitive semantic properties of the images. In addition, we present a simple strategy for grounding the agents' code into natural language. Both of these are necessary steps towards developing machines that are able to communicate with humans productively.},
   archiveprefix = {arXiv},
   eprint        = {1612.07182},
-  file          = {:papers/Lazaridou2016 - Multi Agent Cooperation and the Emergence of (Natural) Language.pdf:PDF},
+  file          = {:papers/Lazaridou2017 - Multi Agent Cooperation and the Emergence of (Natural) Language.pdf:PDF},
   groups        = {AI: Cognitive System, MLT Thesis, Emergent Languages},
   keywords      = {cs.CL, cs.CV, cs.GT, cs.LG, cs.MA},
   primaryclass  = {cs.CL},
@@ -1003,24 +1102,6 @@
   groups    = {Emergent Languages}
 }
 
-@article{Resnick2019,
-  author        = {Resnick, Cinjon and Gupta, Abhinav and Foerster, Jakob and Dai, Andrew M. and Cho, Kyunghyun},
-  title         = {Capacity, Bandwidth, and Compositionality in Emergent Language Learning},
-  year          = {2019},
-  month         = oct,
-  abstract      = {Many recent works have discussed the propensity, or lack thereof, for emergent languages to exhibit properties of natural languages. A favorite in the literature is learning compositionality. We note that most of those works have focused on communicative bandwidth as being of primary importance. While important, it is not the only contributing factor. In this paper, we investigate the learning biases that affect the efficacy and compositionality of emergent languages. Our foremost contribution is to explore how capacity of a neural network impacts its ability to learn a compositional language. We additionally introduce a set of evaluation metrics with which we analyze the learned languages. Our hypothesis is that there should be a specific range of model capacity and channel bandwidth that induces compositional structure in the resulting language and consequently encourages systematic generalization. While we empirically see evidence for the bottom of this range, we curiously do not find evidence for the top part of the range and believe that this is an open question for the community.},
-  archiveprefix = {arXiv},
-  copyright     = {arXiv.org perpetual, non-exclusive license},
-  doi           = {10.48550/ARXIV.1910.11424},
-  eprint        = {1910.11424},
-  file          = {:papers/Resnick2019 - Capacity, Bandwidth, and Compositionality in Emergent Language Learning.pdf:PDF},
-  groups        = {Emergent Languages},
-  keywords      = {Computation and Language (cs.CL), Artificial Intelligence (cs.AI), Machine Learning (cs.LG), Multiagent Systems (cs.MA), Machine Learning (stat.ML), FOS: Computer and information sciences},
-  primaryclass  = {cs.CL},
-  publisher     = {arXiv},
-  readstatus    = {read}
-}
-
 @article{Roy2005,
   author    = {Roy, Deb},
   journal   = {Artificial Intelligence},
@@ -1037,6 +1118,21 @@
   groups    = {Emergent Languages},
   publisher = {Elsevier Science Publishers Ltd.},
   url       = {http://dx.doi.org/10.1016/j.artint.2005.04.007}
+}
+
+@inproceedings{Shah2020,
+  author    = {Shah, Deven Santosh and Schwartz, H. Andrew and Hovy, Dirk},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics},
+  title     = {Predictive Biases in Natural Language Processing Models: A Conceptual Framework and Overview},
+  year      = {2020},
+  address   = {Online},
+  month     = jul,
+  pages     = {5248--5264},
+  publisher = {Association for Computational Linguistics},
+  abstract  = {An increasing number of natural language processing papers address the effect of bias on predictions, introducing mitigation techniques at different parts of the standard NLP pipeline (data and models). However, these works have been conducted individually, without a unifying framework to organize efforts within the field. This situation leads to repetitive approaches, and focuses overly on bias symptoms/effects, rather than on their origins, which could limit the development of effective countermeasures. In this paper, we propose a unifying predictive bias framework for NLP. We summarize the NLP literature and suggest general mathematical definitions of predictive bias. We differentiate two consequences of bias: outcome disparities and error disparities, as well as four potential origins of biases: label bias, selection bias, model overamplification, and semantic bias. Our framework serves as an overview of predictive bias in NLP, integrating existing work into a single structure, and providing a conceptual baseline for improved frameworks.},
+  doi       = {10.18653/v1/2020.acl-main.468},
+  file      = {:papers/Shah2020 - Predictive Biases in Natural Language Processing Models_ a Conceptual Framework and Overview.pdf:PDF},
+  url       = {https://aclanthology.org/2020.acl-main.468}
 }
 
 
@@ -1067,19 +1163,22 @@
   publisher = {Cambridge University Press}
 }
 
-@article{Steels2006,
-  author        = {L. Steels and M. Loetzsch},
-  title         = {Perspective alignment in spatial language},
-  year          = {2006},
-  month         = may,
-  abstract      = {It is well known that perspective alignment plays a major role in the planning and interpretation of spatial language. In order to understand the role of perspective alignment and the cognitive processes involved, we have made precise complete cognitive models of situated embodied agents that self-organise a communication system for dialoging about the position and movement of real world objects in their immediate surroundings. We show in a series of robotic experiments which cognitive mechanisms are necessary and sufficient to achieve successful spatial language and why and how perspective alignment can take place, either implicitly or based on explicit marking.},
-  archiveprefix = {arXiv},
-  eprint        = {cs/0605012},
-  file          = {:papers/Steels2006 - Perspective Alignment in Spatial Language.pdf:PDF},
-  groups        = {AI: Cognitive System},
-  keywords      = {cs.AI},
-  primaryclass  = {cs.AI},
-  readstatus    = {read}
+@incollection{Steels2009,
+  author    = {Luc Steels and Martin Loetzsch},
+  booktitle = {Spatial Language and Dialogue},
+  publisher = {Oxford University Press},
+  title     = {Perspective Alignment in Spatial Language},
+  year      = {2009},
+  editor    = {Kenny R. Coventry and Thora Tenbrink and John A. Bateman},
+  pages     = {70--88},
+  series    = {Explorations in language and space},
+  volume    = {3},
+  bibsource = {dblp computer science bibliography, https://dblp.org},
+  biburl    = {https://dblp.org/rec/books/ox/09/SteelsL09.bib},
+  doi       = {10.1093/acprof:oso/9780199554201.003.0006},
+  file      = {:papers/Steels2009 - Perspective Alignment in Spatial Language.pdf:PDF},
+  timestamp = {Thu, 19 Nov 2020 09:11:25 +0100},
+  url       = {https://doi.org/10.1093/acprof:oso/9780199554201.003.0006}
 }
 
 @mastersthesis{Storckenfeldt2018,
@@ -1108,6 +1207,25 @@
   keywords      = {Computer Vision and Pattern Recognition (cs.CV), Computation and Language (cs.CL), Machine Learning (cs.LG), FOS: Computer and information sciences},
   primaryclass  = {cs.CV},
   publisher     = {arXiv}
+}
+
+@inproceedings{Weidinger2022,
+  author    = {Weidinger, Laura and Uesato, Jonathan and Rauh, Maribeth and Griffin, Conor and Huang, Po-Sen and Mellor, John and Glaese, Amelia and Cheng, Myra and Balle, Borja and Kasirzadeh, Atoosa and Biles, Courtney and Brown, Sasha and Kenton, Zac and Hawkins, Will and Stepleton, Tom and Birhane, Abeba and Hendricks, Lisa Anne and Rimell, Laura and Isaac, William and Haas, Julia and Legassick, Sean and Irving, Geoffrey and Gabriel, Iason},
+  booktitle = {Proceedings of the 2022 ACM Conference on Fairness, Accountability, and Transparency},
+  title     = {Taxonomy of Risks Posed by Language Models},
+  year      = {2022},
+  address   = {New York, NY, USA},
+  pages     = {214–229},
+  publisher = {Association for Computing Machinery},
+  series    = {FAccT '22},
+  abstract  = {Responsible innovation on large-scale Language Models (LMs) requires foresight into and in-depth understanding of the risks these models may pose. This paper develops a comprehensive taxonomy of ethical and social risks associated with LMs. We identify twenty-one risks, drawing on expertise and literature from computer science, linguistics, and the social sciences. We situate these risks in our taxonomy of six risk areas: I. Discrimination, Hate speech and Exclusion, II. Information Hazards, III. Misinformation Harms, IV. Malicious Uses, V. Human-Computer Interaction Harms, and VI. Environmental and Socioeconomic harms. For risks that have already been observed in LMs, the causal mechanism leading to harm, evidence of the risk, and approaches to risk mitigation are discussed. We further describe and analyse risks that have not yet been observed but are anticipated based on assessments of other language technologies, and situate these in the same taxonomy. We underscore that it is the responsibility of organizations to engage with the mitigations we discuss throughout the paper. We close by highlighting challenges and directions for further research on risk evaluation and mitigation with the goal of ensuring that language models are developed responsibly.},
+  doi       = {10.1145/3531146.3533088},
+  file      = {:papers/Weidinger2022 - Taxonomy of Risks Posed by Language Models.pdf:PDF},
+  isbn      = {9781450393522},
+  keywords  = {responsible AI, risk assessment, language models, responsible innovation, technology risks},
+  location  = {Seoul, Republic of Korea},
+  numpages  = {16},
+  url       = {https://doi.org/10.1145/3531146.3533088}
 }
 
 @article{Williams1992,
