@@ -469,15 +469,16 @@ Concluding, the model is able to extract, where objects are located in the image
 
 One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
 Feature extractors like VGG or ResNet are trained on extracting visual information.
-In this process, absolute locations of these features in the images may get lost in the resulting vectors, since they are not important for this task.
+In this process, absolute locations of these features in the images may get lost in the resulting vectors, since they are not necessarily important for classifying tasks.
 To address this challenge, I restructured the task in this experiment.
-Instead of predicting two coordinates of a target object, the model now needs to classify between all available objects.
+Instead of predicting two coordinates of a target object, the model now needs to classify between all available objects, target object and distractors.
 This will take all positional information out and just focus on the attributes and discriminating factors between the objects.
 To do this, fixed-size bounding boxes are extracted around each of the object in the image.
-As for the masking in the experiment before, the bounding boxes are a square of 192x192 pixels, to capture the complete object. \cmtDK{preprocess bounding box}
-The bounding boxes of all objects are padded to the maximum number of object present in an image across the whole dataset with a matrix of zeros.
+As for the masking in the experiment before, the bounding boxes are a square of 192x192 pixels to capture the complete object.
+The bounding boxes of all objects are padded to the maximum number of objects present in an image across the whole dataset with a matrix of zeros.
+For the 'Dale-2', this corresponds to a maximum of two bounding boxes, 5 bounding boxes for the 'Dale-5' dataset and 10 for the 'CLEVR color' dataset
 These bounding boxes are shuffled.
-Furthermore, the attributes of the target object are encoded as on-hot vectors to point the model towards it.
+Furthermore, to point the model towards the target object, its attributes are encoded as on-hot vectors.
 
 \begin{figure}[h]
     \centering
@@ -486,11 +487,11 @@ Furthermore, the attributes of the target object are encoded as on-hot vectors t
     \label{fig:bounding_box_classifier_architecture}
 \end{figure}
 
-The model passes each of the bounding boxes through a linear layer to compress it to an embedding vector of 10 dimensions.
+The model passes each of the bounding boxes through a linear layer to transfer it into an embedding space of 10 dimensions.
 The same is done with the one-hot vector of the target attributes.
 In the next step, the dot product between each embedded image and the embedded attributes are calculated.
 A high correlation between the attributes and the object should result in a high dot product, while a low correlation results in a lower dot product.
-The model points then to an object, using the \emph{softmax} function over all concatenated dot products.
+The model then points to an object, using the \emph{softmax} function over all concatenated dot products.
 The loss is calculated using cross entropy.
 
 Furthermore, the model is compared to a baseline that doesn't include any information about the target object.
@@ -528,7 +529,7 @@ First, this shows that the model is able to extract attribute features from the 
 This worsens slightly, when more objects are introduced.
 More objects lead to more needed attributes to discriminate the objects from each other.
 The model is still able to extract and utilize these additional attributes and combine them with the given attribute encoding of the target object.
-The model can generate these high results, even though its architecture is very simple.
+The model can generate these high results, even with its relatively simple architecture.
 In this architecture, the model doesn't compare the objects directly to each other, but each object is only associated with the attribute encodings.
 A more complex architecture, in which the model is additionally tasked to discriminate the objects directly from each other might even improve the results.
 
@@ -536,12 +537,11 @@ A more complex architecture, in which the model is additionally tasked to discri
 \label{sec:caption_generator}
 \subsubsection*{Setup}
 
-As the bounding box classifier, the caption generator only acts as a learning step towards understanding, how the model can learn the attributes of objects.
-It is used the same way to create the captions for each image as in the section above with the GRE-algorithm.
-This method focuses even more on human knowledge and structure of language than the experiment above, since it is even the final task of the model.
+As the bounding box classifier, the caption generator acts as a learning step towards understanding, how the model can learn the attributes of objects.
+The same method using the GRE-algorithm from the section above is used to create the descriptions of the target object for each image.
+
 There are some minor additions concerning the padding of the caption.
 As before, the caption is padded to a number of three tokens, corresponding to the maximum of three attributes.
-
 However, there are three different ways how the padding is applied.
 First, the captions are, as usual in captioning tasks padded at the end with a specified padding token.
 A problem could arise when the caption is not viewed as a natural language sentence, but as slots filled with tokens.
@@ -559,8 +559,10 @@ Even though a sequence of just three tokens may not be long enough for this fact
 Instead of producing for instance \emph{<pad> green sphere} as correct in English, the model would now need to produce \emph{sphere green <pad>}.
 Notice that the padding token is again at the end of the generation, but the order of slots as well as the amount of information in the caption are still preserved.
 
+The task for the model is to generate these descriptions, based on the complete scene as input.
+Doing this, the task inherently involves learning human knowledge and natural language structure.
 Nonetheless, this helps to understand more detailed if and how the model discriminates objects.
-Does it rely on the same attributes, humans are using, or does it find other important differences, or is it able to solve the task at all?
+Does it rely on the same attributes humans are using, or does it find other important differences, or is it not able to solve the task at all?
 
 \begin{figure}[h]
     \centering
@@ -577,31 +579,31 @@ First, it is passed through a feature extractor with two following 2d convolutio
 After each convolutional layer the \emph{ReLU} function is applied.
 The result is pooled using max pooling and then reduced to 1024 dimension using a linear layer.
 The such encoded image serves as the initial hidden state of an LSTM, which generates the caption.
-During training the input sequence for the LSTM at each time step are embeddings of the tokens in the ground truth caption.
-No teacher forcing is applied.
+During training teacher forcing is applied by using embeddings of the ground truth tokens as the input sequence for the LSTM.
 The output of the LSTM is passed through a linear layer at each step to determine logits over the symbols of the vocabulary.
 The loss is calculated using cross entropy.
-When testing, the LSTM always generates three tokens, with a start-of-sequence token as first input to the LSTM.
+During testing, the LSTM is always forced to generate three tokens, with an embedded start-of-sequence token as first input to the LSTM.
 Each token in the sequence is determined, by selecting the highest logit in the output of each step in the LSTM.
 
-Since with this approach, the model doesn't have any information about the target object, I extend it with a masked image.
-As in the section above, a masked version of the image is created and passed to the model.
+Using this approach, the model doesn't have any information about the target object.
+Therefore, I extend it in a second step with a masked image.
+A masked version of the image is created ass in the section above and passed to the model.
 This is shown in Figure \ref{fig:caption_generator_architecture}.
 The model works exactly the same, except for the additional separate image encoder that encodes the masked image in the same way as the original image.
 Both encodings are concatenated and then used as the initial hidden state for the LSTM.
-This should point the model to which object to describe and discriminate from the other objects.
+This should point the model towards which object to describe and discriminate from the distractors.
 
 To test the success of the model, three measures are calculated.
 The first measure is the \textbf{accuracy} if the model predicted every word in the caption correctly.
-This gives a hint, how the model fares in general and also able to predict actually any of the attributes at all.
+This gives a hint, how the model fares in general and if it is able to predict any of the attributes.
 However, a 'false' prediction doesn't give much insight into why the model predicted a wrong caption.
 
 It could be the case that the model predicted the correct shape, but wrong color.
-Even worse, the model could have predicted more attributes than necessarily to uniquely identify the target object and didn't follow the rules of the GRE-algorithm.
+Even worse, the model could have predicted more attributes than necessary to uniquely identify the target object and didn't follow the rules of the GRE-algorithm.
 For instance, consider the scene in Figure \ref{fig:clevr-dale-5}.
 The correct caption is \emph{cylinder}.
 If the model would predict \emph{purple cylinder}, the accuracy determines it as false as captioning \emph{large purple cylinder} as well \emph{small green cube}.
-The first two descriptions identify the target object perfectly, but the model only didn't learn yet to leave unnecessary attributes out.
+The first two descriptions identify the target object perfectly, but the model only didn't learn to exclude unnecessary attributes.
 To mitigate this, I also include a \textbf{word-by-word accuracy}.
 This measure calculates the accuracy not on sentence level, but on word level.
 The first predicted caption of the model would yield a word-by-word accuracy of 66\% (including padding tokens), the second 33\%, while the third prediction would
@@ -620,13 +622,11 @@ Again, each of these datasets increases the complexity of the description.
 While the referring expression for the 'Dale-2' datasets are generally shorter, expressions of the 'Dale-5' datasets need to be more specific and use more attributes.
 Furthermore, the model needs to attend to many more locations in the image at the same time to find discriminating factors between those.
 
-\cmtDK{align 'description', 'caption' and 'referring expression' over the whole section}
-
 \subsubsection*{Results}
 In the next paragraphs, the results of the caption generator will be discussed.
-Table \ref{tab:results_caption-generator} shows the different scores of the models, when trained on 'Dale-2' and 'Dale-5'.
+Table \ref{tab:results_caption-generator} shows the different scores of the models when trained on 'Dale-2' and 'Dale-5'.
 ResNet-3 produced the best results, when it was used as a feature extractor.
-The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very in the following epochs.
+The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very little in the following epochs.
 
 \begin{table}[h]
     \centering
@@ -644,13 +644,13 @@ The results are shown after 50 epochs, but the scores already start to converge 
 \end{table}
 
 The sum of the \emph{accuracy} and the \emph{non-target-accuracy} adds to 97\%, when trained on the 'Dale-2' dataset.
-This means that the models produce almost always correct descriptions of an object in the image.
-Moreover, these descriptions are also efficient in the way that they follow the GRE-algorithm of \citet{Dale1995} and only use necessary discriminative attributes.
-Features of both objects are therefore extracted perfectly and related to the vocabulary.
+This means that the models produce almost always correct descriptions of one of the objects in the image.
+Moreover, these descriptions are also efficient in the sense that they follow the GRE-algorithm of \citet{Dale1995} and only use necessary discriminative attributes.
+Features of both objects are therefore extracted perfectly and associated with the vocabulary.
 As expected, the model has difficulties to decide, which of both objects is the target object, since no information is passed to the model.
 With 48\% of the images describing the target object and 49\% of the images describing the distractor, the model uses a random guess.
 This changes, when also the masked image is presented to the model.
-Then, the accuracy for the target object is with 72\% well above chance.
+Then, the accuracy for the target object rises with 72\% well above chance.
 Still, the wrong descriptions describe almost every time the distractor object.
 This indicates that the problem doesn't lie in extracting features of objects, but only in deciding which object in the image to describe.
 
@@ -664,12 +664,12 @@ The model is more likely to identify a wrong object.
 Furthermore, the word-by-word accuracy increases from 45\% to 54\%.
 This increase is likely due to the fact that the description of the target object often shares some attributes with distractor objects.
 For instance an image with a target object being a \emph{small red cube} was identified as a \emph{<pad> <pad> cube} when the model didn't receive the masked image.
-After also the masked image was passed to the model, it generated the description \emph{small blue cube}.
+When also the masked image is passed to the model, it generates the description \emph{small blue cube}.
 This was the correct description of a distractor and because of the overlap of the attributes, the word-by-word accuracy increased from 33\% to 66\%.
 
 The approach, how the padding is produced and in which order the attributes are concatenated didn't have an effect on the described metrics.
-When the order was reversed and the padding appended, it seemed like the model was converging slightly faster and reaching the limit around tow to three epochs earlier.
-The final peak stayed exactly the same and the effect was therefore not studied deeper if there is an actual significant difference.
+When the order was reversed and the padding appended, the model was converging slightly faster and reached the limit around two to three epochs earlier.
+The final peak stayed exactly the same and the effects were therefore not studied deeper.
 
 There are two main possible explanations for the big difference between the two datasets.
 First, as already seen in the experiments before, the bigger number of distractors confuses the model more, where to focus on.
@@ -679,7 +679,7 @@ When only two random objects are placed in a scene, the probability that only th
 For shape and color, the probability lies at 29,2\% and that all three attributes are necessary is 4,1\%.
 Opposed to that the probabilities with four distractors are 19,8\%, 47\% and 33,2\% respectively.
 With four distractors the algorithm is much more likely to produce longer captions.
-These are harder to generate for the model, since it needs to take more attributes into account to discriminate the target object from the distractors.
+These are harder to learn and generate for the model since it needs to take more extracted attributes into account to discriminate the target object from the distractors.
 
 \subsection{Language games}
 \label{sec:language-games}
@@ -689,17 +689,19 @@ The experiments that are executed using language games have a similar structure 
 The language games in this research have an asymmetric setup.
 One agent, the sender is shown some information and needs to generate a message.
 This message is received by the second agent, the receiver.
-The receiver needs to parse this message and combine it with the information they are given as well.
+The receiver needs to parse this message and combine it with the same information that the sender was presented with.
 The receiver then makes a prediction, which is compared to the ground truth.
 The game is set up prosocial, which means that both agents receive the same loss based on the receiver's prediction.
 All weights of the agents are adapted in the same way.
-\cmtDK{vocabulary?}
 
-\cmtDK{always ResNet-3}
+The vocabulary that the sender can draw from to produce a message is made up of initially arbitrary symbols.
+The meaning of these symbols is created as soon as the sender uses them in one of the message, and the receiver is able to use it to solve the task successfully.
+Over time, specific meanings are reinforced and a language emerges.
+The number of possible words, namely the size of the vocabulary can be varied.
 
 First, I will discuss \emph{discrimination games}, because they have the simplest setup.
 Furthermore, other language games that research this topic use a very similar setup.
-In the next step, I will look into \emph{caption generators} that are set up as a language game.
+In the next step, I will describe \emph{caption generators} that are set up as a language game.
 Here, the sender describes the scene, while the receiver needs to generate a caption.
 In the last step, I try to lose as much human bias as possible and the models are trained on just 'pointing' towards the target object, by again predicting its center coordinates.
 
