@@ -158,6 +158,7 @@ In the last level, the models are trained to generate referring expressions, mor
 These combined experiments should lay the basis for how to build up the agents in the language games.
 
 \subsubsection{Coordinate predictor}
+\label{sec:coordinate_predictor}
 \subsubsection*{Setup}
 
 This level should help to analyze, how the final task of the language game should look like, in especially what the receiver is tasked to predict.
@@ -532,6 +533,7 @@ In this architecture, the model doesn't compare the objects directly to each oth
 A more complex architecture, in which the model is additionally tasked to discriminate the objects directly from each other might even improve the results.
 
 \subsubsection{Caption generator}
+\label{sec:caption_generator}
 \subsubsection*{Setup}
 
 As the bounding box classifier, the caption generator only acts as a learning step towards understanding, how the model can learn the attributes of objects.
@@ -820,25 +822,25 @@ Therefore, the models need to learn more combinations of symbols in order to att
 \cmtDK{similarity to bounding box classifier}
 
 \subsubsection*{Analysis of the emerged languages}
-In the above experiments, only three configurations lead to success, where a language emerged that the agents used to exchange information: languages with vocabulary sizes of 10, 13 and 100.
+In the above experiments, only three configurations lead to success, where a language emerged that the agents used to exchange information: languages with vocabulary sizes of $|V| = 10$, $|V| = 13$ and $|V| = 100$.
+They will be referred to as $Lang_{10}$, $Lang_{13}$ and $Lang_{100}$ respectively.
 In this section, these three emerged languages is analyzed in more detail.
 This is done in two parts.
 The first part is a qualitative analysis, to understand, which symbols are used to transfer which information.
 In the second part, the emerged languages are compared to English.
 More specifically, it is tested if the messages of the sender align with English referring expressions of the target object.
 
-
 \begin{figure}[h]
     \centering
-    \subfigure[$|V| = 10$]{
+    \subfigure[$Lang_{10}$]{
         \includegraphics[width=0.31\linewidth]{figures/relative_frequencies_v10.png}
         \label{fig:relative_frequencies_v10}
     }
-    \subfigure[$|V| = 13$]{
+    \subfigure[$Lang_{13}$]{
         \includegraphics[width=0.31\linewidth]{figures/relative_frequencies_v13.png}
         \label{fig:relative_frequencies_v13}
     }
-    \subfigure[$|V| = 100$, (13 most frequent messages)]{
+    \subfigure[$Lang_{100}$, (13 most frequent messages)]{
         \includegraphics[width=0.31\linewidth]{figures/relative_frequencies_v100.png}
         \label{fig:relative_frequencies_v100}
     }
@@ -846,13 +848,83 @@ More specifically, it is tested if the messages of the sender align with English
     \label{fig:relative_frequencies_vocabularies}
 \end{figure}
 
-When looking at the emerged vocabulary, a few properties can be seen.
-First, when a message is transferred, it consists of only one symbol.
-In some rare cases, an empty message is communicated.
-The models therefore don't learn to combine symbols to create new meaning, but rather encode everything in separate symbols.
-First, in all three emerged languages, very few symbols are used
+When looking at the emerged vocabulary \textbf{qualitatively}, a few properties can be seen.
+Figure \ref{fig:relative_frequencies_vocabularies} shows an overview of the frequencies of messages in all three emerged languages for the training and the test split.
+Since the tokens themselves are arbitrary, they are ordered by the relative frequency in the messages for the test set and indices for the tokens are added from index 1 for the most frequent token and index $|V|$ for the least frequent token.
+By this the languages are easier comparable across different runs and vocabulary sizes.
+Figure \ref{fig:relative_frequencies_v100} shows only the 13 most frequent message to provide a better overview.
+The lesser frequent messages are never used for the test data and each only used one or two times in the train data.
 
-To compare the emerged language to English in a quantitative way, a probing approach is used.
+The first property is that when a message is transferred, it consists of only one symbol.
+In some rare cases, also an empty message is communicated.
+The models therefore don't learn any compositionality by combining symbols to create new meaning, but rather encode everything in separate symbols.
+Secondly, in all three languages, only very few symbols occur with a high frequency, while most of the symbols are used very rarely.
+More specifically, two symbols are used in 95\% of the images with $Lang_{10}$ and $Lang_{13}$, while three symbols are used with $Lang_{100}$.
+Thirdly, the agents make use of fewer symbols, when presented with unseen test images compared to when communicating about images in the training split.
+This is especially visible for $Lang_{100}$.
+Symbols that are used for 16,5\% of the training sample are not used at all in test split.
+Furthermore, the frequencies in the test split is much more focused on the two most frequent symbols, while it is more distributed around 5 symbols in the train split.
+
+These findings indicate that referring expressions do emerge in each of the newly emerged languages since the agents are able to communicate the correct object.
+However, the agents converge towards very few different referring expressions that are made up differently than in English and likely don't rely on the high level attributes \emph{shape}, \emph{color} and \emph{size}.
+The similar frequencies across all three languages suggest that a greater vocabulary size $|V|$ doesn't necessarily lead to different referring expressions, but the languages still converge towards two main expressions.
+
+\begin{figure}[h]
+    \centering
+    \subfigure[$Lang_{10}$]{
+        \includegraphics[width=0.31\linewidth]{figures/language_analysis_v10.png}
+        \label{fig:language_analysis_v10}
+    }
+    \subfigure[$Lang_{13}$]{
+        \includegraphics[width=0.31\linewidth]{figures/language_analysis_v13.png}
+        \label{fig:language_analysis_v13}
+    }
+    \subfigure[$Lang_{100}$]{
+        \includegraphics[width=0.31\linewidth]{figures/language_analysis_v100.png}
+        \label{fig:language_analysis_v100}
+    }
+    \caption{Relative share of the described target object's attributes for the top three messages}
+
+    \textbf{Shape:} brown: sphere, blue: cube, red: cylinder \\
+    \textbf{Size:} brown: small, blue: large
+    \label{fig:language_analysis_vocabularies}
+\end{figure}
+
+Figure \ref{fig:language_analysis_vocabularies} shows the attributes of the target object that are described by each message.
+Hereby, the relative share each value of all three attributes are displayed.
+For instance the first bar in Figure \ref{fig:language_analysis_v10} shows that 16\% of the target objects that are described with symbol (1) in the language $Lang_{10}$ are spheres.
+In the figures, only the three most frequently used messages are included, which make up over 95\% of all messages.
+
+The first thing that can be seen is that different symbols convey different values of attributes.
+In the language $Lang_{10}$, symbol (1) is mostly used for target objects that are cubes, while symbol (2) is mostly used for spheres.
+There is not much difference for target objects that are cylinders.
+The distribution for colors is almost constant across symbols (1) and (2).
+Symbol (3) is more frequently used for blue, green and gray objects, while being less used for red, cyan and yellow objects.
+This different distribution may also be caused by the much lower absolute usage of symbol (3).
+The different sizes are encoded by all symbols in the same way.
+
+Looking at $Lang_{13}$ the symbol usage differs.
+The frequencies for the shape look similar, but (the much less used) symbol (3) encodes most of the time spheres instead of cubes.
+Again, the colors look similar with small deviations for brown, green and yellow objects.
+Most striking however, is the difference for the size.
+Symbol (1) is used in 77\% of the cases for large objects, while symbol (2) and (3) are used in 90\% and 71\% of the messages for small objects.
+
+Language $Lang_{100}$ uses symbols its symbols to discriminate cubes and cylinders, while the frequencies for sphere remain constant across all symbols.
+The usage for the color is similar to $Lang_{13}$.
+Looking at the size, as for $Lang_{13}$, symbol (1) is mostly used to encode small objects, while symbols (2) and (3) are mostly used to encode large objects.
+
+An interesting observation is that symbols are not used for the same attributes across the languages.
+In some languages, an attribute is not captured at all by the symbols, while another language heavily relies on it.
+The same applies to the values of attributes, especially to the shapes.
+Only two of the shapes are distinguished by the usage of symbols, while the third is not captured.
+Which shape are encoded, differs from language to language.
+
+Furthermore, these numbers confirm even more that the agents don't rely solely on the human defined attributes.
+For instance $Lang_{10}$ only encodes the shape in its symbols.
+This would not be enough to distinguish the target object from the distractor consistently.
+Following, the agents also encode some additional underlying attributes and patterns to the three above defined attributes.
+
+To compare the emerged language to English in a \textbf{quantitative} way, a probing approach is used.
 Probing can be used to analyze and interpret the hidden representations in neural networks.
 Hereby, a second neural model is trained to predict selected linguistic properties on the basis of the hidden representations.
 If this model is successfully able to predict the linguistic properties, the hidden representations are connected to them.
@@ -1001,15 +1073,15 @@ As soon as they are increased to 100 dimensions with a vocabulary size of 100 sy
 
 Looking at the 'Dale-5' dataset, the increase is still there, when the vocabulary is increased to 100 symbols.
 Nonetheless, the difference is with 0,5\% points even smaller and the reason may be due to other influences, such as the random initialization of the weights of the agents.
-This would need to be confirmed in future experiments.
+This is confirmed, when looking at emerged languages.
+In all the setups, the same message is communicated for all samples, independently of the input image.
+This is also reflected in the length of the messages.
+For the setup with a vocabulary size of $|V| = 13$, no message is transferred, and the accuracy stays the same as in the other setups.
 
-An interesting observation can be made about the length of the messages, the sender generates.
-In almost all cases, the average length is 2 symbols.
-Only in one configuration, the sender produces single symbol messages.
-This happens, when the vocabulary size is 13, the same number as possible features the objects can have.
-In this case, the accuracy, as well as the word-by-word accuracy stay the same compared to the configuration with a vocabulary of only 10 symbols.
-
-\cmtDK{look at language more detailed}
+These results show that the agents are not at all able to encode meaning about the images and target objects in their messages.
+This is especially interesting, compared to single model caption generator in section \ref{sec:caption_generator}.
+In these experiments, the model was able to converge towards correct captions and therefore able to extract the necessary information.
+This shows that a main challenge for the agents lies in grounding symbols in these extracted features.
 
 \subsubsection{Coordinate predictor games}
 \subsubsection*{Setup}
@@ -1071,17 +1143,14 @@ In the final setup, the agents are tasked with communicating objects with fewer 
 Table \ref{tab:results_dale_predictor_game} shows the results for the setup, in which the sender is pointed towards the target object with a human description based on the GRE algorithm.
 Hereby, the 'CLEVR single' dataset acts as a baseline, to test if the agents are able to predict coordinates of objects at all.
 In every configuration of the variables, the agents achieve a very high performance.
-The worst average distance across the test dataset is 10 pixels, which still points on an object.
-Also the accuracy, which evaluates how many guesses of the receiver were pointing on an object reflects this fact.
+The worst average distance across the test dataset is 10 pixels, which still points onto an object.
+Also the accuracy, which evaluates how many guesses of the receiver were pointing onto an object reflects this fact.
 All configuration achieve an accuracy higher than 96,7\%.
 This aligns also with the results from the single neural models, where the average distance was similarly low.
 In general, this shows that the agents are able to predict coordinates together.
 However, the question arises if the message by the sender has actually an effect on the receivers' decision, or if the receiver learns to point towards the target coordinates on his own and the message is ignored.
-When a different sender is used that is receiving the masked image as input, the results indicate that the message has in fact an influence and the receiver learns how to interpret the message.
-The results for this setup are summarized in \ref{tab:results_masked_predictor_game}.
-In three of six experiments, the agents predict much higher average distances.
-In one case, the mean distance lies at 19,8 pixels, while the accuracy is only at 55,1\%.
-Since the receiver is the same in both setups, this observation indicates that a meaningful message is communicated between the agents.
+Having a look at the transferred messages, it in fact shows that the receiver learns to point towards the target object on its own.
+As in the experiment before, all communicated messages contain the same symbol independent of the input image.
 
 \begin{table}[h]
     \centering
@@ -1100,21 +1169,15 @@ Since the receiver is the same in both setups, this observation indicates that a
     \label{tab:results_dale_predictor_game}
 \end{table}
 
-When the experiments are run, using the 'Dale-2' dataset, the results are much worse.
+When the experiments are run on the 'Dale-2' dataset, the results are much worse.
 For the \emph{description coordinate predictor}, the average distance ranges from 36,5 pixels to 40,4 pixels.
 The configuration with a vocabulary size of only 10 symbols fares the best, while a vocabulary of 100 symbols produces the worst results.
 Still, the accuracy shows that around 19,9\% to 21,7\% of the guesses are on the target object.
-Here, the configurations with higher vocabulary sizes fare better, even though the differences are very small and may be due to other factors.
-Interestingly, when comparing the two configurations with a vocabulary size of 100 symbols one can see that the average distance is similar, but the accuracy is significantly higher when the hidden sizes are lower.
-In other words, with lower hidden sizes the agents can make more correct guesses.
-Overall, it can be seen that a higher vocabulary size lets the agents' guesses get in general closer to the target object, but they are less precise on the object itself.
+Here, the configurations with higher vocabulary sizes fare slightly better, but the differences are very small and likely due to other factors.
 
 The results for 'Dale-5' dataset are even worse, but are comparable with the results with a single neural model.
 Apparently, the agents are not able to communicate the target object, and the predictions by the receiver are general in the middle of the image, which results in an average distance of around 45 to 50 pixels.
 The differences of the mean distances are not very significant in this range, to allow an analysis of the different configurations.
-The only metric that stands out is the accuracy of the configuration with a vocabulary size of 10 symbols.
-With 14,4\%, it is 2,6\% points higher than the next best accuracy.
-It is able to predict the center coordinates of the target object the most precise.
 
 \begin{table}[h]
     \centering
@@ -1122,7 +1185,7 @@ It is able to predict the center coordinates of the target object the most preci
         \toprule
               &         &          &         & \multicolumn{3}{c}{\textbf{CLEVR single}} & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}}                                                                                                       \\\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
         $|V|$ & $h_{s}$ & $h_{r}$  & $e_{s}$ & \textbf{Dist.}                            & \textbf{Acc.}                       & \textbf{length}                     & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} & \textbf{Dist.} & \textbf{Acc.} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}     & {1024}  & {19,8}                                    & {55,1\%}                            & {1}                                 & {34,8}         & {24,3\%}      & {0}             & {44,3}         & {11,8\%}      & {1}             \\
+        {10}  & {10}    & {10}     & {1024}  & {10,8}                                    & {93,1\%}                            & {1}                                 & {34,8}         & {24,3\%}      & {0}             & {44,3}         & {11,8\%}      & {1}             \\
         {10}  & {10}    & {10}     & {512}   & {9,3}                                     & {92\%}                              & {1}                                 & {36,3}         & {19,9\%}      & {0
         ,7}   & {45,9}  & {12,7\%} & {1}                                                                                                                                                                                                                                   \\
         {13}  & {10}    & {10}     & {1024}  & {7,8}                                     & {96,8\%}                            & {1}                                 & {36,3}         & {20,2\%}      & {0}             & {45,4}         & {11,4\%}      & {1}             \\
@@ -1135,4 +1198,11 @@ It is able to predict the center coordinates of the target object the most preci
     \label{tab:results_masked_predictor_game}
 \end{table}
 
-Finally looking at the
+Finally looking at the setup, when using the masked image as an input shows that the results are similarly bad as when using the encoded captions.
+This is easily explainable with the emerged language.
+For both the experiments using the encoded captions and the experiments using masked images as input, no meaningful symbols are transferred.
+Following, the receiver needs to solve the task alone and the different setups of the sender don't play any role in the overall success.
+
+When comparing these results to the neural models in Section \ref{sec:coordinate_predictor} that are not part of a language game, it can be seen that the metrics are very similar for all datasets.
+The model was already not able to solve the task without the increased complexity of a language game.
+This therefore indicates that the challenge for the agents doesn't lie in grounding the extracted features in new symbols, but already in extracting the features in the first place.

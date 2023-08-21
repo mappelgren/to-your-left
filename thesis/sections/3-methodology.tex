@@ -122,10 +122,15 @@ Basically, this approach works as an indicator to determine the actual success o
 The goal of this thesis is to run and compare different setups of language games systematically.
 To do this, all experiments rely on the \emph{\textbf{E}mergence of lan\textbf{G}uage in \textbf{G}ames} (EGG) framework \citep{Kharitonov2019} which is implemented in PyTorch.
 This framework consists of a heavily configurable core that controls the generating and parsing of the message, the calculation of the loss and the rules, for how the weights of all neural models are trained.
-The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, a choice between Gumbel-Softmax relaxation and REINFORCE algorithms to learn neural models containing discrete symbols or an easy switch between different loss functions.
+The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, an easy switch between different loss functions or a choice between Gumbel-Softmax relaxation and REINFORCE algorithms to learn neural models containing discrete symbols.
 Furthermore, runs of games can be saved to analyze the used messages of the agents and how they vary over the duration of the learning.
 
-The framework is hereby setup in three levels.
+The traditional approach to solve these problems relies on the REINFORCE algorithm \citep{Williams1992}. It uses the concept of Monte Carlo sampling to estimate the gradient of the expected cumulative reward with respect to the policy parameters. The basic idea is to collect trajectories by following the policy, compute the cumulative rewards for each trajectory, and then update the policy parameters to increase the probabilities of actions that led to higher rewards. REINFORCE is easy to implement and understand, but it suffers from high variance in gradient estimation due to the inherent randomness in the environment and the policy.
+
+Gumbel-Softmax is a relaxation of the discrete categorical distribution to a continuous distribution that can be differentiated \citep{Jang2016}. It allows for the application of gradient-based optimization methods to discrete optimization problems. In the Gumbel-Softmax approach, randomness is introduced using the Gumbel distribution (a continuous distribution) and then the \emph{softmax} operation creates a distribution over discrete actions that can be differentiated.
+Gumbel-Softmax offers stable gradient estimates and can be more efficient than the traditional REINFORCE algorithm, especially when dealing with large action spaces.
+
+The EGG framework is set up in three levels.
 Part of the lowest level are the \emph{agents} themselves.
 The agents are neural models that need to be implemented from scratch and define how the agents process their input and in case of the receiver combine it with the message as well as what is their output.
 The second level are \emph{wrappers} that take care of generating and parsing the message.
