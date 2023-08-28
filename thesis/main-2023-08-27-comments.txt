@@ -202,3 +202,83 @@ Table with these results?
 
 More explanatory caption
 
+But this image does not show clearly whether the circles for the same object match. You could calculate the average error in distance between the ground truth and predicted coordinates.
+
+They are closer to the target than distractor and you can see that it is working to a point. But remember this task is very challenging and I wouldn't say the results are so negative.
+
+There is a bias towards the centre but I would not say that the model has not learned anything. I'm surprised that it works so well given the feature representation we have, i.e. no geometric features.
+
+The centre bias could be the way the error function is used, that is averages all distances and of course this has a tendency to some middle distance. A solution would be to have better geometric features that could take these errors better into account.
+
+centre - using British English?
+
+There is a centre bias and the model can partially locate the target. The task is hard. The features are not optimal for this task. Future would should focus on using geometric features - we should have tried these and I'm sure we would get better results. Another extension would be making pointing less precise, i.e. focus on a single point, i.e. using a circle of 20 pixels or a 7x7 grid as in the attention mechanism. This would simplify the task.
+
+I Haven't checked the earlier captions, but the captions should be informative in the sense that one does not need to look for the text to understand them. Hence, include a brief summary of what each figure contains.
+
+Just say that this is a task of identifying objects (the previous was about locating them). This task does not rely on geometric information but it relies on identifying correct object features, hence explore different features and hence it is useful as abenchmarking task.
+
+I haven't commented on this before, but let us be very careful in naming all meta-paramaters of the models in the text or in caption: how many layers, how many dimensions, etc. The reader should be able to replicate the code and the experiment from this. You can do this in the caption which is a longer explanation or in the text itself.
+
+This is quite low? Why only 10?
+
+So, the output of this model is a vector of 0 and 1s, with the 1 identifying the corrct object (or the other way around?).
+
+I don't understand this? Have you actually implemented such model? But how can you train a random classifier? The baseline would normally be 1/5 or 1/5, i.e. the number of labels if the number of examples is equal, other a weighted proportion of these. By definition of "random" you would expect such classifier to achieve these probabilities.
+
+Why not?
+
+The model is able to leatn to discriminate objects based on visual appearance.
+
+Well, this experiment is a natural language generation task: whether the model is able to generate referring expressions.
+
+Slots have the same semantic value, i.e. the last slot is the object type. We can do this because we know the structure of the descriptions in this dataset and because we hope this will help the learning. Also, we are thinking of generation based on slots.
+
+We... I sounds more like you are writing a lab report with casual language but here you want to be more formal.
+
+In this case it should be using the same attributes as humans as we are training it on human labels.
+
+Dimensions?
+
+cross-entropy
+
+Why is this teacher forcing?
+
+There is a greedy decoding algorithm.
+
+You add attention to the target object.
+
+This is normally implemented as a filter of 1 and 0 corresponding to pixels. As such it then corresponds to attention, cf. paper with Mehdi.
+
+This is too strict. if this is a generation task then we can use generation metrics. Those compare if the generated string as a whole is kind of similar to the target string, see ROUGE, METEOR, BERTscore.If this is a classification task, and it is, given that we know what type of word we expect in each slot, we could calculate accuracy per class, precision, recall, F-score. We could also calculate mean ranks for predicting words per classes, or acucracy at k- if the target word is in the k-top predictions.We could also take it a multi-class classification problem and how to calculate accuracy in this case, would need to check.
+
+Too far away, might be worth repeating here, you say still stay Fiigure 2d, repeated asFigure 6 here
+
+Is this figure for a particular class, i.e. object type, or do you then do something to individual accuracy, i.e. average them?
+
+Very good If I understand this right this would be a case where the generated description describes another object better than the target and a human would identify that. So it is like false negatives in describing. Perhaps use another term for this: referring to a distractor? (since you are not measuring hwo individually the description fitts a distractor but only if the entire description could perfectly fit a distractor)
+
+are
+
+Not shown in Table 5
+
+Not sure. Note that <pad> is a token. The model has to learn when to say <pad> just as any word, hence knowing when not to dewscribe is also trickly.
+
+I think we need individual accuracies per class and also precision, recall and the f-score. If we include the joint accuracy figure when you also need to explain how you avergaed the infividual accuracies.
+
+Masking does not work but perhaps this is because you applied convolutional pre-trained filters rather than 0-1. It is harder to detect meaningful patterns since the targets will be smaller and more integrated with other objects.
+
+But this is no-surprise since we have fixed the slots.
+
+Why 66? We have 3 attributes, right, so 33%?
+
+?
+
+I would present these for individual classes.
+
+Not in the table?
+
+Earlier you say that you will only try one method but now you have tried both. Change earlier text; also do you have full performance figures for this setup to include?
+
+But before you argued, rather pesimistically, that having distractors with the same attributes actaully contributes to greater performance as it is moire likely that the correct word is generated. I would only pose this as a very vague hypothesis to be tested, as you conclude now it is also the case that images with simialr distractors are more difficult to describe correctly. Hence, it is by no way given.
+
