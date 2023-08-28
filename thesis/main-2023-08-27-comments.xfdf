@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve"
+><annots
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827110433Z00'00" flags="print" date="D:20230827110433Z00'00" name="32028f10-e8ee-6b40-b72e-93f5187a33ec" page="4" coords="70.866000,737.749735,211.037026,737.749735,70.866000,725.204270,211.037026,725.204270" rect="67.516960,724.812224,214.386066,738.141781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827110445Z00'00" flags="print" date="D:20230827110445Z00'00" name="a22b77c8-a49e-0c40-bcff-371a8f1c1058" page="4" coords="354.284418,697.101735,524.411833,697.101735,354.284418,684.556270,524.411833,684.556270,70.866000,683.552735,147.513337,683.552735,70.866000,671.007270,147.513337,671.007270" rect="67.516960,670.615224,527.760873,697.493781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827110506Z00'00" flags="print" date="D:20230827110506Z00'00" name="a9123f65-9ba0-334e-9f83-72accd190c8a" page="4" coords="113.476945,534.511735,485.477255,534.511735,113.476945,521.966270,485.477255,521.966270" rect="110.127904,521.574224,488.826295,534.903781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827110541Z00'00" flags="print" date="D:20230827110541Z00'00" name="3bfc7cbe-ccaf-a041-81c3-a6c3f821abbd" page="4" coords="162.393349,399.019735,497.379083,399.019735,162.393349,386.474270,497.379083,386.474270" rect="159.044309,386.082224,500.728123,399.411781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827111719Z00'00" flags="print,nozoom,norotate" date="D:20230827111907Z00'00" name="df438513-ab75-344b-ad96-32bb261651ce" icon="Comment" page="4" rect="34,344,52,362" title="Simon Dobnik"
+><contents
+>I would turn the order of this around, it would make the motivation clearer. The introduction should also be much longer with linguistic examples and citations of related work (but I see that you want to keep it for later.)
+
+Our goal is to study referring, how we refer to entities and have we interpret the entities referred to. 
+
+There is a lot of ambiguity involved as language only maps to the world in an under specified way.  The first problem is that a word may map to several pixels. There is a loss of information/abstraction. The second problem is that referring expressions are under-specified, chair can be any of the 5 chairs. This is to compress information in communication, we say less than we mean. Illustrate both points with examples.
+
+Instead, humans rely on communicative protocols to disambiguate referring expressions. The Dale and Reiter algorithm and the literature on GRE. Communicative protocols are established through language games, some parts seen to be universal, some parts are negotiated on the fly.
+
+Artificial language games - describe in more detail what they are and how they are implemented - allow us to study language with8n this communicative setting. 
+
+In this thesis we look at referring within the context of communicative games to explore both theoretical and practical (computational) limits of grounded referring expressions in interactive setting.
+
+The novelty of this thesis is that we study referring to entities through language games involving sequences of descriptions.</contents
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,242,792,362"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827112559Z00'00" flags="print,nozoom,norotate" date="D:20230827112628Z00'00" name="bf0ea5ec-6944-d741-aff8-5cfe59114fb0" icon="Comment" page="4" rect="225.370679,194.016628,243.370679,212.016628" title="Simon Dobnik"
+><contents
+>What are the limits of the agent architecture and and input representation on learning successful grounding referring expressions through language games?</contents
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,78,792,198"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827112736Z00'00" flags="print,nozoom,norotate" date="D:20230827112736Z00'00" name="083b887e-4844-464a-8b6e-cf51e0bde4b8" icon="Comment" page="4" rect="163,149,181,167" title="Simon Dobnik"
+><contents
+>To what degree does the emergent referring expressions align with referring expressions in a natural language such as English what constraints can be imposed on the environment and the agents themselves that languages align?</contents
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,47,792,167"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827112754Z00'00" flags="print" date="D:20230827112754Z00'00" name="7cbf46b6-b670-8143-98b4-79cff7b0ef3b" page="4" coords="173.226085,93.688735,254.313426,93.688735,173.226085,81.143270,254.313426,81.143270" rect="169.877045,80.751224,257.662466,94.080781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827112800Z00'00" flags="print" date="D:20230827112800Z00'00" name="100dbb79-5396-6344-bf43-f419b564a834" page="4" coords="388.015355,93.688735,524.411833,93.688735,388.015355,81.143270,524.411833,81.143270,70.866000,80.138735,102.011481,80.138735,70.866000,67.593270,102.011481,67.593270" rect="67.516960,67.201224,527.760873,94.080781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827114113Z00'00" flags="print,nozoom,norotate" date="D:20230827122304Z00'00" name="31eca9a8-dbd1-9f42-b019-9a4b5a575a24" icon="Comment" page="4" rect="522,332,540,350" title="Simon Dobnik"
+><contents
+>Here we need to cite: (1) literature on grounding, connecting language and vision, Harnad, Roy, us, etc. (2) referring expression generation, Dale and Reiter, (4) reference and co- reference (Poesio, us), (5) language games (Wittgenstein) and referring as a collaborative process (Clark, David Lewis), (6) language games (work by Kazakov and Kirby), within robotics (Steels), language games within neural models (Baroni).
+
+Mathias’ work is also relevant https://era.ed.ac.uk/handle/1842/38727</contents
+><popup flags="print,nozoom,norotate" open="no" page="4" rect="612,230,792,350"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827112833Z00'00" flags="print" date="D:20230827112833Z00'00" name="4f62c807-77da-9542-bd95-f4bc5e9f0e79" page="5" coords="439.026307,715.140735,506.051817,715.140735,439.026307,702.595270,506.051817,702.595270" rect="435.677267,702.203224,509.400857,715.532781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827112916Z00'00" flags="print,nozoom,norotate" date="D:20230827112916Z00'00" name="c78df240-f13c-b94e-b060-61205bf97953" icon="Comment" page="5" rect="351,685,369,703" title="Simon Dobnik"
+><contents
+>We also know the ground truth about the scenes as we know the function that generated them.</contents
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,583,792,703"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827113026Z00'00" flags="print,nozoom,norotate" date="D:20230827113026Z00'00" name="f79dabb2-101e-9147-b10f-82647245a951" icon="Comment" page="5" rect="243,606,261,624" title="Simon Dobnik"
+><contents
+>We can control the properties of these datasets and we can introduce as much bias and ambiguity as we see firm in each experiment to compare with the natural datasets.</contents
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,504,792,624"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827113110Z00'00" flags="print,nozoom,norotate" date="D:20230827113123Z00'00" name="5cab2199-4e06-7249-8331-c8de734e1f14" icon="Comment" page="5" rect="144,570,162,588" title="Simon Dobnik"
+><contents
+>Which is how this is done in practice, cf. referring as a collaborative process, the paper by Clark.</contents
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,468,792,588"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827114136Z00'00" flags="print,nozoom,norotate" date="D:20230827114136Z00'00" name="e495ad62-ccc5-4d4c-a74c-b8220b20b645" icon="Comment" page="5" rect="110,410,128,428" title="Simon Dobnik"
+><contents
+>What are those?</contents
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,308,792,428"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827114210Z00'00" flags="print,nozoom,norotate" date="D:20230827114210Z00'00" name="c4f819ab-8822-8941-a6e6-7914590e4488" icon="Comment" page="5" rect="342,415,360,433" title="Simon Dobnik"
+><contents
+>What kind of complexity?</contents
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,313,792,433"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827114247Z00'00" flags="print,nozoom,norotate" date="D:20230827114247Z00'00" name="fa379c86-3535-8546-b162-4fbdcc98d79c" icon="Comment" page="5" rect="389,364,407,382" title="Simon Dobnik"
+><contents
+>Leave for the last chapter, limitations and future work.</contents
+><popup flags="print,nozoom,norotate" open="no" page="5" rect="612,262,792,382"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827114338Z00'00" flags="print" date="D:20230827114338Z00'00" name="6e0b07f5-1bd3-d54d-8714-cdf0a29d038d" page="6" coords="302.357102,626.473735,478.539067,626.473735,302.357102,613.928270,478.539067,613.928270" rect="299.008062,613.536224,481.888107,626.865781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="6" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827114430Z00'00" flags="print,nozoom,norotate" date="D:20230827114705Z00'00" name="0a4f25d2-1dcd-0148-8136-f6bcfd05afe1" icon="Comment" page="6" rect="471,619,489,637" title="Simon Dobnik"
+><contents
+>Not just real world, also to background knowledge and what the person wants to do. 
+
+Grounding is more related to interpretability of expressions rather than intent. Without grounding they cannot be interpreted. The intent shapes WHAT referring expressions are generated in what contexts of the real world.   Hence, intent is a meta thing connecting world, language, knowledge and agent’s experience.</contents
+><popup flags="print,nozoom,norotate" open="no" page="6" rect="612,517,792,637"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827115025Z00'00" flags="print,nozoom,norotate" date="D:20230827115108Z00'00" name="a6ba5ce2-6d9c-1243-8b9d-224b65d841fe" icon="Comment" page="6" rect="447,468,465,486" title="Simon Dobnik"
+><contents
+>They learn how to interpret expressions against some representation. Hence, a reference is a relation between a description and some entity, it’s interpretation. Without this connection referring expressions are useless as we do not know how to interpret this. Textual models might be good for general knowledge such as factual information from news and Wikipedia but as soon as we have NLP applications that interact with other domains, e.g. a ticket booking system or a situated robot involved in patient care, we need to connect language to some other representations to make language interpretable.</contents
+><popup flags="print,nozoom,norotate" open="no" page="6" rect="612,366,792,486"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827115541Z00'00" flags="print,nozoom,norotate" date="D:20230827115620Z00'00" name="1dbc955d-96d1-4e47-babe-18a652d2a993" icon="Comment" page="6" rect="48,262,66,280" title="Simon Dobnik"
+><contents
+>Give an example of a language games. Symbols are invented at random. However, the constraints of interaction control how new symbols are introduced and when existing symbols are re-used and used. Agents cannot invent unlimited number of symbols to refer to every event the6 encounter as they have limited memory and therefore they are driven by abstraction. On the other hand, the symbols must be flexible enough. The other agent must be able to resolve the symbols they hear based on the context. Hence, a successful interaction is when a describer is producing such symbols that interpreter can easily interpret within the context, here an image. This is also how a reward function is defined and loss is propagated.</contents
+><popup flags="print,nozoom,norotate" open="no" page="6" rect="612,160,792,280"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827115836Z00'00" flags="print,nozoom,norotate" date="D:20230827115836Z00'00" name="2c4500b7-915c-c54a-a388-e797c9e788b8" icon="Comment" page="6" rect="456,120,474,138" title="Simon Dobnik"
+><contents
+>Rephrase, language games provide interactive constraints within which language can emerge. But what are these? In this thesis we will study some, such as agent’s memory and layer representation and the feature representation, the structure of the world and its ambiguity.</contents
+><popup flags="print,nozoom,norotate" open="no" page="6" rect="612,18,792,138"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121044Z00'00" flags="print,nozoom,norotate" date="D:20230827121044Z00'00" name="96573e85-2046-9f42-be46-90352eaabaea" icon="Comment" page="7" rect="341,664,359,682" title="Simon Dobnik"
+><contents
+>Because referring expressions are ambiguous participants rely on language games to resolve the reference in context.
+
+Give an example of a game?</contents
+><popup flags="print,nozoom,norotate" open="no" page="7" rect="612,562,792,682"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121137Z00'00" flags="print,nozoom,norotate" date="D:20230827121221Z00'00" name="a6f4b54a-c463-6d4d-8cf1-5d7b9ecae5ec" icon="Comment" page="7" rect="171,489,189,507" title="Simon Dobnik"
+><contents
+>Examples of architectures from Baroni. The EGG framework.</contents
+><popup flags="print,nozoom,norotate" open="no" page="7" rect="612,387,792,507"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827121331Z00'00" flags="print" date="D:20230827121331Z00'00" name="62f32c98-e4c1-6548-a0b4-51e13f3d028e" page="8" coords="70.866000,612.924735,524.411833,612.924735,70.866000,600.379270,524.411833,600.379270" rect="67.516960,599.987224,527.760873,613.316781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121417Z00'00" flags="print,nozoom,norotate" date="D:20230827121417Z00'00" name="08605866-606a-dc43-946b-10aa18740981" icon="Comment" page="8" rect="541,602,559,620" title="Simon Dobnik"
+><contents
+>Rather, being an artificial dataset, it allows us to precisely control the bias and therefore explore its limits.</contents
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,500,792,620"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121512Z00'00" flags="print,nozoom,norotate" date="D:20230827121512Z00'00" name="35693254-bbce-2340-832d-6a919b67c259" icon="Comment" page="8" rect="187,540,205,558" title="Simon Dobnik"
+><contents
+>We know the ground truth function that generated the scenes and hence we can also make predictions about different effects of contexts.</contents
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,438,792,558"
+/></text
+><strikeout color="#FF0000" opacity="1" creationdate="D:20230827121532Z00'00" flags="print" date="D:20230827121532Z00'00" name="982bace3-79e7-514b-8eb7-cc7595378182" page="8" coords="70.866000,531.629735,524.411833,531.629735,70.866000,519.084270,524.411833,519.084270,70.866000,518.080735,132.229687,518.080735,70.866000,505.535270,132.229687,505.535270" rect="67.124914,504.751178,528.152919,532.413827" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,-100,792,20"
+/></strikeout
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121609Z00'00" flags="print,nozoom,norotate" date="D:20230827122055Z00'00" name="0b2910f8-a4c0-3544-a365-3fed26445dd2" icon="Comment" page="8" rect="37,503,55,521" title="Simon Dobnik"
+><contents
+>We will use the code to generate a new dataset of scenes and descriptions with the properties we want to study.
+
+You are not just taking their dataset but you are taking the framework and you are applying it on a new task, to generate a new dataset(s) with carefully controlled properties. The CLEVR framework is suitable for this because…</contents
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,401,792,521"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121801Z00'00" flags="print,nozoom,norotate" date="D:20230827121801Z00'00" name="ac2a5838-e567-9744-a751-bc4e5b8f6917" icon="Comment" page="8" rect="35,461,53,479" title="Simon Dobnik"
+><contents
+>Reference to GitHub, also perhaps in the following text when you describe your own code, it would be good to include a reference to the code as you go along.</contents
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,359,792,479"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827121855Z00'00" flags="print,nozoom,norotate" date="D:20230827121855Z00'00" name="70c44a3e-423c-604b-b91c-a7d610d3db25" icon="Comment" page="8" rect="296,184,314,202" title="Simon Dobnik"
+><contents
+>For this, functions from the existing code are used, right?</contents
+><popup flags="print,nozoom,norotate" open="no" page="8" rect="612,82,792,202"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827122131Z00'00" flags="print,nozoom,norotate" date="D:20230827122154Z00'00" name="d64060b4-7720-8446-82e3-1b9cb865a4dd" icon="Comment" page="9" rect="452,501,470,519" title="Simon Dobnik"
+><contents
+>Give also example of ground truth features that were used to generate this, i.e. objects and attributes.</contents
+><popup flags="print,nozoom,norotate" open="no" page="9" rect="612,399,792,519"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827122454Z00'00" flags="print" date="D:20230827122454Z00'00" name="06bb4677-2dbf-3144-93ac-685af3e6629d" page="9" coords="171.098811,442.863735,245.717055,442.863735,171.098811,430.318270,245.717055,430.318270" rect="167.749771,429.926224,249.066095,443.255781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="9" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827122459Z00'00" flags="print" date="D:20230827122459Z00'00" name="e8a816e6-f78b-2f44-baad-984307911011" page="9" coords="131.967869,320.921735,165.960625,320.921735,131.967869,308.376270,165.960625,308.376270" rect="128.618829,307.984224,169.309665,321.313781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="9" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827122529Z00'00" flags="print" date="D:20230827122529Z00'00" name="d1b70c12-9817-0748-abdb-b472dbab5070" page="9" coords="172.178812,226.076735,223.931582,226.076735,172.178812,213.531270,223.931582,213.531270" rect="168.829771,213.139224,227.280622,226.468781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="9" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827122553Z00'00" flags="print" date="D:20230827122553Z00'00" name="a5372122-2bd0-0b4f-83cc-9ecdf1165136" page="9" coords="389.226265,198.978735,471.382697,198.978735,389.226265,186.433270,471.382697,186.433270" rect="385.877225,186.041224,474.731738,199.370781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="9" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827122624Z00'00" flags="print" date="D:20230827122624Z00'00" name="30c8cfd5-5246-ce4f-8e81-334597d91f77" page="9" coords="342.655317,117.683735,507.055454,117.683735,342.655317,105.138270,507.055454,105.138270" rect="339.306277,104.746224,510.404495,118.075781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="9" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827122737Z00'00" flags="print,nozoom,norotate" date="D:20230827122846Z00'00" name="80b903e5-b891-4248-92b4-0b57a9d75f7a" icon="Comment" page="10" rect="98,731,116,749" title="Simon Dobnik"
+><contents
+>What are the differences? Mainly in the domain of objects and scenes. What data are VGG19 and ResNet trained on?</contents
+><popup flags="print,nozoom,norotate" open="no" page="10" rect="612,629,792,749"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827122944Z00'00" flags="print,nozoom,norotate" date="D:20230827122944Z00'00" name="ef999676-afb7-0143-9246-9fcf93c77cdf" icon="Comment" page="10" rect="460,407,478,425" title="Simon Dobnik"
+><contents
+>Link to the discussion on what datasets the systems are trained on.</contents
+><popup flags="print,nozoom,norotate" open="no" page="10" rect="612,305,792,425"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827123434Z00'00" flags="print,nozoom,norotate" date="D:20230827123628Z00'00" name="810f854c-f7f8-bd42-b2a7-09a58eb0c6fe" icon="Comment" page="10" rect="33,362,51,380" title="Simon Dobnik"
+><contents
+>This is interestingly more complex and deserves much longer discussion. Pre-trained knowledge may be unhelpful if it is very different from the new domain. Hence, at some point training from scratch may be more successful. 
+
+What is success? Learning may take longer but then after some time the performance is better than with pre-training. 
+
+Since agents are free to invent new language it is not clear whether this will be align with the human language that influenced pre-training the visual models, hence there is both effect of domain and language here. 
+
+We should make these questions part of a discussion, particularly if we are comparing the effects of pre-training vs training from scratch in the experiments.</contents
+><popup flags="print,nozoom,norotate" open="no" page="10" rect="612,260,792,380"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141028Z00'00" flags="print,nozoom,norotate" date="D:20230827141028Z00'00" name="5013e578-abac-ec42-b0d4-b95a95fe74b4" icon="Comment" page="10" rect="219,283,237,301" title="Simon Dobnik"
+><contents
+>What is the framework? We saw that language games can be implemented very differently, with robots, as code, etc. it is a neural model.</contents
+><popup flags="print,nozoom,norotate" open="no" page="10" rect="612,181,792,301"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141124Z00'00" flags="print,nozoom,norotate" date="D:20230827141124Z00'00" name="c8eb3292-a50f-004c-aaad-50ca3321671f" icon="Comment" page="10" rect="39,205,57,223" title="Simon Dobnik"
+><contents
+>More detailed description of all these. Readers will not be familiar with Gumbel-Softmax for example.</contents
+><popup flags="print,nozoom,norotate" open="no" page="10" rect="612,103,792,223"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141937Z00'00" flags="print,nozoom,norotate" date="D:20230827141937Z00'00" name="2bee967a-b8fd-5c48-a2f7-155503d87662" icon="Comment" page="10" rect="545,267,563,285" title="Simon Dobnik"
+><contents
+>You frequently start discussion by referring to quite specific concepts straight away in a very concise way, e.g. Gumbel Softmax, Reinforce, without defining them but then an explanation comes later in the text. The problem with this a reader would wonder what they are and would look for explanation. It is best to have a very general introduction, e.g. we will test two optimisation functions and then introduce them and explain them in one go later.</contents
+><popup flags="print,nozoom,norotate" open="no" page="10" rect="612,165,792,285"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141157Z00'00" flags="print,nozoom,norotate" date="D:20230827141157Z00'00" name="9007ca37-4fae-b745-8484-5ae10ea39e73" icon="Comment" page="11" rect="410,759,428,777" title="Simon Dobnik"
+><contents
+>:-)</contents
+><popup flags="print,nozoom,norotate" open="no" page="11" rect="612,657,792,777"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141334Z00'00" flags="print,nozoom,norotate" date="D:20230827141334Z00'00" name="a5d7c5e1-70bc-584e-9ac5-3c56300420f2" icon="Comment" page="11" rect="532,650,550,668" title="Simon Dobnik"
+><contents
+>This is what a technical manual would say - but what does it do really? What is the difference between reinforce and Gumbel softmax in practice? In our case? Reinforce is still superior but here you make it less.</contents
+><popup flags="print,nozoom,norotate" open="no" page="11" rect="612,548,792,668"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141410Z00'00" flags="print,nozoom,norotate" date="D:20230827141410Z00'00" name="428e650f-8e45-8442-84bb-b1bfbe4f4e84" icon="Comment" page="11" rect="543,530,561,548" title="Simon Dobnik"
+><contents
+>Include a diagram?</contents
+><popup flags="print,nozoom,norotate" open="no" page="11" rect="612,428,792,548"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827141554Z00'00" flags="print,nozoom,norotate" date="D:20230827141624Z00'00" name="cfd20084-a6c9-ab42-b6ae-cb9184e25882" icon="Comment" page="11" rect="31,419,49,437" title="Simon Dobnik"
+><contents
+>This sounds like details of your implementation and should come later. Here, we would only need a general description of the EGG framework. Also for this text later, it would be good to have a diagram of all these steps and examples what these games actually are.</contents
+><popup flags="print,nozoom,norotate" open="no" page="11" rect="612,317,792,437"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827142052Z00'00" flags="print,nozoom,norotate" date="D:20230827142052Z00'00" name="a7c25ab5-afbc-ad4c-bcbc-d9080f7a1e95" icon="Comment" page="11" rect="233,89,251,107" title="Simon Dobnik"
+><contents
+>to study biases</contents
+><popup flags="print,nozoom,norotate" open="no" page="11" rect="612,-13,792,107"
+/></text
+><strikeout color="#FF0000" opacity="1" creationdate="D:20230827142150Z00'00" flags="print" date="D:20230827142150Z00'00" name="f3daf227-9416-8249-99b6-eabc7a370fda" page="12" coords="363.917153,660.943735,524.411833,660.943735,363.917153,648.398270,524.411833,648.398270,70.866000,647.394735,353.084417,647.394735,70.866000,634.849270,353.084417,634.849270" rect="67.124914,634.065178,528.152919,661.727827" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="12" rect="612,-100,792,20"
+/></strikeout
+><text color="#FFFF00" opacity="1" creationdate="D:20230827142241Z00'00" flags="print,nozoom,norotate" date="D:20230827142241Z00'00" name="5647d43c-8a4f-8c49-bd2f-9d7ca4db40ee" icon="Comment" page="12" rect="354,641,372,659" title="Simon Dobnik"
+><contents
+>The work can on the long run mitigate harm as it is provides a study of models, how they would behave on real data and therefore contributes towards interpretability of AI.</contents
+><popup flags="print,nozoom,norotate" open="no" page="12" rect="612,539,792,659"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827142318Z00'00" flags="print,nozoom,norotate" date="D:20230827142318Z00'00" name="619aa576-4341-d944-901b-f117cbc3b699" icon="Comment" page="13" rect="59,661,77,679" title="Simon Dobnik"
+><contents
+>Capitalisation</contents
+><popup flags="print,nozoom,norotate" open="no" page="13" rect="612,559,792,679"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827142350Z00'00" flags="print,nozoom,norotate" date="D:20230827142636Z00'00" name="ca523c24-e044-c04a-b23c-81dedf767077" icon="Comment" page="13" rect="27,539,45,557" title="Simon Dobnik"
+><contents
+>Too informal
+
+We create a new dataset based on the CLEVR framework where we control the appearance of scenes in a referring expression task.
+
+The scenes are controlled by human-recognisable attributes of object such as object shape, colour and type. These attributes also correspond to referring expressions in natural language such as English.
+
+We create two contexts of scenes, one with two objects and one with five. 
+
+We also control for the number of attributes shared between the target and the distractor.</contents
+><popup flags="print,nozoom,norotate" open="no" page="13" rect="612,437,792,557"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827143334Z00'00" flags="print,nozoom,norotate" date="D:20230827143334Z00'00" name="92c52551-cf3b-f749-91c3-9d51371362ae" icon="Comment" page="13" rect="297,310,315,328" title="Simon Dobnik"
+><contents
+>To control how challenging the referring task is</contents
+><popup flags="print,nozoom,norotate" open="no" page="13" rect="612,208,792,328"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827143410Z00'00" flags="print,nozoom,norotate" date="D:20230827143410Z00'00" name="f164bcc9-aba6-6648-a401-6d04e76f2007" icon="Comment" page="13" rect="224,245,242,263" title="Simon Dobnik"
+><contents
+>Introduce other images earlier?</contents
+><popup flags="print,nozoom,norotate" open="no" page="13" rect="612,143,792,263"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827143546Z00'00" flags="print,nozoom,norotate" date="D:20230827143546Z00'00" name="14f539a0-a29c-f742-aa9f-a5d903d7a0dc" icon="Comment" page="13" rect="461,181,479,199" title="Simon Dobnik"
+><contents
+>It depends what you mean by distractor objects. I’d say they are all distractor objects by the virtue they share attributes. The system has to learn understanding of an intersection of these attributes.</contents
+><popup flags="print,nozoom,norotate" open="no" page="13" rect="612,79,792,199"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827143853Z00'00" flags="print,nozoom,norotate" date="D:20230827143853Z00'00" name="15b285c8-3581-d842-9e14-ef98ca83c2ea" icon="Comment" page="13" rect="107,101,125,119" title="Simon Dobnik"
+><contents
+>Note that since objects are generated as a part of 3-d scenes, they may appear differently on images: size, occlusion, shading, rotation. We also expect the model to learn from this noise and which therefore makes the task much harder and a task that approximates natural environment compared to the task where we would use abstract geometric shapes projected on a 2-d plane.</contents
+><popup flags="print,nozoom,norotate" open="no" page="13" rect="612,-1,792,119"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827144248Z00'00" flags="print,nozoom,norotate" date="D:20230827144248Z00'00" name="4be15f25-c158-9346-a628-b3ada9fb3da3" icon="Comment" page="14" rect="440,109,458,127" title="Simon Dobnik"
+><contents
+>But why not test the limits and the harder examples?</contents
+><popup flags="print,nozoom,norotate" open="no" page="14" rect="612,7,792,127"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827144338Z00'00" flags="print,nozoom,norotate" date="D:20230827144338Z00'00" name="a926bc47-df4a-4646-823f-778a36a7f05f" icon="Comment" page="14" rect="258,156,276,174" title="Simon Dobnik"
+><contents
+>Wouldn’t it make sense to introduce the discussion of how scenes can be generated with attributes somewhere here? Again, I felt we were projecting forward earlier without understanding the task.</contents
+><popup flags="print,nozoom,norotate" open="no" page="14" rect="612,54,792,174"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827144448Z00'00" flags="print,nozoom,norotate" date="D:20230827144448Z00'00" name="77fdbec4-32b9-5b47-ab0b-b7759a66b53d" icon="Comment" page="15" rect="281,714,299,732" title="Simon Dobnik"
+><contents
+>In order words, the choice of attributes is random for distractor and there may be an overlap between the same distractor objects. This is because we do not control overlap attributes over distractor, I.e. random.</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,612,792,732"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827144622Z00'00" flags="print,nozoom,norotate" date="D:20230827144622Z00'00" name="be65458e-6190-0e4f-a405-0fc604f98e10" icon="Comment" page="15" rect="310,667,328,685" title="Simon Dobnik"
+><contents
+>In the previous dataset the target and distractor are discriminated by ONE attribute exactly.</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,565,792,685"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827144646Z00'00" flags="print" date="D:20230827144658Z00'00" name="fd2bfe95-8883-b54a-aa2a-4b108b249b8a" page="15" coords="265.407980,630.025735,524.411833,630.025735,265.407980,617.480270,524.411833,617.480270,70.866000,616.475735,309.644381,616.475735,70.866000,603.930270,309.644381,603.930270" rect="67.516960,603.538224,527.760873,630.417781" title="Simon Dobnik"
+><contents
+>Vague</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827144647Z00'00" flags="print" date="D:20230827144647Z00'00" name="0335c3e3-fc79-dc45-8aff-0e9b5adcfc24" page="15" coords="265.407980,630.025735,286.397089,630.025735,265.407980,617.480270,286.397089,617.480270" rect="262.058940,617.088224,289.746129,630.417781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827144732Z00'00" flags="print,nozoom,norotate" date="D:20230827144732Z00'00" name="c9c5fd97-4ab8-d847-b1ad-c2ce16de2088" icon="Comment" page="15" rect="257,588,275,606" title="Simon Dobnik"
+><contents
+>In real world, objects have over-lapping attributes and hence a single object can only be identified by an intersection of attributes.</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,486,792,606"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827144838Z00'00" flags="print,nozoom,norotate" date="D:20230827144954Z00'00" name="d882e86e-a141-9941-b770-e213b726d9da" icon="Comment" page="15" rect="52,552,70,570" title="Simon Dobnik"
+><contents
+>However, we do not do this randomly but ge5 inspiration from the Dale and Reiter generation algorithm who observe that attributes in descriptions occur in certain order and are added incrementally in a certain hierarchy. This way we approximate the information in the scenes to human cognition and we hope that the system will be able to exploit that (we would really need to study and compare it with another dataset where attributes are add3d randomly to confirm that there is an effect of h7man. Ignition).</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,450,792,570"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827155959Z00'00" flags="print,nozoom,norotate" date="D:20230827160111Z00'00" name="27a4f687-15e8-2e4c-8132-bc9cc7209935" icon="Comment" page="15" rect="419.969956,472.118290,437.969956,490.118290" title="Simon Dobnik"
+><contents
+>The sharing of attributes should be according to the Dale and Reiter hierarchy, shouldn’t it? Two attributes, big blue (cube|sphere)</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,371,792,491"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827160330Z00'00" flags="print,nozoom,norotate" date="D:20230827160514Z00'00" name="d3407800-fec3-dc41-9776-c984a0afc757" icon="Comment" page="15" rect="127,354,145,372" title="Simon Dobnik"
+><contents
+>It’s actually the reverse in which descriptions are generated, we start left to right: large purple (are shared), the last attribute must thus be unique. Generation proceeds in the opposite order, one would just say sphere. We should clarify this. Now it is very hard to understand.</contents
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,252,792,372"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827160542Z00'00" flags="print" date="D:20230827160542Z00'00" name="5815c1c1-2bef-8b42-b063-c32d3cda8c9d" page="15" coords="247.026147,242.856735,501.960905,242.856735,247.026147,230.311270,501.960905,230.311270" rect="243.677107,229.919224,505.309945,243.248781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827160549Z00'00" flags="print" date="D:20230827160549Z00'00" name="31771ab5-20dd-c743-9bcb-1e7e27583f58" page="15" coords="114.775127,175.110735,521.684558,175.110735,114.775127,162.565270,521.684558,162.565270" rect="111.426087,162.173224,525.033598,175.502781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="15" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827160654Z00'00" flags="print,nozoom,norotate" date="D:20230827160654Z00'00" name="fd8633f7-0170-d649-a328-26997f8c7251" icon="Comment" page="16" rect="145,717,163,735" title="Simon Dobnik"
+><contents
+>This should go at the beginning where language games with neural agents are introduced.</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,615,792,735"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827160724Z00'00" flags="print,nozoom,norotate" date="D:20230827160724Z00'00" name="50cc2928-914f-f341-bcb5-8fc786837f73" icon="Comment" page="16" rect="207,638,225,656" title="Simon Dobnik"
+><contents
+>We</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,536,792,656"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827160807Z00'00" flags="print" date="D:20230827160807Z00'00" name="9b66e7b7-9eb1-b341-aa9f-590237840618" page="16" coords="70.866000,579.648735,524.411833,579.648735,70.866000,567.103270,524.411833,567.103270,70.866000,566.099735,194.586103,566.099735,70.866000,553.554270,194.586103,553.554270" rect="67.516960,553.162224,527.760873,580.040781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827160904Z00'00" flags="print,nozoom,norotate" date="D:20230827160904Z00'00" name="eeb2b2ce-cb4a-e342-9767-b5c2b758b6cc" icon="Comment" page="16" rect="515,539,533,557" title="Simon Dobnik"
+><contents
+>This is a natural language understanding or reference resolution task.</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,437,792,557"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161102Z00'00" flags="print,nozoom,norotate" date="D:20230827161102Z00'00" name="3f2a2901-c448-1f45-afff-227c8989d6c7" icon="Comment" page="16" rect="465,516,483,534" title="Simon Dobnik"
+><contents
+>Object identification task</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,414,792,534"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161118Z00'00" flags="print,nozoom,norotate" date="D:20230827161118Z00'00" name="13a773a8-a137-5a43-af77-b7c5613b8ceb" icon="Comment" page="16" rect="320,498,338,516" title="Simon Dobnik"
+><contents
+>Referring expression generation task</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,396,792,516"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161142Z00'00" flags="print,nozoom,norotate" date="D:20230827161142Z00'00" name="df53f396-f2bb-4d48-ad7c-33ef480623a9" icon="Comment" page="16" rect="41,470,59,488" title="Simon Dobnik"
+><contents
+>We are validating the dataset on 3 tasks</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,368,792,488"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161203Z00'00" flags="print,nozoom,norotate" date="D:20230827161203Z00'00" name="b1872106-d5d2-704e-9cf6-b7d65b4e5361" icon="Comment" page="16" rect="246,437,264,455" title="Simon Dobnik"
+><contents
+>Reference resolution task</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,335,792,455"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161406Z00'00" flags="print,nozoom,norotate" date="D:20230827161406Z00'00" name="ae18b01c-f717-a54f-aa48-c1f69ea77b69" icon="Comment" page="16" rect="531,289,549,307" title="Simon Dobnik"
+><contents
+>Reference resolution with identification of location. The other task, object identification is also resolving reference but it is easier as you are only picking objects. The first task also involves spatial knowledge.</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,187,792,307"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161758Z00'00" flags="print,nozoom,norotate" date="D:20230827161758Z00'00" name="88c54875-ec7d-8a47-9e0b-288f507148cb" icon="Comment" page="16" rect="91,212,109,230" title="Simon Dobnik"
+><contents
+>What are the features?
+
+Note that these are visual features and not spatial features. It is true that visual features also encode some spatial information, how visual features relate to each other, but such information is very different from the spatial information required to predict coordinates in a coordinate frames, and hence we expect the task will be very hard.</contents
+><popup flags="print,nozoom,norotate" open="no" page="16" rect="612,110,792,230"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827161909Z00'00" flags="print,nozoom,norotate" date="D:20230827161909Z00'00" name="e9e07577-7798-9c4a-bedc-a6532cd0a5fc" icon="Comment" page="17" rect="447,756,465,774" title="Simon Dobnik"
+><contents
+>Very precisely. This is higher resolution that attention in the visual models that operates on o 7x7 grid, normally.</contents
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,654,792,774"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827162011Z00'00" flags="print,nozoom,norotate" date="D:20230827162011Z00'00" name="a61bade6-d07a-ae4c-94db-003557db7f1b" icon="Comment" page="17" rect="274,664,292,682" title="Simon Dobnik"
+><contents
+>How are these encoded?</contents
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,562,792,682"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827162109Z00'00" flags="print,nozoom,norotate" date="D:20230827162109Z00'00" name="b3a1f859-b490-854f-b2e9-1b1946ada96c" icon="Comment" page="17" rect="480,292,498,310" title="Simon Dobnik"
+><contents
+>Encoded locations?</contents
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,190,792,310"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827162243Z00'00" flags="print,nozoom,norotate" date="D:20230827162243Z00'00" name="c3ffaa5d-22a4-634a-a80b-45c22c40c10f" icon="Comment" page="17" rect="290,155,308,173" title="Simon Dobnik"
+><contents
+>Convolutions are only applied on visual features, not object attribute features and locations.</contents
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,53,792,173"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827162401Z00'00" flags="print,nozoom,norotate" date="D:20230827162401Z00'00" name="62b32c1d-6b79-414b-aee8-c2c2d25a5d56" icon="Comment" page="17" rect="157,151,175,169" title="Simon Dobnik"
+><contents
+>Why shuffled? If we order them the way they appear in the image, the model will have more information that they are sequentially related.</contents
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,49,792,169"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827162909Z00'00" flags="print" date="D:20230827162923Z00'00" name="9d7940ba-acc2-6948-85ae-934771e665f9" page="17" coords="505.434190,107.957735,524.416024,107.957735,505.434190,95.412270,524.416024,95.412270,70.866000,94.408735,482.673616,94.408735,70.866000,81.863270,482.673616,81.863270" rect="67.516960,81.471224,527.765064,108.349781" title="Simon Dobnik"
+><contents
+>I don’t understand.</contents
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827162910Z00'00" flags="print" date="D:20230827162910Z00'00" name="6c0e6004-9cc8-0649-ad64-be7fd8fc14ec" page="17" coords="505.434190,107.957735,517.477836,107.957735,505.434190,95.412270,517.477836,95.412270" rect="502.085150,95.020224,520.826877,108.349781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="17" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827162818Z00'00" flags="print,nozoom,norotate" date="D:20230827162818Z00'00" name="78d1d8aa-a4fe-c44d-a130-1552fed17021" icon="Comment" page="18" rect="282,765,300,783" title="Simon Dobnik"
+><contents
+>The question you are asking is whether it is possible to predict location from the visual appearance of the object. This is highly complex task as it requires quite two step reasoning, identification of features with that attribute, e.g. blue and then locating that feature in the image.</contents
+><popup flags="print,nozoom,norotate" open="no" page="18" rect="612,663,792,783"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827163050Z00'00" flags="print,nozoom,norotate" date="D:20230827163050Z00'00" name="4237e4b8-8640-4348-b6bf-c3f926e0a3db" icon="Comment" page="18" rect="530,553,548,571" title="Simon Dobnik"
+><contents
+>See my point earlier about the reversed algorithm between the two tasks </contents
+><popup flags="print,nozoom,norotate" open="no" page="18" rect="612,451,792,571"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827163306Z00'00" flags="print,nozoom,norotate" date="D:20230827163306Z00'00" name="cd45443a-7d67-6345-8e42-3657c3915071" icon="Comment" page="18" rect="224,320,242,338" title="Simon Dobnik"
+><contents
+>\citep and \citet Use Name (year) when you are referring to particular person and (Name, year) when you are referring to a paper. Hence, in this case it would be the latter.</contents
+><popup flags="print,nozoom,norotate" open="no" page="18" rect="612,218,792,338"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827163333Z00'00" flags="print,nozoom,norotate" date="D:20230827163333Z00'00" name="dfad4d56-848c-fe4a-b119-5db1574821df" icon="Comment" page="18" rect="319,305,337,323" title="Simon Dobnik"
+><contents
+>Oh, before we talked about 3 methods</contents
+><popup flags="print,nozoom,norotate" open="no" page="18" rect="612,203,792,323"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827163614Z00'00" flags="print,nozoom,norotate" date="D:20230827163614Z00'00" name="085a956c-819a-b149-ba35-70e07cece7ff" icon="Comment" page="18" rect="137,180,155,198" title="Simon Dobnik"
+><contents
+>The information in the masked image is still not enough to identify the precise location, only the region. Hence, it corresponds on attention in the attention models. But those are generating labels and not predicting coordinated. The task is still challenging.</contents
+><popup flags="print,nozoom,norotate" open="no" page="18" rect="612,78,792,198"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827163754Z00'00" flags="print" date="D:20230827163754Z00'00" name="df30ccca-5753-e144-8634-eb1f709cea6a" page="18" coords="446.837222,91.877735,524.411833,91.877735,446.837222,79.332270,524.411833,79.332270" rect="443.488182,78.940224,527.760873,92.269781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="18" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827163758Z00'00" flags="print" date="D:20230827163758Z00'00" name="8805df12-edf9-544d-9604-384d91746b6c" page="19" coords="70.866000,769.337735,524.411833,769.337735,70.866000,756.792270,524.411833,756.792270,70.866000,755.788735,306.262560,755.788735,70.866000,743.243270,306.262560,743.243270" rect="67.516960,742.851224,527.760873,769.729781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="19" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827163911Z00'00" flags="print,nozoom,norotate" date="D:20230827163911Z00'00" name="6e7365de-1dca-974d-a3b6-8a16c6546579" icon="Comment" page="19" rect="297,765,315,783" title="Simon Dobnik"
+><contents
+>Yes that’s correct but through several epochs we hope we will refine the distance and standard deviation of the error. It should level out. It is not a problem. What you do with a circle and accuracy is that you make the task easier as your pointer is now not pointing to a point but to a larger area.</contents
+><popup flags="print,nozoom,norotate" open="no" page="19" rect="612,663,792,783"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827165207Z00'00" flags="print,nozoom,norotate" date="D:20230827165207Z00'00" name="edabaa79-c371-8349-92ca-72e85fa2511d" icon="Comment" page="19" rect="285,679,303,697" title="Simon Dobnik"
+><contents
+>But here the score will face the same problem with steward deviation. Hence the only difference here is that pointing is less precise.</contents
+><popup flags="print,nozoom,norotate" open="no" page="19" rect="612,577,792,697"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827165305Z00'00" flags="print,nozoom,norotate" date="D:20230827165305Z00'00" name="cb2eaefd-9a82-ea41-b925-1880dd7f377f" icon="Comment" page="19" rect="508,591,526,609" title="Simon Dobnik"
+><contents
+>Explain. w3 had a paper with John Kelleher on what spatial information is encoded in CNNs</contents
+><popup flags="print,nozoom,norotate" open="no" page="19" rect="612,489,792,609"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827165348Z00'00" flags="print,nozoom,norotate" date="D:20230827165348Z00'00" name="e2b729f7-c852-264b-93b4-b8488870d189" icon="Comment" page="19" rect="207,512,225,530" title="Simon Dobnik"
+><contents
+>Point at not just discriminate</contents
+><popup flags="print,nozoom,norotate" open="no" page="19" rect="612,410,792,530"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827165753Z00'00" flags="print,nozoom,norotate" date="D:20230827165753Z00'00" name="786cdbdc-a12a-c74b-8545-776df04059ff" icon="Comment" page="20" rect="475,770,493,788" title="Simon Dobnik"
+><contents
+>How can we have epochs on the testing data? There is no updates so i5 does not make sense.</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,668,792,788"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827165928Z00'00" flags="print,nozoom,norotate" date="D:20230827170056Z00'00" name="b2ad96b3-ac18-624d-8ac1-166341ae501f" icon="Comment" page="20" rect="469,680,487,698" title="Simon Dobnik"
+><contents
+>The results show that the model is learning something from the training data but this is not the feature that should be learning as the performance on the test data is low. Actually, is it low, it is 10, 35 and 45 pixels. We should not expect any difference between epochs as there is no training. Hence, a flat line is expected.</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,578,792,698"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827170131Z00'00" flags="print,nozoom,norotate" date="D:20230827170131Z00'00" name="e60416a1-bcd6-f64c-b36a-07803756805d" icon="Comment" page="20" rect="328,622,346,640" title="Simon Dobnik"
+><contents
+>Because it is in the same location?</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,520,792,640"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827170228Z00'00" flags="print" date="D:20230827170257Z00'00" name="98375ee7-0ce0-c645-b7cc-ae2d53074b7d" page="20" coords="386.946263,633.845735,524.411833,633.845735,386.946263,621.300270,524.411833,621.300270,70.866000,620.296735,421.735383,620.296735,70.866000,607.751270,421.735383,607.751270" rect="67.516960,607.359224,527.760873,634.237781" title="Simon Dobnik"
+><contents
+>Not true, given the previous observation. It is successful.</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827170358Z00'00" flags="print" date="D:20230827170450Z00'00" name="44a6399f-4c11-d142-83dd-9c9829a7727a" page="20" coords="477.731794,525.451735,524.411833,525.451735,477.731794,512.906270,524.411833,512.906270,70.866000,511.902735,524.411833,511.902735,70.866000,499.357270,524.411833,499.357270" rect="67.516960,498.965224,527.760873,525.843781" title="Simon Dobnik"
+><contents
+>Not really. The geometric information is impoverished, other info is rich here, the models still perform to a point.</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827170530Z00'00" flags="print" date="D:20230827170530Z00'00" name="a49baca9-30f2-c042-a42e-fdea9999f64e" page="20" coords="480.068180,484.804735,524.413672,484.804735,480.068180,472.259270,524.413672,472.259270,70.866000,471.255735,130.102413,471.255735,70.866000,458.710270,130.102413,458.710270" rect="67.516960,458.318224,527.762712,485.196781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,-100,792,20"
+/></highlight
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827170625Z00'00" flags="print" date="D:20230827170635Z00'00" name="d5663b8f-8cfd-ed4f-a729-2337d182dfa0" page="20" coords="416.629925,376.410735,476.826338,376.410735,416.629925,363.865270,476.826338,363.865270" rect="413.280884,363.473224,480.175379,376.802781" title="Simon Dobnik"
+><contents
+>What is that?</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827170815Z00'00" flags="print,nozoom,norotate" date="D:20230827170815Z00'00" name="b3284747-0a2e-6f4f-a8e9-9cc66b62339a" icon="Comment" page="20" rect="96,391,114,409" title="Simon Dobnik"
+><contents
+>What is the image size? What is the size of a typical object? 50 sounds quite good. Attention is predicting one of 7x7 blocks. Is 50 more or less than 1/7 of an image? </contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,289,792,409"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827171115Z00'00" flags="print,nozoom,norotate" date="D:20230827171115Z00'00" name="8e63eee8-d0e8-2d4e-b930-d27bd223087a" icon="Comment" page="20" rect="494,134,512,152" title="Simon Dobnik"
+><contents
+>Explanation of labels</contents
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,32,792,152"
+/></text
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827171205Z00'00" flags="print" date="D:20230827171205Z00'00" name="3ad0f466-c4a5-5a4e-864d-c0c82095f478" page="20" coords="279.371628,88.420735,442.179037,88.420735,279.371628,75.875270,442.179037,75.875270" rect="276.022588,75.483224,445.528077,88.812781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="20" rect="612,-100,792,20"
+/></highlight
+><strikeout color="#FF0000" opacity="1" creationdate="D:20230827171228Z00'00" flags="print" date="D:20230827171228Z00'00" name="ff1a5319-2a12-bb46-a1f6-61099cbf3526" page="21" coords="96.295112,755.788735,187.800643,755.788735,96.295112,743.243270,187.800643,743.243270" rect="92.554026,742.459178,191.541729,756.572827" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="21" rect="612,-100,792,20"
+/></strikeout
+><highlight color="#FFFF00" opacity="0.250000" creationdate="D:20230827171305Z00'00" flags="print" date="D:20230827171305Z00'00" name="c57a4ac5-d9c2-9141-9d9a-a3923f6dba11" page="21" coords="403.397186,633.845735,524.411833,633.845735,403.397186,621.300270,524.411833,621.300270,70.866000,620.296735,463.451782,620.296735,70.866000,607.751270,463.451782,607.751270" rect="67.516960,607.359224,527.760873,634.237781" title="Simon Dobnik"
+><popup flags="print,nozoom,norotate" open="no" page="21" rect="612,-100,792,20"
+/></highlight
+><text color="#FFFF00" opacity="1" creationdate="D:20230827171408Z00'00" flags="print,nozoom,norotate" date="D:20230827171408Z00'00" name="d8eb2f7b-1fc7-ce4e-8e11-81f7d95ce542" icon="Comment" page="21" rect="91,581,109,599" title="Simon Dobnik"
+><contents
+>Perhaps arranging the objects sequentially would help the model learn spatial contiguity, see my earlier comment.</contents
+><popup flags="print,nozoom,norotate" open="no" page="21" rect="612,479,792,599"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827171508Z00'00" flags="print,nozoom,norotate" date="D:20230827171508Z00'00" name="dc691848-33e6-fa46-a1d5-38fa35ee6df7" icon="Comment" page="21" rect="189,505,207,523" title="Simon Dobnik"
+><contents
+>Table with these results?</contents
+><popup flags="print,nozoom,norotate" open="no" page="21" rect="612,403,792,523"
+/></text
+><text color="#FFFF00" opacity="1" creationdate="D:20230827171617Z00'00" flags="print,nozoom,norotate" date="D:20230827171617Z00'00" name="861af067-5329-934b-8403-39290c3ab299" icon="Comment" page="23" rect="457,439,475,457" title="Simon Dobnik"
+><contents
+>More explanatory caption</contents
+><popup flags="print,nozoom,norotate" open="no" page="23" rect="612,337,792,457"
+/></text
+></annots
+><f href="main-2023-08-27-comments.pdf"
+/><ids original="04D7128C5F104CF52A2D8E664CB13B53" modified="A72293EB9BE596B886208BB3576741BB"
+/></xfdf
+>

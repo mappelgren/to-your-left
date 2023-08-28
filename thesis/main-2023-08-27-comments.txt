@@ -1,0 +1,204 @@
+I would turn the order of this around, it would make the motivation clearer. The introduction should also be much longer with linguistic examples and citations of related work (but I see that you want to keep it for later.)
+
+Our goal is to study referring, how we refer to entities and have we interpret the entities referred to. 
+
+There is a lot of ambiguity involved as language only maps to the world in an under specified way.  The first problem is that a word may map to several pixels. There is a loss of information/abstraction. The second problem is that referring expressions are under-specified, chair can be any of the 5 chairs. This is to compress information in communication, we say less than we mean. Illustrate both points with examples.
+
+Instead, humans rely on communicative protocols to disambiguate referring expressions. The Dale and Reiter algorithm and the literature on GRE. Communicative protocols are established through language games, some parts seen to be universal, some parts are negotiated on the fly.
+
+Artificial language games - describe in more detail what they are and how they are implemented - allow us to study language with8n this communicative setting. 
+
+In this thesis we look at referring within the context of communicative games to explore both theoretical and practical (computational) limits of grounded referring expressions in interactive setting.
+
+The novelty of this thesis is that we study referring to entities through language games involving sequences of descriptions.
+
+What are the limits of the agent architecture and and input representation on learning successful grounding referring expressions through language games?
+
+To what degree does the emergent referring expressions align with referring expressions in a natural language such as English what constraints can be imposed on the environment and the agents themselves that languages align?
+
+Here we need to cite: (1) literature on grounding, connecting language and vision, Harnad, Roy, us, etc. (2) referring expression generation, Dale and Reiter, (4) reference and co- reference (Poesio, us), (5) language games (Wittgenstein) and referring as a collaborative process (Clark, David Lewis), (6) language games (work by Kazakov and Kirby), within robotics (Steels), language games within neural models (Baroni).
+
+Mathias’ work is also relevant https://era.ed.ac.uk/handle/1842/38727
+
+We also know the ground truth about the scenes as we know the function that generated them.
+
+We can control the properties of these datasets and we can introduce as much bias and ambiguity as we see firm in each experiment to compare with the natural datasets.
+
+Which is how this is done in practice, cf. referring as a collaborative process, the paper by Clark.
+
+What are those?
+
+What kind of complexity?
+
+Leave for the last chapter, limitations and future work.
+
+Not just real world, also to background knowledge and what the person wants to do. 
+
+Grounding is more related to interpretability of expressions rather than intent. Without grounding they cannot be interpreted. The intent shapes WHAT referring expressions are generated in what contexts of the real world.   Hence, intent is a meta thing connecting world, language, knowledge and agent’s experience.
+
+They learn how to interpret expressions against some representation. Hence, a reference is a relation between a description and some entity, it’s interpretation. Without this connection referring expressions are useless as we do not know how to interpret this. Textual models might be good for general knowledge such as factual information from news and Wikipedia but as soon as we have NLP applications that interact with other domains, e.g. a ticket booking system or a situated robot involved in patient care, we need to connect language to some other representations to make language interpretable.
+
+Give an example of a language games. Symbols are invented at random. However, the constraints of interaction control how new symbols are introduced and when existing symbols are re-used and used. Agents cannot invent unlimited number of symbols to refer to every event the6 encounter as they have limited memory and therefore they are driven by abstraction. On the other hand, the symbols must be flexible enough. The other agent must be able to resolve the symbols they hear based on the context. Hence, a successful interaction is when a describer is producing such symbols that interpreter can easily interpret within the context, here an image. This is also how a reward function is defined and loss is propagated.
+
+Rephrase, language games provide interactive constraints within which language can emerge. But what are these? In this thesis we will study some, such as agent’s memory and layer representation and the feature representation, the structure of the world and its ambiguity.
+
+Because referring expressions are ambiguous participants rely on language games to resolve the reference in context.
+
+Give an example of a game?
+
+Examples of architectures from Baroni. The EGG framework.
+
+Rather, being an artificial dataset, it allows us to precisely control the bias and therefore explore its limits.
+
+We know the ground truth function that generated the scenes and hence we can also make predictions about different effects of contexts.
+
+We will use the code to generate a new dataset of scenes and descriptions with the properties we want to study.
+
+You are not just taking their dataset but you are taking the framework and you are applying it on a new task, to generate a new dataset(s) with carefully controlled properties. The CLEVR framework is suitable for this because…
+
+Reference to GitHub, also perhaps in the following text when you describe your own code, it would be good to include a reference to the code as you go along.
+
+For this, functions from the existing code are used, right?
+
+Give also example of ground truth features that were used to generate this, i.e. objects and attributes.
+
+What are the differences? Mainly in the domain of objects and scenes. What data are VGG19 and ResNet trained on?
+
+Link to the discussion on what datasets the systems are trained on.
+
+This is interestingly more complex and deserves much longer discussion. Pre-trained knowledge may be unhelpful if it is very different from the new domain. Hence, at some point training from scratch may be more successful. 
+
+What is success? Learning may take longer but then after some time the performance is better than with pre-training. 
+
+Since agents are free to invent new language it is not clear whether this will be align with the human language that influenced pre-training the visual models, hence there is both effect of domain and language here. 
+
+We should make these questions part of a discussion, particularly if we are comparing the effects of pre-training vs training from scratch in the experiments.
+
+What is the framework? We saw that language games can be implemented very differently, with robots, as code, etc. it is a neural model.
+
+More detailed description of all these. Readers will not be familiar with Gumbel-Softmax for example.
+
+You frequently start discussion by referring to quite specific concepts straight away in a very concise way, e.g. Gumbel Softmax, Reinforce, without defining them but then an explanation comes later in the text. The problem with this a reader would wonder what they are and would look for explanation. It is best to have a very general introduction, e.g. we will test two optimisation functions and then introduce them and explain them in one go later.
+
+:-)
+
+This is what a technical manual would say - but what does it do really? What is the difference between reinforce and Gumbel softmax in practice? In our case? Reinforce is still superior but here you make it less.
+
+Include a diagram?
+
+This sounds like details of your implementation and should come later. Here, we would only need a general description of the EGG framework. Also for this text later, it would be good to have a diagram of all these steps and examples what these games actually are.
+
+to study biases
+
+The work can on the long run mitigate harm as it is provides a study of models, how they would behave on real data and therefore contributes towards interpretability of AI.
+
+Capitalisation
+
+Too informal
+
+We create a new dataset based on the CLEVR framework where we control the appearance of scenes in a referring expression task.
+
+The scenes are controlled by human-recognisable attributes of object such as object shape, colour and type. These attributes also correspond to referring expressions in natural language such as English.
+
+We create two contexts of scenes, one with two objects and one with five. 
+
+We also control for the number of attributes shared between the target and the distractor.
+
+To control how challenging the referring task is
+
+Introduce other images earlier?
+
+It depends what you mean by distractor objects. I’d say they are all distractor objects by the virtue they share attributes. The system has to learn understanding of an intersection of these attributes.
+
+Note that since objects are generated as a part of 3-d scenes, they may appear differently on images: size, occlusion, shading, rotation. We also expect the model to learn from this noise and which therefore makes the task much harder and a task that approximates natural environment compared to the task where we would use abstract geometric shapes projected on a 2-d plane.
+
+But why not test the limits and the harder examples?
+
+Wouldn’t it make sense to introduce the discussion of how scenes can be generated with attributes somewhere here? Again, I felt we were projecting forward earlier without understanding the task.
+
+In order words, the choice of attributes is random for distractor and there may be an overlap between the same distractor objects. This is because we do not control overlap attributes over distractor, I.e. random.
+
+In the previous dataset the target and distractor are discriminated by ONE attribute exactly.
+
+Vague
+
+In real world, objects have over-lapping attributes and hence a single object can only be identified by an intersection of attributes.
+
+However, we do not do this randomly but ge5 inspiration from the Dale and Reiter generation algorithm who observe that attributes in descriptions occur in certain order and are added incrementally in a certain hierarchy. This way we approximate the information in the scenes to human cognition and we hope that the system will be able to exploit that (we would really need to study and compare it with another dataset where attributes are add3d randomly to confirm that there is an effect of h7man. Ignition).
+
+The sharing of attributes should be according to the Dale and Reiter hierarchy, shouldn’t it? Two attributes, big blue (cube|sphere)
+
+It’s actually the reverse in which descriptions are generated, we start left to right: large purple (are shared), the last attribute must thus be unique. Generation proceeds in the opposite order, one would just say sphere. We should clarify this. Now it is very hard to understand.
+
+This should go at the beginning where language games with neural agents are introduced.
+
+We
+
+This is a natural language understanding or reference resolution task.
+
+Object identification task
+
+Referring expression generation task
+
+We are validating the dataset on 3 tasks
+
+Reference resolution task
+
+Reference resolution with identification of location. The other task, object identification is also resolving reference but it is easier as you are only picking objects. The first task also involves spatial knowledge.
+
+What are the features?
+
+Note that these are visual features and not spatial features. It is true that visual features also encode some spatial information, how visual features relate to each other, but such information is very different from the spatial information required to predict coordinates in a coordinate frames, and hence we expect the task will be very hard.
+
+Very precisely. This is higher resolution that attention in the visual models that operates on o 7x7 grid, normally.
+
+How are these encoded?
+
+Encoded locations?
+
+Convolutions are only applied on visual features, not object attribute features and locations.
+
+Why shuffled? If we order them the way they appear in the image, the model will have more information that they are sequentially related.
+
+I don’t understand.
+
+The question you are asking is whether it is possible to predict location from the visual appearance of the object. This is highly complex task as it requires quite two step reasoning, identification of features with that attribute, e.g. blue and then locating that feature in the image.
+
+See my point earlier about the reversed algorithm between the two tasks 
+
+\citep and \citet Use Name (year) when you are referring to particular person and (Name, year) when you are referring to a paper. Hence, in this case it would be the latter.
+
+Oh, before we talked about 3 methods
+
+The information in the masked image is still not enough to identify the precise location, only the region. Hence, it corresponds on attention in the attention models. But those are generating labels and not predicting coordinated. The task is still challenging.
+
+Yes that’s correct but through several epochs we hope we will refine the distance and standard deviation of the error. It should level out. It is not a problem. What you do with a circle and accuracy is that you make the task easier as your pointer is now not pointing to a point but to a larger area.
+
+But here the score will face the same problem with steward deviation. Hence the only difference here is that pointing is less precise.
+
+Explain. w3 had a paper with John Kelleher on what spatial information is encoded in CNNs
+
+Point at not just discriminate
+
+How can we have epochs on the testing data? There is no updates so i5 does not make sense.
+
+The results show that the model is learning something from the training data but this is not the feature that should be learning as the performance on the test data is low. Actually, is it low, it is 10, 35 and 45 pixels. We should not expect any difference between epochs as there is no training. Hence, a flat line is expected.
+
+Because it is in the same location?
+
+Not true, given the previous observation. It is successful.
+
+Not really. The geometric information is impoverished, other info is rich here, the models still perform to a point.
+
+What is that?
+
+What is the image size? What is the size of a typical object? 50 sounds quite good. Attention is predicting one of 7x7 blocks. Is 50 more or less than 1/7 of an image? 
+
+Explanation of labels
+
+Perhaps arranging the objects sequentially would help the model learn spatial contiguity, see my earlier comment.
+
+Table with these results?
+
+More explanatory caption
+
