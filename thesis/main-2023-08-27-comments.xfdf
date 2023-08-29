@@ -877,6 +877,17 @@ Note that these are visual features and not spatial features. It is true that vi
 ></contents-richtext
 ><popup flags="print,nozoom,norotate" open="no" page="26" rect="595.280029,29.855225,799.280029,143.855225"
 /></text
+><text color="#FFD100" creationdate="D:20230829170304+02'00'" flags="print,nozoom,norotate" date="D:20230829170322+02'00'" name="f33b2202-e1ff-0740-bd0a-59e0f68559b7" icon="Comment" page="27" rect="395.199097,91.928040,419.199097,115.928040" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But there is an importnat difference that now we have two neural netweorks, the sender and the receiver.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="27" rect="595.280029,1.928040,799.280029,115.928040"
+/></text
 ><text color="#FFD100" creationdate="D:20230828193552+02'00'" flags="print,nozoom,norotate" date="D:20230828193634+02'00'" name="84608da7-be83-f74c-a03c-8ddb82bc4c4f" icon="Comment" page="27" rect="402.617249,169.164246,426.617249,193.164246" subject="Sticky Note" title="simon"
 ><contents-richtext
 ><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
@@ -987,8 +998,652 @@ Note that these are visual features and not spatial features. It is true that vi
 ></contents-richtext
 ><popup flags="print,nozoom,norotate" open="no" page="27" rect="595.280029,165.564026,799.280029,279.564026"
 /></text
+><text color="#FFD100" creationdate="D:20230829170957+02'00'" flags="print,nozoom,norotate" date="D:20230829171046+02'00'" name="23e76d66-2280-a74b-a8f3-df8df26013e3" icon="Comment" page="28" rect="528.726074,177.891479,552.726074,201.891479" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Here it does not receive a boundig box of an object as in Lazaridou. They use whole images, don't they?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,87.891479,799.280029,201.891479"
+/></text
+><text color="#FFD100" creationdate="D:20230829170851+02'00'" flags="print,nozoom,norotate" date="D:20230829170908+02'00'" name="bc54e393-f550-5642-afcb-4b95ebf13d24" icon="Comment" page="28" rect="356.799164,258.182190,380.799164,282.182190" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>On the contrary,...</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,168.182190,799.280029,282.182190"
+/></text
+><text color="#FFD100" creationdate="D:20230829170735+02'00'" flags="print,nozoom,norotate" date="D:20230829170743+02'00'" name="c134eaa5-f423-e245-8c3d-1fc5d741254f" icon="Comment" page="28" rect="391.708191,608.581421,415.708191,632.581421" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>What is this setup?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,518.581421,799.280029,632.581421"
+/></text
+><text color="#FFD100" creationdate="D:20230829173026+02'00'" flags="print,nozoom,norotate" date="D:20230829173048+02'00'" name="77bab8ec-5699-9545-bcf5-9d63be52ad7f" icon="Comment" page="28" rect="41.308975,585.017822,65.308975,609.017822" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Why are we not testing it on all 3 games?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,495.017822,799.280029,609.017822"
+/></text
+><text color="#FFD100" creationdate="D:20230829170633+02'00'" flags="print,nozoom,norotate" date="D:20230829170652+02'00'" name="2cdb3efa-1ff9-6e44-a52f-b566e2731248" icon="Comment" page="28" rect="314.472015,566.254272,338.472015,590.254272" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Not sure what you mean here? Why do we loose human bias? </span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,476.254272,799.280029,590.254272"
+/></text
+><text color="#FFD100" creationdate="D:20230829170431+02'00'" flags="print,nozoom,norotate" date="D:20230829170554+02'00'" name="136f6aa5-4532-234d-9a50-88d060c44a4d" icon="Comment" page="28" rect="529.162415,628.654114,553.162415,652.654114" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But possibly you would describe the language game setup already before on the background or method chapter. I would move all text there and make the language games description much more detailed, also giving examples. What is happening in terms of interaction? How is this modelled with the neural networks? It is important to emphasise this difference.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,538.654114,799.280029,652.654114"
+/></text
+><highlight color="#FCF485" opacity="0.248901" creationdate="D:20230829170347+02'00'" flags="print" date="D:20230829170358+02'00'" name="52997cce-f99d-c649-88e8-6f944a37b0cb" page="28" coords="98.564362,729.627808,137.346146,729.627808,98.564362,713.406128,137.346146,713.406128" rect="94.233948,712.899170,141.676559,730.134766" subject="Highlight" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Is this how they call it?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="28" rect="595.280029,615.627808,799.280029,729.627808"
+/></highlight
+><text color="#FFD100" creationdate="D:20230829171128+02'00'" flags="print,nozoom,norotate" date="D:20230829171200+02'00'" name="a1cac99e-f9a8-4b44-88c5-aa1c6563b2bc" icon="Comment" page="29" rect="160.872345,534.836121,184.872345,558.836121" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Deatils about the layers, their parameters. More explanatory figure caption.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="29" rect="595.280029,444.836121,799.280029,558.836121"
+/></text
+><text color="#FFD100" creationdate="D:20230829171752+02'00'" flags="print,nozoom,norotate" date="D:20230829171851+02'00'" name="2a65a75a-dada-624b-b886-f5c28717c695" icon="Comment" page="29" rect="392.144562,175.273315,416.144562,199.273315" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Motivation why this is so. The possible number of strings is {#colour} x {#shape} {object type} where all numbers except the last one also contain a padding token.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="29" rect="595.280029,85.273315,799.280029,199.273315"
+/></text
+><text color="#FFD100" creationdate="D:20230829171438+02'00'" flags="print,nozoom,norotate" date="D:20230829171529+02'00'" name="9ad1ef1d-71dd-9f45-9d39-86670bf2c883" icon="Comment" page="29" rect="535.707886,81.455322,559.707886,105.455322" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>This discussion of dimensions could already be introduced when you discuss simple modles earlier as the same dimensions are used. This is a more an evaluation of represnetations rather than interaction and hence it would fit there.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="29" rect="595.280029,-8.544678,799.280029,105.455322"
+/></text
+><text color="#FFD100" creationdate="D:20230829172341+02'00'" flags="print,nozoom,norotate" date="D:20230829172351+02'00'" name="57e95067-f2ed-6146-b6f5-3e11514dacec" icon="Comment" page="30" rect="458.035309,233.309509,482.035309,257.309509" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Calculation behind this figure?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,143.309509,799.280029,257.309509"
+/></text
+><text color="#FFD100" creationdate="D:20230829172244+02'00'" flags="print,nozoom,norotate" date="D:20230829172305+02'00'" name="53315255-98fe-4842-ba82-e5061b036e8f" icon="Comment" page="30" rect="404.799072,328.000214,428.799072,352.000214" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Hypothesis space to find the target function is just too big and they can never approximate that function.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,238.000214,799.280029,352.000214"
+/></text
+><text color="#FFD100" creationdate="D:20230829172014+02'00'" flags="print,nozoom,norotate" date="D:20230829172209+02'00'" name="858f2797-ea5c-5a4d-932f-3212ffaf6692" icon="Comment" page="30" rect="138.617859,354.618347,162.617859,378.618347" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Not sure, since we never tested smaller layer sizes. If the embedding layers are the same as the vocabulary size then at least a language encoding LSTM is not motivated to geenralise at all as it can keep representations for individual words without abstracting them. Leanring word embeddings involves reducing dimensions.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,264.618347,799.280029,378.618347"
+/></text
+><text color="#FFD100" creationdate="D:20230829171939+02'00'" flags="print,nozoom,norotate" date="D:20230829172001+02'00'" name="05ebc4b7-5c6f-f844-ab3d-26f941361669" icon="Comment" page="30" rect="529.162415,405.236420,553.162415,429.236420" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Could we say that calculation on Dale-5 is successful?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,315.236420,799.280029,429.236420"
+/></text
+><text color="#FFD100" creationdate="D:20230829171620+02'00'" flags="print,nozoom,norotate" date="D:20230829171716+02'00'" name="24b91cde-5423-ec42-8e3c-d38cea04b6c8" icon="Comment" page="30" rect="141.672394,464.145386,165.672394,488.145386" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>How do we know? What would happen if the hidden layers are smaller than the vocabulary size? We would also need to test several smaller dimensions.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,374.145386,799.280029,488.145386"
+/></text
+><text color="#FFD100" creationdate="D:20230829173846+02'00'" flags="print,nozoom,norotate" date="D:20230829173912+02'00'" name="a793b46c-6524-7a4e-8b6f-b91459bb6d34" icon="Comment" page="30" rect="500.362488,153.018799,524.362488,177.018799" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>We would need to show that the messages in Dale-2 are shorter than in Dale-5 to claim this.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,63.018799,799.280029,177.018799"
+/></text
+><text color="#FFD100" creationdate="D:20230829173942+02'00'" flags="print,nozoom,norotate" date="D:20230829174014+02'00'" name="30863683-c16d-fb47-81cc-37b338f02077" icon="Comment" page="30" rect="519.998840,741.671997,543.998840,765.671997" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>A note about the datasets chosen. Why do we choose these? Initially, we describe more than 3 datasets.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,651.671997,799.280029,765.671997"
+/></text
+><text color="#FFD100" creationdate="D:20230829174208+02'00'" flags="print,nozoom,norotate" date="D:20230829174315+02'00'" name="0808a7bd-1546-554b-aa0a-a5df87ddf633" icon="Comment" page="30" rect="525.235168,653.963135,549.235168,677.963135" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="30" rect="595.280029,563.963135,799.280029,677.963135"
+/></text
+><text color="#FFD100" creationdate="D:20230829175033+02'00'" flags="print,nozoom,norotate" date="D:20230829175255+02'00'" name="0a736cfb-9b49-7842-9902-f34319c300e8" icon="Comment" page="31" rect="534.835144,478.981689,558.835144,502.981689" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I don't understand how test and training set are used in these experiments. In language games one only has a training set and success is measured through the success in the game. It is not possible to have a test set as learning is continuous.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,512.908691,799.280029,626.908691"
+/></text
+><text color="#FFD100" creationdate="D:20230829175359+02'00'" flags="print,nozoom,norotate" date="D:20230829175406+02'00'" name="70e8113b-b9aa-9042-af9a-b57e6f7db55f" icon="Comment" page="31" rect="532.216980,433.163635,556.216980,457.163635" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I don't understand this.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,343.163635,799.280029,457.163635"
+/></text
+><text color="#FFD100" creationdate="D:20230829175502+02'00'" flags="print,nozoom,norotate" date="D:20230829175620+02'00'" name="49034407-4dac-a14f-854d-b9904fc3b4ba" icon="Comment" page="31" rect="437.962646,387.345551,461.962646,411.345551" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Is this controlled by the sender. The sender must have some policy how it is assigning messages. Or is it just random? But what makes the sender then to generate a single message vs a longer message. If it is not controlled - how could we implement some policies for message length?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,297.345551,799.280029,411.345551"
+/></text
+><text color="#FFD100" creationdate="D:20230829181146+02'00'" flags="print,nozoom,norotate" date="D:20230829181243+02'00'" name="72c15958-f3b0-ad47-941b-cb48ec72d5b5" icon="Comment" page="31" rect="151.708740,286.109436,175.708740,310.109436" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Differences between training and testing configuration; what happens during testing, there is no learning involved but the systems see new images but they have to use the same vocabulary?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,196.109436,799.280029,310.109436"
+/></text
+><text color="#FFD100" creationdate="D:20230829181310+02'00'" flags="print,nozoom,norotate" date="D:20230829181324+02'00'" name="f152405e-7c05-f44b-898c-2e357282a537" icon="Comment" page="31" rect="532.216980,300.072998,556.216980,324.072998" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>A table or a graph with these figures?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,210.072998,799.280029,324.072998"
+/></text
+><text color="#FFD100" creationdate="D:20230829181337+02'00'" flags="print,nozoom,norotate" date="D:20230829181454+02'00'" name="fbce594f-a85d-5849-9208-064331e1168e" icon="Comment" page="31" rect="366.835510,210.618652,390.835510,234.618652" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Are they? We haven't tested how humans would describe these scene. I see what you mean, but they you have to explain that you count as an English expression a description containing sequences of colour, size and type and then following the Dale and Reiter's algorithm.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,120.618652,799.280029,234.618652"
+/></text
+><text color="#FFD100" creationdate="D:20230829181507+02'00'" flags="print,nozoom,norotate" date="D:20230829181553+02'00'" name="6509ff21-67f1-f840-99fb-08faef86a889" icon="Comment" page="31" rect="209.308624,153.455139,233.308624,177.455139" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>All this has to do with the sender's policty how to generate messages. We should have varied this policy. I suspect no policy leads just to one message. How is the system motivated to generate more than one symbol?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="31" rect="595.280029,63.455139,799.280029,177.455139"
+/></text
+><highlight color="#FCF485" opacity="0.248901" creationdate="D:20230829181952+02'00'" flags="print" date="D:20230829181952+02'00'" name="7ad485b0-5be5-6c4d-b2b5-3eb57954605d" page="32" coords="212.237244,328.311707,484.615997,328.311707,212.237244,312.090057,484.615997,312.090057" rect="207.906830,311.583130,488.946411,328.818634" subject="Highlight" title="simon"
+><popup flags="print,nozoom,norotate" open="no" page="32" rect="595.280029,214.311707,799.280029,328.311707"
+/></highlight
+><text color="#FFD100" creationdate="D:20230829182023+02'00'" flags="print,nozoom,norotate" date="D:20230829182143+02'00'" name="ae0aefcb-c3df-0a46-8776-1ee995070169" icon="Comment" page="32" rect="539.198792,209.309570,563.198792,233.309570" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But this is slightly problematic, since we strcutured the world this way to emphasise these attributes visually. Hence, a mapping would indicate that the symbols have good semantics if they can discriminate the colours. But this could have to do with the compisitionality issue, perhaps the system was biased to use single word expressions and hence this interfered with the grounding.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="32" rect="595.280029,119.309570,799.280029,233.309570"
+/></text
+><highlight color="#FCF485" opacity="0.248901" creationdate="D:20230829182158+02'00'" flags="print" date="D:20230829182158+02'00'" name="a2592812-abb9-0f44-a7a4-a7374ae8bc77" page="32" coords="376.086426,179.270615,409.042664,179.270615,376.086426,163.048950,409.042664,163.048950" rect="371.756012,162.542023,413.373077,179.777542" subject="Highlight" title="simon"
+><popup flags="print,nozoom,norotate" open="no" page="32" rect="595.280029,65.270615,799.280029,179.270615"
+/></highlight
+><text color="#FFD100" creationdate="D:20230829182249+02'00'" flags="print,nozoom,norotate" date="D:20230829182848+02'00'" name="728a1a0b-8a54-ee45-a49c-37ab37f1a969" icon="Comment" page="32" rect="548.362366,75.346252,572.362366,99.346252" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>The probing test is to show how well the emerged language can be trasnlated into English descriptions consistting of labels of scene features using Dale and Reiter idea of incrementality. However, we would need to know now what was the policy of the sender to generate message. Was this similar to Dale and Reiter to enforce longer descriptions?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="32" rect="595.280029,-14.653748,799.280029,99.346252"
+/></text
+><highlight color="#FCF485" opacity="0.248901" creationdate="D:20230829182708+02'00'" flags="print" date="D:20230829182708+02'00'" name="071cd771-8216-0b48-a644-7f02f03958a8" page="33" coords="70.865997,607.685852,165.262405,607.685852,70.865997,591.464172,165.262405,591.464172" rect="66.535583,590.957275,169.592819,608.192749" subject="Highlight" title="simon"
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,493.685852,799.280029,607.685852"
+/></highlight
+><text color="#FFD100" creationdate="D:20230829182717+02'00'" flags="print,nozoom,norotate" date="D:20230829182741+02'00'" name="33ca6621-65e9-874c-aa0d-085cb163bdfb" icon="Comment" page="33" rect="534.398804,637.817688,558.398804,661.817688" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Move to the earlier paragraph when you introduce Dale and Reiter.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,547.817688,799.280029,661.817688"
+/></text
+><text color="#FFD100" creationdate="D:20230829182830+02'00'" flags="print,nozoom,norotate" date="D:20230829182835+02'00'" name="534c62b4-bdbd-7648-8a14-c59f3cb356c8" icon="Comment" page="33" rect="452.362610,512.145264,476.362610,536.145264" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Baselines?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,422.145264,799.280029,536.145264"
+/></text
+><text color="#FFD100" creationdate="D:20230829182913+02'00'" flags="print,nozoom,norotate" date="D:20230829182916+02'00'" name="02a9a031-25da-6d4b-95f3-47b84e389de2" icon="Comment" page="33" rect="234.617645,418.763672,258.617645,442.763672" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>We</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,328.763672,799.280029,442.763672"
+/></text
+><text color="#FFD100" creationdate="D:20230829183023+02'00'" flags="print,nozoom,norotate" date="D:20230829183052+02'00'" name="7b1ca33e-1298-dd43-a962-55f14c1e8bfb" icon="Comment" page="33" rect="145.599670,348.945648,169.599670,372.945648" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Is this encessary? But when and where is this loss using 0 inouts calculated?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,258.945648,799.280029,372.945648"
+/></text
+><text color="#FFD100" creationdate="D:20230829183205+02'00'" flags="print,nozoom,norotate" date="D:20230829183318+02'00'" name="046b3061-9737-4744-8158-9e7a5788e886" icon="Comment" page="33" rect="530.035156,104.582520,554.035156,128.582520" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I think at this point a readerwill be confused since we are discussing Dale and Reiter bith for generation of scenes and now for the generation of strings. We should have clarified the difference earlier. Also, rather than referring to it as Dale and Reiter we should call it "the incremental algorithm" and add a reference at first mention.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,14.582520,799.280029,128.582520"
+/></text
+><text color="#FFD100" creationdate="D:20230829183432+02'00'" flags="print,nozoom,norotate" date="D:20230829183554+02'00'" name="0408e464-4943-b348-9e5e-25254c194756" icon="Comment" page="33" rect="538.762390,293.091187,562.762390,317.091187" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I have a trouble of understanding and interpreting these results. First the loss should be estimated on a test set, after the system has been trained. I'm not sure how you estaimate the baseline loss.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="33" rect="595.280029,203.091187,799.280029,317.091187"
+/></text
+><text color="#FFD100" creationdate="D:20230829183750+02'00'" flags="print,nozoom,norotate" date="D:20230829183805+02'00'" name="4b7f89fb-9433-e14d-a379-97af51b1adbf" icon="Comment" page="34" rect="296.144775,495.999878,320.144775,519.999878" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>The sender uses the incremental algorithm?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="34" rect="595.280029,405.999878,799.280029,519.999878"
+/></text
+><text color="#FFD100" creationdate="D:20230829184057+02'00'" flags="print,nozoom,norotate" date="D:20230829184135+02'00'" name="533c477d-ba71-9e4a-93ea-c2b6963b4f17" icon="Comment" page="34" rect="460.653503,399.563690,484.653503,423.563690" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But here we don't need an LSTM, we just want to identify one of the objects. The LSTM should only encode the inout message.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="34" rect="595.280029,309.563690,799.280029,423.563690"
+/></text
+><text color="#FFD100" creationdate="D:20230829184912+02'00'" flags="print,nozoom,norotate" date="D:20230829184934+02'00'" name="2a702c7c-a2c7-a041-af09-4622b590cc70" icon="Comment" page="34" rect="125.090607,151.273376,149.090607,175.273376" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Reference back to when you reported this?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="34" rect="595.280029,61.273376,799.280029,175.273376"
+/></text
+><text color="#FFD100" creationdate="D:20230829185127+02'00'" flags="print,nozoom,norotate" date="D:20230829185153+02'00'" name="645f06bd-a260-d34c-bf4d-641649651179" icon="Comment" page="34" rect="535.707886,57.891724,559.707886,81.891724" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But receiver is not doing captioning? Is it incrementally identifying the objects as the sender's messages are coming in?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="34" rect="595.280029,-32.108276,799.280029,81.891724"
+/></text
+><text color="#FFD100" creationdate="D:20230829185622+02'00'" flags="print,nozoom,norotate" date="D:20230829185641+02'00'" name="e47bc3d9-0bc6-b147-9c53-56c57ad7c56e" icon="Comment" page="35" rect="466.762573,759.126526,490.762573,783.126526" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I'm not sure how teacher forcing is implemented, see my earlier comment</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,669.126526,799.280029,783.126526"
+/></text
+><text color="#FFD100" creationdate="D:20230829185729+02'00'" flags="print,nozoom,norotate" date="D:20230829185746+02'00'" name="935770e0-2ded-a747-a471-fab60ba9e8a1" icon="Comment" page="35" rect="51.781693,681.453979,75.781693,705.453979" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>So the sender is generating descriptions following the GRE policy?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,591.453979,799.280029,705.453979"
+/></text
+><text color="#FFD100" creationdate="D:20230829185905+02'00'" flags="print,nozoom,norotate" date="D:20230829185932+02'00'" name="ff49cedb-5541-194f-adb5-64f55b0dbf24" icon="Comment" page="35" rect="43.054428,324.945679,67.054428,348.945679" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>With the vocabulary size of 100.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,234.945679,799.280029,348.945679"
+/></text
+><text color="#FFD100" creationdate="D:20230829190043+02'00'" flags="print,nozoom,norotate" date="D:20230829190058+02'00'" name="576fcbba-7e55-e142-8c2d-a222e62a2380" icon="Comment" page="35" rect="198.399536,281.745789,222.399536,305.745789" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Not sure. The difference is still very small, within a couple of %.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,191.745789,799.280029,305.745789"
+/></text
+><text color="#FFD100" creationdate="D:20230829190116+02'00'" flags="print,nozoom,norotate" date="D:20230829190134+02'00'" name="3fbd228d-7057-de44-99cc-24e7886ef766" icon="Comment" page="35" rect="178.326874,204.073242,202.326874,228.073242" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Very small decerase for such a large difference in vocabulary size compared to what we have seen earlier.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,114.073242,799.280029,228.073242"
+/></text
+><text color="#FFD100" creationdate="D:20230829190223+02'00'" flags="print,nozoom,norotate" date="D:20230829190238+02'00'" name="68d22aa1-ec56-3140-b596-7b8b3b2d2983" icon="Comment" page="35" rect="283.926605,554.472412,307.926605,578.472412" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>What is word-by-word?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,464.472412,799.280029,578.472412"
+/></text
+><text color="#FFD100" creationdate="D:20230829190340+02'00'" flags="print,nozoom,norotate" date="D:20230829190544+02'00'" name="8ef94065-39f8-0046-8485-5f17b8e71026" icon="Comment" page="35" rect="541.380554,129.018860,565.380554,153.018860" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Here it would be much better to have a loss curve to show differences in loss between the number of communication events, the same could also be done for accuracy. Then we would have a clearer picture of how vocabulary size affects learning. It could be that with 100 vocabulary there is actually a better performance than before the final cut-off point. Is this possible? How was the final cut-off point determined anyway?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,39.018860,799.280029,153.018860"
+/></text
+><highlight color="#FCF485" opacity="0.248901" creationdate="D:20230829190609+02'00'" flags="print" date="D:20230829190609+02'00'" name="a6360604-bcc2-7f43-b725-3f495564e9e9" page="35" coords="228.906616,108.175705,524.412048,108.175705,228.906616,91.954041,524.412048,91.954041,70.865997,94.626694,132.884460,94.626694,70.865997,78.405029,132.884460,78.405029" rect="66.535583,77.898102,528.742432,108.682632" subject="Highlight" title="simon"
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,-5.824295,799.280029,108.175705"
+/></highlight
+><text color="#FFD100" creationdate="D:20230829190612+02'00'" flags="print,nozoom,norotate" date="D:20230829190635+02'00'" name="e8c3ba03-0fb1-fd41-b4f5-883da487f6fc" icon="Comment" page="35" rect="543.126038,84.509888,567.126038,108.509888" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Negative result: how can we then interpret that? What could we change? What did we learn from this?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="35" rect="595.280029,-5.490112,799.280029,108.509888"
+/></text
+><text color="#FFD100" creationdate="D:20230829190653+02'00'" flags="print,nozoom,norotate" date="D:20230829190719+02'00'" name="9dc021de-4d2e-4a48-8d83-c6b2ac7ac594" icon="Comment" page="36" rect="282.181152,700.217590,306.181152,724.217590" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But previously we have said that we are not going to study this game. But good that we have!</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="36" rect="595.280029,610.217590,799.280029,724.217590"
+/></text
+><text color="#FFD100" creationdate="D:20230829190731+02'00'" flags="print,nozoom,norotate" date="D:20230829190757+02'00'" name="06f2f6a5-66ba-b64f-a4e3-9dc8e25336b2" icon="Comment" page="36" rect="423.562653,659.199463,447.562653,683.199463" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Not true: human knowledge is still reflected in the way the environment is structured.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="36" rect="595.280029,569.199463,799.280029,683.199463"
+/></text
+><text color="#FFD100" creationdate="D:20230829190855+02'00'" flags="print,nozoom,norotate" date="D:20230829190908+02'00'" name="18093d51-678e-7c45-b515-ea57a42d8f7c" icon="Comment" page="36" rect="494.689789,548.799744,518.689819,572.799744" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Which contains human knowledge!</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="36" rect="595.280029,458.799744,799.280029,572.799744"
+/></text
+><text color="#FFD100" creationdate="D:20230829190930+02'00'" flags="print,nozoom,norotate" date="D:20230829190941+02'00'" name="180b7c0d-3be7-8941-8580-325164a406c0" icon="Comment" page="36" rect="526.980591,626.472290,550.980591,650.472290" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I'm not following this</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="36" rect="595.280029,536.472290,799.280029,650.472290"
+/></text
+><text color="#FFD100" creationdate="D:20230829191036+02'00'" flags="print,nozoom,norotate" date="D:20230829191202+02'00'" name="1c5c3986-ca0a-0548-ab4e-35c48137d14e" icon="Comment" page="36" rect="39.127167,420.509094,63.127167,444.509094" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Just thinking: would there be a more systematic way to compare all the models? Perhaps if you write the parameters in a table or a text that is parallel. Then you could simply say, modal A + these changes. It would be much clearer to the reader how all models are rerlated and it would be easier for the reader to follow.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="36" rect="595.280029,330.509094,799.280029,444.509094"
+/></text
+><text color="#FFD100" creationdate="D:20230829191225+02'00'" flags="print,nozoom,norotate" date="D:20230829191307+02'00'" name="d40496a0-a35d-fa47-a026-0409bd80bbb7" icon="Comment" page="36" rect="440.580811,313.600281,464.580811,337.600281" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Again, why LSTM, are we inceremtally identifying the image while we are processing each input word?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="36" rect="595.280029,223.600281,799.280029,337.600281"
+/></text
+><text color="#FFD100" creationdate="D:20230829191451+02'00'" flags="print,nozoom,norotate" date="D:20230829191513+02'00'" name="ead79bbc-f458-6f47-a33e-6a1795b15648" icon="Comment" page="37" rect="448.435333,319.709351,472.435333,343.709351" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Just occured to me: how do we measure accuracy if we are predicting numbers (numeric prediction)?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="37" rect="595.280029,229.709351,799.280029,343.709351"
+/></text
+><text color="#FFD100" creationdate="D:20230829191541+02'00'" flags="print,nozoom,norotate" date="D:20230829191624+02'00'" name="6fd7605a-bf70-714a-8fac-92ebd8b6f9f9" icon="Comment" page="37" rect="396.071808,253.382202,420.071808,277.382202" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>But how could it do so if the visual data is randomly distribution. It must rely on the message as that is the only source of information.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="37" rect="595.280029,163.382202,799.280029,277.382202"
+/></text
+><text color="#FFD100" creationdate="D:20230829191719+02'00'" flags="print,nozoom,norotate" date="D:20230829191742+02'00'" name="e8753df9-058c-9542-aaa1-afa0ca90553b" icon="Comment" page="38" rect="533.962402,735.562927,557.962402,759.562927" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>Remind the reader what is the size of the image so that they can interprert the distance relatively to that.</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="38" rect="595.280029,645.562927,799.280029,759.562927"
+/></text
+><underline color="#E52237" creationdate="D:20230829191902+02'00'" flags="print" date="D:20230829191902+02'00'" name="0cd3c937-9225-c246-9e86-3106256614a6" page="38" coords="102.611420,634.783813,524.411621,634.783813,102.611420,618.562134,524.411621,618.562134,70.865997,621.234863,188.411728,621.234863,70.865997,605.013184,188.411728,605.013184" rect="66.028656,603.999329,529.248962,635.797668" subject="Underline" title="simon"
+><popup flags="print,nozoom,norotate" open="no" page="38" rect="595.280029,520.783813,799.280029,634.783813"
+/></underline
+><text color="#FFD100" creationdate="D:20230829191906+02'00'" flags="print,nozoom,norotate" date="D:20230829191925+02'00'" name="7f00ce8b-460b-f04f-9e27-1f66c1ea3644" icon="Comment" page="38" rect="540.944214,613.381409,564.944214,637.381409" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>I don't understand this</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="38" rect="595.280029,523.381409,799.280029,637.381409"
+/></text
+><text color="#FFD100" creationdate="D:20230829192004+02'00'" flags="print,nozoom,norotate" date="D:20230829192116+02'00'" name="68abaca4-6b86-1642-bacd-3b20437fe605" icon="Comment" page="38" rect="538.326050,388.654633,562.326050,412.654633" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>A bit gloomy result. Negative result is okay but then we need an explanation why this is so and have some ideas what to change. What we can learn from these results?</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="38" rect="595.280029,298.654633,799.280029,412.654633"
+/></text
+><text color="#FFD100" creationdate="D:20230829192333+02'00'" flags="print,nozoom,norotate" date="D:20230829193149+02'00'" name="d7b3733b-25a4-9d49-96e6-5ca982a6aa42" icon="Comment" page="38" rect="40.436264,355.927429,64.436264,379.927429" subject="Sticky Note" title="simon"
+><contents-richtext
+><body xmlns="http://www.w3.org/1999/xhtml" xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/" xfa:APIVersion="Acrobat:23.3.0" xfa:spec="2.0.2"
+><p dir="ltr"
+><span dir="ltr" style="font-size:13.2pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>This identifies that the problem lies in how the sender encodes the messages; what is its policy to generate longer strings or reuse the word. Without a policy the sender will never be motivated to encode longer messages and therefore rely on single-word expressions.&#xD;&#xD;The second problem is the size of these networks. We should also test smaller embedding sizes than 10. Practice shows that the embedding sizes can be even several magnitues smaller than the vocabulary sizes, cf. the Bengio paper and word2vec.&#xD;&#xD;The reason why the system is not performing well on the pointing task is that it does not have the right features to learn from. It ahs visual information WHAT these objects are (what do they look like) but they do not have information WHERE these objects are,. John Kelleher and I wrote an opiiuon piece about the lack of spatial knowledge required to model spatial descriptions in CNNs. The same problem is probably occuring here. Replacing the features or adding geometric features that would communicate geometric relations that allow pointing would improve the task and also we would expect that a vocabulary would emerge such that some words are more biased towards visual features (to identify objects) and some more to geometric features (to locate them), hence WHAT and WHERE.&#xD;&#xD;</span
+><span dir="ltr" style="font-size:10.1pt;text-align:left;color:#000000;font-weight:normal;font-style:normal"
+>J. D. Kelleher and S. Dobnik. What is not where: the challenge of integrating spatial representations into deep learning architectures. In S. Dobnik and S. Lappin, editors, Proceedings of the Conference on Logic and Machine Learning in Natural Language (LaML 2017), Gothenburg, 12 –13 June, volume 1 of CLASP Papers in Computational Linguistics, pages 41–52, Gothenburg, Sweden, November 2017. Department of Philosophy, Linguistics and Theory of Science (FLOV), University of Gothenburg, CLASP, Centre for Language and Studies in Probability.https://gup.ub.gu.se/publication/262970?lang=en&#xD;&#xD;Overall, the thesis has a lot of potential if we could implement all this</span
+></p
+></body
+></contents-richtext
+><popup flags="print,nozoom,norotate" open="no" page="38" rect="595.280029,265.927429,799.280029,379.927429"
+/></text
 ></annots
 ><f href="main-2023-08-27-comments.pdf"
-/><ids original="04D7128C5F104CF52A2D8E664CB13B53" modified="985958D2326144C0BF68A02BCC878256"
+/><ids original="04D7128C5F104CF52A2D8E664CB13B53" modified="5968B1F98B764546872C2495E2A8A94B"
 /></xfdf
 >

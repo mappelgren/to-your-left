@@ -262,6 +262,8 @@ are
 
 Not shown in Table 5
 
+But there is an importnat difference that now we have two neural netweorks, the sender and the receiver.
+
 Not sure. Note that <pad> is a token. The model has to learn when to say <pad> just as any word, hence knowing when not to dewscribe is also trickly.
 
 I think we need individual accuracies per class and also precision, recall and the f-score. If we include the joint accuracy figure when you also need to explain how you avergaed the infividual accuracies.
@@ -281,4 +283,120 @@ Not in the table?
 Earlier you say that you will only try one method but now you have tried both. Change earlier text; also do you have full performance figures for this setup to include?
 
 But before you argued, rather pesimistically, that having distractors with the same attributes actaully contributes to greater performance as it is moire likely that the correct word is generated. I would only pose this as a very vague hypothesis to be tested, as you conclude now it is also the case that images with simialr distractors are more difficult to describe correctly. Hence, it is by no way given.
+
+Here it does not receive a boundig box of an object as in Lazaridou. They use whole images, don't they?
+
+On the contrary,...
+
+What is this setup?
+
+Why are we not testing it on all 3 games?
+
+Not sure what you mean here? Why do we loose human bias? 
+
+But possibly you would describe the language game setup already before on the background or method chapter. I would move all text there and make the language games description much more detailed, also giving examples. What is happening in terms of interaction? How is this modelled with the neural networks? It is important to emphasise this difference.
+
+Is this how they call it?
+
+Deatils about the layers, their parameters. More explanatory figure caption.
+
+Motivation why this is so. The possible number of strings is {#colour} x {#shape} {object type} where all numbers except the last one also contain a padding token.
+
+This discussion of dimensions could already be introduced when you discuss simple modles earlier as the same dimensions are used. This is a more an evaluation of represnetations rather than interaction and hence it would fit there.
+
+Calculation behind this figure?
+
+Hypothesis space to find the target function is just too big and they can never approximate that function.
+
+Not sure, since we never tested smaller layer sizes. If the embedding layers are the same as the vocabulary size then at least a language encoding LSTM is not motivated to geenralise at all as it can keep representations for individual words without abstracting them. Leanring word embeddings involves reducing dimensions.
+
+Could we say that calculation on Dale-5 is successful?
+
+How do we know? What would happen if the hidden layers are smaller than the vocabulary size? We would also need to test several smaller dimensions.
+
+We would need to show that the messages in Dale-2 are shorter than in Dale-5 to claim this.
+
+A note about the datasets chosen. Why do we choose these? Initially, we describe more than 3 datasets.
+
+As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.
+
+I don't understand how test and training set are used in these experiments. In language games one only has a training set and success is measured through the success in the game. It is not possible to have a test set as learning is continuous.
+
+I don't understand this.
+
+Is this controlled by the sender. The sender must have some policy how it is assigning messages. Or is it just random? But what makes the sender then to generate a single message vs a longer message. If it is not controlled - how could we implement some policies for message length?
+
+Differences between training and testing configuration; what happens during testing, there is no learning involved but the systems see new images but they have to use the same vocabulary?
+
+A table or a graph with these figures?
+
+Are they? We haven't tested how humans would describe these scene. I see what you mean, but they you have to explain that you count as an English expression a description containing sequences of colour, size and type and then following the Dale and Reiter's algorithm.
+
+All this has to do with the sender's policty how to generate messages. We should have varied this policy. I suspect no policy leads just to one message. How is the system motivated to generate more than one symbol?
+
+But this is slightly problematic, since we strcutured the world this way to emphasise these attributes visually. Hence, a mapping would indicate that the symbols have good semantics if they can discriminate the colours. But this could have to do with the compisitionality issue, perhaps the system was biased to use single word expressions and hence this interfered with the grounding.
+
+The probing test is to show how well the emerged language can be trasnlated into English descriptions consistting of labels of scene features using Dale and Reiter idea of incrementality. However, we would need to know now what was the policy of the sender to generate message. Was this similar to Dale and Reiter to enforce longer descriptions?
+
+Move to the earlier paragraph when you introduce Dale and Reiter.
+
+Baselines?
+
+We
+
+Is this encessary? But when and where is this loss using 0 inouts calculated?
+
+I think at this point a readerwill be confused since we are discussing Dale and Reiter bith for generation of scenes and now for the generation of strings. We should have clarified the difference earlier. Also, rather than referring to it as Dale and Reiter we should call it "the incremental algorithm" and add a reference at first mention.
+
+I have a trouble of understanding and interpreting these results. First the loss should be estimated on a test set, after the system has been trained. I'm not sure how you estaimate the baseline loss.
+
+The sender uses the incremental algorithm?
+
+But here we don't need an LSTM, we just want to identify one of the objects. The LSTM should only encode the inout message.
+
+Reference back to when you reported this?
+
+But receiver is not doing captioning? Is it incrementally identifying the objects as the sender's messages are coming in?
+
+I'm not sure how teacher forcing is implemented, see my earlier comment
+
+So the sender is generating descriptions following the GRE policy?
+
+With the vocabulary size of 100.
+
+Not sure. The difference is still very small, within a couple of %.
+
+Very small decerase for such a large difference in vocabulary size compared to what we have seen earlier.
+
+What is word-by-word?
+
+Here it would be much better to have a loss curve to show differences in loss between the number of communication events, the same could also be done for accuracy. Then we would have a clearer picture of how vocabulary size affects learning. It could be that with 100 vocabulary there is actually a better performance than before the final cut-off point. Is this possible? How was the final cut-off point determined anyway?
+
+Negative result: how can we then interpret that? What could we change? What did we learn from this?
+
+But previously we have said that we are not going to study this game. But good that we have!
+
+Not true: human knowledge is still reflected in the way the environment is structured.
+
+Which contains human knowledge!
+
+I'm not following this
+
+Just thinking: would there be a more systematic way to compare all the models? Perhaps if you write the parameters in a table or a text that is parallel. Then you could simply say, modal A + these changes. It would be much clearer to the reader how all models are rerlated and it would be easier for the reader to follow.
+
+Again, why LSTM, are we inceremtally identifying the image while we are processing each input word?
+
+Just occured to me: how do we measure accuracy if we are predicting numbers (numeric prediction)?
+
+But how could it do so if the visual data is randomly distribution. It must rely on the message as that is the only source of information.
+
+Remind the reader what is the size of the image so that they can interprert the distance relatively to that.
+
+I don't understand this
+
+A bit gloomy result. Negative result is okay but then we need an explanation why this is so and have some ideas what to change. What we can learn from these results?
+
+This identifies that the problem lies in how the sender encodes the messages; what is its policy to generate longer strings or reuse the word. Without a policy the sender will never be motivated to encode longer messages and therefore rely on single-word expressions.The second problem is the size of these networks. We should also test smaller embedding sizes than 10. Practice shows that the embedding sizes can be even several magnitues smaller than the vocabulary sizes, cf. the Bengio paper and word2vec.The reason why the system is not performing well on the pointing task is that it does not have the right features to learn from. It ahs visual information WHAT these objects are (what do they look like) but they do not have information WHERE these objects are,. John Kelleher and I wrote an opiiuon piece about the lack of spatial knowledge required to model spatial descriptions in CNNs. The same problem is probably occuring here. Replacing the features or adding geometric features that would communicate geometric relations that allow pointing would improve the task and also we would expect that a vocabulary would emerge such that some words are more biased towards visual features (to identify objects) and some more to geometric features (to locate them), hence WHAT and WHERE.
+
+J. D. Kelleher and S. Dobnik. What is not where: the challenge of integrating spatial representations into deep learning architectures. In S. Dobnik and S. Lappin, editors, Proceedings of the Conference on Logic and Machine Learning in Natural Language (LaML 2017), Gothenburg, 12 –13 June, volume 1 of CLASP Papers in Computational Linguistics, pages 41–52, Gothenburg, Sweden, November 2017. Department of Philosophy, Linguistics and Theory of Science (FLOV), University of Gothenburg, CLASP, Centre for Language and Studies in Probability.https://gup.ub.gu.se/publication/262970?lang=enOverall, the thesis has a lot of potential if we could implement all this
 
