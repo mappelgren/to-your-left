@@ -3,19 +3,15 @@ from dataclasses import dataclass
 from typing import Callable
 
 import torch
-from mlt.feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
+from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
-    Color,
     CoordinatePredictorDataset,
     DaleCaptionAttributeEncoder,
     OneHotAttributeEncoder,
-    PreprocessScratch,
-    Shape,
-    Size,
 )
 from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
@@ -26,7 +22,6 @@ from mlt.preexperiments.models import (
     CaptionGenerator,
     CoordinatePredictor,
     DaleAttributeCoordinatePredictor,
-    ImageEncoder,
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
 )
@@ -42,6 +37,12 @@ from mlt.preexperiments.test import (
     CaptionGeneratorTester,
     CoordinatePredictorTester,
     Tester,
+)
+from mlt.shared_models import (
+    BoundingBoxImageEncoder,
+    ClevrImageEncoder,
+    CoordinateClassifier,
+    MaskedImageEncoder,
 )
 from torch import nn, optim
 from torch.nn import Module
@@ -75,23 +76,12 @@ models = {
         dataset_args={},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=CoordinatePredictor,
-        model_args={"feature_extractor": DummyFeatureExtractor()},
-        loss_function=pixel_loss,
-        tester=CoordinatePredictorTester,
-        output_processor=PixelOutputProcessor,
-        output_processor_args={
-            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
-        },
-    ),
-    "coordinate_predictor_scratch": ModelDefinition(
-        dataset=CoordinatePredictorDataset,
-        dataset_args={},
-        preprocess=PreprocessScratch(250),
-        model=CoordinatePredictor,
         model_args={
-            "feature_extractor": ResnetFeatureExtractor(
-                pretrained=False, fine_tune=True
-            )
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=2048,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -100,16 +90,35 @@ models = {
             "output_fields": ("image_id", "x", "y", "target_x", "target_y")
         },
     ),
+    # not working at the moment
+    # "coordinate_predictor_scratch": ModelDefinition(
+    #     dataset=CoordinatePredictorDataset,
+    #     dataset_args={},
+    #     preprocess=PreprocessScratch(250),
+    #     model=CoordinatePredictor,
+    #     model_args={
+    #         "feature_extractor": ResnetFeatureExtractor(
+    #             pretrained=False, fine_tune=True
+    #         )
+    #     },
+    #     loss_function=pixel_loss,
+    #     tester=CoordinatePredictorTester,
+    #     output_processor=PixelOutputProcessor,
+    #     output_processor_args={
+    #         "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+    #     },
+    # ),
     "attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
         dataset_args={"attribute_encoder": OneHotAttributeEncoder()},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeCoordinatePredictor,
         model_args={
-            "number_colors": len(Color.names()),
-            "number_shapes": len(Shape.names()),
-            "number_sizes": len(Size.names()),
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=2048,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -132,7 +141,11 @@ models = {
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=2048,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -150,7 +163,11 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=AttributeLocationCoordinatePredictor,
         model_args={
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=2048,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -164,7 +181,16 @@ models = {
         dataset_args={"image_masker": BasicImageMasker()},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCoordinatePredictor,
-        model_args={"feature_extractor": DummyFeatureExtractor()},
+        model_args={
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=2048,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": MaskedImageEncoder(
+                encoder_out_dim=2048,
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
+        },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,
@@ -194,6 +220,7 @@ models = {
         model=BoundingBoxAttributeClassifier,
         model_args={
             "embedding_dimension": 10,
+            "image_encoder": BoundingBoxImageEncoder(embedding_dimension=10),
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
@@ -213,7 +240,7 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=CaptionGenerator,
         model_args={
-            "image_encoder": ImageEncoder(
+            "image_encoder": ClevrImageEncoder(
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
@@ -245,9 +272,12 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCaptionGenerator,
         model_args={
-            "image_encoder": ImageEncoder(
+            "image_encoder": ClevrImageEncoder(
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": MaskedImageEncoder(
+                encoder_out_dim=1024,
             ),
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),

@@ -1,8 +1,6 @@
-from functools import reduce
-
 import torch
-from mlt.feature_extractors import FeatureExtractor
-from torch import Tensor, nn
+from mlt.shared_models import CoordinateClassifier, ImageEncoder, MaskedImageEncoder
+from torch import nn
 
 
 class BoundingBoxClassifier(nn.Module):
@@ -45,12 +43,10 @@ class BoundingBoxAttributeClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(self, embedding_dimension) -> None:
+    def __init__(self, embedding_dimension, image_encoder: ImageEncoder) -> None:
         super().__init__()
 
-        self.image_encoder = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(embedding_dimension)
-        )
+        self.image_encoder = image_encoder
 
         self.linear_attributes = nn.LazyLinear(embedding_dimension)
 
@@ -79,24 +75,21 @@ class CoordinatePredictor(nn.Module):
      - image
     """
 
-    def __init__(self, feature_extractor: FeatureExtractor) -> None:
+    def __init__(
+        self, image_encoder: ImageEncoder, coordinate_classifier: CoordinateClassifier
+    ) -> None:
         super().__init__()
-        self.feature_extractor = feature_extractor
+        self.image_encoder = image_encoder
 
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.LazyLinear(1024),
-            nn.ReLU(),
-            nn.Linear(1024, 2),
-        )
+        self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
         image, *_ = data
 
-        extracted_features = self.feature_extractor(image)
-        classified = self.classifier(extracted_features)
+        encoded_image = self.image_encoder(image)
+        coordinates = self.coordinate_classifier(encoded_image)
 
-        return classified
+        return coordinates
 
 
 class AttributeCoordinatePredictor(nn.Module):
@@ -111,30 +104,22 @@ class AttributeCoordinatePredictor(nn.Module):
 
     def __init__(
         self,
-        number_colors,
-        number_shapes,
-        number_sizes,
-        feature_extractor: FeatureExtractor,
+        image_encoder: ImageEncoder,
+        coordinate_classifier: CoordinateClassifier,
     ) -> None:
         super().__init__()
-        self.feature_extractor = feature_extractor
+        self.image_encoder = image_encoder
 
-        self.process_features = nn.Sequential(
-            feature_extractor, nn.Flatten(), nn.LazyLinear(2048), nn.Dropout(0.2)
-        )
-
-        self.predictor = nn.Linear(
-            2048 + number_colors + number_shapes + number_sizes, 2
-        )
+        self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
         image, attribute_tensor, *_ = data
 
-        processed = self.process_features(image)
-        concatenated = torch.cat((processed, attribute_tensor), dim=1)
-        predicted = self.predictor(concatenated)
+        encoded_image = self.image_encoder(image)
+        concatenated = torch.cat((encoded_image, attribute_tensor), dim=1)
+        coordinates = self.coordinate_classifier(concatenated)
 
-        return predicted
+        return coordinates
 
 
 class AttributeLocationCoordinatePredictor(nn.Module):
@@ -149,42 +134,30 @@ class AttributeLocationCoordinatePredictor(nn.Module):
     """
 
     def __init__(
-        self,
-        feature_extractor: FeatureExtractor,
+        self, image_encoder: ImageEncoder, coordinate_classifier: CoordinateClassifier
     ) -> None:
         super().__init__()
-        self.cnn = nn.Sequential(
-            feature_extractor,
-            nn.LazyConv2d(512, kernel_size=1, padding=0),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Flatten(),
-        )
+        self.image_encoder = image_encoder
 
-        self.reduction = nn.LazyLinear(2048)
-
-        self.predictor = nn.LazyLinear(
-            2,
-        )
+        self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
         image, attribute_tensor, locations, *_ = data
 
-        cnn = self.cnn(image)
+        encoded_image = self.image_encoder(image)
 
-        # reduced = self.reduction(torch.flatten(pooled, start_dim=1))
         concatenated = torch.cat(
             (
-                cnn,
+                encoded_image,
                 attribute_tensor,
                 locations,
             ),
             dim=1,
         )
 
-        predicted = self.predictor(concatenated)
+        coordinates = self.coordinate_classifier(concatenated)
 
-        return predicted
+        return coordinates
 
 
 class DaleAttributeCoordinatePredictor(nn.Module):
@@ -203,45 +176,29 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         vocab_size,
         embedding_dim,
         encoder_out_dim,
-        feature_extractor: FeatureExtractor,
+        image_encoder: ImageEncoder,
+        coordinate_classifier: CoordinateClassifier,
     ) -> None:
         super().__init__()
-        self.process_image = nn.Sequential(
-            feature_extractor,
-            nn.LazyConv2d(128, kernel_size=1, padding=0),
-            nn.ReLU(),
-            nn.LazyConv2d(128, kernel_size=1, padding=0),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Flatten(),
-        )
+        self.image_encoder = image_encoder
 
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
 
-        self.predictor = nn.Sequential(
-            nn.Dropout(0.2),
-            nn.LazyLinear(1024),
-            nn.Dropout(0.2),
-            nn.ReLU(),
-            nn.LazyLinear(1024),
-            nn.Dropout(0.2),
-            nn.ReLU(),
-            nn.LazyLinear(2),
-        )
+        self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
         image, attribute_tensor, *_ = data
 
-        processed_image = self.process_image(image)
+        encoded_image = self.image_encoder(image)
 
         embedded = self.embedding(attribute_tensor)
         _, (hidden_state, _) = self.lstm(embedded)
 
-        concatenated = torch.cat((processed_image, hidden_state.squeeze()), dim=1)
-        predicted = self.predictor(concatenated)
+        concatenated = torch.cat((encoded_image, hidden_state.squeeze()), dim=1)
+        coordinates = self.coordinate_classifier(concatenated)
 
-        return predicted
+        return coordinates
 
 
 class MaskedCoordinatePredictor(nn.Module):
@@ -257,54 +214,29 @@ class MaskedCoordinatePredictor(nn.Module):
 
     def __init__(
         self,
-        feature_extractor: FeatureExtractor,
+        image_encoder: ImageEncoder,
+        masked_image_encoder: MaskedImageEncoder,
+        coordinate_classifier: CoordinateClassifier,
     ) -> None:
         super().__init__()
-        self.process_image = nn.Sequential(
-            feature_extractor, nn.Flatten(), nn.Dropout(0.3), nn.LazyLinear(2048)
-        )
+        self.image_encoder = image_encoder
+        self.masked_image_encoder = masked_image_encoder
 
-        self.process_masked_image = nn.Sequential(nn.Flatten(), nn.LazyLinear(2048))
-
-        self.predictor = nn.LazyLinear(2)
+        self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
         image, _, _, masked_image, *_ = data
 
-        reduced = self.process_image(image)
-        reduced_masked_image = self.process_masked_image(masked_image)
+        encoded_image = self.image_encoder(image)
+        encoded_masked_image = self.masked_image_encoder(masked_image)
 
         concatenated = torch.cat(
-            (reduced, reduced_masked_image),
+            (encoded_image, encoded_masked_image),
             dim=1,
         )
-        predicted = self.predictor(concatenated)
+        coordinates = self.coordinate_classifier(concatenated)
 
-        return predicted
-
-
-class ImageEncoder(nn.Module):
-    def __init__(
-        self,
-        encoder_out_dim,
-        feature_extractor: FeatureExtractor,
-    ) -> None:
-        super().__init__()
-        self.process_image = nn.Sequential(
-            feature_extractor,
-            nn.LazyConv2d(128, kernel_size=1, padding=0),
-            nn.ReLU(),
-            nn.LazyConv2d(128, kernel_size=1, padding=0),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-        )
-        self.mean_reduction = nn.LazyLinear(encoder_out_dim)
-
-    def forward(self, image):
-        processed_image = self.process_image(image)
-        flattened = torch.flatten(processed_image, start_dim=2).permute(0, 2, 1)
-        reduced = self.mean_reduction(flattened.mean(dim=1))
-        return reduced
+        return coordinates
 
 
 class CaptionDecoder(nn.Module):
@@ -330,7 +262,9 @@ class CaptionGenerator(nn.Module):
      - image
     """
 
-    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+    def __init__(
+        self, image_encoder: ImageEncoder, caption_decoder, encoded_sos
+    ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
         self.caption_decoder = caption_decoder
@@ -372,10 +306,16 @@ class MaskedCaptionGenerator(nn.Module):
      - image
     """
 
-    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
+    def __init__(
+        self,
+        image_encoder: ImageEncoder,
+        masked_image_encoder: MaskedImageEncoder,
+        caption_decoder,
+        encoded_sos,
+    ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.masked_image_encoder = nn.Sequential(nn.Flatten(), nn.LazyLinear(1024))
+        self.masked_image_encoder = masked_image_encoder
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 

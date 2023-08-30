@@ -40,7 +40,12 @@ from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     DaleCaptionAttributeEncoder,
 )
-from mlt.preexperiments.models import CaptionDecoder, ImageEncoder
+from mlt.preexperiments.models import CaptionDecoder
+from mlt.shared_models import (
+    ClevrImageEncoder,
+    CoordinateClassifier,
+    MaskedImageEncoder,
+)
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -110,14 +115,17 @@ models = {
         iterator=CaptionGeneratorGameBatchIterator,
         sender=CaptionGeneratorSender,
         sender_args={
-            "image_encoder": ImageEncoder(
+            "image_encoder": ClevrImageEncoder(
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": MaskedImageEncoder(
+                encoder_out_dim=1024,
             ),
         },
         receiver=CaptionGeneratorReceiver,
         receiver_args={
-            "image_encoder": ImageEncoder(
+            "image_encoder": ClevrImageEncoder(
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
@@ -146,11 +154,18 @@ models = {
         sender=DaleAttributeCoordinatePredictorSender,
         sender_args={
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
     ),
@@ -164,11 +179,21 @@ models = {
         iterator=CoordinatePredictorGameBatchIterator,
         sender=MaskedCoordinatePredictorSender,
         sender_args={
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": MaskedImageEncoder(
+                encoder_out_dim=1024,
+            ),
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
-            "feature_extractor": DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=1024,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
     ),
