@@ -4,7 +4,7 @@ from torch import nn
 
 
 class DummyReferentialSender(nn.Module):
-    def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
+    def __init__(self, hidden_size, *_args, **_kwargs) -> None:
         super().__init__()
         self.hidden_size = hidden_size
 

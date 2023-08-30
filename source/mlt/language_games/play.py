@@ -75,7 +75,7 @@ models = {
     "test_discriminator": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
-        split_dataset=True,
+        split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=DaleReferentialGameBatchIterator,
         sender=DummyReferentialSender,
@@ -87,7 +87,7 @@ models = {
     "discriminator": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
-        split_dataset=True,
+        split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=DaleReferentialGameBatchIterator,
         sender=ReferentialGameSender,
@@ -105,7 +105,7 @@ models = {
             ),
             "image_masker": BasicImageMasker(),
         },
-        split_dataset=True,
+        split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=CaptionGeneratorGameBatchIterator,
         sender=CaptionGeneratorSender,
@@ -140,7 +140,7 @@ models = {
                 reversed_caption=False,
             )
         },
-        split_dataset=True,
+        split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=CoordinatePredictorGameBatchIterator,
         sender=DaleAttributeCoordinatePredictorSender,
@@ -159,7 +159,7 @@ models = {
         dataset_args={
             "image_masker": BasicImageMasker(),
         },
-        split_dataset=True,
+        split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=CoordinatePredictorGameBatchIterator,
         sender=MaskedCoordinatePredictorSender,
