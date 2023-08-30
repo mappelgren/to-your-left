@@ -5,9 +5,16 @@
 Even though, recent large language models (LLMs) such as BERT \citep{Devlin2019} or GPT-3 \citep{Brown2020} produce impressive results on many tasks in Natural Language Processing, they are often only trained on big amounts of text corpora.
 In this way, their only way of learning, how to generate language as well as solve these tasks is to find patterns of how words and sentences are used in these large corpora.
 Many researchers criticize this approach, by arguing that these model can't learn meaning just by learning on text.
-In \citet{Bender2020}, the authors argue that meaning is bound to a communicative intent.
-These are the purposes of, why humans are using language.
-This intent is connected to the real world that exists outside of language, in other words it is grounded in the world.
+In \citep{Bender2020}, the authors argue that meaning is bound to a communicative intent.
+These are the purposes of why humans are using language.
+The intent is always embedded in a broader context that exists outside the language itself.
+This context includes the real world, but also the background knowledge of the speaker as well as interlocutors or reason for what the speaker is saying.
+By grounding the intent in this context, it becomes meaningful.
+Only with this step, the intent can be interpreted by the listeners.
+% This intent is connected to the real world that exists outside of language, in other words it is grounded in the world.
+% SD: Not just real world, also to background knowledge and what the person wants to do. 
+% SD: Grounding is more related to interpretability of expressions rather than intent. Without grounding they cannot be interpreted. The intent shapes WHAT referring expressions are generated in what contexts of the real world.   Hence, intent is a meta thing connecting world, language, knowledge and agent’s experience.
+% DK: first part included, referring expressions are included below (done)
 This grounding is missing, when models only train on abstract textual representations of the world.
 \citet{Bisk2020} argues that a multimodal approach, including for instance perception as well as social context, is needed to learn meaning in a broader context.
 One added modality to ground language is often vision. \cmtDK{cite}
@@ -15,13 +22,29 @@ Hereby, the model needs to learn how to associate linguistic concepts in text co
 For instance, a model can learn to associate the noun "dog" with an animal seen in an image or associate the action of "jumping over" with the animal being above an object.
 
 In a first step, models can combine linguistic knowledge with visual input, by referring to objects, seen in an image, with so called referring expressions.
-\cmtDK{write more}
-By doing this, the models ground parts of their language in another perception of the real world and get a step closer to learn the actual meaning.
-The learning of referring expressions is split in two fields.
+Hereby, the communicative intent as well as the broader context in which it is used determines which referring expressions are applied.
+By doing this, the models learn how to relate referring expressions against a representation of the environment.
+More specifically, the model learns to connect symbols to a non-symbolic representation.
+This is known as the symbol grounding problem \citep{Harnad1999,Roy2002}.
+Hereby, the question is asked how arbitrary symbols can be connected to the representation they actually stand for.
+
+To solve this problem, multiple challenges arise since language describes the world in a very under-specified way.
+For instance, sensory input for humans as well as for machines only show a very limited representation of the world.
+Vision needs to map a 3-d world into 2-d images.
+During this process, information about the world gets lost, as for example depth can't be perceived easily or objects might be obfuscated in certain perspectives.
+Following, language needs to be connected to a representation of the world that is already not complete.
+Secondly, referring expressions in language themselves are often under-specified.
+Given for example a table with five cups on top, an interlocutor is asked to retrieve one of the cups, referring to it by 'the red cup'.
+This referring expression on its own might be ambiguous and refer to multiple red cups on the table.
+The challenge now arises as how the interlocutor associates the correct cup with this referring expressions.
+This gets even more complex, when perspective is part of the referring expression as for example in 'the cup on the left' where \emph{left} is dependent on the speaker's and interlocutors' spatial position in relation to the cup \citep{Dobnik2021}.
+
+% By doing this, the models ground parts of their language in another perception of the real world and get a step closer to learn the actual meaning.
+% SD: They learn how to interpret expressions against some representation. Hence, a reference is a relation between a description and some entity, it’s interpretation. Without this connection referring expressions are useless as we do not know how to interpret this. Textual models might be good for general knowledge such as factual information from news and Wikipedia but as soon as we have NLP applications that interact with other domains, e.g. a ticket booking system or a situated robot involved in patient care, we need to connect language to some other representations to make language interpretable.
+% DK: done
+The learning of referring expressions is therefore split in two fields.
 In the referring expression generation, models learn how to produce referring expressions, when presented with visual input.
 In the referring expression understanding, sometimes referred to as coreference, models are trained on interpreting referring expressions and link them to visual input.
-
-
 
 A major challenge in natural language processing is, how machines can
 
@@ -57,15 +80,19 @@ The center of this thesis evolves around language games between deep neural mode
 Hereby, multiple deep neural agents need to solve a task, by communicating with symbols, which initially are not associated with any meaning.
 By using and interpreting these symbols in there communication, the agents start to give these symbols and their combinations meaning.
 After this process, a new artificial language emerged, with which the agents can communicate with each other.
+% SD: Give an example of a language games. Symbols are invented at random. However, the constraints of interaction control how new symbols are introduced and when existing symbols are re-used and used. Agents cannot invent unlimited number of symbols to refer to every event the6 encounter as they have limited memory and therefore they are driven by abstraction. On the other hand, the symbols must be flexible enough. The other agent must be able to resolve the symbols they hear based on the context. Hence, a successful interaction is when a describer is producing such symbols that interpreter can easily interpret within the context, here an image. This is also how a reward function is defined and loss is propagated.
+% DK: TODO
 
-In section \ref{sec:aims_languages}, I will explain reasons, why research in this field is conducted and how it may help in further research.
-Section \ref{sec:setup-lg} shows in more detail, how the language games are set up and how exactly agents can communicate and the language emerges.
-In section \ref{sec:properties-el}, I will discuss, how the emerged languages can be built up.
-Finally, section \ref{sec:referring} discusses, how the language games will be used in this thesis, to explore how agents can refer to objects in images.
+Section \ref{sec:aims_languages} explains reasons why research in this field is conducted and how it may help in further research.
+Section \ref{sec:setup-lg} shows in more detail how the language games are set up and how exactly agents can communicate and the language emerges.
+Section \ref{sec:properties-el} discusses, how the emerged languages can be built up.
+Finally, section \ref{sec:referring} discusses how the language games will be used in this thesis, to explore how agents can refer to objects in images.
 
 \subsubsection{Aims of emerged languages}
 \label{sec:aims_languages}
 The setup of language games allows for very controlled rules of how agents can behave.
+% SD: Rephrase, language games provide interactive constraints within which language can emerge. But what are these? In this thesis we will study some, such as agent’s memory and layer representation and the feature representation, the structure of the world and its ambiguity.
+% DK: TODO
 
 
 \subsubsection{Setup of language games}
@@ -75,7 +102,10 @@ The author describes language games as uses of language between multiple interlo
 These can be any small parts of conversations, for instance between a teacher and a student teaching a new concept or between two persons, discussing a topic.
 The rules in each of these situations differ and therefore the meanings and semantics of words and sentences may differ from situation to situation.
 An interjection 'Water!' may be a warning, an answer to a question, a request or something else, depending on the context.
-The meanings are bound to the rules of the language games.
+% SD: Because referring expressions are ambiguous participants rely on language games to resolve the reference in context.
+% SD: Give an example of a game?
+% DK: TODO
+meanings are bound to the rules of the language games.
 
 This reasoning was taken up, when trying to train artificial entities to produce a language.
 One of the original games is the signaling game, proposed by \citet{Lewis1969}.
@@ -87,6 +117,8 @@ Hence, both agents need to invent a language together, fit to the conditions of 
 The entities can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
 Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
 Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
+% SD: Examples of architectures from Baroni. The EGG framework.
+% DK: TODO
 
 % This reasoning was taken up, when trying to train deep neural models to produce language.
 % These models need to be set into an interactive situation, a language game, that meaning and a language can emerge (\citet{Baroni2020}).
@@ -101,12 +133,3 @@ Guided by the task and the rules, how agents can generate and interpret symbols,
 \label{sec:referring}
 
 \subsection{Artificial dataset}
-\cmtDK[inline]{\\
-    - CLEVR \\
-    ---- 3D objects \\
-    ---- simple objects \\
-    - CLEVR baselines \\
-}
-
-\subsection{Research question}
-

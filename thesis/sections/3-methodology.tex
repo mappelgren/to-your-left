@@ -1,27 +1,43 @@
-\section{Methodology}
+\section{Methodology and Frameworks}
 \label{sec:methodology}
 
-\subsection{CLEVR dataset}
-The basis for my datasets is the Visual Question Answering (VQA) dataset CLEVR \citep{Johnson2017a}.
-This dataset is split in two parts: a collection of images, and a set of questions and answers that refer and describe each image.
+\subsection{CLEVR framework}
+The basis for my datasets is the Visual Question Answering (VQA) framework CLEVR \citep{Johnson2017a}.
+This framework provides code to generate configurable VQA datasets that are split in two parts: a collection of images, and a set of questions and answers that refer and describe each image.
 Many of the existing VQA datasets come with two problems.
 First, they include many biases, such as biases in the base images and biases in the linguistic properties of the questions and answers.
 A relatively high number of images of dogs in a dataset, might for instance bias a classifier model towards classifying dogs most of the time.
 On the other hand, repeating patterns in the questions and answers might also be exploited by a model, without extracting the needed information from the image.
-For these reasons the CLEVR dataset aims to reduce the biases as much as possible in both images and questions and answers.
+For these reasons the CLEVR framework aims to reduce the biases as much as possible in both images and questions and answers as well as precisely control the remaining biases to explore their limits.
+% SD: Rather, being an artificial dataset, it allows us to precisely control the bias and therefore explore its limits.
+% DK: (added; done)
 Secondly, datasets may come with only a limited amount of annotations and information about the state in an image.
 The CLEVR dataset uses artificially rendered 3D-scenes.
-By doing so, all information about for instance the location of objects or their relations to each other can be saved and later used in training models or analyzing their results.
+By doing so, all information about for instance the location of objects or their relations to each other can be later used in training models or analyzing their results.
+Furthermore, it allows making predictions about different effects of varying contexts.
+% SD: We know the ground truth function that generated the scenes and hence we can also make predictions about different effects of contexts.
+% DK: (added; done)
 
-For this thesis, only the visual part of the dataset will be used and extended.
+For this thesis, the CLEVR framework will be extended to have more control over the generation of the images.
+With this extension, several datasets are created.
+The extensions are described in Chapter \ref{sec:creation-dataset}.
+Hereby, only the images and their ground truth properties are interesting for the present study of referring expressions.
+% SD: We will use the code to generate a new dataset of scenes and descriptions with the properties we want to study.
+% SD: You are not just taking their dataset but you are taking the framework and you are applying it on a new task, to generate a new dataset(s) with carefully controlled properties. The CLEVR framework is suitable for this because…
+% DK: made clearer, what is done in the thesis, and what described in which chapter (done)
 The questions and answers won't be used.
+In the following section the image generation of the original CLEVR framework is described.
 The visual part contains images of 3D-generated scenes depicting different kinds of simple objects.
 Each of these objects is made up of a different combination of attributes, such as \emph{shape}, \emph{color}, \emph{size} and \emph{material}.
 The possible values of these attributes are listed in Table \ref{tab:clevr-attributes}.
+% SD: Reference to GitHub, also perhaps in the following text when you describe your own code, it would be good to include a reference to the code as you go along.
+% DK: this only describes the original framework, my extension is in the next chapter with reference (done)
 Three to ten objects are placed in random locations into the scene and assigned with random attributes.
 To enhance realism and reduce ambiguity, objects are placed in a way that they do not intersect and have a certain distance from each other
 Furthermore, it is made sure that every object is almost completely visible.
 The position of the light and the camera are slightly jittered for each image to add noise reduce recurring patterns.
+Since the objects are part of 3-d scenes, they may appear differently for each image, because of different lighting and shadows, distances to the camera and rotations.
+This noise approximates the real world and natural environment, and makes it harder to learn for models compared to relatively noise-free projections on a 2-d plane.
 Figure \ref{fig:clevr-example} shows an example of a generated image in the CLEVR dataset.
 
 \begin{table}[h]
@@ -48,16 +64,16 @@ Figure \ref{fig:clevr-example} shows an example of a generated image in the CLEV
     \includegraphics[width=.8\linewidth]{figures/CLEVR_example.png}
     \caption{Example of a generated image in the CLEVR dataset}
     \label{fig:clevr-example}
+    % SD: Give also example of ground truth features that were used to generate this, i.e. objects and attributes.
+    % DK: TODO
 \end{figure}
 
 Furthermore, the dataset contains information about each scene.
 This includes all selected attributes for each object as well as the exact position of the centers of all the objects, both 3D-coordinates in the 3D scene and 2D-coordinates in the final rendered image.
 In addition, simple spatial relations (in front of, behind, left, right) between the objects are calculated and stored.
+% SD: For this, functions from the existing code are used, right?
+% DK: exactly. Here, it is only described, what is part of the original CLEVR dataset (done)
 These are simply based on the 3D-coordinates of the objects in relation to the position of the camera.
-
-In this thesis, the code for the generation of the images is extended, and multiple new datasets are created.
-The extension is detailed in section \ref{sec:creation-dataset}.
-
 
 \subsection{Feature extractors}
 In computer vision tasks, machines need to analyze images and extract information from them.
@@ -68,13 +84,13 @@ Traditional approaches involve extracting key points and descriptors from an ima
 More recently, convolutional neural networks (CNN) became popular due to their ability to learn complex features automatically from raw image data.
 These are also used in this thesis as a first layer to extract important information from the image. Hereby, two different architectures are tested.
 
-First, I use the VGG19 \citep{Simonyan2015} which is an architecture based on many convolutional layers.
+First, we use the VGG19 \citep{Simonyan2015} which is an architecture based on many convolutional layers.
 Using 16-19 convolutional layers with small convolution filters helps the model to solve localization and classification tasks on the training dataset, but also enables is to generalize onto other datasets.
 After the convolutional layers, the data is passed first through an average pooling layer which outputs 512x7x7 dimensions.
 Next follow three linear layers with \emph{ReLU} non-linearities in between.
 After flattening the input, these classification layers output 4069, 4069 and 1000 dimensions respectively.
 
-Secondly, I include the ResNet-101 \citep{He2016}.
+Secondly, we include the ResNet-101 \citep{He2016}.
 This architecture tries to overcome the degradation of very deep networks, where the accuracy rapidly drops after it gets saturated.
 This is done using residual blocks.
 A residual block consists of two or three convolutional layers and a residual connection, also known as a shortcut connection.
@@ -84,9 +100,16 @@ There are four blocks that output 256x56x56, 512x28x28, 1024x14x14 and 2048x1x1 
 A following average pooling layer outputs 2048x1x1 dimensions as well.
 The final linear layer reduces the flattened data to 1000 dimensions, corresponding to the ImageNet classes.
 
-Both architectures are available pretrained on an image classification task on the ImageNet dataset.
+Both architectures are available pretrained on an image classification task on the ImageNet dataset \citep{Deng2009}.
 In this thesis, the implementations and weights available for PyTorch are used.\footnote{\href{https://pytorch.org/hub/pytorch\_vision\_resnet/}{https://pytorch.org/hub/pytorch\_vision\_resnet/}}\textsuperscript{,}\footnote{\href{https://pytorch.org/hub/pytorch\_vision\_vgg/}{https://pytorch.org/hub/pytorch\_vision\_vgg/}}
 Since the task in this research is very different from a classification, it likely learned representations that are not directly transferrable to other tasks.
+The pretrained knowledge in both models might not be directly transferrable to new tasks as studied by \citet{Yosinski2014}.
+In this thesis, the task differs for multiple reasons.
+First, the used images for the pretraining and the present study are part of a different domain.
+Even though images of the CLEVR framework are generated to resemble the real world, they still only include abstract geometric objects while ImageNet contains real photos of persons, animals and objects.
+Furthermore, the original task for the pretraining is a classification task, whilst this thesis is interested in generating and understanding referring expressions.
+% SD: What are the differences? Mainly in the domain of objects and scenes. What data are VGG19 and ResNet trained on?
+% DK: (added; done)
 For this reason, multiple different adaptions of these architectures are compared.
 Table \ref{tab:feature-extractor-archs} lists the different adaptions for both VGG19 and ResNet-101 that will be used in this research.
 In the later chapters, it will be referred to these adaptions using the name in the table.
@@ -113,22 +136,47 @@ In the later chapters, it will be referred to these adaptions using the name in 
     \label{tab:feature-extractor-archs}
 \end{table}
 
-Furthermore, I experimented with both the pretrained models as well as with the architectures trained from scratch with a random initialization for the weights.
-This reason for this was to test if the success of an experiment was actually making use of the pretrained knowledge incorporated in the models.
-If that was not the case, the agents were likely not using image features, but instead relying on some other underlying patterns to solve the task.
-Basically, this approach works as an indicator to determine the actual success of the agents aside from measures as the accuracy or precision.
+% Furthermore, we experimented with both the pretrained models as well as with the architectures trained from scratch with a random initialization for the weights.
+% This reason for this was to test if the success of an experiment was actually making use of the pretrained knowledge incorporated in the models.
+% SD: Link to the discussion on what datasets the systems are trained on.
+% If that was not the case, the agents were likely not using image features, but instead relying on some other underlying patterns to solve the task.
+% Basically, this approach works as an indicator to determine the actual success of the agents aside from measures as the accuracy or precision.
+% SD: This is interestingly more complex and deserves much longer discussion. Pre-trained knowledge may be unhelpful if it is very different from the new domain. Hence, at some point training from scratch may be more successful. 
+% SD: What is success? Learning may take longer but then after some time the performance is better than with pre-training. 
+% SD: Since agents are free to invent new language it is not clear whether this will be align with the human language that influenced pre-training the visual models, hence there is both effect of domain and language here. 
+% SD: We should make these questions part of a discussion, particularly if we are comparing the effects of pre-training vs training from scratch in the experiments.
+% DK: learning from scratch not part of the thesis anymore, since not the focus and much more complex (done)
 
 \subsection{EGG framework}
 The goal of this thesis is to run and compare different setups of language games systematically.
 To do this, all experiments rely on the \emph{\textbf{E}mergence of lan\textbf{G}uage in \textbf{G}ames} (EGG) framework \citep{Kharitonov2019} which is implemented in PyTorch.
-This framework consists of a heavily configurable core that controls the generating and parsing of the message, the calculation of the loss and the rules, for how the weights of all neural models are trained.
-The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, an easy switch between different loss functions or a choice between Gumbel-Softmax relaxation and REINFORCE algorithms to learn neural models containing discrete symbols.
+% SD: What is the framework? We saw that language games can be implemented very differently, with robots, as code, etc. it is a neural model.
+% DK: (added; done)
+This framework allows the implementation of language games in code, where agents are neural models that communicate with each other.
+It consists of a heavily configurable core that controls the generating and parsing of the message, the calculation of the loss and the rules, for how the weights of all neural models are trained.
+% SD: You frequently start discussion by referring to quite specific concepts straight away in a very concise way, e.g. Gumbel Softmax, Reinforce, without defining them but then an explanation comes later in the text. The problem with this a reader would wonder what they are and would look for explanation. It is best to have a very general introduction, e.g. we will test two optimisation functions and then introduce them and explain them in one go later.
+% DK: (rephrased; done)
+The configuration includes for example a choice between single symbol and sequence messages with varying RNNs, an easy switch between different loss functions or a choice between two optimization functions (Gumbel-Softmax relaxation and REINFORCE algorithms) to learn neural models containing discrete symbols.
+% SD: More detailed description of all these. Readers will not be familiar with Gumbel-Softmax for example.
+% DK: (rephrased; done)
 Furthermore, runs of games can be saved to analyze the used messages of the agents and how they vary over the duration of the learning.
 
-The traditional approach to solve these problems relies on the REINFORCE algorithm \citep{Williams1992}. It uses the concept of Monte Carlo sampling to estimate the gradient of the expected cumulative reward with respect to the policy parameters. The basic idea is to collect trajectories by following the policy, compute the cumulative rewards for each trajectory, and then update the policy parameters to increase the probabilities of actions that led to higher rewards. REINFORCE is easy to implement and understand, but it suffers from high variance in gradient estimation due to the inherent randomness in the environment and the policy.
+The traditional approach to solve problems with a discrete channel relies on the REINFORCE algorithm \citep{Williams1992}.
+It uses the concept of Monte Carlo sampling to estimate the gradient of the expected cumulative reward with respect to the policy parameters.
+The basic idea is to collect trajectories by following the policy, compute the cumulative rewards for each trajectory, and then update the policy parameters to increase the probabilities of actions that led to higher rewards.
+% REINFORCE is easy to implement and understand, but it
+REINFORCE suffers from high variance in gradient estimation due to the inherent randomness in the environment and the policy.
+% SD: :-)
+% DK: (done)
 
-Gumbel-Softmax is a relaxation of the discrete categorical distribution to a continuous distribution that can be differentiated \citep{Jang2016}. It allows for the application of gradient-based optimization methods to discrete optimization problems. In the Gumbel-Softmax approach, randomness is introduced using the Gumbel distribution (a continuous distribution) and then the \emph{softmax} operation creates a distribution over discrete actions that can be differentiated.
+Gumbel-Softmax is a relaxation of the discrete categorical distribution to a continuous distribution that can be differentiated \citep{Jang2016}.
+It allows for the application of gradient-based optimization methods to discrete optimization problems.
+In the Gumbel-Softmax approach, randomness is introduced using the continuous Gumbel distribution.
+Following, the \emph{softmax} operation creates a distribution over discrete actions that can be differentiated.
 Gumbel-Softmax offers stable gradient estimates and can be more efficient than the traditional REINFORCE algorithm, especially when dealing with large action spaces.
+This also applies to language games, where \citet{Havrylov2017} demonstrated that Gumbel-Softmax relaxation is more effective.
+% SD: This is what a technical manual would say - but what does it do really? What is the difference between reinforce and Gumbel softmax in practice? In our case? Reinforce is still superior but here you make it less.
+% DK: I don't think, REINFORCE is superior also in our case, since GS offers more stability in learning (see citing) (TODO, explain GS)
 
 The EGG framework is set up in three levels.
 Part of the lowest level are the \emph{agents} themselves.
@@ -139,11 +187,15 @@ The receiver on the other hand parses the message received by the sender and pas
 The third level, the \emph{game} links all described parts together.
 It provides the agents with the input and passes the message from the sender to the receiver.
 Furthermore, it uses the output of the receiver and calculates the loss, which is then the basis for the adaption of the weights for both wrappers and agents.
+% SD: Include a diagram?
+% DK: TODO
 
 For the language games which are run in this thesis, the sender will always produce a sequence of symbols as a message, which the receiver will parse.
 Gumbel-Softmax relaxation is applied to produce discrete symbols.
-This is done using two LSTMs, an encoder LSTM in the sender wrapper and a decoder LSTM in the receiver wrapper.
+This is done in the default method of the EGG framework using two LSTMs, an encoder LSTM in the sender wrapper and a decoder LSTM in the receiver wrapper.
 The output of the sender agent is used as the initial hidden state for the encoder LSTM.
+% SD: This sounds like details of your implementation and should come later. Here, we would only need a general description of the EGG framework. Also for this text later, it would be good to have a diagram of all these steps and examples what these games actually are.
+% DK: this is actually the default implementation in EGG in therefore described here (TODO, diagram)
 This LSTM is then producing symbols until it generates an end-of-sequence symbol.
 This sequence is then passed to the receiver wrapper with its decoder LSTM.
 Its hidden state is initialized randomly.
@@ -153,8 +205,6 @@ The receiver agent is combining it with its representation of the image input an
 In other words the receiver agent produces as many outputs as symbols are present in the message.
 The \emph{game} is then calculating a loss for each of these outputs separately.
 These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
-
-\cmtDK{Gumbel-Softmax vs REINFORCE}
 
 \subsection{Ethical considerations}
 In the field of natural language processing (NLP) ethical issues often play major roles.
@@ -168,7 +218,9 @@ This applies for example to easy accessible large language model (LLMs) that can
 
 The research in this thesis tries to reduce these risks.
 Looking at the datasets that are used in this thesis, all data is created artificially and contains therefore no personal information.
-Even further, the aim of the creation of these datasets is to reduce biases.
+Even further, the aim of the creation of these datasets is to reduce and study the remaining biases.
+% SD: to study biases
+% DK: (rephrased; done)
 It doesn't include any social information, but on the other hand consists only of abstract scenes.
 The choice of which attributes the objects are made up is inherently biased towards human cognition, but doesn't have a social impact.
 The models and agents are therefore trained, by including as few human biases as possible.
@@ -178,3 +230,7 @@ Larger models as the feature extractors are already pretrained and add no additi
 
 Finally, the purpose of this thesis is to analyze the results and the emerged language and draw conclusions, how emerged languages can be grounded better in the environment.
 For that reason, the final models can't be uses in any real world applications and produce potential harm.
+On the other hand, this work can on the long run mitigate harm as it provides a study of models, how they would behave on real data.
+This therefore contributes towards interpretability of AI.
+% SD: The work can on the long run mitigate harm as it is provides a study of models, how they would behave on real data and therefore contributes towards interpretability of AI.
+% DK: (added; done)
