@@ -56,12 +56,10 @@ class ReferentialGameReceiver(nn.Module):
 
 
 class CaptionGeneratorSender(nn.Module):
-    def __init__(
-        self, image_encoder, masked_image_encoder, hidden_size, *_args, **_kwargs
-    ) -> None:
+    def __init__(self, image_encoder, hidden_size, *_args, **_kwargs) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.masked_image_encoder = masked_image_encoder
+        self.masked_image_encoder = nn.Sequential(nn.Flatten(), nn.LazyLinear(1024))
 
         self.linear = nn.LazyLinear(hidden_size)
 
@@ -207,11 +205,8 @@ class MaskedCoordinatePredictorSender(nn.Module):
             nn.LazyLinear(embedding_dimension),
         )
 
-        self.process_masked_image = nn.Sequential(
-            feature_extractor,
-            nn.Flatten(),
-            nn.Dropout(0.2),
-            nn.LazyLinear(embedding_dimension),
+        self.masked_image_encoder = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(embedding_dimension)
         )
 
         self.linear = nn.LazyLinear(hidden_size)
@@ -221,11 +216,10 @@ class MaskedCoordinatePredictorSender(nn.Module):
         masked_image = aux_input["masked_image"]
 
         reduced = self.process_image(image)
-
-        masked_reduced = self.process_masked_image(masked_image)
+        reduced_masked_image = self.masked_image_encoder(masked_image)
 
         concatenated = torch.cat(
-            (reduced, masked_reduced),
+            (reduced, reduced_masked_image),
             dim=1,
         )
 

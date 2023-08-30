@@ -36,7 +36,6 @@ from mlt.language_games.models import (
     ReferentialGameSender,
 )
 from mlt.language_games.test import captioning_loss, classification_loss, pixel_loss
-from mlt.preexperiments import train
 from mlt.preexperiments.data_readers import (
     BasicImageMasker,
     DaleCaptionAttributeEncoder,
@@ -112,10 +111,6 @@ models = {
         sender=CaptionGeneratorSender,
         sender_args={
             "image_encoder": ImageEncoder(
-                encoder_out_dim=1024,
-                feature_extractor=DummyFeatureExtractor(),
-            ),
-            "masked_image_encoder": ImageEncoder(
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),

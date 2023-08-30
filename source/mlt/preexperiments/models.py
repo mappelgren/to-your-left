@@ -1,6 +1,8 @@
+from functools import reduce
+
 import torch
 from mlt.feature_extractors import FeatureExtractor
-from torch import nn
+from torch import Tensor, nn
 
 
 class BoundingBoxClassifier(nn.Module):
@@ -262,23 +264,18 @@ class MaskedCoordinatePredictor(nn.Module):
             feature_extractor, nn.Flatten(), nn.Dropout(0.3), nn.LazyLinear(2048)
         )
 
-        self.process_masked_image = nn.Sequential(
-            feature_extractor, nn.Flatten(), nn.Dropout(0.3), nn.LazyLinear(2048)
-        )
+        self.process_masked_image = nn.Sequential(nn.Flatten(), nn.LazyLinear(2048))
 
-        self.predictor = nn.Linear(
-            4096,
-            2,
-        )
+        self.predictor = nn.LazyLinear(2)
 
     def forward(self, data):
         image, _, _, masked_image, *_ = data
 
         reduced = self.process_image(image)
-        masked_reduced = self.process_masked_image(masked_image)
+        reduced_masked_image = self.process_masked_image(masked_image)
 
         concatenated = torch.cat(
-            (reduced, masked_reduced),
+            (reduced, reduced_masked_image),
             dim=1,
         )
         predicted = self.predictor(concatenated)
@@ -375,12 +372,10 @@ class MaskedCaptionGenerator(nn.Module):
      - image
     """
 
-    def __init__(
-        self, image_encoder, masked_image_encoder, caption_decoder, encoded_sos
-    ) -> None:
+    def __init__(self, image_encoder, caption_decoder, encoded_sos) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.masked_image_encoder = masked_image_encoder
+        self.masked_image_encoder = nn.Sequential(nn.Flatten(), nn.LazyLinear(1024))
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 
