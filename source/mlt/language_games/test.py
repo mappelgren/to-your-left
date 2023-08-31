@@ -38,7 +38,7 @@ def captioning_loss(
     ):
         for caption in sample:
             described_non_target_object = torch.tensor(False)
-            if torch.equal(output_sample, caption):
+            if torch.equal(output_sample, caption[1:]):
                 described_non_target_object = torch.tensor(True)
                 break
         non_target_accuracy.update(
