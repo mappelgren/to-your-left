@@ -319,6 +319,12 @@ def get_params(params):
         help="save models to checkpoint",
     )
     parser.add_argument(
+        "--progress_bar",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="display progress bar",
+    )
+    parser.add_argument(
         "--out_dir",
         type=str,
         default="out/",
@@ -419,13 +425,20 @@ def main(params):
             ]
         )
     else:
-        callbacks.append(
-            core.ProgressBarLogger(
-                n_epochs=opts.n_epochs,
-                train_data_len=opts.batches_per_epoch,
-                test_data_len=opts.batches_per_epoch,
+        if opts.progress_bar:
+            callbacks.append(
+                core.ProgressBarLogger(
+                    n_epochs=opts.n_epochs,
+                    train_data_len=opts.batches_per_epoch,
+                    test_data_len=opts.batches_per_epoch,
+                )
             )
-        )
+        else:
+            callbacks.append(
+                core.ConsoleLogger(
+                    print_train_loss=True,
+                ),
+            )
 
     if opts.save:
         out_dir = os.path.join(
