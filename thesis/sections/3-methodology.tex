@@ -76,6 +76,7 @@ In addition, simple spatial relations (in front of, behind, left, right) between
 These are simply based on the 3D-coordinates of the objects in relation to the position of the camera.
 
 \subsection{Feature extractors}
+\cmtDK[inline]{preprocessing}
 In computer vision tasks, machines need to analyze images and extract information from them.
 To do this, machines often rely on feature extractors.
 Features are important parts or patterns in an image, which can have different levels of abstractions.
@@ -148,6 +149,9 @@ In the later chapters, it will be referred to these adaptions using the name in 
 % DK: learning from scratch not part of the thesis anymore, since not the focus and much more complex (done)
 
 \subsection{Image processing}
+\cmtDK[inline]{how are feature extractors used in my models}
+\cmtDK[inline]{refer to Johnson2017a}
+\cmtDK[inline]{masking and how are they processed (convolutions to bring it to the same shape)}
 
 \subsection{EGG framework}
 The goal of this thesis is to run and compare different setups of language games systematically.
@@ -162,23 +166,6 @@ The configuration includes for example a choice between single symbol and sequen
 % SD: More detailed description of all these. Readers will not be familiar with Gumbel-Softmax for example.
 % DK: (rephrased; done)
 Furthermore, runs of games can be saved to analyze the used messages of the agents and how they vary over the duration of the learning.
-
-The traditional approach to solve problems with a discrete channel relies on the REINFORCE algorithm \citep{Williams1992}.
-It uses the concept of Monte Carlo sampling to estimate the gradient of the expected cumulative reward with respect to the policy parameters.
-The basic idea is to collect trajectories by following the policy, compute the cumulative rewards for each trajectory, and then update the policy parameters to increase the probabilities of actions that led to higher rewards.
-% REINFORCE is easy to implement and understand, but it
-REINFORCE suffers from high variance in gradient estimation due to the inherent randomness in the environment and the policy.
-% SD: :-)
-% DK: (done)
-
-Gumbel-Softmax is a relaxation of the discrete categorical distribution to a continuous distribution that can be differentiated \citep{Jang2017}.
-It allows for the application of gradient-based optimization methods to discrete optimization problems.
-In the Gumbel-Softmax approach, randomness is introduced using the continuous Gumbel distribution.
-Following, the \emph{softmax} operation creates a distribution over discrete actions that can be differentiated.
-Gumbel-Softmax offers stable gradient estimates and can be more efficient than the traditional REINFORCE algorithm, especially when dealing with large action spaces.
-This also applies to language games, where \citet{Havrylov2017} demonstrated that Gumbel-Softmax relaxation is more effective.
-% SD: This is what a technical manual would say - but what does it do really? What is the difference between reinforce and Gumbel softmax in practice? In our case? Reinforce is still superior but here you make it less.
-% DK: I don't think, REINFORCE is superior also in our case, since GS offers more stability in learning (see citing) (TODO, explain GS)
 
 The EGG framework is set up in three levels.
 Part of the lowest level are the \emph{agents} themselves.
@@ -209,8 +196,25 @@ The \emph{game} is then calculating a loss for each of these outputs separately.
 These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
 
 \subsection{Optimization in language games}
+The traditional approach to solve problems with a discrete channel relies on the REINFORCE algorithm \citep{Williams1992}.
+It uses the concept of Monte Carlo sampling to estimate the gradient of the expected cumulative reward with respect to the policy parameters.
+The basic idea is to collect trajectories by following the policy, compute the cumulative rewards for each trajectory, and then update the policy parameters to increase the probabilities of actions that led to higher rewards.
+% REINFORCE is easy to implement and understand, but it
+REINFORCE suffers from high variance in gradient estimation due to the inherent randomness in the environment and the policy.
+% SD: :-)
+% DK: (done)
+
+Gumbel-Softmax is a relaxation of the discrete categorical distribution to a continuous distribution that can be differentiated \citep{Jang2017}.
+It allows for the application of gradient-based optimization methods to discrete optimization problems.
+In the Gumbel-Softmax approach, randomness is introduced using the continuous Gumbel distribution.
+Following, the \emph{softmax} operation creates a distribution over discrete actions that can be differentiated.
+Gumbel-Softmax offers stable gradient estimates and can be more efficient than the traditional REINFORCE algorithm, especially when dealing with large action spaces.
+This also applies to language games, where \citet{Havrylov2017} demonstrated that Gumbel-Softmax relaxation is more effective.
+% SD: This is what a technical manual would say - but what does it do really? What is the difference between reinforce and Gumbel softmax in practice? In our case? Reinforce is still superior but here you make it less.
+% DK: I don't think, REINFORCE is superior also in our case, since GS offers more stability in learning (see citing) (TODO, explain GS)
 
 \subsection{Probing?}
+\cmtDK[inline]{reason for usage and techniques fits more into theoretical background}
 
 \subsection{Ethical considerations}
 In the field of natural language processing (NLP) ethical issues often play major roles.
