@@ -1,0 +1,703 @@
+\section{Generating and understanding referring expressions}
+\label{sec:preexperiments}
+This chapter serves two purposes.
+First, the generated dataset from the precious section is validated.
+For this, models are trained to both generate referring expressions of the target object and understand existing referring expressions.
+A success of these experiments indicates that the target objects in the datasets are possible to refer to and the datasets can be used in more complex setups in language games.
+
+Secondly, the experiments in this chapter provide the basis for the setup of the agents in the language games.
+Language games are very complex setups for machine learning models.
+The models need to solve multiple tasks at the same time in order to solve the overall problem.
+For instance, in a simple setup of a game two agents are involved.
+The first agent, the sender, is shown a scene with objects and needs to communicate one target object to the other agent, the receiver.
+The receiver is shown the same scene and needs to identify the target object with respect to the message of the sender.
+In this case, the sender first needs to learn to encode the scene, all objects and their attributes, as well as the information about the target object into its own game specific space.
+In a next step it needs to learn how to translate this encoding into a message that is sent to the receiver.
+The receiver then needs to learn to decode this message, after which it needs to learn how to combine the decoded message with its own encoding of the scene and objects.
+And finally it needs to learn how to identify the target object with this information.
+There are many points of possible failure to train the agents.
+% SD: This should go at the beginning where language games with neural agents are introduced.
+% DK: TODO
+
+For this reason, we decided to divide the main problem and let the models learn simpler subtasks and increase the complexity step by step.\footnote{\href{https://github.com/DominikKuenkele/MLT\_Master-Thesis}{https://github.com/DominikKuenkele/MLT\_Master-Thesis}}
+This will give a very detailed overview where the models struggle to learn and in which ways they can be improved.
+Mainly, the tasks are separated into language games with two agents and classical machine learning tasks without any communication, namely only one 'agent' that solves the task alone.
+With this division, we can analyze the learning of the encodings of the scenes separately from the learning of producing and decoding messages.
+
+% TODO maybe move to front...
+The final objective of this thesis is to find out, how agents can communicate about relations of objects based on their attributes, namely how to generate and understand referring expressions.
+Because of that, the first experiments focus on extracting information from images and combining them with structured knowledge about the objects.
+Here, we structured the experiments into three levels.
+In the first level, the models are trained to learn the position of objects in the image and attend to specific regions of the image, by understanding a referring expression of the target object.
+% SD: This is a natural language understanding or reference resolution task.
+% DK: TODO maybe put into methods...
+In the second level, the models are trained to differentiate objects in the scene from each other, again by understanding referring expressions.
+% SD: Object identification task
+% DK: TODO
+In the last level, the models are trained to generate referring expressions, more specifically the models learn to caption and describe objects in the image.
+% SD: Referring expression generation task
+% DK: TODO
+These combined experiments should lay the basis for how to build up the agents in the language games.
+% SD: We are validating the dataset on 3 tasks
+% DK: TODO
+
+\subsection{Reference resolution}
+% SD: Reference resolution task
+% DK: TODO
+\label{sec:reference_resolution}
+\subsubsection*{Setup}
+
+This level should help to analyze, how the final task of the language game should look like, in especially what the receiver is tasked to predict.
+As described before, the sender should communicate an object in the image and the receiver needs to identify it.
+The challenge lies in how the receiver refers to the identified object.
+There are multiple possibilities, how it can be done.
+One of them could be to describe the target object with human language, using the attributes.
+The main goal however is to let the language of the agents emerge as natural as possible.
+Including human knowledge into the task would bias also the emerged language towards attributes and words, used in natural language.
+For this reason, the final task of the receiver will be to 'point' to the target object.
+The models are therefore tasked to predict the center coordinates of the target object.
+% SD: Reference resolution with identification of location. The other task, object identification is also resolving reference but it is easier as you are only picking objects. The first task also involves spatial knowledge.
+% DK: TODO
+With this approach, the models receive few human knowledge, but are still able to rely on all information present in the image to discriminate the objects.
+
+To achieve this goal, multiple setups of models are tested.
+In the simplest setup, the model receives only the image \cmtDK{preprocess image} as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
+% SD: What are the features?
+% SD: Note that these are visual features and not spatial features. It is true that visual features also encode some spatial information, how visual features relate to each other, but such information is very different from the spatial information required to predict coordinates in a coordinate frames, and hence we expect the task will be very hard.
+% DK: TODO
+Here the image is first passed through one of the \emph{feature extractors}.
+Next, the extracted feature vector is flattened and passed through two linear layers with a \emph{ReLU} non-linearity in between.
+These reduce the dimensions first to 1024 and finally to 2.
+
+To determine the loss, the euclidean distance between the resulting predicted point on the image and the ground truth point are calculated.
+This distance is learned to be minimized.
+By doing that, the model learns to focus and attend on a specific part in the image, in a perfect model the center of the target objects.
+
+With this simple setup, the model is theoretically able to focus on an object in the image.
+% SD: Very precisely. This is higher resolution that attention in the visual models that operates on o 7x7 grid, normally.
+% DK: TODO
+The problem arises as soon as multiple objects are present in the image.
+There is no information available for the model to understand which one of these objects is the actual target object, except for the final calculation of the loss.
+Since there is not necessarily a pattern for which object in the image is the correct target object over the whole dataset, the models will likely fail to generalize.
+Therefore, the models need to receive more information.
+Here, we try out four different ways to encode and refer to the target object.
+
+\begin{figure}[ht]
+    \centering
+    \subfigure[Model including one-hot encoded attributes and locations]{
+        \includegraphics[width=0.35\linewidth]{figures/arch_coordinate_predictor.png}
+        \label{fig:coordinate_predictor_architecture}
+    }
+    \subfigure[Model including GRE description]{
+        \includegraphics[width=0.315\linewidth]{figures/arch_coordinate_predictor_dale.png}
+        \label{fig:coordinate_predictor_dale_architecture}
+    }
+    \caption{Simplified architecture of the coordinate predictors}
+    % SD: How are these encoded?
+    % DK: TODO
+\end{figure}
+
+In the first method, we encode the attributes of the target object as \textbf{one-hot encodings}.
+There is a three-dimensional vector encoding the \emph{shape}, an eight-dimensional vector encoding the color and a two-dimensional vector encoding the two different sizes.
+The values of each dimension of these vectors can either be zero or one, depending on the attributes of the target object.
+These three encodings of the attributes are then concatenated.
+The image is again passed through a feature extractor, before the flattened vector is reduced to 2048 dimensions with a linear layer.
+The result is concatenated with the encoded attributes and passed to a final linear layer to predict the coordinates.
+
+In an extension to this method, we also include the \textbf{center coordinates of all objects} in the image.
+% SD: Encoded locations?
+% DK: TODO
+This should help the model to identify all possible options to chose from, when predicting the target object.
+All the center coordinates are simply extracted and shuffled.
+Since there are varying numbers of objects in the image, this vector of variable length is padded to the maximum number of objects in the dataset.
+The padded locations consist of two zeros for both coordinates.
+For this model, we also made use of a more complex way to encode the image.
+Here, we based the approach on code that implements baselines for the CLEVR dataset \citep{Johnson2017}.
+The image is first passed through the feature extractor.
+Afterwards, a 2-dimensional convolutional layer, reduces the channels from 2048 to 512 channels with a kernel size of 1.
+After applying the \emph{ReLU} function, the resulting matrix is max pooled over two dimensions with both a kernel size and a stride of 2.
+The resulting matrix is flattened and concatenated with both the attribute encodings and the shuffled coordinates of all objects.
+% SD: Why shuffled? If we order them the way they appear in the image, the model will have more information that they are sequentially related.
+% DK: TODO
+This is then passed again through a final linear layer to predict x- and y-coordinates.
+% SD: Convolutions are only applied on visual features, not object attribute features and locations.
+% DK: TODO
+
+The third method encodes the attributes of the target object with human language using the \textbf{incremental algorithm for the Generation of Referring Expressions (GRE)} described in \citep{Dale1995}.
+This opposes the idea described before, to share as few human knowledge as possible with the model.
+Still, this approach can help to understand and analyze if the model was able to extract information about the objects and more specifically their attributes from the image.
+% SD: The question you are asking is whether it is possible to predict location from the visual appearance of the object. This is highly complex task as it requires quite two step reasoning, identification of features with that attribute, e.g. blue and then locating that feature in the image.
+% DK: TODO
+If the model is able to match parts of the image with human words it would show that the model learned this attribute.
+If the model in a next step can learn this for the whole dataset, this would mean that it could generalize over these attributes and assign them to certain regions in an image.
+This insight would help for succeeding models that make use of these learnings without human language.
+
+Using the algorithm, one can describe an object using its attributes to discriminate it from other objects as efficiently as possible.
+In other words, the object is described unambiguously using the lowest number of words.
+The algorithm assumes that there is an order of importance for attributes, such as shape, color and size.
+This order defines, which attributes can be left out, while still identifying the object uniquely.
+This research relies on the following order from most important to least important: shape, color, size
+Given for example the scene from \ref{fig:clevr-dale-5} with the target object being the \emph{big purple cylinder}.
+Using all three attributes, this description identifies the object perfectly and uniquely.
+Following the algorithm, we could make the description shorter by removing the least important attribute \emph{size} without loosing unambiguity, describing it as the \emph{purple cylinder}.
+This can be taken even one step further by removing also the \emph{color}.
+Describing it as the \emph{cylinder} still doesn't describe any distractor, since the target object is the only cylinder in the scene.
+% SD: See my point earlier about the reversed algorithm between the two tasks 
+% DK: TODO
+
+For the experiments, each image is captioned with a description of the target object using the described algorithm.
+To include it in the model, the captions need to be padded to an equal length.
+In this case they are padded to a length of 3, which is the maximum number of attributes that can be used.
+For this, as standard practice in captioning tasks, the captions are padded at the end with a specified padding token.
+
+The model is made up of three parts:
+The first part extracts features from the image.
+Here, the setup is similar to the previous model.
+The image is passed through a feature extractor, before it is passed through two 2d convolutional layers, both reducing the channels to 128 with a kernel size of 1.
+A \emph{ReLU} function is applied, after both convolutional layers.
+As before, the resulting vector is pooled, using max pooling with both a kernel size and stride of 2.
+In the second part, the caption is encoded, using an LSTM.
+Here, the learned embeddings of each token are parsed by the LSTM and its final hidden state is then used as a summary of the complete caption.
+The third part is again the predictor of the coordinates of the target object.
+Both the processed image and the final hidden state of the LSTM are flattened and concatenated.
+The resulting vector is passed through three linear layers reducing to 1024, 1024 and 2 dimensions respectively.
+Between each linear layer, the \emph{ReLU} function is applied.
+This architecture is also inspired by the baselines described in \citep{Johnson2017}.
+% SD: \citep and \citet Use Name (year) when you are referring to particular person and (Name, year) when you are referring to a paper. Hence, in this case it would be the latter.
+% DK: done
+
+The forth method, to encode the target object utilizes \textbf{masking} of the image.
+% SD: Oh, before we talked about 3 methods
+% DK: done
+For this, the image is separated into a fixed size squared area containing the target object and the rest of the image.
+The side of the square is always two fifth of the image width, in this case 192 pixels.
+This size always includes the whole object if it is large or small, while not being cut off if the target object is too close to the border of the image.
+The square is filled in white, while the rest of the image is filled in black.
+This approach has the advantage of providing as few as possible human bias to the model.
+While even the one-hot encodings contain human knowledge by explicitly encoding human chosen attributes, masking the image will only point the model towards the target object without giving more information.
+It therefore can only rely on its own extracted visual features when looking at masked images.
+% SD: The information in the masked image is still not enough to identify the precise location, only the region. Hence, it corresponds on attention in the attention models. But those are generating labels and not predicting coordinated. The task is still challenging.
+% DK: TODO
+The model is presented with both the original image and the masked image.
+Both are passed through a feature extractor and afterwards passed through a linear layer, reducing the dimensions to 2048.
+The resulting vectors are concatenated and passed through another linear layer that predicts the coordinates.
+
+The test dataset is again evaluated on the euclidean distance of the predicted coordinates to the ground truth coordinates.
+This distance needs to be minimized.
+The mean of all calculated distances is calculated across the whole epoch, which results in a mean distance score per epoch.
+Since this score only takes the average of all predictions into account it doesn't show how every prediction fared individually.
+If for instance the prediction of one object is getting more precise with growing number of epochs, but the precision of another object gets worse, the mean distance will stay the same.
+% SD: Yes that’s correct but through several epochs we hope we will refine the distance and standard deviation of the error. It should level out. It is not a problem. What you do with a circle and accuracy is that you make the task easier as your pointer is now not pointing to a point but to a larger area.
+% DK: TODO
+It doesn't reflect this change.
+For that reason, we also introduced an accuracy score.
+For that we defined a fixed size circle with a radius of 20 pixels around the center of each object.
+If the model's prediction lies in this circle, it will be counted as a correct prediction, if it lies outside, it is a false prediction.
+These scores are averaged for the epoch and result in an accuracy score, where 100\% means that all predictions were very close to the center coordinates and 0\% means that no predictions were close to the center coordinates.
+% SD: But here the score will face the same problem with steward deviation. Hence the only difference here is that pointing is less precise.
+% DK: TODO
+This of course doesn't give a perfect representation since the size of the objects varies, but it will still show, how precise each individual prediction is.
+A high accuracy may indicate that the model could identify this specific object better.
+
+The coordinate predictors are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
+The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.
+Since the model relies on the extracted features of either VGG or ResNet, locational information about the image could have gone lost.
+% SD: Explain. w3 had a paper with John Kelleher on what spatial information is encoded in CNNs
+% DK: TODO
+Training on this dataset should make sure that the model can converge towards the correct pixels, utilizing these features.
+In a next step, the 'Dale' datasets provide the actual problem of discriminating objects from each other and afterwards pointing to the correct one.
+Here, the models should make use of the additional given referring expressions about the scene, as one-hot encodings of the attributes, descriptions using the GRE-algorithm or the encoded locations.
+'Dale-2' and 'Dale-5' provide two different difficulties for the model, where it needs to discriminate a target object from one or four distractors.
+% SD: Point at not just discriminate
+% DK: TODO
+Latter task is assumed to be significantly harder.
+
+\subsubsection*{Results}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/coordinate-predictor_loss.png}
+    \caption{Mean distance between predicted coordinates and ground truth in pixels on different datasets}
+    \label{fig:coordinate-predictor_loss}
+\end{figure}
+
+Figure \ref{fig:coordinate-predictor_loss} shows the results of the coordinate predictor that doesn't include any information about the target object.
+The used feature extractor for these results is \emph{Resnet-3}, but the results don't differ meaningfully from results with other feature extractors.
+As can be seen, the success between the different datasets are significant.
+The more objects are present in an image, the worse the model performs.
+The model converges for the CLEVR single dataset after around 20 epochs to a mean distance of around 2 pixels.
+This prediction even though not perfectly on the center point is always on the object.
+Opposed to that, using the Dale-2 dataset with two objects, the mean distance lies between 37 and 38 pixels already after the first epoch and doesn't drop with increasing number of epochs.
+With five objects in the Dale-5 dataset, the model only predicts a mean distance of around 45 pixels in the beginning, which worsens with a rising number of epochs to 48 pixels.
+
+An interesting observation is the difference of the mean distances between training and testing data.
+% SD: How can we have epochs on the testing data? There is no updates so i5 does not make sense.
+% DK: TODO
+The training distance is constantly approaching zero, while the testing loss is staying constant or even getting higher.
+This points to the fact that the model is not generalizing the task by learning abstract patterns that can be applied to unseen data, but is instead memorizing the training data.
+That is especially visible for the Dale-5 dataset, where learning the patterns of the training data looses even the ability to interpret some patterns in the testing data.
+Applying a higher dropout didn't have an impact on the results.
+% SD: The results show that the model is learning something from the training data but this is not the feature that should be learning as the performance on the test data is low. Actually, is it low, it is 10, 35 and 45 pixels. We should not expect any difference between epochs as there is no training. Hence, a flat line is expected.
+% DK: TODO
+
+This behavior is indeed not very surprising.
+First, results with the 'CLEVR single' dataset show that the model is able to derive geometrical information from abstract feature, extracted by a feature extractor.
+Geometrical information therefore doesn't get lost during this abstraction, but the model is able to point to a specific object, as long as only one object is part of the image.
+% SD: Because it is in the same location?
+% DK: TODO
+Secondly, more than one objects present in an image confuses the model, and it is not able to consistently point to one of them.
+This can have multiple reasons, for instance that the models lacks the ability to separate objects in the extracted features.
+But even in case, the model is able to do that and could determine the location of each object in the scene given the feature, it would not be able to tell, which of these is the actual target object.
+The guess is then more or less random.
+This especially applies to the Dale-2 dataset, where an identification of the target object just based on one distractor is impossible; both of the present objects are unique.
+For the Dale-5 dataset, the model could in theory learn that the target object is always the one object which is unique in respect to its and the distractors' attributes.
+This task on the other hand seems very difficult to learn.
+In conclusion, the models are able to predict geometrical coordinates, but need more information about the target object to identify it.
+
+When the target object \textbf{attributes are encoded as one-hot vectors} and added to the input, the results don't improve.
+One factor that now has a much higher impact is the feature extractor that is used.
+Table \ref{tab:feature-extractor-mean-distances} compares the mean distances the models predict for the different feature extractors.
+The results are shown for the models trained on the Dale-2 and Dale-5 datasets for training and test data.
+First, a big difference can be seen between the datasets.
+The models only converge to a minimum mean distance of around 46 pixels to the correct coordinates for the Dale-5 dataset, looking at the test data.
+In most cases, it stays above 50 pixels.
+% SD: What is the image size? What is the size of a typical object? 50 sounds quite good. Attention is predicting one of 7x7 blocks. Is 50 more or less than 1/7 of an image? 
+% DK: TODO
+Using the Dale-2 dataset, the behavior is a little different.
+All ResNet extractors with four residual blocks and an additional average pooling and optionally a classifier layers reach similar scores as the experiments before without any one-hot encodings.
+Interestingly, without the classifier layer, the model doesn't converge at all and the mean distances jump up and down between the epochs.
+This effect also applies when using less residual blocks.
+Using the VGG, only VGG-cls2 achieve a similar performance, while the others predict coordinates between 43 and 46 pixels away.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rcccc}
+        \toprule
+                            & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}}                                   \\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+                            & train                               & test                                & train          & test           \\\midrule
+        \textbf{VGG-0}      & 30,27                               & 46,20                               & \textbf{32,17} & 54,40          \\
+        \textbf{VGG-avg}    & \textbf{29,99}                      & 45,08                               & 32,32          & 52,67          \\
+        \textbf{VGG-cls1}   & 37,99                               & 43,28                               & 46,57          & 50,75          \\
+        \textbf{VGG-cls2}   & 38,87                               & \textbf{39,02}                      & 47,48          & 49,91          \\
+        \textbf{VGG-cls3}   & 39,99                               & 44,32                               & 47,26          & \textbf{46,77} \\\midrule
+        \textbf{ResNet-3}   & 78,26                               & 65,23                               & 92,07          & 91,12          \\
+        \textbf{ResNet-4}   & 44,14                               & 55,24                               & \textbf{36,48} & 58,28          \\
+        \textbf{ResNet-avg} & \textbf{33,06}                      & \textbf{39,18}                      & 47,64          & 46,38          \\
+        \textbf{ResNet-cls} & 37,57                               & 38,10                               & 44,72          & \textbf{45,92} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean test losses for different feature extractors with one-hot attribute encodings after 20 epochs}
+    \label{tab:feature-extractor-mean-distances}
+    % SD: Explanation of labels
+    % DK: TODO
+\end{table}
+
+Secondly, the training loss now looks also different.
+In almost no cases, the models converge to a lower mean distance than with the test data, meaning a higher precision in their predictions, as they did in the experiment before.
+The only exception is ResNet-3 as a feature extractor.
+In other words, the models are again not able to generalize, but in specific cases memorize the patterns in the train data.
+This hints to the fact that only specific layers of the feature extractors contain information that is generally usable to identify and discriminate objects.
+Especially the lower layers with fewer residual blocks in the case of ResNet and no classifier layers for the VGG seem to not encode knowledge that can be utilized for this task.
+Higher layers, with more specific encoded information need to be used for this research.
+The experiments in the following sections are set up using these higher layers.
+
+Adding \textbf{information about the center coordinates} of all objects should have helped the models to get a list of possible predictions.
+In theory, the model could learn to choose between these coordinates by relating them to the extracted features of the image.
+This hypothesis doesn't hold.
+All results for both datasets Dale-2 and Dale-5 are the exact same as without included information about the locations.
+The problem therefore doesn't seem to lie in predicting coordinates in general, but predicting the coordinates of the target object.
+% SD: Perhaps arranging the objects sequentially would help the model learn spatial contiguity, see my earlier comment.
+% DK: TODO
+The model is still not able to understand, which object is the target object.
+For that reason, a better representation of the target object is necessary.
+
+In a next step, information about the attributes is included using the \textbf{\emph{GRE-algorithm}} from \citet{Dale1995}.
+Again, the mean distance of the predictions as well as the accuracy doesn't improve compared to the previous experiments.
+% SD: Table with these results?
+% DK: the table would show the same figures as the existing table. Should be still included? (QUESTION)
+
+\begin{figure}[ht]
+    \centering
+    \subfigure['Dale-2', train split]{
+        \includegraphics[width=.92\linewidth]{figures/visualization_dale-2_train.png}
+        \label{fig:visualizations_dale-2_train}
+    }
+    \subfigure['Dale-2', test split]{
+        \includegraphics[width=.92\linewidth]{figures/visualization_dale-2_test.png}
+        \label{fig:visualizations_dale-2_test}
+    }
+    \subfigure['Dale-5', train split]{
+        \includegraphics[width=.92\linewidth]{figures/visualization_dale-5_train.png}
+        \label{fig:visualizations_dale-5_train}
+    }
+    \subfigure['Dale-5', test split]{
+        \includegraphics[width=.92\linewidth]{figures/visualization_dale-5_test.png}
+        \label{fig:visualizations_dale-5_test}
+    }
+    \caption{Visualization of the models' predictions in the 'Dale' datasets}
+    \label{fig:visualizations_dale}
+\end{figure}
+
+An interesting pattern appears when doing a qualitative analysis of the models' predictions.
+Here, we visualized the predicted coordinates compared to the ground truth coordinates.
+Figure \ref{fig:visualizations_dale-2_train} shows random examples of predictions for images in the train dataset of Dale-2.
+The green circle shows the ground truth center coordinates of the target object, while the red circle shows the prediction of the model.
+As can be seen, the predictions are very precise.
+Figure \ref{fig:visualizations_dale-2_complete_train} combines the predictions and ground truths across all images in the train dataset.
+This shows general patterns of the models predictions over the complete dataset.
+Here, all predicted coordinates are placed as red circles into the image, while all ground truth coordinates are placed as green circles.
+The resulting shape is a rhombus, which reflects that all objects are placed usually central into the scene.
+As expected the green and red rhombus align mostly in the same area for the train split of the 'Dale-2' dataset.
+% SD: But this image does not show clearly whether the circles for the same object match. You could calculate the average error in distance between the ground truth and predicted coordinates.
+% DK: that is done in the quantitative analysis (mean square error above). The visualization should show general learned patterns of the model (as in this case predictions toard the center)
+
+The results look very different for the test split.
+As can be seen in Figure \ref{fig:visualizations_dale-2_test}, the three randomly selected predictions don't align with the ground truth coordinates.
+For all the images, the predictions don't lie on any object.
+In the left image as well as in the central image, the predictions are closer to the target object than towards the distractor, but are still quite imprecise.
+% SD: They are closer to the target than distractor and you can see that it is working to a point. But remember this task is very challenging and I wouldn't say the results are so negative.
+% DK: right, this is addressed in the conclusions below
+These findings align with the mean distance scores, described in the sections before.
+However, it seems that the model's predictions are all towards the center of the image.
+This can be seen clearer in Figure \ref{fig:visualizations_dale-2_complete_test}.
+Again, the green circles form the shape of rhombus.
+In contrast, the predictions in red almost all cluster in the center of the image.
+They form roughly the shape of a smaller rhombus.
+% SD: There is a bias towards the centre but I would not say that the model has not learned anything. I'm surprised that it works so well given the feature representation we have, i.e. no geometric features.
+% DK: again, conclusion below
+This behavior can be observed for all datasets and architectures of the model.
+Figures \ref{fig:visualizations_dale-5_train}, \ref{fig:visualizations_dale-5_test}, \ref{fig:visualizations_dale-5_complete_train} and \ref{fig:visualizations_dale-5_complete_test} show the results for the 'Dale-5' dataset.
+Here, the model more likely predicts the center coordinates of a distractor object as seen in the right image, which is also reflected in the lower score of the mean distance.
+Also the combined visualization shows the same clustering of predictions in the center of the scene, but the pattern of the smaller rhombus is more visible.
+% SD: The centre bias could be the way the error function is used, that is averages all distances and of course this has a tendency to some middle distance. A solution would be to have better geometric features that could take these errors better into account.
+% DK: TODO (future work)
+
+\begin{figure}[ht]
+    \centering
+    \subfigure['Dale-2', train split]{
+        \includegraphics[width=0.42\linewidth]{figures/visualization_dale-2_train_complete.png}
+        \label{fig:visualizations_dale-2_complete_train}
+    }
+    \subfigure['Dale-2', test split]{
+        \includegraphics[width=0.42\linewidth]{figures/visualization_dale-2_test_complete.png}
+        \label{fig:visualizations_dale-2_complete_test}
+    }
+    \subfigure['Dale-5', train split]{
+        \includegraphics[width=0.42\linewidth]{figures/visualization_dale-5_train_complete.png}
+        \label{fig:visualizations_dale-5_complete_train}
+    }
+    \subfigure['Dale-5', test split]{
+        \includegraphics[width=0.42\linewidth]{figures/visualization_dale-5_test_complete.png}
+        \label{fig:visualizations_dale-5_complete_test}
+    }
+    \caption{Visualization of the models' predictions in the Dale datasets}
+    % SD: I Haven't checked the earlier captions, but the captions should be informative in the sense that one does not need to look for the text to understand them. Hence, include a brief summary of what each figure contains.
+    % DK: TODO
+    \label{fig:visualizations_dale_complete}
+\end{figure}
+
+These results allow two conclusions.
+First, the models are biased to predict coordinates in the center of the image.
+% SD: centre - using British English?
+% DK: so far I used always American English (hopefully consistently)
+The reason for this is likely that the model can produce a relatively low loss, without relying on many extracted features of the objects.
+Since all objects are always located in the center of the image and never in its corners, a prediction of any coordinate in the center is on average closer to the target object than any random prediction or predictions of coordinates at the borders of the image.
+The model therefore learns only, where any object is likely located and can minimize the mean distance to a certain extent with this strategy.
+
+Second, even though the models are biased towards the center of the image, the predictions are still often leaning towards the location where many objects lie.
+This can be seen for the 'Dale-5' dataset, especially in left and central image in Figure \ref{fig:visualizations_dale-5_test}.
+Again, by this strategy, the model can minimize the mean distance, since the probability is high that the target object lies in this cluster of objects.
+Concluding, the model is able to extract, where objects are located in the image, but can't make use of the referring expressions, to decide which of these objects is the target object.
+% SD: There is a centre bias and the model can partially locate the target. The task is hard. The features are not optimal for this task. Future would should focus on using geometric features - we should have tried these and I'm sure we would get better results. Another extension would be making pointing less precise, i.e. focus on a single point, i.e. using a circle of 20 pixels or a 7x7 grid as in the attention mechanism. This would simplify the task.
+% DK: TODO (future work)
+
+\subsection{Object identification}
+\subsubsection*{Setup}
+
+One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
+Feature extractors like VGG or ResNet are trained on extracting visual information.
+In this process, absolute locations of these features in the images may get lost in the resulting vectors, since they are not necessarily important for classifying tasks.
+To address this challenge, we restructured the task in this experiment.
+% SD: Just say that this is a task of identifying objects (the previous was about locating them). This task does not rely on geometric information but it relies on identifying correct object features, hence explore different features and hence it is useful as abenchmarking task.
+% DK: TODO
+Instead of predicting two coordinates of a target object, the model now needs to classify between all available objects, target object and distractors.
+This will take all positional information out and just focus on the attributes and discriminating factors between the objects.
+To do this, fixed-size bounding boxes are extracted around each of the object in the image.
+As for the masking in the experiment before, the bounding boxes are a square of 192x192 pixels to capture the complete object.
+The bounding boxes of all objects are padded to the maximum number of objects present in an image across the whole dataset with a matrix of zeros.
+For the 'Dale-2', this corresponds to a maximum of two bounding boxes, 5 bounding boxes for the 'Dale-5' dataset and 10 for the 'CLEVR color' dataset
+These bounding boxes are shuffled.
+Furthermore, to point the model towards the target object, its attributes are encoded as on-hot vectors.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.5\linewidth]{figures/arch_bounding_box_classifier.png}
+    \caption{Simplified architecture of the bounding box classifier}
+    \label{fig:bounding_box_classifier_architecture}
+    % SD: I haven't commented on this before, but let us be very careful in naming all meta-paramaters of the models in the text or in caption: how many layers, how many dimensions, etc. The reader should be able to replicate the code and the experiment from this. You can do this in the caption which is a longer explanation or in the text itself.
+    % DK: TODO
+\end{figure}
+
+The model passes each of the bounding boxes through a linear layer to transfer it into an embedding space of 10 dimensions.
+% SD: This is quite low? Why only 10?
+% DK: to calculate the dot product (inserted; done)
+The same is done with the one-hot vector of the target attributes.
+By bringing both vectors to the same embedding size, the dot product between each embedded image and the embedded attributes can be calculated in the next step.
+A high correlation between the attributes and the object should result in a high dot product, while a low correlation results in a lower dot product.
+The dot products are concatenated and form a vector with as many dimensions as objects present.
+The \emph{softmax} function is applied over the resulting vector, which returns a probability distribution over all objects; the model points to the object with the highest probability.
+% The model then points to an object, using the \emph{softmax} function over this resulting vector.
+The loss is calculated using cross entropy.
+% SD: So, the output of this model is a vector of 0 and 1s, with the 1 identifying the corrct object (or the other way around?).
+% DK: the output is a probability distriution over all objects (inserted above; done)
+
+Furthermore, the model is compared to a baseline that doesn't include any information about the target object.
+Here, the model passes all flattened bounding box representations through a linear layer resulting in a vector with as many objects as are present in the image.
+Again, the model uses a \emph{softmax} function to point to one of these objects.
+Since no information about the target object is included, the guesses are expected to be random.
+% SD: I don't understand this? Have you actually implemented such model? But how can you train a random classifier? The baseline would normally be 1/5 or 1/5, i.e. the number of labels if the number of examples is equal, other a weighted proportion of these. By definition of "random" you would expect such classifier to achieve these probabilities.
+% DK: the idea was not to just compare it to the random probabilities, but compare it to a similar setup as the actual model, with the only difference being the missing information of the target object. As you say the probability is 1/5 (resp. 1/2), which is also the result of thi model. Better to just compare to random probability? (QUESTION)
+
+The bounding box classifier is trained on all datasets that inlcudes more than one object in each sample, namely the 'CLEVR color', 'Dale-2' and 'Dale-5' dataset.
+% excluding the 'CLEVR single'.
+% SD: Why not?
+% DK: because there is only one object in the input, and therefore only one possible guess. The model can't point to a distractor (adressed; done)
+The 'Dale' datasets are directly comparable to each other for the similar setup of their creation.
+Especially interesting is the effect of the increasing the number of distractors and the growing number of attributes that are needed to discriminate the objects.
+
+\subsubsection*{Results}
+As expected, all baselines achieve a random accuracy for each of the datasets.
+The accuracy lies at 50\% for the 'Dale-2' dataset, 22\% for the 'Dale-5' dataset and 12\% for the 'CLEVR color' dataset.
+This changes however, when information about the target object is included.
+Table \ref{tab:results_bounding_box_classifier} lists the accuracies of the models' predictions after 10 epochs.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rcc}
+        \toprule
+                             & \textbf{Accuracy baseline} & \textbf{Accuracy} \\
+        \textbf{Dale-2}      & 50\%                       & 99\%              \\
+        \textbf{Dale-5}      & 22\%                       & 94\%              \\
+        \textbf{CLEVR color} & 12\%                       & 93\%              \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the bounding box classifier after 10 epochs}
+    \label{tab:results_bounding_box_classifier}
+\end{table}
+
+The model achieves almost perfect accuracy on the 'Dale-2' dataset with 99\%.
+For both other datasets, the accuracy is slightly lower with 94\% and 93\% respectively, but still close to perfect, especially compared to the random baseline.
+First, this shows that the model is able to extract attribute features from the image and manages to combine them with the given information about the target object.
+This worsens slightly, when more objects are introduced.
+More objects lead to more needed attributes to discriminate the objects from each other.
+The model is still able to extract and utilize these additional attributes and combine them with the given attribute encoding of the target object.
+The model can generate these high results, even with its relatively simple architecture.
+In this architecture, the model doesn't compare the objects directly to each other, but each object is only associated with the attribute encodings.
+A more complex architecture, in which the model is additionally tasked to discriminate the objects directly from each other might even improve the results.
+% SD: The model is able to leatn to discriminate objects based on visual appearance.
+% DK: TODO
+
+\subsection{Referring expression generation}
+\label{sec:referring_expression_generation}
+\subsubsection*{Setup}
+
+As the bounding box classifier, the caption generator acts as a learning step towards understanding, how the model can learn the attributes of objects.
+Additionally, this setup is a natural language generation task, where the model is trained to generate referring expressions, based on visual input.
+% SD: Well, this experiment is a natural language generation task: whether the model is able to generate referring expressions.
+% DK: (addressed; done)
+The same method using the GRE-algorithm from the section above is used to create the descriptions of the target object for each image.
+
+There are some minor additions concerning the padding of the caption.
+As before, the caption is padded to a number of three tokens, corresponding to the maximum of three attributes.
+However, there are three different ways how the padding is applied.
+First, the captions are, as usual in captioning tasks padded at the end with a specified padding token.
+A problem could arise when the caption is not viewed as a natural language sentence, but as slots filled with tokens.
+More specifically, following the GRE-algorithm, the last token in the caption is always the shape.
+The second last token if existing describes the color, while the third last token if existing describes the size.
+As soon as this sequence is padded at the end, these slots suddenly disappear.
+A caption that only describes the shape, such as \emph{cube} will be padded to \emph{cube <pad> <pad>}, where the third last slot is filled up with the shape instead of the size.
+Since in this task we are not focussing on producing natural language with a correct grammar, but focus instead of extracting attributes, having a slot structure could help the model to express the extracted attributes correctly.
+For this reason, the second method of padding the caption is prepending the caption with padding tokens.
+By this, the positions of the slots are preserved and if not specified just filled with a padding token.
+Each slot has always the same semantic value, e.g. the last slot always contains the shape of an object.
+This can be done since the captions are not free text, but instead the structure and the possible content is given by the dataset.
+This method might help the model to learn the correct referring expressions.
+% SD: Slots have the same semantic value, i.e. the last slot is the object type. We can do this because we know the structure of the descriptions in this dataset and because we hope this will help the learning. Also, we are thinking of generation based on slots.
+% DK: (addressed; done)
+The last variation concerns the order of producing each token.
+When the captions are prepended, the model would need first produce two padding tokens, before it finally can produce a much more meaningful token for the shape.
+This could be difficult to learn for a model, as the longer a sequence of tokens is, the more information about the beginning of the sequence gets lost.
+Even though a sequence of just three tokens may not be long enough for this factor to be a problem, we experimented to reverse the caption.
+% SD: We... I sounds more like you are writing a lab report with casual language but here you want to be more formal.
+% DK: (done)
+Instead of producing for instance \emph{<pad> green sphere} as correct in English, the model would now need to produce \emph{sphere green <pad>}.
+Notice that the padding token is again at the end of the generation, but the order of slots as well as the amount of information in the caption are still preserved.
+
+The task for the model is to generate these descriptions, based on the complete scene as input.
+Doing this, the task inherently involves learning human knowledge and natural language structure.
+Nonetheless, this helps to understand more detailed if and how the model discriminates objects.
+Can the model solve the task, or do specific attributes used by humans pose challenges to the model?
+% Does it rely on the same attributes humans are using, or does it find other important differences, or is it not able to solve the task at all?
+% SD: In this case it should be using the same attributes as humans as we are training it on human labels.
+% DK: (rephrased; done)
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.5\linewidth]{figures/arch_caption_generator.png}
+    \caption{Simplified architecture of the masked caption generator}
+    \label{fig:caption_generator_architecture}
+\end{figure}
+
+We compare two different models against each other.
+The first model just takes the image as the input.
+During training, also the ground truth caption is passed to the model.
+The image is processed as in the section before.
+First, it is passed through a feature extractor with two following 2d convolutional layers, reducing the channels to 128.
+After each convolutional layer the \emph{ReLU} function is applied.
+The result is pooled using max pooling and then reduced to 1024 dimension using a linear layer.
+The such encoded image serves as the initial hidden state of an LSTM, which generates the caption.
+% SD: Dimensions?
+% DK: 1024? (QUESTION)
+During training, teacher forcing is applied by using embeddings of the ground truth tokens as the input sequence for the LSTM, instead of the output of the LSTM.
+% SD: Why is this teacher forcing?
+% DK: because the ground truth during generation of the sequence (added subclause; done)
+The output of the LSTM is passed through a linear layer at each step to determine logits over the symbols of the vocabulary.
+The loss is calculated using cross-entropy.
+During testing, the LSTM is always forced to generate three tokens, with an embedded start-of-sequence token as first input to the LSTM.
+Each token in the sequence is determined greedily, by selecting the highest logit in the output of each step in the LSTM.
+% SD: There is a greedy decoding algorithm.
+% DK: (added; done)
+
+Using this approach, the model doesn't have any information about the target object.
+Therefore, we extend it in a second step with attention to the target object.
+% SD: You add attention to the target object.
+% DK: (added; done)
+A masked version of the image is created ass in the section above and passed to the model.
+This is shown in Figure \ref{fig:caption_generator_architecture}.
+The model works exactly the same, except for the additional separate image encoder that encodes the masked image in the same way as the original image.
+% SD: This is normally implemented as a filter of 1 and 0 corresponding to pixels. As such it then corresponds to attention, cf. paper with Mehdi.
+% DK: (QUESTION)
+Both encodings are concatenated and then used as the initial hidden state for the LSTM.
+This should point the model towards which object to describe and discriminate from the distractors.
+
+To test the success of the model, three measures are calculated.
+The first measure is the \textbf{accuracy} if the model predicted every word in the caption correctly.
+% SD: This is too strict. if this is a generation task then we can use generation metrics. Those compare if the generated string as a whole is kind of similar to the target string, see ROUGE, METEOR, BERTscore.
+% If this is a classification task, and it is, given that we know what type of word we expect in each slot, we could calculate accuracy per class, precision, recall, F-score. We could also calculate mean ranks for predicting words per classes, or acucracy at k- if the target word is in the k-top predictions.
+% We could also take it a multi-class classification problem and how to calculate accuracy in this case, would need to check.
+% DK: I agree that classification metrics refelct success better here (therefore I also used accuracy). These metrics would give a better overview, but I don't think there is time to implement it (QUESTION)
+This gives a hint, how the model fares in general and if it is able to predict any of the attributes.
+However, a 'false' prediction doesn't give much insight into why the model predicted a wrong caption.
+
+It could be the case that the model predicted the correct shape, but wrong color.
+Even worse, the model could have predicted more attributes than necessary to uniquely identify the target object and didn't follow the rules of the GRE-algorithm.
+For instance, consider the scene in Figure \ref{fig:clevr-dale-5}.
+% SD: Too far away, might be worth repeating here, you say still stay Fiigure 2d, repeated asFigure 6 here
+% DK: TODO
+The correct caption is \emph{cylinder}.
+If the model would predict \emph{purple cylinder}, the accuracy determines it as false as captioning \emph{large purple cylinder} as well \emph{small green cube}.
+The first two descriptions identify the target object perfectly, but the model only didn't learn to exclude unnecessary attributes.
+To mitigate this, we also include a \textbf{word-by-word accuracy}.
+This measure calculates the accuracy not on sentence level, but on word level.
+The first predicted caption of the model would yield a word-by-word accuracy of 66\% (including padding tokens), the second 33\%, while the third prediction would yield 0\%.
+% SD: Is this figure for a particular class, i.e. object type, or do you then do something to individual accuracy, i.e. average them?
+% DK: the metric is averaged over all samples (not by class). Might be definitly worth to do it class by class. Time? (QUESTION)
+This can give a better understanding of the errors the model makes.
+
+% SD: Very good If I understand this right this would be a case where the generated description describes another object better than the target and a human would identify that. So it is like false negatives in describing. Perhaps use another term for this: referring to a distractor? (since you are not measuring hwo individually the description fitts a distractor but only if the entire description could perfectly fit a distractor)
+% DK: exactly. I added false negatives. But I would like to keep accuracy in the name, since that is what it is. maybe better distractor accuracy? (QUESTION)
+With the \textbf{non-target accuracy}, we identify if the model described another object, which is not the target image.
+This is basically an inverted accuracy score; the lower the score, the better the model fares.
+By this it measures the false negative generated captions.
+For this we generated captions for all the non-target objects and distractors in the images using the GRE-algorithm.
+If the generated description of the model describes an object that is not the target object, it gets assigned 100\%.
+If not, independently of describing the target object, no object, or one of the objects insufficiently, it gets assigned 0\%.
+Using this measure, we can get a quick overview if the model's problem lies in extracting and relating attributes or in understanding which of the presented objects is the target object.
+
+The caption generator models are trained on both 'Dale' datasets.
+Again, each of these datasets increases the complexity of the description.
+While the referring expression for the 'Dale-2' datasets are generally shorter, expressions of the 'Dale-5' datasets need to be more specific and use more attributes.
+Furthermore, the model needs to attend to many more locations in the image at the same time to find discriminating factors between those.
+
+\subsubsection*{Results}
+In the next paragraphs, the results of the caption generator are discussed.
+Table \ref{tab:results_caption-generator} shows the different scores of the models when trained on 'Dale-2' and 'Dale-5'.
+ResNet-3 produced the best results, when it was used as a feature extractor.
+The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very little in the following epochs.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rccc}
+        \toprule
+                               & \textbf{Accuracy} & \textbf{Word-by-word accuracy} & \textbf{Non-target accuracy} \\
+        \textbf{Dale-2}        & 49\%              & 82\%                           & 48\%                         \\
+        \textbf{Dale-2 masked} & 72\%              & 90\%                           & 25\%                         \\
+        \textbf{Dale-5}        & 21\%              & 45\%                           & 40\%                         \\
+        \textbf{Dale-5 masked} & 21\%              & 54\%                           & 45\%                         \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the caption generator, based on ResNet-3}
+    % SD: Masking does not work but perhaps this is because you applied convolutional pre-trained filters rather than 0-1. It is harder to detect meaningful patterns since the targets will be smaller and more integrated with other objects.
+    % DK: might be the case. in the last language game i use only a linear layer instead of convolutions, but it doesn't help. This however might also be due to other problems. Time? (QUESTION, future work)
+    % SD: I would present these for individual classes.
+    % DK: I only have accuracy scores at. Time? (QUESTION)
+    \label{tab:results_caption-generator}
+\end{table}
+
+The sum of the two columns for the \emph{accuracy} and the \emph{non-target-accuracy} adds to 97\%, when trained on the 'Dale-2' dataset.
+% SD: Not shown in Table 5
+% DK: sum of two columns (addressed; done)
+This means that the models produce almost always correct descriptions of one of the objects in the image.
+Moreover, these descriptions are also efficient in the sense that they follow the GRE-algorithm of \citet{Dale1995} and only use necessary discriminative attributes.
+Features of both objects are therefore extracted perfectly and associated with the vocabulary.
+% SD: But this is no-surprise since we have fixed the slots.
+% DK: but this applies to all padding methods. (done)
+As expected, the model has difficulties to decide, which of both objects is the target object, since no information is passed to the model.
+With 48\% of the images describing the target object and 49\% of the images describing the distractor, the model uses a random guess.
+This changes, when also the masked image is presented to the model.
+Then, the accuracy for the target object rises with 72\% well above chance.
+Still, the wrong descriptions describe almost every time the distractor object.
+This indicates that the problem doesn't lie in extracting features of objects, but only in deciding which object in the image to describe.
+
+When the model is trained on the 'Dale-5' dataset, the results are much worse.
+Now, without masking only in 61\% of the images, the model describes any of the objects in the image, whether it is the target object or a distractor.
+% SD: ?
+% DK: added subclause (done)
+With 21\% of these descriptions being a description of the target object, the model again uses a random guess.
+Interestingly, passing the masked image to the model doesn't help it to identify the correct object.
+The accuracy stays at the same value.
+In contrast, the non-target accuracy is increased by 5\% points.
+The model is more likely to identify a wrong object.
+Furthermore, the word-by-word accuracy increases from 45\% to 54\%.
+This increase is likely due to the fact that the description of the target object often shares some attributes with distractor objects.
+For instance a sample with a target object being a \emph{small red cube} was identified as a \emph{<pad> <pad> cube} when the model didn't receive the masked image.
+When also the masked image is passed to the model, it generates the description \emph{small blue cube}.
+This was the correct description of a distractor and because of the overlap of the attributes, the word-by-word accuracy increased from 33\% to 66\%.
+% SD: Not in the table?
+% DK: no, because a result of one specific sample (done)
+
+The approach, how the padding is produced and in which order the attributes are concatenated didn't have an effect on the described metrics.
+When the order was reversed and the padding appended, the model was converging slightly faster and reached the limit around two to three epochs earlier.
+The final peak stayed exactly the same and the effects were therefore not studied deeper.
+% SD: Earlier you say that you will only try one method but now you have tried both. Change earlier text; also do you have full performance figures for this setup to include?
+% DK: where? I can't find it. (QUESTION). Since they are the same (and are therefore not central in this study), i didn't inlcude them. (QUESTION)
+
+There are two main possible explanations for the big difference between the two datasets.
+First, as already seen in the experiments before, the bigger number of distractors confuses the model more, where to focus on.
+In the 'Dale-2' dataset, there are only two possibilities, while the four distractors in the 'Dale-5' dataset give the model a bigger choice.
+% SD: But before you argued, rather pesimistically, that having distractors with the same attributes actaully contributes to greater performance as it is moire likely that the correct word is generated. I would only pose this as a very vague hypothesis to be tested, as you conclude now it is also the case that images with simialr distractors are more difficult to describe correctly. Hence, it is by no way given.
+% DK: TODO
+The second explanation lies in the used GRE-algorithm.
+When only two random objects are placed in a scene, a second (or third) attribute to discriminate the objects is only needed, when the shape is the same.
+Otherwise, the shape is enough, and the caption is only one word long.
+The probability for this lies at 66,6\%.
+% SD: Why 66? We have 3 attributes, right, so 33%?
+% DK: but that the other attributes are only needed if the shape is the same. The prob. for the shape being different for the second object is 66% (rephrased; done)
+For shape and color being enough, the probability lies at 29,2\% and that all three attributes are necessary is 4,1\%.
+Opposed to that the probabilities with four distractors are 19,8\%, 47\% and 33,2\% respectively.
+With four distractors the algorithm is much more likely to produce longer captions.
+These are harder to learn and generate for the model since it needs to take more extracted attributes into account to discriminate the target object from the distractors.
+% SD: I think we need individual accuracies per class and also precision, recall and the f-score. If we include the joint accuracy figure when you also need to explain how you avergaed the infividual accuracies.
+% DK: time? (QUESTION)
+% SD: Not sure. Note that <pad> is a token. The model has to learn when to say <pad> just as any word, hence knowing when not to dewscribe is also trickly.
+% DK: true, but <pad> token is probably the most used token in general and therefore a guess of <pad> just by frequency is likely right? (QUESTION)

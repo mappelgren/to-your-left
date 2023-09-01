@@ -40,7 +40,7 @@ Since the objects are part of 3-d scenes, they may appear differently for each i
 This noise approximates the real world and natural environment, and makes it harder to learn for models compared to relatively noise-free projections on a 2-d plane.
 Figure \ref{fig:clevr-example} shows an example of a generated image in the CLEVR dataset.
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \begin{tabular}{cccc}
         \toprule
@@ -59,7 +59,7 @@ Figure \ref{fig:clevr-example} shows an example of a generated image in the CLEV
     \label{tab:clevr-attributes}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=.8\linewidth]{figures/CLEVR_example.png}
     \caption{Example of a generated image in the CLEVR dataset}
@@ -114,7 +114,7 @@ For this reason, multiple different adaptions of these architectures are compare
 Table \ref{tab:feature-extractor-archs} lists the different adaptions for both VGG19 and ResNet-101 that will be used in this research.
 In the later chapters, it will be referred to these adaptions using the name in the table.
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \begin{tabular}{rlc}
         \toprule
@@ -146,6 +146,8 @@ In the later chapters, it will be referred to these adaptions using the name in 
 % SD: Since agents are free to invent new language it is not clear whether this will be align with the human language that influenced pre-training the visual models, hence there is both effect of domain and language here. 
 % SD: We should make these questions part of a discussion, particularly if we are comparing the effects of pre-training vs training from scratch in the experiments.
 % DK: learning from scratch not part of the thesis anymore, since not the focus and much more complex (done)
+
+\subsection{Image processing}
 
 \subsection{EGG framework}
 The goal of this thesis is to run and compare different setups of language games systematically.
@@ -205,6 +207,10 @@ The receiver agent is combining it with its representation of the image input an
 In other words the receiver agent produces as many outputs as symbols are present in the message.
 The \emph{game} is then calculating a loss for each of these outputs separately.
 These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
+
+\subsection{Optimization in language games}
+
+\subsection{Probing?}
 
 \subsection{Ethical considerations}
 In the field of natural language processing (NLP) ethical issues often play major roles.
