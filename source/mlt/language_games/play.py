@@ -37,8 +37,8 @@ from mlt.language_games.models import (
 )
 from mlt.language_games.test import captioning_loss, classification_loss, pixel_loss
 from mlt.preexperiments.data_readers import (
-    BasicImageMasker,
     DaleCaptionAttributeEncoder,
+    SingleObjectImageMasker,
 )
 from mlt.preexperiments.models import CaptionDecoder
 from mlt.shared_models import (
@@ -108,7 +108,7 @@ models = {
                 padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
                 reversed_caption=False,
             ),
-            "image_masker": BasicImageMasker(),
+            "image_masker": SingleObjectImageMasker(),
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,
@@ -172,7 +172,7 @@ models = {
     "masked_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorGameDataset,
         dataset_args={
-            "image_masker": BasicImageMasker(),
+            "image_masker": SingleObjectImageMasker(),
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,

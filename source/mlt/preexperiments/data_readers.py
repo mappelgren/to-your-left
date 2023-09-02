@@ -6,8 +6,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 
+import cv2
+import numpy as np
 import torch
 from mlt.image_loader import ImageLoader
+from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.models import ResNet101_Weights
@@ -231,10 +234,10 @@ class ImageMasker(ABC):
         ...
 
 
-class BasicImageMasker(ImageMasker):
+class SingleObjectImageMasker(ImageMasker):
     def get_masked_image(self, image, scene, target_object):
         masked_image = image.copy()
-        MASK_SIZE = masked_image.size[0] / 5
+        MASK_SIZE = masked_image.size[0] / 10
         x_center, y_center, _ = scene["objects"][target_object]["pixel_coords"]
         pixels = masked_image.load()
 
@@ -252,6 +255,52 @@ class BasicImageMasker(ImageMasker):
                 pixels[i, j] = (255, 255, 255)
 
         return masked_image
+
+
+class AllObjectsImageMasker(ImageMasker):
+    def get_masked_image(self, image, scene, _target_object):
+        masked_image = image.copy()
+        MASK_SIZE = masked_image.size[0] / 10
+
+        masked_pixels = set()
+        for obj in scene["objects"]:
+            x_center, y_center, _ = obj["pixel_coords"]
+            min_x = int(x_center - MASK_SIZE)
+            max_x = int(x_center + MASK_SIZE)
+            min_y = int(y_center - MASK_SIZE)
+            max_y = int(y_center + MASK_SIZE)
+
+            for x in range(min_x, max_x + 1):
+                for y in range(min_y, max_y + 1):
+                    masked_pixels.add((x, y))
+
+        pixels = masked_image.load()
+
+        for i, j in itertools.product(
+            range(masked_image.size[0]), range(masked_image.size[1])
+        ):
+            if (i, j) not in masked_pixels:
+                pixels[i, j] = (0, 0, 0)
+            else:
+                pixels[i, j] = (255, 255, 255)
+
+        return masked_image
+
+
+class GeometricFeatureExtractor(ABC):
+    @abstractmethod
+    def get_features(self, image: Image.Image):
+        ...
+
+
+class SiftFeatureExtractor(GeometricFeatureExtractor):
+    def get_features(self, image: Image.Image):
+        gray_scale_image = image.convert("L")
+        image_array = np.array(gray_scale_image)
+        sift = cv2.SIFT_create(nfeatures=50)
+        keypoints, descriptors = sift.detectAndCompute(image_array, None)
+
+        return keypoints, descriptors
 
 
 @dataclass
@@ -282,7 +331,7 @@ class BoundingBoxClassifierDataset(Dataset):
         max_number_samples,
         *args,
         attribute_encoder: AttributeEncoder = None,
-        **kwargs,
+        **_kwargs,
     ) -> None:
         super().__init__()
 
@@ -375,7 +424,7 @@ class CoordinatePredictorDataset(Dataset):
         encode_locations=False,
         image_masker: ImageMasker = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
-        **kwargs,
+        **_kwargs,
     ) -> None:
         super().__init__()
 

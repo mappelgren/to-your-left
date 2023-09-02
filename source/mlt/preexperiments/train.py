@@ -1,17 +1,19 @@
 import argparse
 from dataclasses import dataclass
+from tkinter import ALL
 from typing import Callable
 
 import torch
 from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.data_readers import (
-    BasicImageMasker,
+    AllObjectsImageMasker,
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
     CoordinatePredictorDataset,
     DaleCaptionAttributeEncoder,
     OneHotAttributeEncoder,
+    SingleObjectImageMasker,
 )
 from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
@@ -178,7 +180,29 @@ models = {
     ),
     "masked_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorDataset,
-        dataset_args={"image_masker": BasicImageMasker()},
+        dataset_args={"image_masker": SingleObjectImageMasker()},
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=MaskedCoordinatePredictor,
+        model_args={
+            "image_encoder": ClevrImageEncoder(
+                encoder_out_dim=2048,
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": MaskedImageEncoder(
+                encoder_out_dim=2048,
+            ),
+            "coordinate_classifier": CoordinateClassifier(),
+        },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "all_masked_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={"image_masker": AllObjectsImageMasker()},
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCoordinatePredictor,
         model_args={
@@ -267,7 +291,7 @@ models = {
                 padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
                 reversed_caption=False,
             ),
-            "image_masker": BasicImageMasker(),
+            "image_masker": SingleObjectImageMasker(),
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedCaptionGenerator,
