@@ -1,7 +1,7 @@
 from abc import ABC
 
 import torch
-from mlt.feature_extractors import FeatureExtractor
+from mlt.feature_extractors import DummyFeatureExtractor, FeatureExtractor
 from torch import nn
 
 
@@ -18,18 +18,21 @@ class ClevrImageEncoder(ImageEncoder):
         super().__init__()
         self.process_image = nn.Sequential(
             feature_extractor,
-            nn.LazyConv2d(128, kernel_size=1, padding=0),
+            nn.LazyConv2d(128, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.LazyConv2d(128, kernel_size=1, padding=0),
+            nn.LazyConv2d(128, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-        self.mean_reduction = nn.LazyLinear(encoder_out_dim)
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(encoder_out_dim))
 
     def forward(self, image):
         processed_image = self.process_image(image)
-        flattened = torch.flatten(processed_image, start_dim=2).permute(0, 2, 1)
-        reduced = self.mean_reduction(flattened.mean(dim=1))
+
+        # flattened = torch.flatten(processed_image, start_dim=2).permute(0, 2, 1)
+        # reduced = self.mean_reduction(flattened.mean(dim=1))
+        reduced = self.reduction(processed_image)
+
         return reduced
 
 

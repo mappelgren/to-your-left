@@ -84,6 +84,7 @@ They can for example be low-level features, as geometric information about lines
 Traditional approaches involve extracting key points and descriptors from an image and using them to represent the image \citep{Harris1988,Lowe1999,Bay2006}.
 More recently, convolutional neural networks (CNN) became popular due to their ability to learn complex features automatically from raw image data.
 These are also used in this thesis as a first layer to extract important information from the image. Hereby, two different architectures are tested.
+\cmtDK[inline]{explain advantage of CNN}
 
 First, we use the VGG19 \citep{Simonyan2015} which is an architecture based on many convolutional layers.
 Using 16-19 convolutional layers with small convolution filters helps the model to solve localization and classification tasks on the training dataset, but also enables is to generalize onto other datasets.
@@ -120,16 +121,16 @@ In the later chapters, it will be referred to these adaptions using the name in 
     \begin{tabular}{rlc}
         \toprule
                             & \textbf{description}                                            & \textbf{ output dimensions } \\\midrule
-        \textbf{VGG-0}      & contains only the convolutional layers                          & 512x7x7                      \\
-        \textbf{VGG-avg}    & contains an additional average pooling layer                    & 512x7x7                      \\
+        \textbf{VGG-0}      & contains only the convolutional layers                          & 512 \times\ 7 \times\ 7      \\
+        \textbf{VGG-avg}    & contains an additional average pooling layer                    & 512 \times\ 7 \times\ 7      \\
         \textbf{VGG-cls1}   & \makecell[cl]{contains an additional one classification layer,                                 \\ including its non-linearity} & 4069                         \\
         \textbf{VGG-cls2}   & \makecell[cl]{contains another additional classification layer,                                \\ including its non-linearity} & 4069                         \\
         \textbf{VGG-cls3}   & the original VGG19 architecture                                 & 1000                         \\\midrule
-        \textbf{ResNet-1}   & contains one residual block                                     & 256x56x56                    \\
-        \textbf{ResNet-2}   & contains two residual blocks                                    & 512x28x28                    \\
-        \textbf{ResNet-3}   & contains three residual blocks                                  & 1024x14x14                   \\
-        \textbf{ResNet-4}   & contains four residual blocks                                   & 2048x1x1                     \\
-        \textbf{ResNet-avg} & contains an additional average pooling layer                    & 2048x1x1                     \\
+        \textbf{ResNet-1}   & contains one residual block                                     & 256 \times\ 56 \times\ 56    \\
+        \textbf{ResNet-2}   & contains two residual blocks                                    & 512 \times\ 28 \times\ 28    \\
+        \textbf{ResNet-3}   & contains three residual blocks                                  & 1024 \times\ 14 \times\ 14   \\
+        \textbf{ResNet-4}   & contains four residual blocks                                   & 2048 \times\ 1 \times\ 1     \\
+        \textbf{ResNet-avg} & contains an additional average pooling layer                    & 2048 \times\ 1 \times\ 1     \\
         \textbf{ResNet-cls} & the original ResNet-101 architecture                            & 1000                         \\
         \bottomrule
     \end{tabular}
@@ -149,9 +150,46 @@ In the later chapters, it will be referred to these adaptions using the name in 
 % DK: learning from scratch not part of the thesis anymore, since not the focus and much more complex (done)
 
 \subsection{Image processing}
-\cmtDK[inline]{how are feature extractors used in my models}
-\cmtDK[inline]{refer to Johnson2017a}
 \cmtDK[inline]{masking and how are they processed (convolutions to bring it to the same shape)}
+
+The above described feature extractors are not enough to be solely used to encode the images used in this thesis.
+Even though final layers that contain very task and domain specific knowledge can be removed, the previous layers still don't contain any information about the new domain and task.
+For this reason they need to be extened with further layers that are not frozen and can learn and store information about the new domain by connecting the pretrained general knowledge with the specific task.
+In this thesis, we use one architecture to encode images for all the conducted experiment.
+The additional layers on top of the feature extractors however are always trained from scratch for each of the experiments and tasks.
+By doing this, the models are made up of multiple smaller modules, as for example the image processing module or other modules that encode different inputs.
+These modules can be added and combined step by step, whilst the architecture of each module always stays the same.
+Following, the experiments stay comparable, since differences are only added or removed modules.
+
+\citet{Johnson2017} describe an architecture that was used for training baseline models on the CLEVR dataset.
+This architecture will be used for all experiments.
+Hereby, the image is first passed through a frozen feature extractor.
+Two convolutional networks with subsequent \emph{ReLU} non-linearities condense the important information from the output of the feature extractor.
+The convolutional layers reduce the channels to 128 channels, using a kernel size of 3 and a stride and padding of 1.
+Afterwards, a 2-dimensional max pooling is applied with a kernel size and stride of 2.
+Finally, the resulting matrix is flattened and passed through a linear layer to reduce it to an encoding size.
+This vector represents the encoded image with its extracted features.
+Table \ref{tab:image_encoder} shows the layers and their output dimensions when using ResNet-3 as the feature extractor and an encoding size of 2048 dimensions.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc}
+        \toprule
+        \textbf{layer}                      & \textbf{output dimensions} \\\midrule
+        Input image                         & 3 \times\ 224 \times\ 224  \\
+        ResNet-3                            & 1024 \times\ 14 \times\ 14 \\
+        Conv(3 \times\ 3, \rightarrow\ 128) & 128 \times\ 14 \times\ 14  \\
+        ReLU                                & 128 \times\ 14 \times\ 14  \\
+        Conv(3 \times\ 3, \rightarrow\ 128) & 128 \times\ 14 \times\ 14  \\
+        ReLU                                & 128 \times\ 14 \times\ 14  \\
+        MaxPool(2 \times\ 2, stride 2)      & 128 \times\ 7 \times\ 7    \\
+        Flatten                             & 6272                       \\
+        Linear Layer(\rightarrow\ 2048)     & 2048                       \\
+        \bottomrule
+    \end{tabular}
+    \caption{Image encoder with ResNet-3 and an encoding size of 2048}
+    \label{tab:image_encoder}
+\end{table}
 
 \subsection{EGG framework}
 The goal of this thesis is to run and compare different setups of language games systematically.
