@@ -1,5 +1,10 @@
 import torch
-from mlt.shared_models import CoordinateClassifier, ImageEncoder, MaskedImageEncoder
+from mlt.shared_models import (
+    BoundingBoxImageEncoder,
+    CoordinateClassifier,
+    ImageEncoder,
+    MaskedImageEncoder,
+)
 from torch import nn
 
 
@@ -32,6 +37,54 @@ class BoundingBoxClassifier(nn.Module):
             output = self.classifier_10(bounding_boxes)
 
         return self.softmax(output)
+
+
+class BoundingBoxCaptionGenerator(nn.Module):
+    def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
+        super().__init__()
+        self.image_encoder = BoundingBoxImageEncoder(
+            embedding_dimension=embedding_dimension
+        )
+
+        self.lin = nn.LazyLinear(hidden_size, bias=False)
+        self.caption_decoder = caption_decoder
+        self.encoded_sos = torch.tensor(encoded_sos)
+
+    def forward(self, data):
+        bounding_boxes, *_, caption = data
+
+        encoded_images = []
+        for image_index in range(bounding_boxes.shape[1]):
+            encoded_images.append(self.image_encoder(bounding_boxes[:, image_index]))
+
+        concatenated = torch.cat(encoded_images, dim=1)
+        lin = self.lin(concatenated)
+        lstm_states = lin, lin
+        predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
+
+        return predicted.permute(0, 2, 1)
+
+    def caption(self, data):
+        bounding_boxes, *_ = data
+        device = bounding_boxes.device
+
+        encoded_images = []
+        for image_index in range(bounding_boxes.shape[1]):
+            encoded_images.append(self.image_encoder(bounding_boxes[:, image_index]))
+
+        concatenated = torch.cat(encoded_images, dim=1)
+        lin = self.lin(concatenated)
+        lstm_states = lin, lin
+
+        caption = []
+        # shape: batch, sequence length
+        word = torch.full((bounding_boxes.shape[0], 1), self.encoded_sos, device=device)
+        for _ in range(3):
+            predicted_word_layer, lstm_states = self.caption_decoder(word, lstm_states)
+            word = torch.max(predicted_word_layer, dim=2).indices
+            caption.append(word)
+
+        return torch.cat(caption, dim=1)
 
 
 class BoundingBoxAttributeClassifier(nn.Module):
