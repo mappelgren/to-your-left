@@ -2,7 +2,13 @@ from abc import abstractmethod
 
 import torch
 from mlt.preexperiments.data_readers import DaleCaptionAttributeEncoder
-from torcheval.metrics import BinaryAccuracy, Mean, MulticlassAccuracy
+from torcheval.metrics import (
+    BinaryAccuracy,
+    Mean,
+    MulticlassAccuracy,
+    MulticlassPrecision,
+    MulticlassRecall,
+)
 
 
 class Tester:
@@ -67,6 +73,18 @@ class CaptionGeneratorTester(Tester):
             average=None,
             num_classes=len(DaleCaptionAttributeEncoder.vocab),
         )
+        word_by_word_precision = MulticlassPrecision(device=device)
+        class_precision = MulticlassPrecision(
+            device=device,
+            average=None,
+            num_classes=len(DaleCaptionAttributeEncoder.vocab),
+        )
+        word_by_word_recall = MulticlassRecall(device=device)
+        class_recall = MulticlassRecall(
+            device=device,
+            average=None,
+            num_classes=len(DaleCaptionAttributeEncoder.vocab),
+        )
         non_target_accuracy = BinaryAccuracy(device=device)
 
         test_outputs = []
@@ -116,10 +134,26 @@ class CaptionGeneratorTester(Tester):
             word: round(accuracy.item(), 2)
             for word, accuracy in zip(DaleCaptionAttributeEncoder.vocab, class_accuracy)
         }
+        class_precision = class_precision.compute()
+        precision_by_word = {
+            word: round(precision.item(), 2)
+            for word, precision in zip(
+                DaleCaptionAttributeEncoder.vocab, class_precision
+            )
+        }
+        class_recall = class_recall.compute()
+        recall_by_word = {
+            word: round(recall.item(), 2)
+            for word, recall in zip(DaleCaptionAttributeEncoder.vocab, class_recall)
+        }
 
         return {
             "accuracy": f"{accuracy.compute():.2f}",
             "word_by_word_accuracy": f"{word_by_word_accuracy.compute():.2f}",
             "accuracy_by_word": f"{accuracy_by_word}",
+            "word_by_word_precision": f"{word_by_word_precision.compute():.2f}",
+            "precision_by_word": f"{precision_by_word}",
+            "word_by_word_recall": f"{word_by_word_recall.compute():.2f}",
+            "recall_by_word": f"{recall_by_word}",
             "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
         }, test_outputs
