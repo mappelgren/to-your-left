@@ -158,9 +158,9 @@ class CaptionGeneratorTester(Tester):
             "accuracy": f"{accuracy.compute():.2f}",
             "word_by_word_accuracy": f"{word_by_word_accuracy.compute():.2f}",
             "accuracy_by_word": f"{accuracy_by_word}",
-            "word_by_word_precision": f"{torch.mean(class_precision.compute()[included_indices])}",
+            "word_by_word_precision": f"{torch.mean(class_precision.compute()[included_indices]):.2f}",
             "precision_by_word": f"{precision_by_word}",
-            "word_by_word_recall": f"{torch.mean(class_recall.compute()[included_indices])}",
+            "word_by_word_recall": f"{torch.mean(class_recall.compute()[included_indices]):.2f}",
             "recall_by_word": f"{recall_by_word}",
             "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
         }, test_outputs
