@@ -73,17 +73,13 @@ class CaptionGeneratorTester(Tester):
             average=None,
             num_classes=len(DaleCaptionAttributeEncoder.vocab),
         )
-        word_by_word_precision = MulticlassPrecision(
-            device=device,
-        )
+        word_by_word_precision = MulticlassPrecision(device=device, average="macro")
         class_precision = MulticlassPrecision(
             device=device,
             average=None,
             num_classes=len(DaleCaptionAttributeEncoder.vocab),
         )
-        word_by_word_recall = MulticlassRecall(
-            device=device,
-        )
+        word_by_word_recall = MulticlassRecall(device=device, average="macro")
         class_recall = MulticlassRecall(
             device=device,
             average=None,
@@ -156,17 +152,13 @@ class CaptionGeneratorTester(Tester):
             )
         }
 
-        included_indices = [
-            i for i in range(len(DaleCaptionAttributeEncoder.vocab)) if i != 1
-        ]
-
         return {
             "accuracy": f"{accuracy.compute():.2f}",
-            "word_by_word_accuracy": f"{word_by_word_accuracy.compute():.2f}, {torch.mean(class_accuracy.compute()[included_indices]):.2f}",
+            "word_by_word_accuracy": f"{word_by_word_accuracy.compute():.2f}",
             "accuracy_by_word": f"{accuracy_by_word}",
-            "word_by_word_precision": f"{word_by_word_precision.compute():.2f}, {torch.mean(class_precision.compute()[included_indices]):.2f}",
+            "word_by_word_precision": f"{word_by_word_precision.compute():.2f}",
             "precision_by_word": f"{precision_by_word}",
-            "word_by_word_recall": f"{word_by_word_recall.compute():.2f}, {torch.mean(class_recall.compute()[included_indices]):.2f}",
+            "word_by_word_recall": f"{word_by_word_recall.compute():.2f}",
             "recall_by_word": f"{recall_by_word}",
             "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
         }, test_outputs
