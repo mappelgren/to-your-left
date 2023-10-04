@@ -266,6 +266,7 @@ models = {
         model=BoundingBoxCaptionGenerator,
         model_args={
             "embedding_dimension": 256,
+            # same as decoder_out_dim
             "hidden_size": 128,
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
@@ -295,6 +296,7 @@ models = {
         model=CaptionGenerator,
         model_args={
             "image_encoder": ClevrImageEncoder(
+                # same as caption_decoder decoder_out_dim
                 encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),

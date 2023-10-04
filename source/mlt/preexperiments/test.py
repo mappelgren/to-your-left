@@ -1,12 +1,8 @@
 from abc import abstractmethod
 
 import torch
-from torcheval.metrics import (
-    BinaryAccuracy,
-    Mean,
-    MulticlassAccuracy,
-    MultilabelAccuracy,
-)
+from mlt.preexperiments.data_readers import DaleCaptionAttributeEncoder
+from torcheval.metrics import BinaryAccuracy, Mean, MulticlassAccuracy
 
 
 class Tester:
@@ -65,7 +61,12 @@ class CaptionGeneratorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
         accuracy = BinaryAccuracy(device=device)
-        hamming_accuracy = MulticlassAccuracy(device=device)
+        word_by_word_accuracy = MulticlassAccuracy(device=device)
+        class_accuracy = MulticlassAccuracy(
+            device=device,
+            average=None,
+            num_classes=len(DaleCaptionAttributeEncoder.vocab),
+        )
         non_target_accuracy = BinaryAccuracy(device=device)
 
         test_outputs = []
@@ -105,12 +106,20 @@ class CaptionGeneratorTester(Tester):
                     torch.tensor(True).unsqueeze(dim=0),
                 )
 
-            hamming_accuracy.update(output.flatten(), ground_truth.flatten())
+            word_by_word_accuracy.update(output.flatten(), ground_truth.flatten())
+            class_accuracy.update(output.flatten(), ground_truth.flatten())
 
             test_outputs.extend(zip(image_id, output, ground_truth))
 
+        class_accuracy = class_accuracy.compute()
+        accuracy_by_word = {
+            word: round(accuracy.item(), 2)
+            for word, accuracy in zip(DaleCaptionAttributeEncoder.vocab, class_accuracy)
+        }
+
         return {
             "accuracy": f"{accuracy.compute():.2f}",
-            "hamming_accuracy": f"{hamming_accuracy.compute():.2f}",
+            "word_by_word_accuracy": f"{word_by_word_accuracy.compute():.2f}",
+            "accuracy_by_word": f"{accuracy_by_word}",
             "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
         }, test_outputs
