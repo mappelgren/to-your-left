@@ -1,3 +1,5 @@
+import json
+import logging
 from abc import abstractmethod
 
 import torch
@@ -129,22 +131,29 @@ class CaptionGeneratorTester(Tester):
 
             test_outputs.extend(zip(image_id, output, ground_truth))
 
+        logging.getLogger().setLevel(logging.ERROR)
+        computed_accuracy = word_by_word_accuracy.compute()
+        computed_class_accuracy = class_accuracy.compute()
+        computef_class_precisions = class_precision.compute()
+        computed_class_recall = class_recall.compute()
+        logging.getLogger().setLevel(logging.WARNING)
+
         accuracy_by_word = {
             word: round(accuracy.item(), 2)
             for word, accuracy in zip(
-                DaleCaptionAttributeEncoder.vocab, class_accuracy.compute()
+                DaleCaptionAttributeEncoder.vocab, computed_class_accuracy
             )
         }
         precision_by_word = {
             word: round(precision.item(), 2)
             for word, precision in zip(
-                DaleCaptionAttributeEncoder.vocab, class_precision.compute()
+                DaleCaptionAttributeEncoder.vocab, computef_class_precisions
             )
         }
         recall_by_word = {
             word: round(recall.item(), 2)
             for word, recall in zip(
-                DaleCaptionAttributeEncoder.vocab, class_recall.compute()
+                DaleCaptionAttributeEncoder.vocab, computed_class_recall
             )
         }
 
@@ -154,13 +163,18 @@ class CaptionGeneratorTester(Tester):
             if token != DaleCaptionAttributeEncoder.SOS_TOKEN
         ]
 
-        return {
-            "accuracy": f"{accuracy.compute():.2f}",
-            "word_by_word_accuracy": f"{word_by_word_accuracy.compute():.2f}",
-            "accuracy_by_word": f"{accuracy_by_word}",
-            "word_by_word_precision": f"{torch.mean(class_precision.compute()[included_indices]):.2f}",
-            "precision_by_word": f"{precision_by_word}",
-            "word_by_word_recall": f"{torch.mean(class_recall.compute()[included_indices]):.2f}",
-            "recall_by_word": f"{recall_by_word}",
-            "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
-        }, test_outputs
+        return (
+            json.dumps(
+                {
+                    "accuracy": f"{accuracy.compute():.2f}",
+                    "word_by_word_accuracy": f"{computed_accuracy:.2f}",
+                    "accuracy_by_word": accuracy_by_word,
+                    "word_by_word_precision": f"{torch.mean(computef_class_precisions[included_indices]):.2f}",
+                    "precision_by_word": precision_by_word,
+                    "word_by_word_recall": f"{torch.mean(computed_class_recall[included_indices]):.2f}",
+                    "recall_by_word": recall_by_word,
+                    "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
+                }
+            ),
+            test_outputs,
+        )
