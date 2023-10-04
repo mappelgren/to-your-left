@@ -266,11 +266,11 @@ models = {
         model=BoundingBoxCaptionGenerator,
         model_args={
             "embedding_dimension": 256,
-            "hidden_size": 512,
+            "hidden_size": 128,
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
-                decoder_out_dim=512,
+                decoder_out_dim=128,
             ),
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -378,6 +378,8 @@ if __name__ == "__main__":
         choices=models.keys(),
         help="model to load",
     )
+    parser.add_argument("--hidden_size", type=int, default=None)
+    parser.add_argument("--embedding_size", type=int, default=None)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
@@ -393,6 +395,7 @@ if __name__ == "__main__":
         help="directory, where the output should be saved",
     )
     args = parser.parse_args()
+    print(args)
 
     if args.device == "cpu":
         device = torch.device("cpu")
@@ -436,7 +439,13 @@ if __name__ == "__main__":
     model_saver = ModelSaver(args.out_dir, args.model, output_processor)
     tester = models[args.model].tester()
 
-    model = models[args.model].model(**models[args.model].model_args).to(device)
+    model_args = models[args.model].model_args
+    if args.hidden_size:
+        model_args["hidden_size"] = args.hidden_size
+    if args.embedding_size:
+        model_args["embedding_size"] = args.embedding_size
+
+    model = models[args.model].model(**model_args).to(device)
 
     if args.checkpoint_path is not None:
         model.load_state_dict(torch.load(args.checkpoint_path))
