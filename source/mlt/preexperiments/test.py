@@ -73,7 +73,9 @@ class CaptionGeneratorTester(Tester):
             average=None,
             num_classes=len(DaleCaptionAttributeEncoder.vocab),
         )
-        word_by_word_precision = MulticlassPrecision(device=device)
+        word_by_word_precision = MulticlassPrecision(
+            device=device,
+        )
         class_precision = MulticlassPrecision(
             device=device,
             average=None,
@@ -126,25 +128,30 @@ class CaptionGeneratorTester(Tester):
 
             word_by_word_accuracy.update(output.flatten(), ground_truth.flatten())
             class_accuracy.update(output.flatten(), ground_truth.flatten())
+            word_by_word_precision.update(output.flatten(), ground_truth.flatten())
+            class_precision.update(output.flatten(), ground_truth.flatten())
+            word_by_word_recall.update(output.flatten(), ground_truth.flatten())
+            class_recall.update(output.flatten(), ground_truth.flatten())
 
             test_outputs.extend(zip(image_id, output, ground_truth))
 
-        class_accuracy = class_accuracy.compute()
         accuracy_by_word = {
             word: round(accuracy.item(), 2)
-            for word, accuracy in zip(DaleCaptionAttributeEncoder.vocab, class_accuracy)
+            for word, accuracy in zip(
+                DaleCaptionAttributeEncoder.vocab, class_accuracy.compute()
+            )
         }
-        class_precision = class_precision.compute()
         precision_by_word = {
             word: round(precision.item(), 2)
             for word, precision in zip(
-                DaleCaptionAttributeEncoder.vocab, class_precision
+                DaleCaptionAttributeEncoder.vocab, class_precision.compute()
             )
         }
-        class_recall = class_recall.compute()
         recall_by_word = {
             word: round(recall.item(), 2)
-            for word, recall in zip(DaleCaptionAttributeEncoder.vocab, class_recall)
+            for word, recall in zip(
+                DaleCaptionAttributeEncoder.vocab, class_recall.compute()
+            )
         }
 
         return {
