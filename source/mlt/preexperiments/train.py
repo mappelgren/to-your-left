@@ -1,4 +1,5 @@
 import argparse
+from calendar import day_abbr
 from dataclasses import dataclass
 from tkinter import ALL
 from typing import Callable
@@ -8,6 +9,7 @@ from mlt.feature_extractors import DummyFeatureExtractor
 from mlt.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.data_readers import (
     AllObjectsImageMasker,
+    BoundingBoxCaptioningDataset,
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
     CoordinatePredictorDataset,
@@ -19,6 +21,7 @@ from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
     AttributeLocationCoordinatePredictor,
     BoundingBoxAttributeClassifier,
+    BoundingBoxCaptionGenerator,
     BoundingBoxClassifier,
     CaptionDecoder,
     CaptionGenerator,
@@ -251,6 +254,35 @@ models = {
         output_processor=BoundingBoxOutputProcessor,
         output_processor_args={
             "output_fields": ("image_id", "bounding_box", "target_bounding_box")
+        },
+    ),
+    "bounding_box_caption_generator": ModelDefinition(
+        dataset=BoundingBoxCaptioningDataset,
+        dataset_args={
+            "captioner": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
+                reversed_caption=False,
+            ),
+        },
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=BoundingBoxCaptionGenerator,
+        model_args={
+            "embedding_dimension": 512,
+            "hidden_size": 1024,
+            "caption_decoder": CaptionDecoder(
+                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
+                decoder_out_dim=1024,
+            ),
+            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
+                DaleCaptionAttributeEncoder.SOS_TOKEN
+            ),
+        },
+        loss_function=nn.CrossEntropyLoss(),
+        tester=CaptionGeneratorTester,
+        output_processor=CaptionOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "caption", "target_caption")
         },
     ),
     "caption_generator": ModelDefinition(

@@ -70,7 +70,11 @@ class CaptionGeneratorTester(Tester):
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
-            image, _, non_target_captions, masked_image, *_ = model_input
+            if len(model_input) > 3:
+                image, _, non_target_captions, masked_image, *_ = model_input
+            else:
+                image, _, non_target_captions = model_input
+                masked_image = torch.zeros(1)
 
             image = image.to(device)
             masked_image = masked_image.to(device)

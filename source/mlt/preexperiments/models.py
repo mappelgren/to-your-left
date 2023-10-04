@@ -40,7 +40,15 @@ class BoundingBoxClassifier(nn.Module):
 
 
 class BoundingBoxCaptionGenerator(nn.Module):
-    def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
+    def __init__(
+        self,
+        hidden_size,
+        caption_decoder,
+        encoded_sos,
+        *_args,
+        embedding_dimension=256,
+        **_kwargs
+    ) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
             embedding_dimension=embedding_dimension
@@ -51,28 +59,28 @@ class BoundingBoxCaptionGenerator(nn.Module):
         self.encoded_sos = torch.tensor(encoded_sos)
 
     def forward(self, data):
-        bounding_boxes, *_, caption = data
+        bounding_boxes, caption, *_ = data
 
         encoded_images = []
         for image_index in range(bounding_boxes.shape[1]):
             encoded_images.append(self.image_encoder(bounding_boxes[:, image_index]))
 
-        concatenated = torch.cat(encoded_images, dim=1)
+        concatenated = torch.cat(encoded_images, dim=1).unsqueeze(dim=0)
+
         lin = self.lin(concatenated)
         lstm_states = lin, lin
         predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
 
         return predicted.permute(0, 2, 1)
 
-    def caption(self, data):
-        bounding_boxes, *_ = data
+    def caption(self, bounding_boxes):
         device = bounding_boxes.device
 
         encoded_images = []
         for image_index in range(bounding_boxes.shape[1]):
             encoded_images.append(self.image_encoder(bounding_boxes[:, image_index]))
 
-        concatenated = torch.cat(encoded_images, dim=1)
+        concatenated = torch.cat(encoded_images, dim=1).unsqueeze(dim=0)
         lin = self.lin(concatenated)
         lstm_states = lin, lin
 

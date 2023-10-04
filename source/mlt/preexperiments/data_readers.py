@@ -63,7 +63,7 @@ class PreprocessScratch:
 
 class Captioner(ABC):
     @abstractmethod
-    def caption(self, scene, object_index):
+    def caption(self, scene, object_index) -> torch.Tensor:
         ...
 
     @classmethod
@@ -297,6 +297,7 @@ class SiftFeatureExtractor(GeometricFeatureExtractor):
     def get_features(self, image: Image.Image):
         gray_scale_image = image.convert("L")
         image_array = np.array(gray_scale_image)
+        # pylint: disable-next=no-member
         sift = cv2.SIFT_create(nfeatures=50)
         keypoints, descriptors = sift.detectAndCompute(image_array, None)
 
@@ -329,7 +330,7 @@ class BoundingBoxClassifierDataset(Dataset):
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
-        *args,
+        *_args,
         attribute_encoder: AttributeEncoder = None,
         **_kwargs,
     ) -> None:
@@ -381,6 +382,98 @@ class BoundingBoxClassifierDataset(Dataset):
                 sample.attribute_tensor,
             ),
             sample.target_index,
+            sample.image_id,
+        )
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+
+@dataclass
+class BoundingBoxCaptioningSample:
+    image_id: str
+    bounding_boxes: torch.Tensor
+
+    # target
+    caption: torch.Tensor
+
+    # additional attributes
+    non_target_captions: torch.Tensor = torch.tensor(0)
+
+
+class BoundingBoxCaptioningDataset(Dataset):
+    def __init__(
+        self,
+        scenes_json_dir,
+        image_loader: ImageLoader,
+        max_number_samples,
+        captioner: Captioner,
+        *_args,
+        **_kwargs,
+    ):
+        super().__init__()
+
+        self.captioner = captioner
+        self.samples: list[BoundingBoxCaptioningSample] = []
+
+        scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
+        selected_scenes = random.sample(scenes, max_number_samples)
+
+        max_number_of_distractors = 0
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                scene = json.load(f)
+
+            image_id = scene_file.removesuffix(".json")
+            _, bounding_boxes, _ = image_loader.get_image(image_id)
+
+            target_object = scene["groups"]["target"][0]
+
+            number_of_objects = len(scene["objects"])
+            max_number_of_distractors = max(
+                number_of_objects - 1, max_number_of_distractors
+            )
+            captions = []
+            for obj_index in range(number_of_objects):
+                captions.append(captioner.caption(scene, obj_index))
+
+            target_caption = captions.pop(target_object)
+
+            sample = BoundingBoxCaptioningSample(
+                image_id=scene_file.removesuffix(".json"),
+                bounding_boxes=bounding_boxes,
+                caption=target_caption,
+                non_target_captions=torch.stack(captions)[:, 1:],
+            )
+            self.samples.append(sample)
+
+        # pad non-target captions
+        for sample in self.samples:
+            padding = [torch.zeros_like(sample.non_target_captions[0])] * (
+                max_number_of_distractors - len(sample.non_target_captions)
+            )
+            if len(padding) > 0:
+                sample.non_target_captions = torch.cat(
+                    (
+                        sample.non_target_captions,
+                        torch.stack(padding),
+                    )
+                )
+
+        print()
+        print("loaded data.")
+
+    def __getitem__(self, index):
+        sample = self.samples[index]
+        return (
+            (sample.bounding_boxes, sample.caption, sample.non_target_captions),
+            sample.caption[1:],
             sample.image_id,
         )
 
