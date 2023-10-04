@@ -104,7 +104,9 @@ class BoundingBoxAttributeClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(self, embedding_dimension, image_encoder: ImageEncoder) -> None:
+    def __init__(
+        self, embedding_dimension, image_encoder: ImageEncoder, *_args, **_kwargs
+    ) -> None:
         super().__init__()
 
         self.image_encoder = image_encoder
@@ -137,7 +139,11 @@ class CoordinatePredictor(nn.Module):
     """
 
     def __init__(
-        self, image_encoder: ImageEncoder, coordinate_classifier: CoordinateClassifier
+        self,
+        image_encoder: ImageEncoder,
+        coordinate_classifier: CoordinateClassifier,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -167,6 +173,8 @@ class AttributeCoordinatePredictor(nn.Module):
         self,
         image_encoder: ImageEncoder,
         coordinate_classifier: CoordinateClassifier,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -195,7 +203,11 @@ class AttributeLocationCoordinatePredictor(nn.Module):
     """
 
     def __init__(
-        self, image_encoder: ImageEncoder, coordinate_classifier: CoordinateClassifier
+        self,
+        image_encoder: ImageEncoder,
+        coordinate_classifier: CoordinateClassifier,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -239,6 +251,8 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         encoder_out_dim,
         image_encoder: ImageEncoder,
         coordinate_classifier: CoordinateClassifier,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -278,6 +292,8 @@ class MaskedCoordinatePredictor(nn.Module):
         image_encoder: ImageEncoder,
         masked_image_encoder: MaskedImageEncoder,
         coordinate_classifier: CoordinateClassifier,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -301,7 +317,9 @@ class MaskedCoordinatePredictor(nn.Module):
 
 
 class CaptionDecoder(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, decoder_out_dim) -> None:
+    def __init__(
+        self, vocab_size, embedding_dim, decoder_out_dim, *_args, **_kwargs
+    ) -> None:
         super().__init__()
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, decoder_out_dim, batch_first=True)
@@ -324,7 +342,12 @@ class CaptionGenerator(nn.Module):
     """
 
     def __init__(
-        self, image_encoder: ImageEncoder, caption_decoder, encoded_sos
+        self,
+        image_encoder: ImageEncoder,
+        caption_decoder,
+        encoded_sos,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -373,6 +396,8 @@ class MaskedCaptionGenerator(nn.Module):
         masked_image_encoder: MaskedImageEncoder,
         caption_decoder,
         encoded_sos,
+        *_args,
+        **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
