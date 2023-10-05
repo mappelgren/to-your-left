@@ -84,7 +84,7 @@ def captioning_loss(
 
     logging.getLogger().setLevel(logging.ERROR)
     computed_class_accuracy = class_accuracy.compute()
-    computef_class_precisions = class_precision.compute()
+    computed_class_precisions = class_precision.compute()
     computed_class_recall = class_recall.compute()
     logging.getLogger().setLevel(logging.WARNING)
 
@@ -97,7 +97,7 @@ def captioning_loss(
     precision_by_word = {
         f"prec_{word}": precision.detach().clone().float()
         for word, precision in zip(
-            DaleCaptionAttributeEncoder.vocab, computef_class_precisions
+            DaleCaptionAttributeEncoder.vocab, computed_class_precisions
         )
     }
     recall_by_word = {
@@ -109,6 +109,12 @@ def captioning_loss(
 
     loss = F.cross_entropy(receiver_output, labels)
 
+    included_indices = [
+        i
+        for i, token in enumerate(DaleCaptionAttributeEncoder.vocab)
+        if token != DaleCaptionAttributeEncoder.SOS_TOKEN
+    ]
+
     return loss, {
         "accuracy": accuracy.compute().detach().clone().float(),
         "word-by-word_accuracy": word_by_word_accuracy.compute()
@@ -116,6 +122,8 @@ def captioning_loss(
         .clone()
         .float(),
         "non_target_accuracy": non_target_accuracy.compute().detach().clone().float(),
+        "word_by_word_precision": f"{torch.mean(computed_class_precisions[included_indices]):.2f}",
+        "word_by_word_recall": f"{torch.mean(computed_class_recall[included_indices]):.2f}",
         **accuracy_by_word,
         **precision_by_word,
         **recall_by_word,
