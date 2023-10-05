@@ -408,6 +408,8 @@ class MaskedCaptionGenerator(nn.Module):
     def forward(self, data):
         image, caption, _, masked_image, *_ = data
 
+        print(image.shape, masked_image.shape)
+
         encoded_image = self.image_encoder(image).unsqueeze(dim=0)
         encoded_masked_image = self.masked_image_encoder(masked_image).unsqueeze(dim=0)
         concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
