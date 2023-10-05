@@ -484,6 +484,7 @@ if __name__ == "__main__":
                 loss_string,
                 end="\r",
             )
+            print(torch.cuda.memory_allocated())
 
             loss.backward()
             optimizer.step()
