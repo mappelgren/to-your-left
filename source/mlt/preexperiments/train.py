@@ -460,7 +460,6 @@ if __name__ == "__main__":
         model_args["embedding_size"] = args.embedding_size
 
     model = models[args.model].model(**model_args).to(device)
-    print_gpu_allocation()
 
     if args.checkpoint_path is not None:
         model.load_state_dict(torch.load(args.checkpoint_path))
@@ -479,12 +478,9 @@ if __name__ == "__main__":
                 model_input = [t.to(device) for t in model_input]
             else:
                 model_input.to(device)
-            print_gpu_allocation()
             ground_truth = ground_truth.to(device)
-            print_gpu_allocation()
 
             output = model(model_input)
-            print_gpu_allocation()
             train_outputs.extend(
                 zip(image_id, output.detach().cpu(), ground_truth.cpu())
             )
@@ -499,7 +495,6 @@ if __name__ == "__main__":
                 end="\r",
             )
             print()
-            print_gpu_allocation()
 
             loss.backward()
             optimizer.step()
