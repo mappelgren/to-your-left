@@ -449,6 +449,7 @@ if __name__ == "__main__":
         model_args["embedding_size"] = args.embedding_size
 
     model = models[args.model].model(**model_args).to(device)
+    print(torch.cuda.memory_allocated())
 
     if args.checkpoint_path is not None:
         model.load_state_dict(torch.load(args.checkpoint_path))
@@ -467,7 +468,9 @@ if __name__ == "__main__":
                 model_input = [t.to(device) for t in model_input]
             else:
                 model_input.to(device)
+            print(torch.cuda.memory_allocated())
             ground_truth = ground_truth.to(device)
+            print(torch.cuda.memory_allocated())
 
             output = model(model_input)
             train_outputs.extend(zip(image_id, output.detach(), ground_truth))
