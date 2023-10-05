@@ -32,7 +32,7 @@ class ClevrImageEncoder(ImageEncoder):
 
     def forward(self, image):
         processed_image = self.process_image(image)
-
+        return processed_image
         # flattened = torch.flatten(processed_image, start_dim=2).permute(0, 2, 1)
         # reduced = self.mean_reduction(flattened.mean(dim=1))
         reduced = self.reduction(processed_image)

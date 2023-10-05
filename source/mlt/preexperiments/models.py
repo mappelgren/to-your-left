@@ -404,15 +404,17 @@ class MaskedCaptionGenerator(nn.Module):
         self.masked_image_encoder = masked_image_encoder
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(2048))
 
     def forward(self, data):
         image, caption, _, masked_image, *_ = data
 
-        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
-        encoded_masked_image = self.masked_image_encoder(masked_image).unsqueeze(dim=0)
-        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
+        encoded_image = self.image_encoder(image)
+        encoded_masked_image = self.masked_image_encoder(masked_image)
+        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=1)
+        reduced = self.reduction(concatenated).unsqueeze(dim=0)
 
-        lstm_states = concatenated, concatenated
+        lstm_states = reduced, reduced
         predicted, lstm_states = self.caption_decoder(caption[:, :-1], lstm_states)
 
         return predicted.permute(0, 2, 1)
@@ -420,12 +422,13 @@ class MaskedCaptionGenerator(nn.Module):
     def caption(self, image, masked_image):
         device = image.device
 
-        encoded_image = self.image_encoder(image).unsqueeze(dim=0)
-        encoded_masked_image = self.masked_image_encoder(masked_image).unsqueeze(dim=0)
-        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=2)
+        encoded_image = self.image_encoder(image)
+        encoded_masked_image = self.masked_image_encoder(masked_image)
+        concatenated = torch.cat((encoded_image, encoded_masked_image), dim=1)
+        reduced = self.reduction(concatenated).unsqueeze(dim=0)
 
         caption = []
-        lstm_states = concatenated, concatenated
+        lstm_states = reduced, reduced
 
         # shape: batch, sequence length
         word = torch.full((image.shape[0], 1), self.encoded_sos, device=device)
