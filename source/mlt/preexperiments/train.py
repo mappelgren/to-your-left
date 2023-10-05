@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 import torch
-from mlt.feature_extractors import DummyFeatureExtractor
+from mlt.feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
 from mlt.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.data_readers import (
     AllObjectsImageMasker,
@@ -334,7 +334,13 @@ models = {
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 encoder_out_dim=1024,
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
             ),
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
