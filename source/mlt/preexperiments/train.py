@@ -473,7 +473,9 @@ if __name__ == "__main__":
             print(torch.cuda.memory_allocated())
 
             output = model(model_input)
-            train_outputs.extend(zip(image_id, output.detach(), ground_truth))
+            train_outputs.extend(
+                zip(image_id, output.detach().cpu(), ground_truth.cpu())
+            )
 
             loss = loss_function(output, ground_truth)
 
