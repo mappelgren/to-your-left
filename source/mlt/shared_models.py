@@ -1,11 +1,13 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from mlt.feature_extractors import FeatureExtractor
 from torch import nn
 
 
 class ImageEncoder(ABC, nn.Module):
-    ...
+    @abstractmethod
+    def __repr__(self):
+        ...
 
 
 class ClevrImageEncoder(ImageEncoder):
@@ -15,6 +17,9 @@ class ClevrImageEncoder(ImageEncoder):
         feature_extractor: FeatureExtractor,
     ) -> None:
         super().__init__()
+        self.encoder_out_dim = encoder_out_dim
+        self.feature_extractor = feature_extractor
+
         self.process_image = nn.Sequential(
             feature_extractor,
             nn.LazyConv2d(128, kernel_size=3, padding=1),
@@ -34,6 +39,9 @@ class ClevrImageEncoder(ImageEncoder):
 
         return reduced
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.encoder_out_dim=}, {self.feature_extractor=})"
+
 
 class BoundingBoxImageEncoder(ImageEncoder):
     def __init__(
@@ -41,12 +49,18 @@ class BoundingBoxImageEncoder(ImageEncoder):
         embedding_dimension,
     ) -> None:
         super().__init__()
+
+        self.embedding_dimensions = embedding_dimension
+
         self.process_image = nn.Sequential(
             nn.Flatten(), nn.LazyLinear(embedding_dimension, bias=False)
         )
 
     def forward(self, bounding_box):
         return self.process_image(bounding_box)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.embedding_dimension=})"
 
 
 class MaskedImageEncoder(ImageEncoder):
@@ -56,10 +70,15 @@ class MaskedImageEncoder(ImageEncoder):
     ) -> None:
         super().__init__()
 
+        self.encoder_out_dim = encoder_out_dim
+
         self.process_image = nn.Sequential(nn.Flatten(), nn.LazyLinear(encoder_out_dim))
 
     def forward(self, masked_image):
         return self.process_image(masked_image)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.encoder_out_dim=})"
 
 
 class CoordinateClassifier(nn.Module):
@@ -78,3 +97,6 @@ class CoordinateClassifier(nn.Module):
 
     def forward(self, data):
         return self.classifier(data)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"

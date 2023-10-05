@@ -46,6 +46,8 @@ class Size(Attribute):
 
 class PreprocessScratch:
     def __init__(self, image_size):
+        self.image_size = image_size
+
         self.transform = transforms.Compose(
             [
                 transforms.Resize(image_size),
@@ -59,6 +61,9 @@ class PreprocessScratch:
 
     def __call__(self, image):
         return self.transform(image)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.image_size=})"
 
 
 class Captioner(ABC):
@@ -76,10 +81,18 @@ class Captioner(ABC):
     def get_decoded_word(cls, search_index):
         ...
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        ...
+
 
 class AttributeEncoder(ABC):
     @abstractmethod
     def encode(self, scene, object_index):
+        ...
+
+    @abstractmethod
+    def __repr__(self) -> str:
         ...
 
 
@@ -100,6 +113,9 @@ class OneHotAttributeEncoder(AttributeEncoder):
         tensor[attribute[value.upper()].value] = 1
 
         return tensor
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
 
 class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
@@ -187,6 +203,9 @@ class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
 
         raise AttributeError("no word found with this index")
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.padding_position=}, {self.reversed_caption=})"
+
 
 class CoordinateEncoder:
     def __init__(self, preprocess) -> None:
@@ -227,10 +246,17 @@ class CoordinateEncoder:
 
         return new_x, new_y
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.preprocess=})"
+
 
 class ImageMasker(ABC):
     @abstractmethod
     def get_masked_image(self, image, scene, target_object):
+        ...
+
+    @abstractmethod
+    def __repr__(self) -> str:
         ...
 
 
@@ -255,6 +281,9 @@ class SingleObjectImageMasker(ImageMasker):
                 pixels[i, j] = (255, 255, 255)
 
         return masked_image
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
 
 class AllObjectsImageMasker(ImageMasker):
@@ -286,10 +315,17 @@ class AllObjectsImageMasker(ImageMasker):
 
         return masked_image
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
+
 
 class GeometricFeatureExtractor(ABC):
     @abstractmethod
     def get_features(self, image: Image.Image):
+        ...
+
+    @abstractmethod
+    def __repr__(self) -> str:
         ...
 
 
@@ -302,6 +338,9 @@ class SiftFeatureExtractor(GeometricFeatureExtractor):
         keypoints, descriptors = sift.detectAndCompute(image_array, None)
 
         return keypoints, descriptors
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
 
 @dataclass

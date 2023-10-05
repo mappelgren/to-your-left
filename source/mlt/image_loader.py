@@ -11,6 +11,10 @@ class ImageLoader(ABC):
     def get_image(self, image_id):
         ...
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        ...
+
 
 class ClevrImageLoader(ImageLoader):
     def __init__(self, image_dir, preprocess) -> None:
@@ -23,10 +27,14 @@ class ClevrImageLoader(ImageLoader):
         )
         return image, self.preprocess(image), image.size
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.image_dir=}, {self.preprocess=})"
+
 
 class FeatureImageLoader(ImageLoader):
     def __init__(self, feature_file, image_dir) -> None:
         self.image_dir = image_dir
+        self.feature_file = feature_file
 
         with h5py.File(feature_file, "r") as f:
             feature_data_set = f["features"]
@@ -41,3 +49,6 @@ class FeatureImageLoader(ImageLoader):
         )
 
         return image, torch.from_numpy(self.features[image_index]), self.image_size
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.feature_file=}, {self.image_dir=})"

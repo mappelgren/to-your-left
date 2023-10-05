@@ -1,4 +1,9 @@
 import argparse
+import hashlib
+import json
+import os
+import pickle
+import sys
 from dataclasses import dataclass
 from typing import Callable
 
@@ -360,6 +365,14 @@ models = {
     ),
 }
 
+# names of the datasets and their foldernames
+datasets = {
+    "dale-2": "clevr-images-unambigous-dale-two",
+    "dale-5": "clevr-images-unambigous-dale",
+    "single": "clevr-images-random-single",
+    "colour": "clevr-images-unambigous-colour",
+}
+
 
 def print_gpu_allocation():
     print(f"GPU: {torch.cuda.memory_allocated()/(1024**3):.2f}GB")
@@ -368,13 +381,15 @@ def print_gpu_allocation():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
-    parser.add_argument("--scene_json_dir", type=str, help="Path to the scene json dir")
-    parser.add_argument("--image_dir", type=str, help="Path to the scene image dir")
+    parser.add_argument(
+        "--dataset_root_dir", type=str, help="Path to the base directory of the dataset"
+    )
+    parser.add_argument("--dataset", choices=datasets.keys(), help="datasets, to load")
     parser.add_argument(
         "--feature_file",
         type=str,
         default=None,
-        help="Path to the hd5 file containing extracted image features",
+        help="Name of the hd5 file containing extracted image features",
     )
     parser.add_argument(
         "--checkpoint_path",
@@ -418,22 +433,48 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
+    image_dir = os.path.join(args.dataset_root_dir, datasets[args.dataset], "images/")
+    scene_json_dir = os.path.join(
+        args.dataset_root_dir, datasets[args.dataset], "scenes/"
+    )
+    feature_file = os.path.join(
+        args.dataset_root_dir, datasets[args.dataset], "features", args.feature_file
+    )
+
     if args.feature_file is not None:
         image_loader = FeatureImageLoader(
-            feature_file=args.feature_file, image_dir=args.image_dir
+            feature_file=feature_file, image_dir=image_dir
         )
     else:
         image_loader = ClevrImageLoader(
-            image_dir=args.image_dir,
+            image_dir=image_dir,
             preprocess=models[args.model].preprocess,
         )
 
-    dataset = models[args.model].dataset(
-        scenes_json_dir=args.scene_json_dir,
-        image_loader=image_loader,
-        max_number_samples=args.max_samples,
+    dataset_args = {
+        "scenes_json_dir": scene_json_dir,
+        "image_loader": image_loader,
+        "max_number_samples": args.max_samples,
         **models[args.model].dataset_args,
-    )
+    }
+
+    dataset_identifier = hashlib.sha256(str(dataset_args).encode()).hexdigest()
+    dataset_dir = os.path.join(args.out_dir, "datasets")
+    dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.pt")
+    if os.path.exists(dataset_file):
+        print(f"Loading dataset {dataset_identifier}...", end="\r")
+        with open(dataset_file, "rb") as f:
+            dataset = torch.load(f)
+        print(f"Dataset {dataset_identifier} loaded.   ")
+    else:
+        dataset = models[args.model].dataset(**dataset_args)
+
+        print(f"Saving dataset {dataset_identifier}...", end="\r")
+        if not os.path.exists(dataset_dir):
+            os.makedirs(dataset_dir)
+        with open(dataset_file, "wb") as f:
+            torch.save(dataset, f)
+        print(f"Dataset {dataset_identifier} saved.   ")
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length

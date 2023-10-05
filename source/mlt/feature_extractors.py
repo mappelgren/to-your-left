@@ -17,6 +17,10 @@ class FeatureExtractor(ABC, nn.Module):
     def feature_shape(self):
         ...
 
+    @abstractmethod
+    def __repr__(self):
+        ...
+
 
 class DummyFeatureExtractor(FeatureExtractor):
     """Feature extractor that ouputs input unchanged
@@ -32,12 +36,21 @@ class DummyFeatureExtractor(FeatureExtractor):
     def forward(self, data):
         return data
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"
+
 
 class ResnetFeatureExtractor(FeatureExtractor):
     def __init__(
         self, pretrained=True, fine_tune=False, number_blocks=4, avgpool=True, fc=True
     ) -> None:
         super().__init__()
+
+        self.pretrained = pretrained
+        self.fine_tune = fine_tune
+        self.number_blocks = number_blocks
+        self.avgpool = avgpool
+        self.fc = fc
 
         if pretrained:
             resnet = resnet101(weights=ResNet101_Weights.IMAGENET1K_V2)
@@ -83,12 +96,20 @@ class ResnetFeatureExtractor(FeatureExtractor):
     def forward(self, data):
         return self.resnet(data)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.pretrained=}, {self.fine_tune=}, {self.number_blocks=}, {self.avgpool=:=}, {self.fc=})"
+
 
 class VggFeatureExtractor(FeatureExtractor):
     def __init__(
         self, pretrained=True, fine_tune=False, avgpool=True, classifier_layers=3
     ) -> None:
         super().__init__()
+
+        self.pretrained = pretrained
+        self.fine_tune = fine_tune
+        self.avgpool = avgpool
+        self.classifier_layers = classifier_layers
 
         if pretrained:
             vgg = vgg19(weights=VGG19_Weights.IMAGENET1K_V1)
@@ -131,6 +152,9 @@ class VggFeatureExtractor(FeatureExtractor):
 
     def forward(self, data):
         return self.vgg(data)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.pretrained=}, {self.fine_tune=}, {self.avgpool=}, {self.classifier_layers=})"
 
 
 def get_bounding_boxes(image, scene, preprocess, max_number_objects):
