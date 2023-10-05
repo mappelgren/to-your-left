@@ -356,7 +356,7 @@ models = {
 
 
 def print_gpu_allocation():
-    print(f"{torch.cuda.memory_allocated()/(1024**3)}GB")
+    print(f"GPU: {torch.cuda.memory_allocated()/(1024**3):.2f}GB")
 
 
 if __name__ == "__main__":
