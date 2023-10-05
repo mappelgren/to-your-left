@@ -1,7 +1,6 @@
 from abc import ABC
 
-import torch
-from mlt.feature_extractors import DummyFeatureExtractor, FeatureExtractor
+from mlt.feature_extractors import FeatureExtractor
 from torch import nn
 
 
