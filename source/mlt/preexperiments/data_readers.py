@@ -490,7 +490,7 @@ class BoundingBoxCaptioningDataset(Dataset):
                 caption=target_caption,
                 non_target_captions=torch.stack(captions)[:, 1:]
                 if len(captions) != 0
-                else torch.fill((1, 3), 1),
+                else torch.ones((1, 3)),
             )
             self.samples.append(sample)
 
