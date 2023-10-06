@@ -42,19 +42,19 @@ class BoundingBoxClassifier(nn.Module):
 class BoundingBoxCaptionGenerator(nn.Module):
     def __init__(
         self,
-        hidden_size,
+        decoder_out_dim,
         caption_decoder,
         encoded_sos,
         *_args,
-        embedding_dimension=256,
+        image_embedding_dimension=256,
         **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
-            embedding_dimension=embedding_dimension
+            image_embedding_dimension=image_embedding_dimension
         )
 
-        self.lin = nn.LazyLinear(hidden_size, bias=False)
+        self.lin = nn.LazyLinear(decoder_out_dim, bias=False)
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 
@@ -105,14 +105,16 @@ class BoundingBoxAttributeClassifier(nn.Module):
     """
 
     def __init__(
-        self, embedding_dimension, image_encoder: ImageEncoder, *_args, **_kwargs
+        self, image_embedding_dimension, image_encoder: ImageEncoder, *_args, **_kwargs
     ) -> None:
         super().__init__()
 
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
-        self.linear_attributes = nn.LazyLinear(embedding_dimension)
+        self.linear_attributes = nn.LazyLinear(image_embedding_dimension)
 
         self.softmax = nn.LogSoftmax(dim=1)
 
@@ -143,14 +145,16 @@ class CoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
         self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
@@ -176,14 +180,16 @@ class AttributeCoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -212,14 +218,16 @@ class AttributeLocationCoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -306,7 +314,7 @@ class MaskedCoordinatePredictor(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: MaskedImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs
@@ -314,7 +322,9 @@ class MaskedCoordinatePredictor(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -362,7 +372,7 @@ class CaptionGenerator(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         caption_decoder,
         encoded_sos,
         *_args,
@@ -370,7 +380,9 @@ class CaptionGenerator(nn.Module):
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 
@@ -416,7 +428,7 @@ class MaskedCaptionGenerator(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: MaskedImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         caption_decoder,
         encoded_sos,
         *_args,
@@ -427,7 +439,9 @@ class MaskedCaptionGenerator(nn.Module):
         self.masked_image_encoder = masked_image_encoder
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
     def forward(self, data):
         image, caption, _, masked_image, *_ = data

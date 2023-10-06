@@ -1,7 +1,7 @@
 import argparse
 import hashlib
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 
 import torch
@@ -73,6 +73,9 @@ class ModelDefinition:
     output_processor: StandardOutputProcessor
     output_processor_args: dict
 
+    # optional
+    caption_decoder_args: dict = field(default_factory=dict)
+
 
 models = {
     "coordinate_predictor": ModelDefinition(
@@ -84,7 +87,7 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "embedding_dimension": 2048,
+            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -121,7 +124,7 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "embedding_dimension": 2048,
+            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -170,7 +173,7 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "embedding_dimension": 2048,
+            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -198,7 +201,7 @@ models = {
                     number_blocks=3,
                 ),
             ),
-            "embedding_dimension": 4096,
+            "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -226,7 +229,7 @@ models = {
                     number_blocks=3,
                 ),
             ),
-            "embedding_dimension": 4096,
+            "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -257,8 +260,8 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxAttributeClassifier,
         model_args={
-            "embedding_dimension": 10,
-            "image_encoder": BoundingBoxImageEncoder(embedding_dimension=10),
+            "image_embedding_dimension": 10,
+            "image_encoder": BoundingBoxImageEncoder(image_embedding_dimension=10),
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
@@ -278,14 +281,8 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxCaptionGenerator,
         model_args={
-            "embedding_dimension": 256,
-            # same as decoder_out_dim
-            "hidden_size": 128,
-            "caption_decoder": CaptionDecoder(
-                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
-                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
-                decoder_out_dim=128,
-            ),
+            "image_embedding_dimension": 256,
+            "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
             ),
@@ -311,12 +308,8 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "embedding_dimension": 1024,
-            "caption_decoder": CaptionDecoder(
-                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
-                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
-                decoder_out_dim=1024,
-            ),
+            "image_embedding_dimension": 1024,
+            "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
             ),
@@ -352,12 +345,8 @@ models = {
                     number_blocks=3,
                 ),
             ),
-            "embedding_dimension": 2048,
-            "caption_decoder": CaptionDecoder(
-                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
-                embedding_dim=len(DaleCaptionAttributeEncoder.vocab),
-                decoder_out_dim=2048,
-            ),
+            "image_embedding_dimension": 2048,
+            "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
             ),
@@ -415,8 +404,9 @@ if __name__ == "__main__":
         choices=models.keys(),
         help="model to load",
     )
-    parser.add_argument("--hidden_size", type=int, default=None)
-    parser.add_argument("--embedding_size", type=int, default=None)
+    parser.add_argument("--decoder_out_dim", type=int, default=None)
+    parser.add_argument("--embedding_dim", type=int, default=None)
+    parser.add_argument("--image_embedding_dimension", type=int, default=None)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
@@ -507,10 +497,17 @@ if __name__ == "__main__":
     tester = model_name.tester()
 
     model_args = model_name.model_args
-    if args.hidden_size:
-        model_args["hidden_size"] = args.hidden_size
-    if args.embedding_size:
-        model_args["embedding_size"] = args.embedding_size
+    if args.decoder_out_dim:
+        model_args["decoder_out_dim"] = args.decoder_out_dim
+    if args.image_embedding_dimension:
+        model_args["image_embedding_dimension"] = args.image_embedding_dimension
+
+    if "caption_decoder" in model_args.keys():
+        model_args["caption_decoder"] = model_args["caption_decoder"](
+            embedding_dim=args.embedding_dim,
+            decoder_out_dim=args.decoder_out_dim,
+            vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+        )
 
     model = model_name.model(**model_args).to(device)
 

@@ -37,21 +37,21 @@ class ClevrImageEncoder(ImageEncoder):
 class BoundingBoxImageEncoder(ImageEncoder):
     def __init__(
         self,
-        embedding_dimension,
+        image_embedding_dimension,
     ) -> None:
         super().__init__()
 
-        self.embedding_dimension = embedding_dimension
+        self.image_embedding_dimension = image_embedding_dimension
 
         self.process_image = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(embedding_dimension, bias=False)
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension, bias=False)
         )
 
     def forward(self, bounding_box):
         return self.process_image(bounding_box)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.embedding_dimension=})"
+        return f"{self.__class__.__name__}({self.image_embedding_dimension=})"
 
 
 class MaskedImageEncoder(ImageEncoder):

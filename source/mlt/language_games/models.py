@@ -21,7 +21,7 @@ class ReferentialGameSender(nn.Module):
     def __init__(self, hidden_size, *_args, embedding_dimension=256, **_kwargs) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
-            embedding_dimension=embedding_dimension
+            image_embedding_dimension=embedding_dimension
         )
 
         self.lin = nn.LazyLinear(hidden_size, bias=False)
@@ -41,7 +41,7 @@ class ReferentialGameReceiver(nn.Module):
     def __init__(self, *_args, embedding_dimension=256, **_kwargs) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
-            embedding_dimension=embedding_dimension
+            image_embedding_dimension=embedding_dimension
         )
 
         self.linear_message = nn.LazyLinear(embedding_dimension, bias=False)
