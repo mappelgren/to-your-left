@@ -488,7 +488,9 @@ class BoundingBoxCaptioningDataset(Dataset):
                 image_id=scene_file.removesuffix(".json"),
                 bounding_boxes=bounding_boxes,
                 caption=target_caption,
-                non_target_captions=torch.stack(captions)[:, 1:],
+                non_target_captions=torch.stack(captions)[:, 1:]
+                if len(captions) != 0
+                else torch.fill((1, 3), 1),
             )
             self.samples.append(sample)
 
