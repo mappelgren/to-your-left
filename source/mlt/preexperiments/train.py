@@ -278,13 +278,13 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxCaptionGenerator,
         model_args={
-            "embedding_dimension": 256,
+            "embedding_dimension": 128,
             # same as decoder_out_dim
-            "hidden_size": 128,
+            "hidden_size": len(DaleCaptionAttributeEncoder.vocab),
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
-                decoder_out_dim=128,
+                decoder_out_dim=len(DaleCaptionAttributeEncoder.vocab),
             ),
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
