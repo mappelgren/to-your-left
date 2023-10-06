@@ -122,8 +122,10 @@ def captioning_loss(
         .clone()
         .float(),
         "non_target_accuracy": non_target_accuracy.compute().detach().clone().float(),
-        "word_by_word_precision": f"{torch.mean(computed_class_precisions[included_indices]):.2f}",
-        "word_by_word_recall": f"{torch.mean(computed_class_recall[included_indices]):.2f}",
+        "word_by_word_precision": torch.mean(
+            computed_class_precisions[included_indices]
+        ),
+        "word_by_word_recall": torch.mean(computed_class_recall[included_indices]),
         **accuracy_by_word,
         **precision_by_word,
         **recall_by_word,

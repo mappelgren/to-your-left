@@ -1,12 +1,14 @@
 import argparse
+import hashlib
 import os
 import sys
 from dataclasses import dataclass
 from time import gmtime, strftime
 from typing import Callable
 
-import egg.core as core
-from mlt.feature_extractors import DummyFeatureExtractor
+import torch
+from egg import core
+from mlt.feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader
 from mlt.language_games.callbacks import (
     ExcludingInteractionSaver,
@@ -41,11 +43,7 @@ from mlt.preexperiments.data_readers import (
     SingleObjectImageMasker,
 )
 from mlt.preexperiments.models import CaptionDecoder
-from mlt.shared_models import (
-    ClevrImageEncoder,
-    CoordinateClassifier,
-    MaskedImageEncoder,
-)
+from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -116,19 +114,25 @@ models = {
         sender=CaptionGeneratorSender,
         sender_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "masked_image_encoder": MaskedImageEncoder(
-                encoder_out_dim=1024,
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
             ),
+            "embedding_dimension": 2048,
         },
         receiver=CaptionGeneratorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 1024,
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
@@ -155,16 +159,16 @@ models = {
         sender_args={
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "image_embedding_dimension": 1024,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 1024,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -180,23 +184,37 @@ models = {
         sender=MaskedCoordinatePredictorSender,
         sender_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "masked_image_encoder": MaskedImageEncoder(
-                encoder_out_dim=1024,
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
             ),
+            "embedding_dimension": 2048,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 1024,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
     ),
+}
+
+# names of the datasets and their foldernames
+datasets = {
+    "dale-2": "clevr-images-unambigous-dale-two",
+    "dale-5": "clevr-images-unambigous-dale",
+    "single": "clevr-images-random-single",
+    "colour": "clevr-images-unambigous-colour",
 }
 
 
@@ -204,6 +222,13 @@ def get_params(params):
     parser = argparse.ArgumentParser()
 
     # -- DATASET --
+    parser.add_argument(
+        "--dataset_base_dir",
+        type=str,
+        help="Path to the base directory of all datasets",
+    )
+    parser.add_argument("--dataset", choices=datasets.keys(), help="datasets, to load")
+
     parser.add_argument("--scene_json_dir", type=str, help="Path to the scene json dir")
     parser.add_argument("--image_dir", type=str, help="Path to the scene image dir")
     parser.add_argument(
@@ -216,7 +241,7 @@ def get_params(params):
         "--data_root_dir",
         type=str,
         default=None,
-        help="Path to root dir of the dataset",
+        help="Path to root dir of the specific dataset",
     )
     parser.add_argument(
         "--max_samples", type=int, default=100, help="max samples to load"
@@ -340,22 +365,50 @@ def main(params):
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
 
+    image_dir = os.path.join(opts.dataset_base_dir, datasets[opts.dataset], "images/")
+    scene_json_dir = os.path.join(
+        opts.dataset_base_dir, datasets[opts.dataset], "scenes/"
+    )
+    feature_file = os.path.join(
+        opts.dataset_base_dir, datasets[opts.dataset], "features", opts.feature_file
+    )
+
     model = models[opts.model]
 
     if model.image_loader:
         image_loader = model.image_loader(
-            feature_file=opts.feature_file, image_dir=opts.image_dir
+            feature_file=feature_file, image_dir=image_dir
         )
     else:
         image_loader = None
 
-    dataset = model.dataset(
-        scenes_json_dir=opts.scene_json_dir,
-        image_loader=image_loader,
-        max_number_samples=opts.max_samples,
-        data_root_dir=opts.data_root_dir,
+    dataset_args = {
+        "scenes_json_dir": scene_json_dir,
+        "image_loader": image_loader,
+        "max_number_samples": opts.max_samples,
+        "data_root_dir": opts.data_root_dir,
         **model.dataset_args,
-    )
+    }
+
+    dataset_identifier = hashlib.sha256(
+        str(f"{model.dataset.__name__}({dataset_args})").encode()
+    ).hexdigest()
+    dataset_dir = os.path.join(opts.out_dir, "datasets")
+    dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.pt")
+    if os.path.exists(dataset_file):
+        print(f"Loading dataset {dataset_identifier}...", end="\r")
+        with open(dataset_file, "rb") as f:
+            dataset = torch.load(f)
+        print(f"Dataset {dataset_identifier} loaded.   ")
+    else:
+        dataset = model.dataset(**dataset_args)
+
+        print(f"Saving dataset {dataset_identifier}...", end="\r")
+        if not os.path.exists(dataset_dir):
+            os.makedirs(dataset_dir)
+        with open(dataset_file, "wb") as f:
+            torch.save(dataset, f)
+        print(f"Dataset {dataset_identifier} saved.   ")
 
     if model.split_dataset:
         train_dataset_length = int(0.8 * len(dataset))

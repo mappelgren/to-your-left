@@ -1,9 +1,6 @@
 import argparse
 import hashlib
-import json
 import os
-import pickle
-import sys
 from dataclasses import dataclass
 from typing import Callable
 
@@ -50,7 +47,6 @@ from mlt.shared_models import (
     BoundingBoxImageEncoder,
     ClevrImageEncoder,
     CoordinateClassifier,
-    MaskedImageEncoder,
 )
 from torch import nn, optim
 from torch.nn import Module
@@ -86,9 +82,9 @@ models = {
         model=CoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -123,9 +119,9 @@ models = {
         model=AttributeCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -150,9 +146,9 @@ models = {
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -172,9 +168,9 @@ models = {
         model=AttributeLocationCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -191,12 +187,18 @@ models = {
         model=MaskedCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "masked_image_encoder": MaskedImageEncoder(
-                encoder_out_dim=2048,
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
             ),
+            "embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -213,12 +215,18 @@ models = {
         model=MaskedCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=2048,
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "masked_image_encoder": MaskedImageEncoder(
-                encoder_out_dim=2048,
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
             ),
+            "embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier(),
         },
         loss_function=pixel_loss,
@@ -301,10 +309,9 @@ models = {
         model=CaptionGenerator,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                # same as caption_decoder decoder_out_dim
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
+            "embedding_dimension": 1024,
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
@@ -334,11 +341,9 @@ models = {
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "masked_image_encoder": ClevrImageEncoder(
-                encoder_out_dim=1024,
                 feature_extractor=ResnetFeatureExtractor(
                     pretrained=True,
                     avgpool=False,
@@ -347,6 +352,7 @@ models = {
                     number_blocks=3,
                 ),
             ),
+            "embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder(
                 vocab_size=len(DaleCaptionAttributeEncoder.vocab),
                 embedding_dim=len(DaleCaptionAttributeEncoder.vocab),
@@ -382,7 +388,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
     parser.add_argument(
-        "--dataset_root_dir", type=str, help="Path to the base directory of the dataset"
+        "--dataset_base_dir",
+        type=str,
+        help="Path to the base directory of all datasets",
     )
     parser.add_argument("--dataset", choices=datasets.keys(), help="datasets, to load")
     parser.add_argument(
@@ -433,13 +441,15 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    image_dir = os.path.join(args.dataset_root_dir, datasets[args.dataset], "images/")
+    image_dir = os.path.join(args.dataset_base_dir, datasets[args.dataset], "images/")
     scene_json_dir = os.path.join(
-        args.dataset_root_dir, datasets[args.dataset], "scenes/"
+        args.dataset_base_dir, datasets[args.dataset], "scenes/"
     )
     feature_file = os.path.join(
-        args.dataset_root_dir, datasets[args.dataset], "features", args.feature_file
+        args.dataset_base_dir, datasets[args.dataset], "features", args.feature_file
     )
+
+    model_name = models[args.model]
 
     if args.feature_file is not None:
         image_loader = FeatureImageLoader(
@@ -448,17 +458,19 @@ if __name__ == "__main__":
     else:
         image_loader = ClevrImageLoader(
             image_dir=image_dir,
-            preprocess=models[args.model].preprocess,
+            preprocess=model_name.preprocess,
         )
 
     dataset_args = {
         "scenes_json_dir": scene_json_dir,
         "image_loader": image_loader,
         "max_number_samples": args.max_samples,
-        **models[args.model].dataset_args,
+        **model_name.dataset_args,
     }
 
-    dataset_identifier = hashlib.sha256(str(dataset_args).encode()).hexdigest()
+    dataset_identifier = hashlib.sha256(
+        str(f"{model_name.dataset.__name__}({dataset_args})").encode()
+    ).hexdigest()
     dataset_dir = os.path.join(args.out_dir, "datasets")
     dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.pt")
     if os.path.exists(dataset_file):
@@ -467,7 +479,7 @@ if __name__ == "__main__":
             dataset = torch.load(f)
         print(f"Dataset {dataset_identifier} loaded.   ")
     else:
-        dataset = models[args.model].dataset(**dataset_args)
+        dataset = model_name.dataset(**dataset_args)
 
         print(f"Saving dataset {dataset_identifier}...", end="\r")
         if not os.path.exists(dataset_dir):
@@ -488,25 +500,25 @@ if __name__ == "__main__":
         test_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
     )
 
-    output_processor = models[args.model].output_processor(
-        dataset=dataset, **models[args.model].output_processor_args
+    output_processor = model_name.output_processor(
+        dataset=dataset, **model_name.output_processor_args
     )
     model_saver = ModelSaver(args.out_dir, args.model, output_processor)
-    tester = models[args.model].tester()
+    tester = model_name.tester()
 
-    model_args = models[args.model].model_args
+    model_args = model_name.model_args
     if args.hidden_size:
         model_args["hidden_size"] = args.hidden_size
     if args.embedding_size:
         model_args["embedding_size"] = args.embedding_size
 
-    model = models[args.model].model(**model_args).to(device)
+    model = model_name.model(**model_args).to(device)
 
     if args.checkpoint_path is not None:
         model.load_state_dict(torch.load(args.checkpoint_path))
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    loss_function = models[args.model].loss_function
+    loss_function = model_name.loss_function
 
     log = [str(args) + "\n" + str(model) + "\n"]
     print(f"Batches per epoch: {len(train_loader)}")

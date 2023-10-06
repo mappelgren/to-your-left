@@ -13,11 +13,9 @@ class ImageEncoder(ABC, nn.Module):
 class ClevrImageEncoder(ImageEncoder):
     def __init__(
         self,
-        encoder_out_dim,
         feature_extractor: FeatureExtractor,
     ) -> None:
         super().__init__()
-        self.encoder_out_dim = encoder_out_dim
         self.feature_extractor = feature_extractor
 
         self.process_image = nn.Sequential(
@@ -28,19 +26,12 @@ class ClevrImageEncoder(ImageEncoder):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(encoder_out_dim))
 
     def forward(self, image):
-        processed_image = self.process_image(image)
-        return processed_image
-        # flattened = torch.flatten(processed_image, start_dim=2).permute(0, 2, 1)
-        # reduced = self.mean_reduction(flattened.mean(dim=1))
-        reduced = self.reduction(processed_image)
-
-        return reduced
+        return self.process_image(image)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.encoder_out_dim=}, {self.feature_extractor=})"
+        return f"{self.__class__.__name__}({self.feature_extractor=})"
 
 
 class BoundingBoxImageEncoder(ImageEncoder):
@@ -50,7 +41,7 @@ class BoundingBoxImageEncoder(ImageEncoder):
     ) -> None:
         super().__init__()
 
-        self.embedding_dimensions = embedding_dimension
+        self.embedding_dimension = embedding_dimension
 
         self.process_image = nn.Sequential(
             nn.Flatten(), nn.LazyLinear(embedding_dimension, bias=False)

@@ -65,6 +65,7 @@ class CaptionGeneratorSender(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: MaskedImageEncoder,
+        embedding_dimension: int,
         hidden_size,
         *_args,
         **_kwargs
@@ -72,6 +73,7 @@ class CaptionGeneratorSender(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
 
         self.linear = nn.LazyLinear(hidden_size)
 
@@ -84,7 +86,9 @@ class CaptionGeneratorSender(nn.Module):
 
         concatenated = torch.cat((encoded_image, encoded_masked_image), dim=1)
 
-        linear = self.linear(concatenated)
+        reduced = self.reduction(concatenated)
+
+        linear = self.linear(reduced)
         return linear
 
 
@@ -92,6 +96,7 @@ class CaptionGeneratorReceiver(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
+        embedding_dimension: int,
         caption_decoder,
         encoded_sos,
         *_args,
@@ -99,6 +104,7 @@ class CaptionGeneratorReceiver(nn.Module):
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
         self.caption_decoder = caption_decoder
         self.linear = nn.LazyLinear(1024)
         self.encoded_sos = torch.tensor(encoded_sos)
@@ -110,8 +116,9 @@ class CaptionGeneratorReceiver(nn.Module):
 
         if aux_input["train_mode"][0]:
             encoded_image = self.image_encoder(image)
+            reduced = self.reduction(encoded_image)
 
-            concatenated = torch.cat((encoded_image, message), dim=1).unsqueeze(dim=0)
+            concatenated = torch.cat((reduced, message), dim=1).unsqueeze(dim=0)
             linear = self.linear(concatenated)
             lstm_states = linear, linear
             predicted, lstm_states = self.caption_decoder(captions[:, :-1], lstm_states)
@@ -120,8 +127,9 @@ class CaptionGeneratorReceiver(nn.Module):
 
         else:
             encoded_image = self.image_encoder(image)
+            reduced = self.reduction(encoded_image)
 
-            concatenated = torch.cat((encoded_image, message), dim=1).unsqueeze(dim=0)
+            concatenated = torch.cat((reduced, message), dim=1).unsqueeze(dim=0)
             linear = self.linear(concatenated)
             lstm_states = linear, linear
 
@@ -155,6 +163,7 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         embedding_dimension,
         encoder_out_dim,
         image_encoder: ImageEncoder,
+        image_embedding_dimension,
         hidden_size,
         *_args,
         **_kwargs
@@ -162,6 +171,9 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         super().__init__()
 
         self.image_encoder = image_encoder
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
         self.embedding = nn.Embedding(vocab_size, embedding_dimension)
         self.lstm = nn.LSTM(embedding_dimension, encoder_out_dim, batch_first=True)
@@ -173,11 +185,12 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         attribute_tensor = aux_input["attribute_tensor"]
 
         processed_image = self.image_encoder(image)
+        reduced = self.reduction(processed_image)
 
         embedded = self.embedding(attribute_tensor)
         _, (hidden_state, _) = self.lstm(embedded)
 
-        concatenated = torch.cat((processed_image, hidden_state.squeeze()), dim=1)
+        concatenated = torch.cat((reduced, hidden_state.squeeze()), dim=1)
 
         hidden = self.linear(concatenated)
 
@@ -199,6 +212,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: MaskedImageEncoder,
+        embedding_dimension: int,
         hidden_size,
         *_args,
         **_kwargs
@@ -207,6 +221,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
 
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
 
         self.linear = nn.LazyLinear(hidden_size)
 
@@ -221,8 +236,9 @@ class MaskedCoordinatePredictorSender(nn.Module):
             (reduced, reduced_masked_image),
             dim=1,
         )
+        reduced = self.reduction(concatenated)
 
-        hidden = self.linear(concatenated)
+        hidden = self.linear(reduced)
 
         return hidden
 
@@ -231,20 +247,23 @@ class CoordinatePredictorReceiver(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
+        embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
 
         self.coordinate_classifier = coordinate_classifier
 
     def forward(self, message, x, _aux_input):
         image = x
         processed_image = self.image_encoder(image)
+        reduced = self.reduction(processed_image)
 
-        concatenated = torch.cat((processed_image, message), dim=1)
+        concatenated = torch.cat((reduced, message), dim=1)
         coordinates = self.coordinate_classifier(concatenated)
 
         return coordinates
