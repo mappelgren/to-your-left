@@ -421,6 +421,12 @@ if __name__ == "__main__":
         default="out/",
         help="directory, where the output should be saved",
     )
+    parser.add_argument(
+        "--save_appendix",
+        type=str,
+        default="",
+        help="information that will be appended to the name of the folder",
+    )
     args = parser.parse_args()
     print(args)
 
@@ -493,7 +499,9 @@ if __name__ == "__main__":
     output_processor = model_name.output_processor(
         dataset=dataset, **model_name.output_processor_args
     )
-    model_saver = ModelSaver(args.out_dir, args.model, output_processor)
+    model_saver = ModelSaver(
+        args.out_dir, args.model, args.dataset, args.save_appendix, output_processor
+    )
     tester = model_name.tester()
 
     model_args = model_name.model_args

@@ -5,8 +5,10 @@ import torch
 
 
 class ModelSaver:
-    def __init__(self, out_dir, model_name, output_processor) -> None:
-        folder_name = f'{strftime("%Y-%m-%d_%H-%M-%S", gmtime())}_{model_name}'
+    def __init__(
+        self, out_dir, model_name, dataset, save_appendix, output_processor
+    ) -> None:
+        folder_name = f'{strftime("%Y-%m-%d_%H-%M-%S", gmtime())}_{model_name}_{dataset}{"_" + save_appendix if save_appendix != "" else ""}'
         self.directory = os.path.join(out_dir, folder_name)
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
