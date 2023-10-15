@@ -17,7 +17,7 @@ class BoundingBoxClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *_args, **_kwargs) -> None:
         super().__init__()
 
         self.classifier_2 = nn.Sequential(nn.Flatten(), nn.LazyLinear(2))
