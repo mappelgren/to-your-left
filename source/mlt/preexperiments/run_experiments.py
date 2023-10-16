@@ -17,7 +17,9 @@ variables = {
     "--decoder_out_dim": [100, 500, 1000],
 }
 
-for combination in itertools.product(*variables.values()):
+for index, combination in enumerate(itertools.product(*variables.values())):
+    if index == 0:
+        continue
     save_appendix = "_".join(str(i) for i in combination[1:])
     subprocess.run(
         [
