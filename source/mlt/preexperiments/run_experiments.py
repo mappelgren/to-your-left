@@ -19,6 +19,7 @@ variables = {
 }
 
 for combination in itertools.product(*variables.values()):
+    save_appendix = "_".join(str(i) for i in combination[1:])
     subprocess.run(
         [
             "python",
@@ -28,5 +29,6 @@ for combination in itertools.product(*variables.values()):
                 f"{option}={value}"
                 for option, value in zip(variables.keys(), combination)
             ],
+            f"--save_appendix={save_appendix}",
         ]
     )
