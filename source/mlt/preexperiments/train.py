@@ -515,6 +515,8 @@ if __name__ == "__main__":
         model_args["decoder_out_dim"] = args.decoder_out_dim
     if args.image_embedding_dimension:
         model_args["image_embedding_dimension"] = args.image_embedding_dimension
+    else:
+        model_args["image_embedding_dimension"] = args.decoder_out_dim
 
     if "caption_decoder" in model_args.keys():
         model_args["caption_decoder"] = model_args["caption_decoder"](

@@ -13,7 +13,6 @@ options = [
 
 variables = {
     "--dataset": ["dale-2", "dale-5", "colour"],
-    "--image_embedding_dimension": [100, 500, 1000],
     "--embedding_dim": [10, 15, 30],
     "--decoder_out_dim": [100, 500, 1000],
 }
