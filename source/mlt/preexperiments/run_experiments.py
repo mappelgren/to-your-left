@@ -5,14 +5,14 @@ options = [
     "--dataset_base_dir=/home/dominik/Development/",
     "--epochs=30",
     "--lr=0.002",
-    "--feature_file=bounding_box_resnet_4_avgpool_no-fc.h5",
+    "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
     "--device=cuda",
-    "--model=bounding_box_caption_generator",
+    "--model=masked_caption_generator",
 ]
 
 variables = {
-    "--dataset": ["colour"],
+    "--dataset": ["dale-2", "dale-5", "colour"],
     "--image_embedding_dimension": [100, 500, 1000],
     "--embedding_dim": [10, 15, 30],
     "--decoder_out_dim": [100, 500, 1000],
