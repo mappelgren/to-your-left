@@ -39,10 +39,15 @@ class CoordinatePredictorTester(Tester):
             positives = torch.where(distances < 20, distances, 0)
             accuracy.update(positives, torch.ones_like(positives))
 
-        return {
-            "accuracy": f"{accuracy.compute():.2f}",
-            "mean test loss": f"{mean.compute():.2f}",
-        }, test_outputs
+        return (
+            json.dumps(
+                {
+                    "accuracy": f"{accuracy.compute():.2f}",
+                    "mean test loss": f"{mean.compute():.2f}",
+                }
+            ),
+            test_outputs,
+        )
 
 
 class BoundingBoxClassifierTester(Tester):
@@ -60,9 +65,14 @@ class BoundingBoxClassifierTester(Tester):
 
             accuracy.update(max_indices, ground_truth)
 
-        return {
-            "accuracy": f"{accuracy.compute():.2f}",
-        }, test_outputs
+        return (
+            json.dumps(
+                {
+                    "accuracy": f"{accuracy.compute():.2f}",
+                }
+            ),
+            test_outputs,
+        )
 
 
 class CaptionGeneratorTester(Tester):
