@@ -422,6 +422,12 @@ if __name__ == "__main__":
         help="directory, where the output should be saved",
     )
     parser.add_argument(
+        "--save_model",
+        type=bool,
+        default=False,
+        help="if model should be saved",
+    )
+    parser.add_argument(
         "--save_appendix",
         type=str,
         default="",
@@ -562,7 +568,8 @@ if __name__ == "__main__":
         log.append(loss_string + "\n")
         log.append(str(metrics) + "\n")
 
-    model_saver.save_model(model, f"{model.__class__.__name__}.pth")
+    if args.save_model:
+        model_saver.save_model(model, f"{model.__class__.__name__}.pth")
     model_saver.save_log(log, "log.txt")
     model_saver.save_output(test_outputs, "test_outputs.csv")
     model_saver.save_output(train_outputs, "train_outputs.csv")
