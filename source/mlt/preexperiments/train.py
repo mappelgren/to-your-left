@@ -88,7 +88,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "image_embedding_dimension": 2048,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -125,7 +125,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "image_embedding_dimension": 2048,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -152,7 +152,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "image_embedding_dimension": 2048,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -174,7 +174,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "image_embedding_dimension": 2048,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -202,7 +202,7 @@ models = {
                 ),
             ),
             "image_embedding_dimension": 4096,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -230,7 +230,7 @@ models = {
                 ),
             ),
             "image_embedding_dimension": 4096,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
@@ -407,6 +407,7 @@ if __name__ == "__main__":
     parser.add_argument("--decoder_out_dim", type=int, default=None)
     parser.add_argument("--embedding_dim", type=int, default=None)
     parser.add_argument("--image_embedding_dimension", type=int, default=None)
+    parser.add_argument("--coordinate_classifier_dimension", type=int, default=None)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
@@ -523,6 +524,11 @@ if __name__ == "__main__":
             embedding_dim=args.embedding_dim,
             decoder_out_dim=args.decoder_out_dim,
             vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+        )
+
+    if "coordinate_classifier" in model_args.keys():
+        model_args["coordinate_classifier"] = model_args["coordinate_classifier"](
+            classifier_dimension=args.coordinate_classifier_dimension
         )
 
     model = model_name.model(**model_args).to(device)

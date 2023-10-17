@@ -73,14 +73,15 @@ class MaskedImageEncoder(ImageEncoder):
 
 
 class CoordinateClassifier(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, classifier_dimension) -> None:
         super().__init__()
+        self.classifier_dimension = classifier_dimension
 
         self.classifier = nn.Sequential(
-            nn.LazyLinear(1024),
+            nn.LazyLinear(classifier_dimension),
             nn.Dropout(0.2),
             nn.ReLU(),
-            nn.LazyLinear(1024),
+            nn.LazyLinear(classifier_dimension),
             nn.Dropout(0.2),
             nn.ReLU(),
             nn.LazyLinear(2),
@@ -90,4 +91,4 @@ class CoordinateClassifier(nn.Module):
         return self.classifier(data)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}()"
+        return f"{self.__class__.__name__}({self.classifier_dimension=})"
