@@ -9,6 +9,7 @@ options = [
     "--max_samples=10000",
     "--device=cuda",
     "--model=attribute_location_coordinate_predictor",
+    "--out=/scratch/guskunkdo/out/",
 ]
 
 variables = {
