@@ -2,7 +2,7 @@ import itertools
 import subprocess
 
 options = [
-    "--dataset_base_dir=/home/dominik/Development/",
+    "--dataset_base_dir=/scratch/guskunkdo/",
     "--epochs=30",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
