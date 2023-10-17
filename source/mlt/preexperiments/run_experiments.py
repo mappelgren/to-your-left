@@ -12,7 +12,7 @@ options = [
 ]
 
 variables = {
-    "--dataset": ["single", "dale-2", "dale-5", "colour"],
+    "--dataset": ["dale-2", "dale-5", "colour"],
     "--embedding_dim": [10, 15, 30],
     "--decoder_out_dim": [100, 500, 1000],
 }
