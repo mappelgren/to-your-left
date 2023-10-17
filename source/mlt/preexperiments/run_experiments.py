@@ -3,7 +3,7 @@ import subprocess
 
 options = [
     "--dataset_base_dir=/home/dominik/Development/",
-    "--epochs=30",
+    "--epochs=40",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
