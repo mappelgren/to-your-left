@@ -2,20 +2,22 @@ import itertools
 import subprocess
 
 options = [
-    "--dataset_base_dir=/home/dominik/Development",
+    "--dataset_base_dir=/scratch/guskunkdo",
     "--epochs=30",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
     "--device=cuda",
-    "--model=masked_caption_generator",
-    # "--out=/scratch/guskunkdo/out/",
+    "--model=masked_coordinate_predictor",
+    "--out=/scratch/guskunkdo/out/",
 ]
 
 variables = {
     "--dataset": ["dale-2", "dale-5", "colour"],
-    "--decoder_out_dim": [1500, 2000, 3000],
-    "--embedding_dim": [10, 15, 30],
+    "--image_embedding_dimension": [100, 500, 1000],
+    "--coordinate_classifier_dimension": [512, 1024, 2048],
+    # "--decoder_out_dim": [100, 500, 1000],
+    # "--embedding_dim": [10, 15, 30],
 }
 
 for index, combination in enumerate(itertools.product(*variables.values())):
