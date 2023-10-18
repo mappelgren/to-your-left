@@ -8,7 +8,7 @@ options = [
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
     "--device=cuda",
-    "--model=masked_coordinate_predictor",
+    "--model=all_masked_coordinate_predictor",
     "--out=/scratch/guskunkdo/out/",
 ]
 
