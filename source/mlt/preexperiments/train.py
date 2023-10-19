@@ -405,6 +405,7 @@ if __name__ == "__main__":
         help="model to load",
     )
     parser.add_argument("--decoder_out_dim", type=int, default=None)
+    parser.add_argument("--encoder_out_dim", type=int, default=None)
     parser.add_argument("--embedding_dim", type=int, default=None)
     parser.add_argument("--image_embedding_dimension", type=int, default=None)
     parser.add_argument("--coordinate_classifier_dimension", type=int, default=None)
@@ -514,6 +515,8 @@ if __name__ == "__main__":
     model_args = model_name.model_args
     if args.decoder_out_dim:
         model_args["decoder_out_dim"] = args.decoder_out_dim
+    if args.encoder_out_dim:
+        model_args["encoder_out_dim"] = args.encoder_out_dim
     if args.image_embedding_dimension:
         model_args["image_embedding_dimension"] = args.image_embedding_dimension
     else:
