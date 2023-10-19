@@ -14,7 +14,7 @@ options = [
 ]
 
 variables = {
-    "--dataset": ["single", "dale-2", "dale-5", "colour"],
+    "--dataset": ["dale-2", "dale-5", "colour"],
     "--image_embedding_dimension": [500, 1000],
     "--coordinate_classifier_dimension": [1024, 2048],
     # "--decoder_out_dim": [500, 1000, 1500, 2000],
