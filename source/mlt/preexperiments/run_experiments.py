@@ -13,11 +13,11 @@ options = [
 ]
 
 variables = {
-    "--dataset": ["dale-2", "dale-5", "colour"],
-    "--image_embedding_dimension": [100, 500, 1000],
-    "--coordinate_classifier_dimension": [512, 1024, 2048],
-    # "--decoder_out_dim": [100, 500, 1000],
-    # "--embedding_dim": [10, 15, 30],
+    "--dataset": ["single", "dale-2", "dale-5", "colour"],
+    "--image_embedding_dimension": [500, 1000],
+    "--coordinate_classifier_dimension": [1024, 2048],
+    "--decoder_out_dim": [500, 1000, 1500, 2000],
+    "--embedding_dim": [15, 30],
 }
 
 for index, combination in enumerate(itertools.product(*variables.values())):
