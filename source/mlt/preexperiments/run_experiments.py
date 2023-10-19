@@ -2,14 +2,15 @@ import itertools
 import subprocess
 
 options = [
-    "--dataset_base_dir=/scratch/guskunkdo",
+    # "--dataset_base_dir=/scratch/guskunkdo",
+    "--dataset_base_dir=/home/dominik/Development/",
     "--epochs=30",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
     "--device=cuda",
     "--model=all_masked_coordinate_predictor",
-    "--out=/scratch/guskunkdo/out/",
+    # "--out=/scratch/guskunkdo/out/",
 ]
 
 variables = {
