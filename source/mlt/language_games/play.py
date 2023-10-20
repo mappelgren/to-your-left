@@ -251,6 +251,12 @@ def get_params(params):
         default=0,
         help="Batch size when processing validation data, whereas training data batch_size is controlled by batch_size (default: same as training data batch size)",
     )
+    parser.add_argument(
+        "--validation_batches_per_epoch",
+        type=int,
+        default=100,
+        help="batches shown to the model every epoch",
+    )
 
     # -- MODEL --
     parser.add_argument(
@@ -449,7 +455,7 @@ def main(params):
         dataset=test_dataset,
         iterator=model.iterator,
         batch_size=opts.validation_batch_size,
-        batches_per_epoch=opts.batches_per_epoch,
+        batches_per_epoch=opts.validation_batches_per_epoch,
         train_mode=False,
         seed=7,
     )
