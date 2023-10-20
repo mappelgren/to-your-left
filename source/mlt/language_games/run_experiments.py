@@ -2,8 +2,8 @@ import itertools
 import subprocess
 
 options = [
-    # "--dataset_base_dir=/scratch/guskunkdo",
-    "--dataset_base_dir=/home/dominik/Development/",
+    "--dataset_base_dir=/scratch/guskunkdo",
+    # "--dataset_base_dir=/home/dominik/Development/",
     "--n_epochs=30",
     "--batch_size=2",
     "--batches_per_epoch=1",
@@ -15,8 +15,8 @@ options = [
     "--sender_cell=lstm",
     "--receiver_cell=lstm",
     "--save",
-    # "--out_dir=/scratch/guskunkdo/out/",
-    "--out_dir=out/",
+    "--out_dir=/scratch/guskunkdo/out/",
+    # "--out_dir=out/",
     # -- model specifics --
     "--sender_embedding=500",
     # "--sender_encoder_dim=",
