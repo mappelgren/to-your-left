@@ -407,25 +407,26 @@ def main(params):
         **model.dataset_args,
     }
 
-    dataset_identifier = hashlib.sha256(
-        str(f"{model.dataset.__name__}({dataset_args})").encode()
-    ).hexdigest()
-    dataset_dir = os.path.join(opts.out_dir, "datasets")
-    dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.pt")
-    if os.path.exists(dataset_file):
-        print(f"Loading dataset {dataset_identifier}...", end="\r")
-        with open(dataset_file, "rb") as f:
-            dataset = torch.load(f)
-        print(f"Dataset {dataset_identifier} loaded.   ")
-    else:
-        dataset = model.dataset(**dataset_args)
+    dataset = model.dataset(**dataset_args)
+    # dataset_identifier = hashlib.sha256(
+    #     str(f"{model.dataset.__name__}({dataset_args})").encode()
+    # ).hexdigest()
+    # dataset_dir = os.path.join(opts.out_dir, "datasets")
+    # dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.pt")
+    # if os.path.exists(dataset_file):
+    #     print(f"Loading dataset {dataset_identifier}...", end="\r")
+    #     with open(dataset_file, "rb") as f:
+    #         dataset = torch.load(f)
+    #     print(f"Dataset {dataset_identifier} loaded.   ")
+    # else:
+    #     dataset = model.dataset(**dataset_args)
 
-        print(f"Saving dataset {dataset_identifier}...", end="\r")
-        if not os.path.exists(dataset_dir):
-            os.makedirs(dataset_dir)
-        with open(dataset_file, "wb") as f:
-            torch.save(dataset, f)
-        print(f"Dataset {dataset_identifier} saved.   ")
+    #     print(f"Saving dataset {dataset_identifier}...", end="\r")
+    #     if not os.path.exists(dataset_dir):
+    #         os.makedirs(dataset_dir)
+    #     with open(dataset_file, "wb") as f:
+    #         torch.save(dataset, f)
+    #     print(f"Dataset {dataset_identifier} saved.   ")
 
     if model.split_dataset:
         train_dataset_length = int(0.8 * len(dataset))

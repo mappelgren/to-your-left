@@ -6,6 +6,7 @@ options = [
     # "--dataset_base_dir=/home/dominik/Development/",
     "--n_epochs=5000",
     "--batch_size=2",
+    "--validation_batch_size=2000",
     "--batches_per_epoch=1",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
