@@ -4,7 +4,7 @@ import subprocess
 options = [
     "--dataset_base_dir=/scratch/guskunkdo",
     # "--dataset_base_dir=/home/dominik/Development/",
-    "--n_epochs=30",
+    "--n_epochs=5000",
     "--batch_size=2",
     "--batches_per_epoch=1",
     "--lr=0.0002",
