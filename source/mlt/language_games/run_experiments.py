@@ -10,12 +10,11 @@ options = [
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
-    "--device=cuda",
     "--model=discriminator",
     "--mode=gs",
     "--sender_cell=lstm",
     "--receiver_cell=lstm",
-    "--save=True",
+    "--save",
     # "--out_dir=/scratch/guskunkdo/out/",
     "--out_dir=out/",
     # -- model specifics --

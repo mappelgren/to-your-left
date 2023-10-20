@@ -366,6 +366,12 @@ def get_params(params):
         default="out/",
         help="directory, where the output should be saved",
     )
+    parser.add_argument(
+        "--save_appendix",
+        type=str,
+        default="",
+        help="information that will be appended to the name of the folder",
+    )
     args = core.init(parser, params)
     return args
 
@@ -518,7 +524,8 @@ def main(params):
 
     if opts.save:
         out_dir = os.path.join(
-            opts.out_dir, f"{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}"
+            opts.out_dir,
+            f"{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}_{opts.dataset}{'_' + opts.save_appendix if opts.save_appendix != '' else ''}",
         )
         callbacks.extend(
             [
