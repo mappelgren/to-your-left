@@ -3,8 +3,8 @@ import itertools
 import subprocess
 
 options = [
-    "--n_epochs=5000",
-    "--batch_size=2",
+    "--n_epochs=1000",
+    "--batch_size=10",
     "--batches_per_epoch=1",
     "--validation_batch_size=512",
     "--validation_batches_per_epoch=4",
