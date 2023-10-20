@@ -133,11 +133,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "embedding_dimension": 1024,
-            "caption_decoder": CaptionDecoder(
-                vocab_size=len(DaleCaptionAttributeEncoder.vocab),
-                embedding_dim=int(len(DaleCaptionAttributeEncoder.vocab) / 2),
-                decoder_out_dim=1024,
-            ),
+            "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
             ),
@@ -169,7 +165,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "embedding_dimension": 1024,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
     ),
@@ -203,7 +199,7 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "embedding_dimension": 1024,
-            "coordinate_classifier": CoordinateClassifier(),
+            "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
     ),
@@ -228,9 +224,6 @@ def get_params(params):
         help="Path to the base directory of all datasets",
     )
     parser.add_argument("--dataset", choices=datasets.keys(), help="datasets, to load")
-
-    parser.add_argument("--scene_json_dir", type=str, help="Path to the scene json dir")
-    parser.add_argument("--image_dir", type=str, help="Path to the scene image dir")
     parser.add_argument(
         "--feature_file",
         type=str,
@@ -306,16 +299,28 @@ def get_params(params):
         help="Size of the hidden layer of Sender (default: 10)",
     )
     parser.add_argument(
-        "--receiver_hidden",
-        type=int,
-        default=10,
-        help="Size of the hidden layer of Receiver (default: 10)",
-    )
-    parser.add_argument(
         "--sender_embedding",
         type=int,
         default=10,
         help="Output dimensionality of the layer that embeds symbols produced at previous step in Sender (default: 10)",
+    )
+    parser.add_argument(
+        "--sender_image_embedding",
+        type=int,
+        default=10,
+        help="Output dimensionality of the layer that embeds the image in Sender (default: 10)",
+    )
+    parser.add_argument(
+        "--sender_encoder_dim",
+        type=int,
+        default=10,
+        help="Size of the LSTM encoder of Sender when attributes are encoded with descriptions (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_hidden",
+        type=int,
+        default=10,
+        help="Size of the hidden layer of Receiver (default: 10)",
     )
     parser.add_argument(
         "--receiver_embedding",
@@ -324,10 +329,16 @@ def get_params(params):
         help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
     )
     parser.add_argument(
-        "--sender_encoder_dim",
+        "--receiver_decoder_out_dim",
         type=int,
         default=10,
-        help="Size of the LSTM encoder of Sender when attributes are encoded with descriptions (default: 10)",
+        help="Output dimensionality of the layer that embeds the caption for Receiver (default: 10)",
+    )
+    parser.add_argument(
+        "--coordinate_classifier_dimension",
+        type=int,
+        default=10,
+        help="Dimensions for the coordinate predictor for Receiver (default: 10)",
     )
 
     # -- OUTPUT --
@@ -438,11 +449,23 @@ def main(params):
 
     sender_args = model.sender_args
     sender_args["embedding_dimension"] = opts.sender_embedding
+    sender_args["image_embedding_dimension"] = opts.sender_image_embedding
     sender_args["hidden_size"] = opts.sender_hidden
     sender_args["encoder_out_dim"] = opts.sender_encoder_dim
 
     receiver_args = model.receiver_args
     receiver_args["embedding_dimension"] = opts.receiver_embedding
+
+    if "caption_decoder" in receiver_args.keys():
+        receiver_args["caption_decoder"] = receiver_args["caption_decoder"](
+            embedding_dim=opts.receiver_embedding,
+            decoder_out_dim=opts.receiver_decoder_out_dim,
+            vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+        )
+    if "coordinate_classifier" in receiver_args.keys():
+        receiver_args["coordinate_classifier"] = receiver_args["coordinate_classifier"](
+            classifier_dimension=opts.coordinate_classifier_dimension
+        )
 
     receiver = model.receiver(**receiver_args)
     sender = model.sender(**sender_args)

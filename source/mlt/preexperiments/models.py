@@ -104,12 +104,10 @@ class BoundingBoxAttributeClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(
-        self, image_embedding_dimension, image_encoder: ImageEncoder, *_args, **_kwargs
-    ) -> None:
+    def __init__(self, image_embedding_dimension, *_args, **_kwargs) -> None:
         super().__init__()
 
-        self.image_encoder = image_encoder
+        # self.image_encoder = image_encoder
         self.reduction = nn.Sequential(
             nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
         )
@@ -124,8 +122,7 @@ class BoundingBoxAttributeClassifier(nn.Module):
         attribute_tensor = self.linear_attributes(attribute_tensor)
         dot_products = []
         for image_index in range(bounding_boxes.shape[1]):
-            encoded_image = self.image_encoder(bounding_boxes[:, image_index])
-            reduced = self.reduction(encoded_image)
+            reduced = self.reduction(bounding_boxes[:, image_index])
             dot_products.append(torch.sum(attribute_tensor * reduced, dim=1))
 
         output = torch.stack(dot_products, dim=1)

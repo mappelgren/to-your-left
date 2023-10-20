@@ -261,7 +261,6 @@ models = {
         model=BoundingBoxAttributeClassifier,
         model_args={
             "image_embedding_dimension": 10,
-            "image_encoder": BoundingBoxImageEncoder(image_embedding_dimension=10),
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
