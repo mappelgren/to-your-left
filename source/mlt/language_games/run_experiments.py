@@ -1,14 +1,13 @@
+import argparse
 import itertools
 import subprocess
 
 options = [
-    "--dataset_base_dir=/scratch/guskunkdo",
-    # "--dataset_base_dir=/home/dominik/Development/",
     "--n_epochs=5000",
     "--batch_size=2",
     "--batches_per_epoch=1",
-    "--validation_batch_size=256",
-    "--validation_batches_per_epoch=8",
+    "--validation_batch_size=512",
+    "--validation_batches_per_epoch=4",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
@@ -17,8 +16,6 @@ options = [
     "--sender_cell=lstm",
     "--receiver_cell=lstm",
     "--save",
-    "--out_dir=/scratch/guskunkdo/out/",
-    # "--out_dir=out/",
     # -- model specifics --
     "--sender_embedding=500",
     # "--sender_encoder_dim=",
@@ -36,18 +33,41 @@ variables = {
     "--max_len": [1, 2, 3, 4, 5, 6],
 }
 
-for index, combination in enumerate(itertools.product(*variables.values())):
-    save_appendix = "_".join(str(i) for i in combination[1:])
-    subprocess.run(
-        [
-            "python",
-            "source/mlt/language_games/play.py",
-            *options,
-            *[
-                f"{option}={value}"
-                for option, value in zip(variables.keys(), combination)
-            ],
-            f"--save_appendix={save_appendix}",
-        ],
-        check=False,
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--mlt_server",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="run on MLT server or not",
     )
+
+    args = parser.parse_args()
+
+    if args.mlt_server:
+        dirs = [
+            "--dataset_base_dir=/scratch/guskunkdo",
+            "--out_dir=/scratch/guskunkdo/out/",
+        ]
+    else:
+        dirs = [
+            "--dataset_base_dir=/home/dominik/Development/",
+            "--out_dir=out/",
+        ]
+
+    for index, combination in enumerate(itertools.product(*variables.values())):
+        save_appendix = "_".join(str(i) for i in combination[1:])
+        subprocess.run(
+            [
+                "python",
+                "source/mlt/language_games/play.py",
+                *dirs,
+                *options,
+                *[
+                    f"{option}={value}"
+                    for option, value in zip(variables.keys(), combination)
+                ],
+                f"--save_appendix={save_appendix}",
+            ],
+            check=False,
+        )
