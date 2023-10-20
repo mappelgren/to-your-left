@@ -21,7 +21,7 @@ options = [
     # -- model specifics --
     "--sender_embedding=500",
     # "--sender_encoder_dim=",
-    "--receiver_embedding=",
+    "--receiver_embedding=100",
     # "--receiver_decoder_out_dim=",
     # "--coordinate_classifier_dimension=",
 ]
@@ -29,7 +29,7 @@ options = [
 variables = {
     "--dataset": ["dale-2", "dale-5", "colour"],
     "--sender_hidden": [100, 500, 1000],
-    "--receiver_hidden": [15, 30],
+    "--receiver_hidden": [10, 30, 50, 100, 500, 1000],
     "--temperature": [1, 3, 5, 10],
     "--vocab_size": [1, 10, 16, 50, 100],
     "--max_len": [1, 2, 3, 4, 5, 6],
