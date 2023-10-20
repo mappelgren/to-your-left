@@ -6,8 +6,6 @@ options = [
     "--n_epochs=1000",
     "--batch_size=10",
     "--batches_per_epoch=1",
-    "--validation_batch_size=1024",
-    "--validation_batches_per_epoch=2",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
@@ -45,14 +43,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.mlt_server:
-        dirs = [
+        spec_options = [
             "--dataset_base_dir=/scratch/guskunkdo",
             "--out_dir=/scratch/guskunkdo/out/",
+            "--validation_batch_size=1024",
+            "--validation_batches_per_epoch=2",
         ]
     else:
-        dirs = [
+        spec_options = [
             "--dataset_base_dir=/home/dominik/Development/",
             "--out_dir=out/",
+            "--validation_batch_size=512",
+            "--validation_batches_per_epoch=4",
         ]
 
     for index, combination in enumerate(itertools.product(*variables.values())):
@@ -61,7 +63,7 @@ if __name__ == "__main__":
             [
                 "python",
                 "source/mlt/language_games/play.py",
-                *dirs,
+                *spec_options,
                 *options,
                 *[
                     f"{option}={value}"
