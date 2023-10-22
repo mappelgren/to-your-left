@@ -25,7 +25,6 @@ options = [
 ]
 
 variables = {
-    "--dataset": ["dale-2", "dale-5", "colour"],
     "--sender_hidden": [100, 500, 1000],
     "--receiver_hidden": [10, 30, 50, 100, 500, 1000],
     "--vocab_size": [1, 10, 16, 50, 100],
@@ -41,7 +40,7 @@ if __name__ == "__main__":
         help="run on MLT server or not",
     )
 
-    args = parser.parse_args()
+    args, additional = parser.parse_known_args()
 
     if args.mlt_server:
         spec_options = [
@@ -59,7 +58,7 @@ if __name__ == "__main__":
         ]
 
     for index, combination in enumerate(itertools.product(*variables.values())):
-        save_appendix = "_".join(str(i) for i in combination[1:])
+        save_appendix = "_".join(str(i) for i in combination)
         subprocess.run(
             [
                 "python",
@@ -71,6 +70,7 @@ if __name__ == "__main__":
                     for option, value in zip(variables.keys(), combination)
                 ],
                 f"--save_appendix={save_appendix}",
+                *additional,
             ],
             check=False,
         )
