@@ -4,6 +4,7 @@ import subprocess
 
 options = [
     "--n_epochs=30",
+    "--validation_freq=30",
     "--batch_size=32",
     "--batches_per_epoch=10",
     "--lr=0.0002",
@@ -20,13 +21,13 @@ options = [
     "--receiver_embedding=100",
     # "--receiver_decoder_out_dim=",
     # "--coordinate_classifier_dimension=",
+    "--temperature=1",
 ]
 
 variables = {
     "--dataset": ["dale-2", "dale-5", "colour"],
     "--sender_hidden": [100, 500, 1000],
     "--receiver_hidden": [10, 30, 50, 100, 500, 1000],
-    "--temperature": [1, 3, 5, 10],
     "--vocab_size": [1, 10, 16, 50, 100],
     "--max_len": [1, 2, 3, 4, 5, 6],
 }
