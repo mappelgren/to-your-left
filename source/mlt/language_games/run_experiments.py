@@ -3,9 +3,9 @@ import itertools
 import subprocess
 
 options = [
-    "--n_epochs=40",
-    "--batch_size=256",
-    "--batches_per_epoch=1",
+    "--n_epochs=30",
+    "--batch_size=32",
+    "--batches_per_epoch=10",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
