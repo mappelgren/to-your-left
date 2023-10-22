@@ -16,6 +16,7 @@ from mlt.preexperiments.data_readers import (
     CoordinatePredictorDataset,
     CoordinatePredictorSample,
 )
+from mlt.util import Persistable
 from torch.utils.data import DataLoader, Dataset, Subset
 
 
@@ -70,10 +71,15 @@ class GameLoader(DataLoader):
         )
 
 
-class LazaridouReferentialGameDataset(Dataset):
-    def __init__(self, data_root_dir, *_args, **_kwargs) -> None:
+class LazaridouReferentialGameDataset(Dataset, Persistable):
+    def __init__(self, images, concept_dict) -> None:
         super().__init__()
 
+        self.images = images
+        self.concept_dict = concept_dict
+
+    @classmethod
+    def load(cls, data_root_dir, *_args, **_kwargs):
         feature_file_path = os.path.join(
             data_root_dir, "train", "ours_images_single_sm0.h5"
         )
@@ -87,14 +93,16 @@ class LazaridouReferentialGameDataset(Dataset):
 
         # normalise data
         img_norm = torch.norm(data, p=2, dim=1, keepdim=True)
-        self.images = data / img_norm
+        images = data / img_norm
 
         with open(label_file_path, "rb") as f:
             labels = pickle.load(f)
 
-        self.concept_dict = defaultdict(list)
-        for data, label in zip(self.images, labels):
-            self.concept_dict[label].append(data)
+        concept_dict = defaultdict(list)
+        for data, label in zip(images, labels):
+            concept_dict[label].append(data)
+
+        return cls(images, concept_dict)
 
     def __getitem__(self, index):
         return self.images[index]
@@ -163,18 +171,25 @@ class DaleReferentialGameSample:
     image_id: str
 
 
-class DaleReferentialGameDataset(Dataset):
+class DaleReferentialGameDataset(Dataset, Persistable):
     def __init__(
         self,
+        samples,
+    ) -> None:
+        super().__init__()
+
+        self.samples: list[DaleReferentialGameSample] = samples
+
+    @classmethod
+    def load(
+        cls,
         scenes_json_dir,
         image_loader: ImageLoader,
         *_args,
         max_number_samples=100,
         **_kwargs,
-    ) -> None:
-        super().__init__()
-
-        self.samples: list[DaleReferentialGameSample] = []
+    ):
+        samples: list[DaleReferentialGameSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         print("sampling scenes...")
@@ -212,7 +227,7 @@ class DaleReferentialGameDataset(Dataset):
 
             target_index = indices.index(target_object)
 
-            self.samples.append(
+            samples.append(
                 DaleReferentialGameSample(
                     target_index=target_index,
                     bounding_boxes=bounding_boxes,
@@ -221,6 +236,53 @@ class DaleReferentialGameDataset(Dataset):
                 )
             )
         print()
+
+        return cls(samples)
+
+    def save(self, file_path):
+        with h5py.File(file_path, "w") as f:
+            f.create_dataset(
+                "bounding_boxes",
+                data=torch.stack(
+                    [torch.stack(sample.bounding_boxes) for sample in self.samples]
+                ),
+            )
+            f.create_dataset(
+                "target_index", data=[sample.target_index for sample in self.samples]
+            )
+            f.create_dataset(
+                "target_order", data=[sample.target_order for sample in self.samples]
+            )
+            f.create_dataset(
+                "image_id", data=[sample.image_id for sample in self.samples]
+            )
+
+    @classmethod
+    def load_file(cls, file_path):
+        with h5py.File(file_path, "r") as f:
+            samples = [
+                DaleReferentialGameSample(
+                    **dict(
+                        zip(
+                            [
+                                "bounding_boxes",
+                                "image_id",
+                                "target_index",
+                                "target_order",
+                            ],
+                            sample,
+                        )
+                    )
+                )
+                for sample in zip(
+                    [list(torch.from_numpy(s)) for s in f["bounding_boxes"]],
+                    [str(i, "utf-8") for i in f["image_id"]],
+                    f["target_index"],
+                    [a.tolist() for a in f["target_order"]],
+                )
+            ]
+
+        return cls(samples)
 
     def __getitem__(self, index):
         return self.samples[index]

@@ -1,15 +1,18 @@
 import itertools
 import json
 import os
+import pickle
 import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 
 import cv2
+import h5py
 import numpy as np
 import torch
 from mlt.image_loader import ImageLoader
+from mlt.util import Persistable
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -355,7 +358,7 @@ class BoundingBoxClassifierSample:
     attribute_tensor: torch.Tensor = torch.tensor(0)
 
 
-class BoundingBoxClassifierDataset(Dataset):
+class BoundingBoxClassifierDataset(Dataset, Persistable):
     """
     Input:
      - bounding boxes of all objects
@@ -364,18 +367,22 @@ class BoundingBoxClassifierDataset(Dataset):
      - index of target bounding box
     """
 
-    def __init__(
-        self,
+    def __init__(self, samples: list[BoundingBoxClassifierSample]) -> None:
+        super().__init__()
+
+        self.samples = samples
+
+    @classmethod
+    def load(
+        cls,
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
         *_args,
         attribute_encoder: AttributeEncoder = None,
         **_kwargs,
-    ) -> None:
-        super().__init__()
-
-        self.samples: list[BoundingBoxClassifierSample] = []
+    ):
+        samples: list[BoundingBoxClassifierSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         print("sampling scenes...")
@@ -409,9 +416,11 @@ class BoundingBoxClassifierDataset(Dataset):
             if attribute_encoder is not None:
                 sample.attribute_tensor = attribute_encoder.encode(scene, target_object)
 
-            self.samples.append(sample)
+            samples.append(sample)
         print()
         print("loaded data.")
+
+        return cls(samples)
 
     def __getitem__(self, index):
         sample = self.samples[index]
@@ -427,6 +436,51 @@ class BoundingBoxClassifierDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
+    def save(self, file_path):
+        with h5py.File(file_path, "w") as f:
+            f.create_dataset(
+                "bounding_boxes",
+                data=torch.stack([sample.bounding_boxes for sample in self.samples]),
+            )
+            f.create_dataset(
+                "target_index",
+                data=torch.stack([sample.target_index for sample in self.samples]),
+            )
+            f.create_dataset(
+                "attribute_tensor",
+                data=torch.stack([sample.attribute_tensor for sample in self.samples]),
+            )
+            f.create_dataset(
+                "image_id", data=[sample.image_id for sample in self.samples]
+            )
+
+    @classmethod
+    def load_file(cls, file_path):
+        with h5py.File(file_path, "r") as f:
+            samples = [
+                BoundingBoxClassifierSample(
+                    **dict(
+                        zip(
+                            [
+                                "bounding_boxes",
+                                "image_id",
+                                "target_index",
+                                "attribute_tensor",
+                            ],
+                            sample,
+                        )
+                    )
+                )
+                for sample in zip(
+                    [torch.from_numpy(s) for s in f["bounding_boxes"]],
+                    [str(i, "utf-8") for i in f["image_id"]],
+                    [torch.from_numpy(i) for i in f["target_index"]],
+                    [torch.from_numpy(a) for a in f["attribute_tensor"]],
+                )
+            ]
+
+        return cls(samples)
+
 
 @dataclass
 class BoundingBoxCaptioningSample:
@@ -440,9 +494,18 @@ class BoundingBoxCaptioningSample:
     non_target_captions: torch.Tensor = torch.tensor(0)
 
 
-class BoundingBoxCaptioningDataset(Dataset):
+class BoundingBoxCaptioningDataset(Dataset, Persistable):
     def __init__(
-        self,
+        self, captioner: Captioner, samples: list[BoundingBoxCaptioningSample]
+    ) -> None:
+        super().__init__()
+
+        self.captioner = captioner
+        self.samples = samples
+
+    @classmethod
+    def load(
+        cls,
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
@@ -450,10 +513,7 @@ class BoundingBoxCaptioningDataset(Dataset):
         *_args,
         **_kwargs,
     ):
-        super().__init__()
-
-        self.captioner = captioner
-        self.samples: list[BoundingBoxCaptioningSample] = []
+        samples: list[BoundingBoxCaptioningSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         print("sampling scenes...")
@@ -492,10 +552,10 @@ class BoundingBoxCaptioningDataset(Dataset):
                 if len(captions) != 0
                 else torch.ones((1, 3)),
             )
-            self.samples.append(sample)
+            samples.append(sample)
 
         # pad non-target captions
-        for sample in self.samples:
+        for sample in samples:
             padding = [torch.zeros_like(sample.non_target_captions[0])] * (
                 max_number_of_distractors - len(sample.non_target_captions)
             )
@@ -510,6 +570,8 @@ class BoundingBoxCaptioningDataset(Dataset):
         print()
         print("loaded data.")
 
+        return cls(captioner, samples)
+
     def __getitem__(self, index):
         sample = self.samples[index]
         return (
@@ -520,6 +582,55 @@ class BoundingBoxCaptioningDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.samples)
+
+    def save(self, file_path):
+        with h5py.File(file_path, "w") as f:
+            f.create_dataset(
+                "bounding_boxes",
+                data=torch.stack([sample.bounding_boxes for sample in self.samples]),
+            )
+            f.create_dataset(
+                "caption", data=torch.stack([sample.caption for sample in self.samples])
+            )
+            f.create_dataset(
+                "non_target_caption",
+                data=torch.stack(
+                    [sample.non_target_caption for sample in self.samples]
+                ),
+            )
+            f.create_dataset(
+                "image_id", data=[sample.image_id for sample in self.samples]
+            )
+
+            f.attrs["captioner"] = np.void(pickle.dumps(self.captioner))
+
+    @classmethod
+    def load_file(cls, file_path):
+        with h5py.File(file_path, "r") as f:
+            samples = [
+                BoundingBoxCaptioningSample(
+                    **dict(
+                        zip(
+                            [
+                                "bounding_boxes",
+                                "image_id",
+                                "caption",
+                                "non_target_caption",
+                            ],
+                            sample,
+                        )
+                    )
+                )
+                for sample in zip(
+                    [torch.from_numpy(b) for b in f["bounding_boxes"]],
+                    [str(i, "utf-8") for i in f["image_id"]],
+                    [torch.from_numpy(c) for c in f["caption"]],
+                    [torch.from_numpy(n) for n in f["non_target_caption"]],
+                )
+            ]
+            captioner = pickle.loads(f.attrs["captioner"].tobytes())
+
+        return cls(captioner, samples)
 
 
 @dataclass
@@ -536,7 +647,7 @@ class CoordinatePredictorSample:
     masked_image: torch.Tensor = torch.tensor(0)
 
 
-class CoordinatePredictorDataset(Dataset):
+class CoordinatePredictorDataset(Dataset, Persistable):
     """
     Input:
      - image
@@ -548,8 +659,13 @@ class CoordinatePredictorDataset(Dataset):
      - x and y coordinate of target object
     """
 
-    def __init__(
-        self,
+    def __init__(self, samples) -> None:
+        super().__init__()
+        self.samples: list[CoordinatePredictorSample] = samples
+
+    @classmethod
+    def load(
+        cls,
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
@@ -560,11 +676,9 @@ class CoordinatePredictorDataset(Dataset):
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
         **_kwargs,
     ) -> None:
-        super().__init__()
-
         coordinate_encoder = CoordinateEncoder(preprocess)
 
-        self.samples: list[CoordinatePredictorSample] = []
+        samples: list[CoordinatePredictorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         print("sampling scenes...")
@@ -608,9 +722,11 @@ class CoordinatePredictorDataset(Dataset):
                     image_masker.get_masked_image(image, scene, target_object)
                 )
 
-            self.samples.append(sample)
+            samples.append(sample)
         print()
         print("loaded data.")
+
+        return cls(samples)
 
     def __getitem__(self, index):
         sample = self.samples[index]
@@ -628,6 +744,62 @@ class CoordinatePredictorDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
+    def save(self, file_path):
+        with h5py.File(file_path, "w") as f:
+            f.create_dataset(
+                "image",
+                data=torch.stack([sample.image for sample in self.samples]),
+            )
+            f.create_dataset(
+                "target_pixels",
+                data=torch.stack([sample.target_index for sample in self.samples]),
+            )
+            f.create_dataset(
+                "attribute_tensor",
+                data=torch.stack([sample.attribute_tensor for sample in self.samples]),
+            )
+            f.create_dataset(
+                "image_id", data=[sample.image_id for sample in self.samples]
+            )
+            f.create_dataset(
+                "masked_image",
+                data=torch.stack([sample.masked_image for sample in self.samples]),
+            )
+            f.create_dataset(
+                "locations",
+                data=torch.stack([sample.locations for sample in self.samples]),
+            )
+
+    @classmethod
+    def load_file(cls, file_path):
+        with h5py.File(file_path, "r") as f:
+            samples = [
+                CoordinatePredictorSample(
+                    **dict(
+                        zip(
+                            [
+                                "image",
+                                "image_id",
+                                "target_pixels",
+                                "attribute_tensor",
+                                "masked_image",
+                                "locations",
+                            ],
+                            sample,
+                        )
+                    )
+                )
+                for sample in zip(
+                    [torch.from_numpy(b) for b in f["images"]],
+                    [str(i, "utf-8") for i in f["image_id"]],
+                    [torch.from_numpy(c) for c in f["target_pixels"]],
+                    [torch.from_numpy(n) for n in f["attribute_tensor"]],
+                    [torch.from_numpy(c) for c in f["masked_image"]],
+                    [torch.from_numpy(n) for n in f["locations"]],
+                )
+            ]
+        return cls(samples)
+
 
 @dataclass
 class CaptionGeneratorSample:
@@ -642,7 +814,7 @@ class CaptionGeneratorSample:
     non_target_captions: torch.Tensor = torch.tensor(0)
 
 
-class CaptionGeneratorDataset(Dataset):
+class CaptionGeneratorDataset(Dataset, Persistable):
     """
     Input:
      - image
@@ -652,7 +824,16 @@ class CaptionGeneratorDataset(Dataset):
     """
 
     def __init__(
-        self,
+        self, captioner: Captioner, samples: list[CaptionGeneratorSample]
+    ) -> None:
+        super().__init__()
+
+        self.captioner = captioner
+        self.samples = samples
+
+    @classmethod
+    def load(
+        cls,
         scenes_json_dir,
         image_loader: ImageLoader,
         max_number_samples,
@@ -662,9 +843,7 @@ class CaptionGeneratorDataset(Dataset):
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
         **_kwargs,
     ) -> None:
-        super().__init__()
-        self.captioner = captioner
-        self.samples: list[CaptionGeneratorSample] = []
+        samples: list[CaptionGeneratorSample] = []
 
         scenes = os.listdir(scenes_json_dir)
         print("sampling scenes...")
@@ -707,10 +886,10 @@ class CaptionGeneratorDataset(Dataset):
                     image_masker.get_masked_image(image, scene, target_object)
                 )
 
-            self.samples.append(sample)
+            samples.append(sample)
 
         # pad non-target captions
-        for sample in self.samples:
+        for sample in samples:
             padding = [torch.zeros_like(sample.non_target_captions[0])] * (
                 max_number_of_distractors - len(sample.non_target_captions)
             )
@@ -724,6 +903,8 @@ class CaptionGeneratorDataset(Dataset):
 
         print()
         print("loaded data.")
+
+        return cls(captioner, samples)
 
     def __getitem__(self, index):
         sample = self.samples[index]
@@ -740,3 +921,57 @@ class CaptionGeneratorDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.samples)
+
+    def save(self, file_path):
+        with h5py.File(file_path, "w") as f:
+            f.create_dataset(
+                "image",
+                data=torch.stack([sample.image for sample in self.samples]),
+            )
+            f.create_dataset(
+                "caption", data=torch.stack([sample.caption for sample in self.samples])
+            )
+            f.create_dataset(
+                "non_target_captions",
+                data=torch.stack(
+                    [sample.non_target_captions for sample in self.samples]
+                ),
+            )
+            f.create_dataset(
+                "masked_image",
+                data=torch.stack([sample.masked_image for sample in self.samples]),
+            )
+            f.create_dataset(
+                "image_id", data=[sample.image_id for sample in self.samples]
+            )
+            f.attrs["captioner"] = np.void(pickle.dumps(self.captioner))
+
+    @classmethod
+    def load_file(cls, file_path):
+        with h5py.File(file_path, "r") as f:
+            samples = [
+                CaptionGeneratorSample(
+                    **dict(
+                        zip(
+                            [
+                                "image",
+                                "image_id",
+                                "caption",
+                                "non_target_captions",
+                                "masked_image",
+                            ],
+                            sample,
+                        )
+                    )
+                )
+                for sample in zip(
+                    [torch.from_numpy(b) for b in f["image"]],
+                    [str(i, "utf-8") for i in f["image_id"]],
+                    [torch.from_numpy(c) for c in f["caption"]],
+                    [torch.from_numpy(n) for n in f["non_target_captions"]],
+                    [torch.from_numpy(c) for c in f["masked_image"]],
+                )
+            ]
+            captioner = pickle.loads(f.attrs["captioner"].tobytes())
+
+        return cls(captioner, samples)

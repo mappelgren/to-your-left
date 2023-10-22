@@ -475,20 +475,18 @@ if __name__ == "__main__":
         str(f"{model_name.dataset.__name__}({dataset_args})").encode()
     ).hexdigest()
     dataset_dir = os.path.join(args.out_dir, "datasets")
-    dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.pt")
+    dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.h5")
     if os.path.exists(dataset_file):
         print(f"Loading dataset {dataset_identifier}...", end="\r")
-        with open(dataset_file, "rb") as f:
-            dataset = torch.load(f)
+        dataset = model_name.dataset.load_file(dataset_file)
         print(f"Dataset {dataset_identifier} loaded.   ")
     else:
-        dataset = model_name.dataset(**dataset_args)
+        dataset = model_name.dataset.load(**dataset_args)
 
         print(f"Saving dataset {dataset_identifier}...", end="\r")
         if not os.path.exists(dataset_dir):
             os.makedirs(dataset_dir)
-        with open(dataset_file, "wb") as f:
-            torch.save(dataset, f)
+        dataset.save(dataset_file)
         print(f"Dataset {dataset_identifier} saved.   ")
 
     train_dataset_length = int(0.8 * len(dataset))
