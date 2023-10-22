@@ -53,8 +53,8 @@ if __name__ == "__main__":
         spec_options = [
             "--dataset_base_dir=/home/dominik/Development/",
             "--out_dir=out/",
-            "--validation_batch_size=512",
-            "--validation_batches_per_epoch=4",
+            "--validation_batch_size=256",
+            "--validation_batches_per_epoch=8",
         ]
 
     for index, combination in enumerate(itertools.product(*variables.values())):
