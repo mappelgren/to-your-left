@@ -533,11 +533,11 @@ def main(params):
         )
         callbacks.extend(
             [
-                core.CheckpointSaver(
-                    checkpoint_path=out_dir,
-                    prefix="checkpoint",
-                    checkpoint_freq=0,
-                ),
+                # core.CheckpointSaver(
+                #     checkpoint_path=out_dir,
+                #     prefix="checkpoint",
+                #     checkpoint_freq=0,
+                # ),
                 ExcludingInteractionSaver(
                     checkpoint_dir=out_dir,
                     train_epochs=[opts.n_epochs],
