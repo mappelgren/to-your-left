@@ -5,8 +5,8 @@ import subprocess
 options = [
     "--n_epochs=9",
     "--validation_freq=9",
-    "--batch_size=128",
-    "--batches_per_epoch=10",
+    "--batch_size=32",
+    "--batches_per_epoch=40",
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
