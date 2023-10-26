@@ -44,6 +44,7 @@ These combined experiments should lay the basis for how to build up the agents i
 % DK: TODO
 
 \subsection{Object identification}
+\label{sec:object-identification}
 \subsubsection*{Setup}
 
 In a first task a neural model is trained to discriminate multiple objects from each other.
@@ -95,7 +96,7 @@ The dot products are concatenated and form a vector with as many dimensions as o
 The \emph{softmax} function is applied over the resulting vector, which returns a probability distribution over all objects; the model points to the object with the highest probability.
 % The model then points to an object, using the \emph{softmax} function over this resulting vector.
 
-The experiments are conducted with the following hyperparameters: a learning rate of 0,0002, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
 The number of epochs was chosen manually after identifying when the loss as well as the test accuracies didn't improve significantly.
 8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
@@ -200,7 +201,6 @@ This representation of all objects serves as the initial hidden state of an LSTM
 Tokens used in the LSTM are embedded with embedding dimension $e_t$.
 During training, teacher forcing is applied by using embeddings of the ground truth tokens as the input sequence for the LSTM, instead of the output of the LSTM.
 The output of the LSTM is passed through a linear layer at each step to determine logits over the symbols of the vocabulary.
-The loss is calculated using cross-entropy.
 During testing, the LSTM is always forced to generate three tokens, with an embedded start-of-sequence token as first input to the LSTM.
 Each token in the sequence is determined greedily, by selecting the highest logit in the output of each step in the LSTM.
 
@@ -211,40 +211,40 @@ Each token in the sequence is determined greedily, by selecting the highest logi
     \label{fig:caption_generator_architecture}
 \end{figure}
 
-We compare two different models against each other.
-The first model just takes the image as the input.
-During training, also the ground truth caption is passed to the model.
-The image is processed as in the section before.
-First, it is passed through a feature extractor with two following 2d convolutional layers, reducing the channels to 128.
-After each convolutional layer the \emph{ReLU} function is applied.
-The result is pooled using max pooling and then reduced to 1024 dimension using a linear layer.
-The such encoded image serves as the initial hidden state of an LSTM, which generates the caption.
-% SD: Dimensions?
-% DK: 1024? (QUESTION)
-During training, teacher forcing is applied by using embeddings of the ground truth tokens as the input sequence for the LSTM, instead of the output of the LSTM.
-% SD: Why is this teacher forcing?
-% DK: because the ground truth during generation of the sequence (added subclause; done)
-The output of the LSTM is passed through a linear layer at each step to determine logits over the symbols of the vocabulary.
-The loss is calculated using cross-entropy.
-During testing, the LSTM is always forced to generate three tokens, with an embedded start-of-sequence token as first input to the LSTM.
-Each token in the sequence is determined greedily, by selecting the highest logit in the output of each step in the LSTM.
-% SD: There is a greedy decoding algorithm.
-% DK: (added; done)
+In the second setup two different models are compared against each other.
+The first model acts as the baseline and only receives the complete image as the input.
+The image is passed through \emph{ResNet-3} and subsequently processed by additional convolution layers, described in section \ref{sec:image-processing}.
+The resulting vector is then reduced to decoder output dimension $d$ by a linear layer and as for the bounding boxes acts as the initial hidden state for the LSTM.
+The LSTM is trained in the same way as above.
 
-Using this approach, the model doesn't have any information about the target object.
-Therefore, we extend it in a second step with attention to the target object.
+Using this approach, the model doesn't have any information about the target object and is therefore expected to produce referring expressions for a randomly selected object on the scene.
+Therefore, it is extended in a second step with attention to the target object.
 % SD: You add attention to the target object.
 % DK: (added; done)
-A masked version of the image is created ass in the section above and passed to the model.
-This is shown in Figure \ref{fig:caption_generator_architecture}.
-The model works exactly the same, except for the additional separate image encoder that encodes the masked image in the same way as the original image.
+A masked version of the image is created and passed to the model.
+For this, a fixed size squared area of 96 \times\ 96 pixels around the center of the target object is filled in white, while the rest of the image is filled in black.
+Both original and masked image are processed together with convolutional layers as described in section \ref{sec:image-processing}.
 % SD: This is normally implemented as a filter of 1 and 0 corresponding to pixels. As such it then corresponds to attention, cf. paper with Mehdi.
 % DK: (QUESTION)
-Both encodings are concatenated and then used as the initial hidden state for the LSTM.
+The result is then again projected to the decoder output dimension $d$ by a linear layer and then used as the initial hidden state for the LSTM.
 This should point the model towards which object to describe and discriminate from the distractors.
 
-To test the success of the model, three measures are calculated.
-The first measure is the \textbf{accuracy} if the model predicted every word in the caption correctly.
+For both setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
+The loss is calculated using cross entropy.
+The following values for the variables are compared:
+\begin{itemize}
+    \item $e_i$ (only for bounding boxes): 100, 500, 1000
+    \item $d$: 10, 15, 30
+    \item $e_t$: 100, 500, 1000
+\end{itemize}
+
+As already discussed before, this task can be interpreted as a classification task rather than a natural language generation task.
+The main reason for this is that the model is tasked to assign specific attributes to the target object instead of producing free text with a large vocabulary.
+Following, we are interested in the classification mistakes the model makes.
+For this, the model's success is validated on accuracy, recall and precision scores.
+These are calculated in the following ways.
+The first measure is the \textbf{overall accuracy} if the model predicted every word in the caption correctly.
 % SD: This is too strict. if this is a generation task then we can use generation metrics. Those compare if the generated string as a whole is kind of similar to the target string, see ROUGE, METEOR, BERTscore.
 % If this is a classification task, and it is, given that we know what type of word we expect in each slot, we could calculate accuracy per class, precision, recall, F-score. We could also calculate mean ranks for predicting words per classes, or acucracy at k- if the target word is in the k-top predictions.
 % We could also take it a multi-class classification problem and how to calculate accuracy in this case, would need to check.
@@ -260,12 +260,11 @@ For instance, consider the scene in Figure \ref{fig:clevr-dale-5}.
 The correct caption is \emph{cylinder}.
 If the model would predict \emph{purple cylinder}, the accuracy determines it as false as captioning \emph{large purple cylinder} as well \emph{small green cube}.
 The first two descriptions identify the target object perfectly, but the model only didn't learn to exclude unnecessary attributes.
-To mitigate this, we also include a \textbf{word-by-word accuracy}.
-This measure calculates the accuracy not on sentence level, but on word level.
-The first predicted caption of the model would yield a word-by-word accuracy of 66\% (including padding tokens), the second 33\%, while the third prediction would yield 0\%.
+To mitigate this, the accuracies for each class are included, as well as the macro average.
 % SD: Is this figure for a particular class, i.e. object type, or do you then do something to individual accuracy, i.e. average them?
 % DK: the metric is averaged over all samples (not by class). Might be definitly worth to do it class by class. Time? (QUESTION)
 This can give a better understanding of the errors the model makes.
+The same is done for \emph{precision} and \emph{recall}.
 
 % SD: Very good If I understand this right this would be a case where the generated description describes another object better than the target and a human would identify that. So it is like false negatives in describing. Perhaps use another term for this: referring to a distractor? (since you are not measuring hwo individually the description fitts a distractor but only if the entire description could perfectly fit a distractor)
 % DK: exactly. I added false negatives. But I would like to keep accuracy in the name, since that is what it is. maybe better distractor accuracy? (QUESTION)
@@ -275,7 +274,7 @@ By this it measures the false negative generated captions.
 For this we generated captions for all the non-target objects and distractors in the images using the GRE-algorithm.
 If the generated description of the model describes an object that is not the target object, it gets assigned 100\%.
 If not, independently of describing the target object, no object, or one of the objects insufficiently, it gets assigned 0\%.
-Using this measure, we can get a quick overview if the model's problem lies in extracting and relating attributes or in understanding which of the presented objects is the target object.
+Using this measure, we can get an overview if the model's problem lies in extracting and relating attributes or in understanding which of the presented objects is the target object.
 
 The caption generator models are trained on both 'Dale' datasets.
 Again, each of these datasets increases the complexity of the description.
@@ -371,26 +370,29 @@ These are harder to learn and generate for the model since it needs to take more
 \subsubsection*{Setup}
 \cmtDK[inline]{attribute encodings, coordinate predictor}
 
+With the reference resolution task, the model is trained to understand referring expressions, by pointing towards the target object in the scene.
 This level should help to analyze, how the final task of the language game should look like, in especially what the receiver is tasked to predict.
 As described before, the sender should communicate an object in the image and the receiver needs to identify it.
 The challenge lies in how the receiver refers to the identified object.
 There are multiple possibilities, how it can be done.
 One of them could be to describe the target object with human language, using the attributes.
 The main goal however is to let the language of the agents emerge as natural as possible.
-Including human knowledge into the task would bias also the emerged language towards attributes and words, used in natural language.
+Including human referring expressions into the task would bias also the emerged language towards attributes and words, used in natural language.
 For this reason, the final task of the receiver will be to 'point' to the target object.
 The models are therefore tasked to predict the center coordinates of the target object.
 % SD: Reference resolution with identification of location. The other task, object identification is also resolving reference but it is easier as you are only picking objects. The first task also involves spatial knowledge.
 % DK: TODO
-With this approach, the models receive few human knowledge, but are still able to rely on all information present in the image to discriminate the objects.
+With this approach, the models receive few natural language information, but are still able to rely on all information present in the image to discriminate the objects.
 
-To achieve this goal, multiple setups of models are tested.
-In the simplest setup, the model receives only the image \cmtDK{preprocess image} as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
+To achieve this goal, multiple setups of models are trained.
+In the simplest setup, the model receives only the image as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
 % SD: What are the features?
 % SD: Note that these are visual features and not spatial features. It is true that visual features also encode some spatial information, how visual features relate to each other, but such information is very different from the spatial information required to predict coordinates in a coordinate frames, and hence we expect the task will be very hard.
 % DK: TODO
-Here the image is first passed through one of the \emph{feature extractors}.
-Next, the extracted feature vector is flattened and passed through two linear layers with a \emph{ReLU} non-linearity in between.
+In a first step, the image is encoded.
+This is done by first passing it through one of the \emph{feature extractors} and then further processing it with convolutional layers as described in section \ref{sec:image-processing}.
+In the next step the encoded image is used to predict coordinates using the \emph{coordinate predictor}.
+Hereby, the extracted feature vector is flattened and passed through two linear layers with a \emph{ReLU} non-linearity in between.
 These reduce the dimensions first to 1024 and finally to 2.
 
 To determine the loss, the euclidean distance between the resulting predicted point on the image and the ground truth point are calculated.
@@ -404,7 +406,7 @@ The problem arises as soon as multiple objects are present in the image.
 There is no information available for the model to understand which one of these objects is the actual target object, except for the final calculation of the loss.
 Since there is not necessarily a pattern for which object in the image is the correct target object over the whole dataset, the models will likely fail to generalize.
 Therefore, the models need to receive more information.
-Here, we try out four different ways to encode and refer to the target object.
+Here, four different ways to encode and refer to the target object are tested.
 
 \begin{figure}[ht]
     \centering
@@ -421,34 +423,21 @@ Here, we try out four different ways to encode and refer to the target object.
     % DK: TODO
 \end{figure}
 
-In the first method, we encode the attributes of the target object as \textbf{one-hot encodings}.
-There is a three-dimensional vector encoding the \emph{shape}, an eight-dimensional vector encoding the color and a two-dimensional vector encoding the two different sizes.
-The values of each dimension of these vectors can either be zero or one, depending on the attributes of the target object.
-These three encodings of the attributes are then concatenated.
-The image is again passed through a feature extractor, before the flattened vector is reduced to 2048 dimensions with a linear layer.
-The result is concatenated with the encoded attributes and passed to a final linear layer to predict the coordinates.
-
-In an extension to this method, we also include the \textbf{center coordinates of all objects} in the image.
+In the first method, the target object is encoded as \textbf{one-hot encodings}, as described in section \ref{sec:object-identification}.
+In an extension to this method, also the \textbf{center coordinates of all objects} in the image are included.
 % SD: Encoded locations?
 % DK: TODO
 This should help the model to identify all possible options to chose from, when predicting the target object.
 All the center coordinates are simply extracted and shuffled.
 Since there are varying numbers of objects in the image, this vector of variable length is padded to the maximum number of objects in the dataset.
 The padded locations consist of two zeros for both coordinates.
-For this model, we also made use of a more complex way to encode the image.
-Here, we based the approach on code that implements baselines for the CLEVR dataset \citep{Johnson2017}.
-The image is first passed through the feature extractor.
-Afterwards, a 2-dimensional convolutional layer, reduces the channels from 2048 to 512 channels with a kernel size of 1.
-After applying the \emph{ReLU} function, the resulting matrix is max pooled over two dimensions with both a kernel size and a stride of 2.
-The resulting matrix is flattened and concatenated with both the attribute encodings and the shuffled coordinates of all objects.
 % SD: Why shuffled? If we order them the way they appear in the image, the model will have more information that they are sequentially related.
 % DK: TODO
-This is then passed again through a final linear layer to predict x- and y-coordinates.
 % SD: Convolutions are only applied on visual features, not object attribute features and locations.
 % DK: TODO
 
-The third method encodes the attributes of the target object with human language using the \textbf{incremental algorithm for the Generation of Referring Expressions (GRE)} described in \citep{Dale1995}.
-This opposes the idea described before, to share as few human knowledge as possible with the model.
+The third method encodes the attributes of the target object with human language using the \textbf{incremental GRE-algorithm}.
+This opposes the idea described before, to share as few natural language information as possible with the model.
 Still, this approach can help to understand and analyze if the model was able to extract information about the objects and more specifically their attributes from the image.
 % SD: The question you are asking is whether it is possible to predict location from the visual appearance of the object. This is highly complex task as it requires quite two step reasoning, identification of features with that attribute, e.g. blue and then locating that feature in the image.
 % DK: TODO
@@ -456,55 +445,63 @@ If the model is able to match parts of the image with human words it would show 
 If the model in a next step can learn this for the whole dataset, this would mean that it could generalize over these attributes and assign them to certain regions in an image.
 This insight would help for succeeding models that make use of these learnings without human language.
 
-Using the algorithm, one can describe an object using its attributes to discriminate it from other objects as efficiently as possible.
-In other words, the object is described unambiguously using the lowest number of words.
-The algorithm assumes that there is an order of importance for attributes, such as shape, color and size.
-This order defines, which attributes can be left out, while still identifying the object uniquely.
-This research relies on the following order from most important to least important: shape, color, size
-Given for example the scene from \ref{fig:clevr-dale-5} with the target object being the \emph{big purple cylinder}.
-Using all three attributes, this description identifies the object perfectly and uniquely.
-Following the algorithm, we could make the description shorter by removing the least important attribute \emph{size} without loosing unambiguity, describing it as the \emph{purple cylinder}.
-This can be taken even one step further by removing also the \emph{color}.
-Describing it as the \emph{cylinder} still doesn't describe any distractor, since the target object is the only cylinder in the scene.
-% SD: See my point earlier about the reversed algorithm between the two tasks 
-% DK: TODO
+% Using the algorithm, one can describe an object using its attributes to discriminate it from other objects as efficiently as possible.
+% In other words, the object is described unambiguously using the lowest number of words.
+% The algorithm assumes that there is an order of importance for attributes, such as shape, color and size.
+% This order defines, which attributes can be left out, while still identifying the object uniquely.
+% This research relies on the following order from most important to least important: shape, color, size
+% Given for example the scene from \ref{fig:clevr-dale-5} with the target object being the \emph{big purple cylinder}.
+% Using all three attributes, this description identifies the object perfectly and uniquely.
+% Following the algorithm, we could make the description shorter by removing the least important attribute \emph{size} without loosing unambiguity, describing it as the \emph{purple cylinder}.
+% This can be taken even one step further by removing also the \emph{color}.
+% Describing it as the \emph{cylinder} still doesn't describe any distractor, since the target object is the only cylinder in the scene.
+% % SD: See my point earlier about the reversed algorithm between the two tasks 
+% % DK: TODO
 
 For the experiments, each image is captioned with a description of the target object using the described algorithm.
 To include it in the model, the captions need to be padded to an equal length.
 In this case they are padded to a length of 3, which is the maximum number of attributes that can be used.
 For this, as standard practice in captioning tasks, the captions are padded at the end with a specified padding token.
 
-The model is made up of three parts:
-The first part extracts features from the image.
-Here, the setup is similar to the previous model.
-The image is passed through a feature extractor, before it is passed through two 2d convolutional layers, both reducing the channels to 128 with a kernel size of 1.
-A \emph{ReLU} function is applied, after both convolutional layers.
-As before, the resulting vector is pooled, using max pooling with both a kernel size and stride of 2.
-In the second part, the caption is encoded, using an LSTM.
+In the model, the referring expression is encoded, using an LSTM.
 Here, the learned embeddings of each token are parsed by the LSTM and its final hidden state is then used as a summary of the complete caption.
-The third part is again the predictor of the coordinates of the target object.
-Both the processed image and the final hidden state of the LSTM are flattened and concatenated.
-The resulting vector is passed through three linear layers reducing to 1024, 1024 and 2 dimensions respectively.
-Between each linear layer, the \emph{ReLU} function is applied.
-This architecture is also inspired by the baselines described in \citep{Johnson2017}.
+Both the processed image and the final hidden state of the LSTM are flattened and concatenated, which is then passed through the coordinate predictor.
 % SD: \citep and \citet Use Name (year) when you are referring to particular person and (Name, year) when you are referring to a paper. Hence, in this case it would be the latter.
 % DK: done
 
 The forth method, to encode the target object utilizes \textbf{masking} of the image.
 % SD: Oh, before we talked about 3 methods
 % DK: done
-For this, the image is separated into a fixed size squared area containing the target object and the rest of the image.
-The side of the square is always two fifth of the image width, in this case 192 pixels.
-This size always includes the whole object if it is large or small, while not being cut off if the target object is too close to the border of the image.
-The square is filled in white, while the rest of the image is filled in black.
-This approach has the advantage of providing as few as possible human bias to the model.
+The image is masked in the same way as in section \ref{sec:referring_expression_generation}.
 While even the one-hot encodings contain human knowledge by explicitly encoding human chosen attributes, masking the image will only point the model towards the target object without giving more information.
-It therefore can only rely on its own extracted visual features when looking at masked images.
+It therefore can only rely on its own extracted visual features and the inherent human bias in the image when looking at masked images.
 % SD: The information in the masked image is still not enough to identify the precise location, only the region. Hence, it corresponds on attention in the attention models. But those are generating labels and not predicting coordinated. The task is still challenging.
 % DK: TODO
-The model is presented with both the original image and the masked image.
-Both are passed through a feature extractor and afterwards passed through a linear layer, reducing the dimensions to 2048.
-The resulting vectors are concatenated and passed through another linear layer that predicts the coordinates.
+Both original and masked image are processed as described in \ref{sec:image-processing} and afterwards passed through the coordinate predictor.
+
+For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
+The loss is calculated using cross entropy.
+The following values for the variables are compared:
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+                               & $e_i$              & $c$               & $LSTM_e$  & $LSTM_o$               \\
+                               & $[100, 500, 1000]$ & $[512,1024,2048]$ & $[15,30]$ & $[500,1000,1500,2000]$ \\\midrule
+        Coordinate predictor   & \times             & \times            & -         & -                      \\
+        + one-hot              & \times             & \times            & -         & -                      \\
+        + one-hot + locations  & \times             & \times            & -         & -                      \\
+        + referring expression & \times             & \times            & \times    & \times                 \\
+        + masking              & \times             & \times            & -         & -                      \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean test losses for different feature extractors with one-hot attribute encodings after 20 epochs}
+    \label{tab:feature-extractor-mean-distances}
+    % SD: Explanation of labels
+    % DK: TODO
+\end{table}
 
 The test dataset is again evaluated on the euclidean distance of the predicted coordinates to the ground truth coordinates.
 This distance needs to be minimized.
@@ -523,7 +520,7 @@ These scores are averaged for the epoch and result in an accuracy score, where 1
 This of course doesn't give a perfect representation since the size of the objects varies, but it will still show, how precise each individual prediction is.
 A high accuracy may indicate that the model could identify this specific object better.
 
-The coordinate predictors are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
+The reference resolution models are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
 The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.
 Since the model relies on the extracted features of either VGG or ResNet, locational information about the image could have gone lost.
 % SD: Explain. w3 had a paper with John Kelleher on what spatial information is encoded in CNNs
