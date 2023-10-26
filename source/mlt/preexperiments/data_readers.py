@@ -595,7 +595,7 @@ class BoundingBoxCaptioningDataset(Dataset, Persistable):
             f.create_dataset(
                 "non_target_captions",
                 data=torch.stack(
-                    [sample.non_target_caption for sample in self.samples]
+                    [sample.non_target_captions for sample in self.samples]
                 ),
             )
             f.create_dataset(
