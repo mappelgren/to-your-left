@@ -45,53 +45,66 @@ These combined experiments should lay the basis for how to build up the agents i
 
 \subsection{Object identification}
 \subsubsection*{Setup}
-\cmtDK[inline]{include how to process bounding boxes}
-\cmtDK[inline]{dot product + discussion about embedding size}
-One problem that arises, when only predicting the coordinates is that the models may not be able to predict locations of objects from just visual features.
-Feature extractors like VGG or ResNet are trained on extracting visual information.
-In this process, absolute locations of these features in the images may get lost in the resulting vectors, since they are not necessarily important for classifying tasks.
-To address this challenge, we restructured the task in this experiment.
-% SD: Just say that this is a task of identifying objects (the previous was about locating them). This task does not rely on geometric information but it relies on identifying correct object features, hence explore different features and hence it is useful as abenchmarking task.
-% DK: TODO
-Instead of predicting two coordinates of a target object, the model now needs to classify between all available objects, target object and distractors.
-This will take all positional information out and just focus on the attributes and discriminating factors between the objects.
-To do this, fixed-size bounding boxes are extracted around each of the object in the image.
-As for the masking in the experiment before, the bounding boxes are a square of 192x192 pixels to capture the complete object.
-The bounding boxes of all objects are padded to the maximum number of objects present in an image across the whole dataset with a matrix of zeros.
-For the 'Dale-2', this corresponds to a maximum of two bounding boxes, 5 bounding boxes for the 'Dale-5' dataset and 10 for the 'CLEVR color' dataset
-These bounding boxes are shuffled.
-Furthermore, to point the model towards the target object, its attributes are encoded as on-hot vectors.
+
+In a first task a neural model is trained to discriminate multiple objects from each other.
+Hereby, the model is shown bounding boxes of all objects in the scene as well as a description of the target object.
+The model needs to combine all information and then point to the correct bounding box.
+This task forces the model to extract visual features from the objects in the shown inputs and connect them to a representation of human given attributes.
+Since the model is shown only bounding boxes around each object rather than the whole scene, geometric information about the objects' locations doesn't play a role for the success in this task.
+
+In a first step, bounding boxes are extracted from each scene.
+Each bounding box is a square with a side length of 96 pixels around the center coordinates of each object.
+By doing this large objects in the front of the scene fill the bounding box completely, while smaller objects in the back of the scene contain some space around them.
+They also might contain noise in the form of parts of adjacent objects.
+Preliminary experiments indicated however that a more complex method for extracting the bounding boxes, depending on spatial position in the scene to reduce the noise didn't improve the results.
+Therefore, bounding boxes in this thesis rely on the former simpler approach.
+Since, each bounding box will be passed through on of the feature extractors, described in section \ref{sec:feature-extractors} they need to be normalized first.
+As described in \citep{He2016,Simonyan2015}, the bounding boxes are resized to 256 pixels for the shorter side, then cropped around the center to a square of 224 \times\ 224 pixels.
+Finally, the RGB channels are normalized, by subtracting the means (0,485; 0,456; 0,406) and dividing the result by the standard deviation (0,229; 0,224; 0,225) for each channel respectively.
+The array of bounding boxes is padded with matrix of zeros to the maximum possible number of objects present in a scene across the dataset.
+For the 'Dale-2' dataset, this corresponds to a maximum of two bounding boxes, 5 bounding boxes for the 'Dale-5' dataset and 10 for the 'CLEVR color' dataset.
+For each sample in the dataset the bounding boxes are shuffled.
+
+The attributes of the target object are encoded as one-hot encodings.
+There is a three-dimensional vector encoding the \emph{shape}, an eight-dimensional vector encoding the \emph{color} and a two-dimensional vector encoding the two different \emph{sizes}.
+The values of each dimension of these vectors can either be zero or one, depending on the attributes of the target object.
+These three encodings of the attributes are then concatenated to a vector with 13 dimensions.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.5\linewidth]{figures/arch_bounding_box_classifier.png}
-    \caption{Simplified architecture of the bounding box classifier}
+    \caption{Simplified architecture of the object identification task}
     \label{fig:bounding_box_classifier_architecture}
     % SD: I haven't commented on this before, but let us be very careful in naming all meta-paramaters of the models in the text or in caption: how many layers, how many dimensions, etc. The reader should be able to replicate the code and the experiment from this. You can do this in the caption which is a longer explanation or in the text itself.
     % DK: TODO
 \end{figure}
 
-The model passes each of the bounding boxes through a linear layer to transfer it into an embedding space of 10 dimensions.
+The model is split into two parts.
+First, each normalized bounding box of the sample is passed through \emph{ResNet-avg}.
+The preceding layers \emph{ResNet-1} to \emph{ResNet-4} couldn't be compared due to memory restrictions on the GPU.
+A deeper analysis of the effects of different feature extractors will be done in the following chapters.
+The resulting vector is flattened and projected to the embedding dimension $e$ via a linear layer.
 % SD: This is quite low? Why only 10?
-% DK: to calculate the dot product (inserted; done)
-The same is done with the one-hot vector of the target attributes.
-By bringing both vectors to the same embedding size, the dot product between each embedded image and the embedded attributes can be calculated in the next step.
+% DK: different embedding sizes are tested (done)
+Correspondingly, the one-hot vector of the attributes is projected to the same embedding dimension with another linear layer.
+In the second part, each bounding box is combined with the representation of the attributes.
+By bringing both vectors to the same embedding size, the dot product between each embedded bounding box and the embedded attributes can be calculated.
 A high correlation between the attributes and the object should result in a high dot product, while a low correlation results in a lower dot product.
+The model can so learn to connect the object representation with the attributes.
 The dot products are concatenated and form a vector with as many dimensions as objects present.
 The \emph{softmax} function is applied over the resulting vector, which returns a probability distribution over all objects; the model points to the object with the highest probability.
 % The model then points to an object, using the \emph{softmax} function over this resulting vector.
+
+The experiments are conducted with the following hyperparameters: a learning rate of 0,0002, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+The number of epochs was chosen manually after identifying when the loss as well as the test accuracies didn't improve significantly.
+8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
+The following embedding dimension $e$ are compared: 2, 10, 50, 100, 500, 1000.
 % SD: So, the output of this model is a vector of 0 and 1s, with the 1 identifying the corrct object (or the other way around?).
 % DK: the output is a probability distriution over all objects (inserted above; done)
 
-Furthermore, the model is compared to a baseline that doesn't include any information about the target object.
-Here, the model passes all flattened bounding box representations through a linear layer resulting in a vector with as many objects as are present in the image.
-Again, the model uses a \emph{softmax} function to point to one of these objects.
-Since no information about the target object is included, the guesses are expected to be random.
-% SD: I don't understand this? Have you actually implemented such model? But how can you train a random classifier? The baseline would normally be 1/5 or 1/5, i.e. the number of labels if the number of examples is equal, other a weighted proportion of these. By definition of "random" you would expect such classifier to achieve these probabilities.
-% DK: the idea was not to just compare it to the random probabilities, but compare it to a similar setup as the actual model, with the only difference being the missing information of the target object. As you say the probability is 1/5 (resp. 1/2), which is also the result of thi model. Better to just compare to random probability? (QUESTION)
-
-The bounding box classifier is trained on all datasets that inlcudes more than one object in each sample, namely the 'CLEVR color', 'Dale-2' and 'Dale-5' dataset.
+The object identification task is trained on all datasets that include more than one object in each sample, namely the 'CLEVR color', 'Dale-2' and 'Dale-5' dataset.
+Random baselines for each dataset would yield accuracies of 10\%, 50\% and 20\% respectively.
 % excluding the 'CLEVR single'.
 % SD: Why not?
 % DK: because there is only one object in the input, and therefore only one possible guess. The model can't point to a distractor (adressed; done)
@@ -135,45 +148,61 @@ A more complex architecture, in which the model is additionally tasked to discri
 \subsubsection*{Setup}
 \cmtDK[inline]{new metrics}
 
-As the bounding box classifier, the caption generator acts as a learning step towards understanding, how the model can learn the attributes of objects.
-Additionally, this setup is a natural language generation task, where the model is trained to generate referring expressions, based on visual input.
-% SD: Well, this experiment is a natural language generation task: whether the model is able to generate referring expressions.
-% DK: (addressed; done)
-The same method using the GRE-algorithm from the section above is used to create the descriptions of the target object for each image.
+Opposed to the previous experiment, where the focus lied on extracting visual features, the model is now tasked to generate referring expressions.
+This is done in two setups.
+The first setup uses bounding boxes as in the previous section as input, where the model needs to describe the target object of one of the bounding boxes.
+In the second setup, the model is presented with the complete image and therefore also needs to accommodate to geometric information of the scene.
 
-There are some minor additions concerning the padding of the caption.
-As before, the caption is padded to a number of three tokens, corresponding to the maximum of three attributes.
+The bounding boxes are extracted and normalized in the same way as for the object identification task.
+Since for the second setup, the images will also be passed through the feature extractors, they are normalized as well in like manner.
+The referring expressions for the target object are generated using the incremental GRE-algorithm, described in section \ref{GRE}.
+By this, the model needs to describe the target object with respect to the distractor objects.
+There are some minor additions concerning the padding of the referring expression.
+As before, the referring expression is padded to a number of three tokens, corresponding to the maximum of three attributes.
 However, there are three different ways how the padding is applied.
-First, the captions are, as usual in captioning tasks padded at the end with a specified padding token.
-A problem could arise when the caption is not viewed as a natural language sentence, but as slots filled with tokens.
-More specifically, following the GRE-algorithm, the last token in the caption is always the shape.
+First, the referring expression are, as usual in captioning tasks padded at the end with a specified padding token.
+A problem could arise when the referring expression is not viewed as a natural language sentence, but as slots filled with tokens.
+More specifically, following the GRE-algorithm, the last token in the referring expression is always the shape.
 The second last token if existing describes the color, while the third last token if existing describes the size.
-As soon as this sequence is padded at the end, these slots suddenly disappear.
-A caption that only describes the shape, such as \emph{cube} will be padded to \emph{cube <pad> <pad>}, where the third last slot is filled up with the shape instead of the size.
-Since in this task we are not focussing on producing natural language with a correct grammar, but focus instead of extracting attributes, having a slot structure could help the model to express the extracted attributes correctly.
-For this reason, the second method of padding the caption is prepending the caption with padding tokens.
+As soon as this sequence is padded at the end, these slots disappear.
+A referring expression that only describes the shape, such as \emph{cube} will be padded to \emph{cube <pad> <pad>}, where the third last slot is filled up with the shape instead of the size.
+Since this task is not focussing on producing natural language with a correct grammar, but focuses instead on extracting attributes, having a slot structure could help the model to express the extracted attributes correctly.
+For this reason, the second method of padding the referring expression is prepending the referring expression with padding tokens.
 By this, the positions of the slots are preserved and if not specified just filled with a padding token.
 Each slot has always the same semantic value, e.g. the last slot always contains the shape of an object.
-This can be done since the captions are not free text, but instead the structure and the possible content is given by the dataset.
+This can be done since the referring expressions are not free text, but instead the structure and the possible content is given by the dataset.
 This method might help the model to learn the correct referring expressions.
 % SD: Slots have the same semantic value, i.e. the last slot is the object type. We can do this because we know the structure of the descriptions in this dataset and because we hope this will help the learning. Also, we are thinking of generation based on slots.
 % DK: (addressed; done)
 The last variation concerns the order of producing each token.
-When the captions are prepended, the model would need first produce two padding tokens, before it finally can produce a much more meaningful token for the shape.
+When the referring expressions are prepended, the model would need first produce two padding tokens, before it finally can produce a much more meaningful token for the shape.
 This could be difficult to learn for a model, as the longer a sequence of tokens is, the more information about the beginning of the sequence gets lost.
-Even though a sequence of just three tokens may not be long enough for this factor to be a problem, we experimented to reverse the caption.
+Even though a sequence of just three tokens may not be long enough for this factor to be a problem, we experimented to reverse the referring expression.
 % SD: We... I sounds more like you are writing a lab report with casual language but here you want to be more formal.
 % DK: (done)
 Instead of producing for instance \emph{<pad> green sphere} as correct in English, the model would now need to produce \emph{sphere green <pad>}.
-Notice that the padding token is again at the end of the generation, but the order of slots as well as the amount of information in the caption are still preserved.
+Notice that the padding token is again at the end of the generation, but the order of slots as well as the amount of information in the referring expression are still preserved.
 
-The task for the model is to generate these descriptions, based on the complete scene as input.
-Doing this, the task inherently involves learning human knowledge and natural language structure.
+This task inherently involves learning human knowledge and natural language structure.
 Nonetheless, this helps to understand more detailed if and how the model discriminates objects.
 Can the model solve the task, or do specific attributes used by humans pose challenges to the model?
 % Does it rely on the same attributes humans are using, or does it find other important differences, or is it not able to solve the task at all?
 % SD: In this case it should be using the same attributes as humans as we are training it on human labels.
 % DK: (rephrased; done)
+
+% TODO include figure
+
+In the first setup, the model receives the bounding boxes as input.
+The first bounding box is always the target object, while the remaining bounding boxes are shuffled.
+As in the previous experiment, each bounding box is passed through \emph{ResNet-avg} and projected afterwards to an image embedding dimension $e_i$ with a linear layer.
+All thus encoded bounding boxes are concatenated and again compressed to the decoder output dimension $d$ using another linear layer.
+This representation of all objects serves as the initial hidden state of an LSTM, which generates the referring expression.
+Tokens used in the LSTM are embedded with embedding dimension $e_t$.
+During training, teacher forcing is applied by using embeddings of the ground truth tokens as the input sequence for the LSTM, instead of the output of the LSTM.
+The output of the LSTM is passed through a linear layer at each step to determine logits over the symbols of the vocabulary.
+The loss is calculated using cross-entropy.
+During testing, the LSTM is always forced to generate three tokens, with an embedded start-of-sequence token as first input to the LSTM.
+Each token in the sequence is determined greedily, by selecting the highest logit in the output of each step in the LSTM.
 
 \begin{figure}[ht]
     \centering

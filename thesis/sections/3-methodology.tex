@@ -76,6 +76,7 @@ In addition, simple spatial relations (in front of, behind, left, right) between
 These are simply based on the 3D-coordinates of the objects in relation to the position of the camera.
 
 \subsection{Feature extractors}
+\label{sec:feature-extractors}
 \cmtDK[inline]{preprocessing}
 In computer vision tasks, machines need to analyze images and extract information from them.
 To do this, machines often rely on feature extractors.
@@ -154,7 +155,7 @@ In the later chapters, it will be referred to these adaptions using the name in 
 
 The above described feature extractors are not enough to be solely used to encode the images used in this thesis.
 Even though final layers that contain very task and domain specific knowledge can be removed, the previous layers still don't contain any information about the new domain and task.
-For this reason they need to be extened with further layers that are not frozen and can learn and store information about the new domain by connecting the pretrained general knowledge with the specific task.
+For this reason they need to be extended with further layers that are not frozen and can learn and store information about the new domain by connecting the pretrained general knowledge with the specific task.
 In this thesis, we use one architecture to encode images for all the conducted experiment.
 The additional layers on top of the feature extractors however are always trained from scratch for each of the experiments and tasks.
 By doing this, the models are made up of multiple smaller modules, as for example the image processing module or other modules that encode different inputs.

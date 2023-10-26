@@ -593,7 +593,7 @@ class BoundingBoxCaptioningDataset(Dataset, Persistable):
                 "caption", data=torch.stack([sample.caption for sample in self.samples])
             )
             f.create_dataset(
-                "non_target_caption",
+                "non_target_captions",
                 data=torch.stack(
                     [sample.non_target_caption for sample in self.samples]
                 ),
@@ -615,7 +615,7 @@ class BoundingBoxCaptioningDataset(Dataset, Persistable):
                                 "bounding_boxes",
                                 "image_id",
                                 "caption",
-                                "non_target_caption",
+                                "non_target_captions",
                             ],
                             sample,
                         )
@@ -625,7 +625,7 @@ class BoundingBoxCaptioningDataset(Dataset, Persistable):
                     [torch.from_numpy(b) for b in f["bounding_boxes"]],
                     [str(i, "utf-8") for i in f["image_id"]],
                     [torch.from_numpy(c) for c in f["caption"]],
-                    [torch.from_numpy(n) for n in f["non_target_caption"]],
+                    [torch.from_numpy(n) for n in f["non_target_captions"]],
                 )
             ]
             captioner = pickle.loads(f.attrs["captioner"].tobytes())
