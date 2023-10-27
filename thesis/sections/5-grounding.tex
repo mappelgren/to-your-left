@@ -1,7 +1,6 @@
 \section{Grounding referring expressions}
 \label{sec:preexperiments}
 
-\cmtDK[inline]{general setup: epochs, optimizer, batch size, ...}
 This chapter serves two purposes.
 First, the generated dataset from the precious section is validated.
 For this, models are trained to both generate referring expressions of the target object and understand existing referring expressions.
@@ -80,7 +79,7 @@ These three encodings of the attributes are then concatenated to a vector with 1
     % DK: TODO
 \end{figure}
 
-The model is split into two parts.
+The model, the \emph{object identifier} is split into two parts.
 First, each normalized bounding box of the sample is passed through \emph{ResNet-avg}.
 The preceding layers \emph{ResNet-1} to \emph{ResNet-4} couldn't be compared due to memory restrictions on the GPU.
 A deeper analysis of the effects of different feature extractors will be done in the following chapters.
@@ -96,7 +95,7 @@ The dot products are concatenated and form a vector with as many dimensions as o
 The \emph{softmax} function is applied over the resulting vector, which returns a probability distribution over all objects; the model points to the object with the highest probability.
 % The model then points to an object, using the \emph{softmax} function over this resulting vector.
 
-The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
 The number of epochs was chosen manually after identifying when the loss as well as the test accuracies didn't improve significantly.
 8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
@@ -193,7 +192,7 @@ Can the model solve the task, or do specific attributes used by humans pose chal
 
 % TODO include figure
 
-In the first setup, the model receives the bounding boxes as input.
+In the first setup, the \emph{bounding box RE generator}, the model receives the bounding boxes as input.
 The first bounding box is always the target object, while the remaining bounding boxes are shuffled.
 As in the previous experiment, each bounding box is passed through \emph{ResNet-avg} and projected afterwards to an image embedding dimension $e_i$ with a linear layer.
 All thus encoded bounding boxes are concatenated and again compressed to the decoder output dimension $d$ using another linear layer.
@@ -212,13 +211,13 @@ Each token in the sequence is determined greedily, by selecting the highest logi
 \end{figure}
 
 In the second setup two different models are compared against each other.
-The first model acts as the baseline and only receives the complete image as the input.
+The first model, the \emph{basic RE generator} acts as the baseline and only receives the complete image as the input.
 The image is passed through \emph{ResNet-3} and subsequently processed by additional convolution layers, described in section \ref{sec:image-processing}.
 The resulting vector is then reduced to decoder output dimension $d$ by a linear layer and as for the bounding boxes acts as the initial hidden state for the LSTM.
 The LSTM is trained in the same way as above.
 
 Using this approach, the model doesn't have any information about the target object and is therefore expected to produce referring expressions for a randomly selected object on the scene.
-Therefore, it is extended in a second step with attention to the target object.
+Therefore, it is extended in a second step with attention to the target object, the \emph{masked RE generator}.
 % SD: You add attention to the target object.
 % DK: (added; done)
 A masked version of the image is created and passed to the model.
@@ -229,14 +228,14 @@ Both original and masked image are processed together with convolutional layers 
 The result is then again projected to the decoder output dimension $d$ by a linear layer and then used as the initial hidden state for the LSTM.
 This should point the model towards which object to describe and discriminate from the distractors.
 
-For both setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+For both setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
 8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
 The following values for the variables are compared:
 \begin{itemize}
     \item $e_i$ (only for bounding boxes): 100, 500, 1000
-    \item $d$: 10, 15, 30
-    \item $e_t$: 100, 500, 1000
+    \item $d$: 100, 500, 1000
+    \item $e_t$: 10, 15, 30
 \end{itemize}
 
 As already discussed before, this task can be interpreted as a classification task rather than a natural language generation task.
@@ -385,15 +384,16 @@ The models are therefore tasked to predict the center coordinates of the target 
 With this approach, the models receive few natural language information, but are still able to rely on all information present in the image to discriminate the objects.
 
 To achieve this goal, multiple setups of models are trained.
-In the simplest setup, the model receives only the image as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
+In the simplest setup, the \emph{reference resolver}, the model receives only the image as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
 % SD: What are the features?
 % SD: Note that these are visual features and not spatial features. It is true that visual features also encode some spatial information, how visual features relate to each other, but such information is very different from the spatial information required to predict coordinates in a coordinate frames, and hence we expect the task will be very hard.
 % DK: TODO
 In a first step, the image is encoded.
 This is done by first passing it through one of the \emph{feature extractors} and then further processing it with convolutional layers as described in section \ref{sec:image-processing}.
+Finally, it is projected to the image embedding size $e_i$.
 In the next step the encoded image is used to predict coordinates using the \emph{coordinate predictor}.
 Hereby, the extracted feature vector is flattened and passed through two linear layers with a \emph{ReLU} non-linearity in between.
-These reduce the dimensions first to 1024 and finally to 2.
+These reduce the dimensions first to the coordinate predictor dimension $c$ and finally to 2.
 
 To determine the loss, the euclidean distance between the resulting predicted point on the image and the ground truth point are calculated.
 This distance is learned to be minimized.
@@ -431,6 +431,7 @@ This should help the model to identify all possible options to chose from, when 
 All the center coordinates are simply extracted and shuffled.
 Since there are varying numbers of objects in the image, this vector of variable length is padded to the maximum number of objects in the dataset.
 The padded locations consist of two zeros for both coordinates.
+For both methods, the encodings of the target object are concatenated with the encoded image and then passed to the coordinate predictor.
 % SD: Why shuffled? If we order them the way they appear in the image, the model will have more information that they are sequentially related.
 % DK: TODO
 % SD: Convolutions are only applied on visual features, not object attribute features and locations.
@@ -465,11 +466,13 @@ For this, as standard practice in captioning tasks, the captions are padded at t
 
 In the model, the referring expression is encoded, using an LSTM.
 Here, the learned embeddings of each token are parsed by the LSTM and its final hidden state is then used as a summary of the complete caption.
+Tokens are embedded with embedding dimensions $LSTM_e$ and the output of the LSTM has the size if $LSTM_o$.
+The vocabulary that is used for the descriptions is based on 14 symbols, including the padding token.
 Both the processed image and the final hidden state of the LSTM are flattened and concatenated, which is then passed through the coordinate predictor.
 % SD: \citep and \citet Use Name (year) when you are referring to particular person and (Name, year) when you are referring to a paper. Hence, in this case it would be the latter.
 % DK: done
 
-The forth method, to encode the target object utilizes \textbf{masking} of the image.
+The fourth method, to encode the target object utilizes \textbf{masking} of the image.
 % SD: Oh, before we talked about 3 methods
 % DK: done
 The image is masked in the same way as in section \ref{sec:referring_expression_generation}.
@@ -479,10 +482,10 @@ It therefore can only rely on its own extracted visual features and the inherent
 % DK: TODO
 Both original and masked image are processed as described in \ref{sec:image-processing} and afterwards passed through the coordinate predictor.
 
-For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, Adam \citep{Kingma2015} as optimizer.
+For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
 8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
-The following values for the variables are compared:
+Table \ref{tab:variables-reference-resolution} shows the variables that are changed during the experiments for each of the models.
 
 \begin{table}[ht]
     \centering
@@ -490,17 +493,15 @@ The following values for the variables are compared:
         \toprule
                                & $e_i$              & $c$               & $LSTM_e$  & $LSTM_o$               \\
                                & $[100, 500, 1000]$ & $[512,1024,2048]$ & $[15,30]$ & $[500,1000,1500,2000]$ \\\midrule
-        Coordinate predictor   & \times             & \times            & -         & -                      \\
+        reference resolver     & \times             & \times            & -         & -                      \\
         + one-hot              & \times             & \times            & -         & -                      \\
         + one-hot + locations  & \times             & \times            & -         & -                      \\
         + referring expression & \times             & \times            & \times    & \times                 \\
         + masking              & \times             & \times            & -         & -                      \\
         \bottomrule
     \end{tabular}
-    \caption{Mean test losses for different feature extractors with one-hot attribute encodings after 20 epochs}
-    \label{tab:feature-extractor-mean-distances}
-    % SD: Explanation of labels
-    % DK: TODO
+    \caption{Variables for each model where $e_i$ is the image embedding dimension, $c$ the dimensions of the coordinate predictor, $LSTM_e$ the embedding dimensions for tokens in the LSTM and $LSTM_o$ the output dimension of the LSTM}
+    \label{tab:variables-reference-resolution}
 \end{table}
 
 The test dataset is again evaluated on the euclidean distance of the predicted coordinates to the ground truth coordinates.

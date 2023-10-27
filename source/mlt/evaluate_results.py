@@ -24,6 +24,9 @@ if __name__ == "__main__":
             for line in f:
                 if line.startswith("{"):
                     epoch = json.loads(line)
+                    if epoch.get("mode", "test") == "train":
+                        continue
+
                     flattened = {}
                     for k, v in epoch.items():
                         if isinstance(v, dict):
@@ -31,9 +34,12 @@ if __name__ == "__main__":
                                 flattened[f"{k}_{sub_k}"] = sub_v
                         else:
                             flattened[k] = v
+
                     results.append(flattened)
-            metrics.update(results[0].keys())
-            all_results[name] = results
+
+            if len(results) != 0:
+                metrics.update(results[0].keys())
+                all_results[name] = results
 
     sorted_metrics = list(sorted(metrics))
     print(list(enumerate(sorted_metrics)))

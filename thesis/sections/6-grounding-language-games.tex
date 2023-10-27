@@ -38,9 +38,12 @@ An analysis of the frequency of used symbols and messages, as well as an examina
 In a second step, the language is compared to several referring expressions in natural language.
 By doing this, it can be seen if the models learned to use similar ways of referring to objects as humans do, or if they rely on different approaches.
 
+\cmtDK[inline]{discuss training/epochs/batches, vocab size, message length, gs temperature}
+
 \subsection{Object identification}
 \subsubsection*{Setup}
 
+The object identification game is set up as a discrimination game.
 In a discrimination game, the agents are presented with two or more images, one of these being the target image.
 The sender needs to communicate this target image to the receiver by discriminating it from the other distractor images.
 The receiver then needs to decide based on the message, which of the images is the target image.
@@ -56,39 +59,38 @@ Opposed to that in this research, the agents are tasked to discriminate objects 
 It is therefore assumed that the sender will communicate these discriminative attributes.
 For that reason, the sender is allowed to generate sequences as a message.
 
-Both 'Dale' datasets are used to train the agents in this mode.
-Similarly to the bounding box classifier, bounding boxes around each of the objects are extracted and fed to the game.
-As in \citep{Lazaridou2017}, the sender receives the bounding box of the target object as the first image, while the rest of the bounding boxes are shuffled.
-% SD: Here it does not receive a boundig box of an object as in Lazaridou. They use whole images, don't they?
-% DK: TODO
-The sender is assumed to learn which of the input images is the target images by this approach.
-The receiver receives the images in completely shuffled order.
+The data is prepared in the same way as for the single model object identification task in section \ref{sec:object-identification}.
+Bounding boxes of all objects in the scene are extracted and preprocessed to be used for the feature extractors.
+Accordingly, also the models from the single model tasks serve as basis for the object identification task.
+The sender uses the architecture of the model described in section \ref{sec:referring_expression_generation} apart from the final LSTM.
+Instead, it will use the LSTM with the hidden size $h_s$ included in the \emph{EGG} framework to produce a message.
+Based on the results from the single model object identifiers, the image embedding size $e_s$ is fixed to 100.
+The bounding box of the target object is passed first, the remaining are shuffled.
 
-\begin{figure}[h]
+The receiver instead uses the architecture of the single model object identifier, described in section \ref{sec:object-identification}.
+Similarly to the sender, the LSTM of the \emph{EGG} framework with the hidden size $h_e$ is used to encode the sender's message instead of the one-hot encoded attributes in the single model.
+The hidden state of the LSTM is projected to the embedding size $e_r=500$ with a linear layer, based on the results in the previous experiments.
+As before the dot product between the embedded message and the encoded image is calculated to let the model point towards one of the bounding boxes.
+Opposed to the sender, the receiver is shown all bounding boxes in shuffled order.
+Figure \ref{fig:discriminator_architecture} shows, how the sender and the receiver of the discriminator are built up.
+
+\begin{figure}[ht]
     \centering
     \includegraphics[width=.8\linewidth]{figures/arch_discriminator.png}
     \caption{Sender and receiver architectures in the discrimination game}
     \label{fig:discriminator_architecture}
 \end{figure}
 
-Figure \ref{fig:discriminator_architecture} shows, how the sender and the receiver of the discriminator are built up.
-For the sender, the images are passed through a feature extractor and a following linear layer that reduces the dimensions to an embedding size $e_s$.
-All embedded images are concatenated and passed through another linear layer to reduce the dimensions to the hidden size $h_s$.
-This is then used as the initial state of the encoder LSTM in the sender wrapper.
-% SD: Deatils about the layers, their parameters. More explanatory figure caption.
-% DK: TODO
-
-The receiver also encodes all images using a feature extractor with a following linear layer, reducing it to $e_r$.
-The sequence, received by the sender is the input for its decoder LSTM, where the hidden state with a dimension of $h_r$ is randomly initialized.
-As mentioned above, the receiver combines this image representation with the hidden state of each symbol separately.
-This is done by passing the hidden state through a linear layer to scale its dimensions to the same $e_r$.
-This allows the calculation of the dot product between it and the image representation.
-If the message describes an object well, the resulting dot product should be higher.
-The receiver then `points' to one of the images by applying the \emph{softmax} function over the results of the dot products.
-The loss is calculated using the NLL-loss.
-
-During the experiments, five variables are adjusted to compare their effects:
-(1) the image embedding size for the sender $e_s$, (2) the LSTM hidden size for the sender wrapper $h_s$, (3) the image/message embedding size for the receiver $e_r$, (4) the LSTM hidden size for the receiver wrapper $h_r$ and (5) the size of the vocabulary $|V|$.
+The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
+The loss is calculated using cross entropy.
+The following values for the variables are compared:
+\begin{itemize}
+    \item $h_s$: 100, 500, 1000
+    \item $h_r$: 10, 30, 50, 100, 500, 1000
+    \item $|V|$: 1, 10, 16, 50, 100
+    \item $n$: 1, 2, 3, 4, 5, 6
+\end{itemize}
+The language game is run on the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets.
 
 \subsection*{Results}
 Table \ref{tab:results_discriminator} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
@@ -110,7 +112,7 @@ The reason for this is to experiment, what is the optimal middle ground between 
 % SD: This discussion of dimensions could already be introduced when you discuss simple modles earlier as the same dimensions are used. This is a more an evaluation of represnetations rather than interaction and hence it would fit there.
 % DK: TODO
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \begin{tabular}{ccccc|cc|cc|cc}
         \toprule
@@ -172,24 +174,29 @@ Therefore, the models need to learn more combinations of symbols in order to att
 % SD: We would need to show that the messages in Dale-2 are shorter than in Dale-5 to claim this.
 % DK: TODO
 
-\cmtDK{similarity to bounding box classifier}
+\cmtDK[inline]{similarity to bounding box classifier}
 
 \subsection{Referring expression generation}
+\label{sec:referring-expression-generation-game}
 \subsubsection*{Setup}
 
 In a next step, it is tested if the agents can learn to extract features of the objects together.
 For this, the receiver is tasked to describe the target object in natural language, while the sender needs to communicate, which object is the target.
 Again, the setup is asymmetrical: the sender receives the image and information, which of the objects in the image is the target object in form of a masked image.
 The receiver only sees the image without additional information.
-\cmtDK{human bias vs emergent language}
+\cmtDK[inline]{human bias vs emergent language}
 
-This setup is based on the single neural model described above.
-The target caption for each image is created using the GRE-algorithm of \citet{Dale1995}.
-% SD: The sender uses the incremental algorithm?
-% DK: TODO, QUESTION
-Since the results of the experiments show that the position of the padding doesn't have an effect on the final converging scores, the padding tokens are only prepended to the caption.
+For this experiment, the data is prepared in the same way as described in section \ref{sec:referring_expression_generation}.
+Since the position of the padding as well as the order of the words didn't have an effect on the results, the usual approach in natural generation task is used: padding tokens are appended and the referring expression is not reversed.
+Respectively, both agents are based on the models in these experiments.
+The sender uses the \emph{masked RE generator} with its LSTM replaced with the LSTM included in the \emph{EGG} framework, using the hidden size $h_s$.
+\cmtDK[inline]{fixed parameters}
+The receiver is built up similarly.
+The image is encoded in the same way, but afterwards it is concatenated with the decoded message, received be the sender with the hidden size $h_r$.
+The concatenated is reduced to $d=$ dimensions, based on the results of the previous experiments, and used as the initial state of the captioning LSTM.
+\cmtDK[inline]{fixed parameters}
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=.7\linewidth]{figures/arch_caption_generator_game.png}
     \caption{Simplified architecture of the caption generator game}
@@ -198,41 +205,29 @@ Since the results of the experiments show that the position of the padding doesn
     % DK: TODO
 \end{figure}
 
-The sender is built up of two image encoders, one encodes the original target image and one encodes the masked image.
-The image encoders are set up as described in \citep{Johnson2017}.
-A feature extractor extracts basic features of the images.
-Two following convolutional layers with a \emph{ReLU} function are trained to condense the most important information from the resulting matrices.
-A max pooling layer and a linear layer reduce the dimensions to 1024 dimensions.
-This size was found to have the best results during the experiments.
-% SD: Reference back to when you reported this?
-% DK: TODO
-The two resulting encoded images are flattened and concatenated.
-A final linear layer reduces this long vector to the hidden size of the message LSTM $h_s$, which is used as the initial hidden state of this LSTM.
-
-The receiver uses the same architecture to encode the original image as the sender.
-The resulting flattened vector is concatenated with the decoded message of hidden size $h_r$.
-This is then passed through a linear layer, again reducing it to 1024 dimensions and is then used as the initial state of the captioning LSTM.
-% SD: But receiver is not doing captioning? Is it incrementally identifying the objects as the sender's messages are coming in?
-% DK: TODO
 During training, the ground truth caption is used as the input to the LSTM using teacher forcing.
 % SD: I'm not sure how teacher forcing is implemented, see my earlier comment
 % DK: typo, teacher forcing is actually applied (done)
 When presented with test data, the LSTM always produces three tokens, by using its own predicted words as the input for the next step.
-The loss is calculated with cross entropy.
 
+The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
+The loss is calculated using cross entropy.
+The following values for the variables are compared:
+\begin{itemize}
+    \item $h_s$: 100, 500, 1000
+    \item $h_r$: 10, 30, 50, 100, 500, 1000
+    \item $|V|$: 1, 10, 16, 50, 100
+    \item $n$: 1, 2, 3, 4, 5, 6
+\end{itemize}
+\cmtDK[inline]{real values}
 Since the agents are trained to describe the target object discriminatively based on the described GRE-algorithm, they are trained on the 'Dale-2' and 'Dale-5' dataset.
 The 'Dale-5' should be again much harder to learn, since there are more objects that the agents need to discriminate the target object from.
 % SD: So the sender is generating descriptions following the GRE policy?
 % DK: TODO
-
-During the experiments, the following variables are adjusted, and the results are compared:
-(1) the vocabulary size $|V|$,
-(2) the LSTM hidden size of the sender wrapper $h_s$ and
-(3) the LSTM hidden size of the receiver wrapper $h_r$.
-The same metrics as in the pre-experiments are used to evaluate the results.
+The same metrics as in the section \ref{sec:referring_expression_generation} are used to evaluate the results.
 
 \subsubsection*{Results}
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \begin{tabular}{ccc|ccc|ccc}
         \toprule
@@ -291,40 +286,32 @@ This shows that a main challenge for the agents lies in grounding symbols in the
 
 \subsection{Reference resolution}
 \subsubsection*{Setup}
-% SD: But previously we have said that we are not going to study this game. But good that we have!
-% DK: where? (QUESTION)
-In the final experiments, it is tried to eliminate as much human knowledge as possible.
-% SD: Not true: human knowledge is still reflected in the way the environment is structured.
-% DK: TODO
-For that reason, the agents are tasked to only predict the location of the target object.
-This task is approached in two steps.
-In the first step the sender is still shown human knowledge in form of a description of the target object, since the previous experiments showed that the models were able to relate them to their own extracted features.
-% SD: I'm not following this
-% DK: TODO
-The receiver doesn't come in contact with any human knowledge, not as input nor as output.
-This approach acts as a sanity check if the agents are able to converge together on the correct target object coordinates.
-In the second step, the caption is also removed from the sender.
-Instead, a masked image points the sender towards the target object.
-In this setup, no human knowledge is explicitly present, that can bias the emerged language to form similarly to human language, except for the implicit information in the image itself.
-% SD: Which contains human knowledge!
-% DK: TODO
-With this, it can be analyzed, how the language between the agents emerges and which features or patterns are represented with symbols.
+In the final experiments, the agents are tasked to produced and understand referring expressions only based on the implicit human knowledge present in the scenes as for example the attributes of the objects.
+Opposed to the previous experiments, explicit human language information as human referring expressions or one-hot encoded attributes are avoided.
+By this, the agents can't just reuse these human referring expressions, but need to learn to generate them themselves during the language games just based on the visual input.
+This is done similarly to the single model reference resolution task, described in section \ref{sec:reference_resolution}.
+The agents are tasked to predict the center coordinates of the target object, after being presented with the complete scene.
+However, the agents, more specifically the sender needs to be pointed towards the target object.
+In the final setup, the \emph{masked reference resolution game}, this is done providing the sender with an additional masked visual input.
+However, this can prove to be a challenging task for the agents.
+For this reason, in an approach to reduce the complexity, for the \emph{RE reference resolution game} the sender is shown a human referring expression, generated with the incremental GRE algorithm instead of the additional masked image.
+This might lead to a heavy bias of the emerged language towards the human referring expressions and will be compared to the unbiased emerged language.
 
-The agents are both set up in the same way as the single neural model, predicting the target object's coordinates.
-The sender encodes the original image the same as in the previous paragraph.
-In the first setup, the description of the target object is encoded, using an LSTM.
-For this, an embedding with $emb_{descr}$ dimensions is learned to represent each word.
-These embeddings are the input for the LSTM.
-The final hidden state of $LSTM_{descr}$ dimensions is used as the representation of the whole description.
-The vocabulary that is used for the descriptions is based on 14 symbols, including the padding token.
-For the LSTM to learn a representation of each token as well as of the complete description, both $emb_{descr}$ and $LSTM_{descr}$ need to be smaller than the size of this vocabulary.
-Choosing a size of 10 for both variables proved to give good results in the experiments.
-In a next step, the image encoding and the final hidden state of the description are concatenated and passed through a linear layer to reduce the dimension to the hidden size $h_s$.
-The resulting vector is passed to the sender wrapper LSTM, to generate the message.
+The masked sender is the same as the \emph{RE generation sender}, described in section \ref{sec:referring-expression-generation-game}.
+The RE sender works similarly, but instead encodes the human referring expression with an LSTM.
+The final hidden state is concatenated with the encoded image.
+The resulting vector is reduced to the hidden size $h_s$ and used as the initial hidden state of the LSTM included in the \emph{EGG} framework to generate the message.
+\cmtDK[inline]{fixed variables}
+
+The receiver is the same in both setups and is based on the \emph{reference resolver} + referring expressions, described in section \ref{sec:reference_resolution}.
+Again, instead of the included LSTM, the receiver uses the \emph{EGG} LSTM with the hidden size $h_r$ to encode the message.
+The dimensions of the coordinate predictor are fixed to $c=$, based on the previous results.
+\cmtDK[inline]{fixed variables}
 % SD: Just thinking: would there be a more systematic way to compare all the models? Perhaps if you write the parameters in a table or a text that is parallel. Then you could simply say, modal A + these changes. It would be much clearer to the reader how all models are rerlated and it would be easier for the reader to follow.
 % DK: TODO
+The euclidean distance between the resulting prediction of the center point and the true center of the target object is calculated and the weights of both agents are adapted accordingly.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=.7\linewidth]{figures/arch_coordinate_predictor_game.png}
     \caption{Simplified architecture of the masked coordinate predictor game}
@@ -333,28 +320,21 @@ The resulting vector is passed to the sender wrapper LSTM, to generate the messa
     % DK: because it's a message sequence of discrete symbols (done)
 \end{figure}
 
-For the second approach, the masked image is passed only through a feature extractor.
-Both the resulting encoding of the masked image and the encoding of the original image are each passed through separate linear layer to adjust their dimensions to the same embedding size $e_s$.
-These embeddings are subsequently concatenated and reduced to the hidden size $h_s$ with a final linear layer.
 
-The receiver contains of two parts.
-First, the original image is encoded with an image encode of the same setup.
-This encoded image is flattened and concatenated with the final hidden state of the wrapper LSTM encoding the message received by the receiver.
-The resulting vector is the passed through the second part of the receiver, the predictor.
-This predictor contains of three linear layers, reducing the dimensions to 1024, 1024 and 2 respectively.
-A \emph{ReLU} function is applied in between.
-This setup is trained to combine the important information from both the image and the message of the sender.
-The euclidean distance between the resulting prediction of the center point and the true center of the target object is calculated and the weights of both agents are adapted accordingly.
+The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
+The loss is calculated using cross entropy.
+The following values for the variables are compared:
+\begin{itemize}
+    \item $h_s$: 100, 500, 1000
+    \item $h_r$: 10, 30, 50, 100, 500, 1000
+    \item $|V|$: 1, 10, 16, 50, 100
+    \item $n$: 1, 2, 3, 4, 5, 6
+\end{itemize}
+\cmtDK[inline]{real values}
 
-As in the pre-experiments, the agents are trained first the 'CLEVR single' dataset to understand if they are capable of predicting locations in an image together.
+As in section \ref{sec:reference_resolution}, the agents are trained first on the 'CLEVR single' dataset to understand if they are capable of predicting locations in an image together.
 In a next step, the 'Dale-2' and 'Dale-5' datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
-
-During the experiments, the effects of the following variables are compared:
-(1) the vocabulary size $|V|$,
-(2) the LSTM hidden size of the sender wrapper $h_s$,
-(3) the LSTM hidden size of the receiver wrapper $h_r$ and
-(4) the embedding size of the sender $e_s$.
-As before, the metrics to evaluate the results are the same as in the pre-experiments.
+The same metrics are used to evaluate the results.
 
 \subsection*{Results}
 In the final setup, the agents are tasked with communicating objects with fewer infused human knowledge.
@@ -374,7 +354,7 @@ Having a look at the transferred messages, it in fact shows that the receiver le
 % DK: it does it in the same way as the single model above (TODO)
 As in the experiment before, all communicated messages contain the same symbol independent of the input image.
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \begin{tabular}{ccc|ccc|ccc|ccc}
         \toprule
@@ -405,7 +385,7 @@ The differences of the mean distances are not very significant in this range, to
 % SD: I don't understand this
 % DK: TODO
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \begin{tabular}{cccc|ccc|ccc|ccc}
         \toprule
