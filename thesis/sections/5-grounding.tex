@@ -135,6 +135,36 @@ Table \ref{tab:results_bounding_box_classifier} lists the accuracies of the mode
     \label{tab:results_bounding_box_classifier}
 \end{table}
 
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|cc|cc}
+        \toprule
+                                        &                           & \multicolumn{2}{c}{\textbf{dale-2}} & \multicolumn{2}{c}{\textbf{dale-5}}                                               \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}
+        coordinate-classifier-dimension & image-embedding-dimension & \textbf{accuracy}                   & \textbf{mean test loss}             & \textbf{accuracy} & \textbf{mean test loss} \\\midrule
+        {1000}                          & {512}                     & {0.95}                              & {2.67}                              & {0.96}            & {10.57}                 \\
+        {1000}                          & {512}                     & {0.99}                              & {6.03}                              & {0.97}            & {9.12}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {8.60}                              & {0.94}            & {2.07}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {8.77}                              & {0.98}            & {3.61}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {8.71}                              & {0.96}            & {4.28}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {5.85}                              & {0.98}            & {12.24}                 \\
+        {1000}                          & {512}                     & {0.95}                              & {6.59}                              & {0.99}            & {9.20}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {5.85}                              & {0.98}            & {12.24}                 \\
+        {1000}                          & {512}                     & {0.98}                              & {8.01}                              & {1.00}            & {6.77}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {14.27}                             & {0.99}            & {9.97}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {8.71}                              & {0.96}            & {4.28}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {8.60}                              & {0.94}            & {2.07}                  \\
+        {1000}                          & {512}                     & {0.95}                              & {2.67}                              & {0.96}            & {10.57}                 \\
+        {1000}                          & {512}                     & {0.99}                              & {14.27}                             & {0.99}            & {9.97}                  \\
+        {1000}                          & {512}                     & {0.98}                              & {8.01}                              & {1.00}            & {6.77}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {6.03}                              & {0.97}            & {9.12}                  \\
+        {1000}                          & {512}                     & {0.99}                              & {8.77}                              & {0.98}            & {3.61}                  \\
+        {1000}                          & {512}                     & {0.95}                              & {6.59}                              & {0.99}            & {9.20}                  \\
+        \bottomrule
+    \end{tabular}
+    \caption{test}
+    \label{test}
+\end{table}
+
 The model achieves almost perfect accuracy on the 'Dale-2' dataset with 99\%.
 For both other datasets, the accuracy is slightly lower with 94\% and 93\% respectively, but still close to perfect, especially compared to the random baseline.
 First, this shows that the model is able to extract attribute features from the image and manages to combine them with the given information about the target object.
