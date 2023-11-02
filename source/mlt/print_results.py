@@ -26,13 +26,75 @@ def calculate_f1(run):
             / (run["word_by_word_precision"] + run["word_by_word_recall"])
         )
 
+    for attribute in ["shape", "size", "color"]:
+        if (
+            f"precision_{attribute}" in run.keys()
+            and f"recall_{attribute}" in run.keys()
+        ):
+            run[f"f1_{attribute}"] = (
+                (
+                    2
+                    * (run[f"precision_{attribute}"] * run[f"recall_{attribute}"])
+                    / (run[f"precision_{attribute}"] + run[f"recall_{attribute}"])
+                )
+                if run[f"precision_{attribute}"] + run[f"recall_{attribute}"] != 0
+                else float("nan")
+            )
+
+    return run
+
+
+def calculate_metrics_by_attribute(run):
+    attributes = {
+        "shape": ["sphere", "cube", "cylinder"],
+        "size": [
+            "large",
+            "small",
+        ],
+        "color": [
+            "gray",
+            "red",
+            "blue",
+            "green",
+            "brown",
+            "purple",
+            "cyan",
+            "yellow",
+        ],
+    }
+
+    for metric in ["precision", "recall", "accuracy"]:
+        for attribute, values in attributes.items():
+            for value in values:
+                if f"{metric}_by_word_{value}" not in run.keys():
+                    return run
+
+            run[f"{metric}_{attribute}"] = sum(
+                run[f"{metric}_by_word_{value}"] for value in values
+            ) / len(values)
+
     return run
 
 
 def calculate_metrics(run):
+    run = calculate_metrics_by_attribute(run)
     run = calculate_f1(run)
-
     return run
+
+
+def to_percent(number):
+    rounded = str(round(number * 100, 2)).replace(".", ",").rstrip("0").rstrip(",")
+    return rf"{rounded}\%"
+
+
+def to_number(number):
+    return rf"{str(round(number, 2)).rstrip('0.').replace('.', ',')}"
+
+
+metric_types = {
+    "%": to_percent,
+    "num": to_number,
+}
 
 
 if __name__ == "__main__":
@@ -55,6 +117,12 @@ if __name__ == "__main__":
         help="order of the chosen variables",
     )
     parser.add_argument(
+        "--metric_types",
+        nargs="+",
+        choices=metric_types.keys(),
+        help="type of the variable in order of --variables",
+    )
+    parser.add_argument(
         "--datasets",
         nargs="+",
         type=str,
@@ -62,8 +130,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    if len(args.variable_order) == 0:
+    if not args.variable_order:
         args.variable_order = range(len(args.variables))
+
     if len(args.variable_order) != len(args.variables):
         raise ValueError(
             f"Number of variables and orders don't match: {args.variable_order}, {args.variables}"
@@ -72,6 +141,7 @@ if __name__ == "__main__":
 
     experiments: list[Experiment] = []
     all_results = {}
+
     for folder in glob.glob(args.folder):
         folder_name = folder.split("/")[-1]
 
@@ -79,6 +149,10 @@ if __name__ == "__main__":
         match = re.search(pattern, folder_name)
         if match:
             dataset = match.group(1)
+
+            if dataset not in args.datasets:
+                continue
+
             variables = [int(var) for var in match.group(2).split("_") if var != ""]
             if len(variables) != len(args.variables):
                 raise ValueError(f"Number of Variables don't match: {folder_name}")
@@ -114,14 +188,42 @@ if __name__ == "__main__":
                     )
                 )
 
+    for index, folder in enumerate(
+        [experiment.folder_name for experiment in experiments]
+    ):
+        print(f"{index}: {folder}")
+    excluded_input = input("exclude folders (separated by comma, ranges with hyphen):")
+    if len(excluded_input) != 0:
+        excluded_indices = []
+        for index in excluded_input.split(","):
+            if "-" in index:
+                range_indices = index.split("-")
+                excluded_indices.extend(
+                    range(int(range_indices[0]), int(range_indices[1]) + 1)
+                )
+            else:
+                excluded_indices.append(int(index))
+
+        experiments = [
+            experiment
+            for index, experiment in enumerate(experiments)
+            if index not in excluded_indices
+        ]
+
     all_metrics = set(
         metric for experiment in experiments for metric in experiment.last_run.keys()
     )
     sorted_metrics = list(sorted(all_metrics))
-    print(list(enumerate(sorted_metrics)))
+    for index, metric in enumerate(sorted_metrics):
+        print(f"{index}: {metric}")
+    choice = input("choose important metrics (separated by comma):").split(",")
 
-    choice = input("choose important metrics (separated by comma):")
-    chosen_metrics = [sorted_metrics[int(c)] for c in choice.split(",")]
+    if not args.metric_types:
+        args.metric_types = ["%"] * len(choice)
+    chosen_metrics = {
+        sorted_metrics[int(c)]: metric_types[metric_type]
+        for c, metric_type in zip(choice, args.metric_types)
+    }
 
     all_datasets = args.datasets
     all_variables = set(args.variables[i] for i in args.variable_order)
@@ -163,10 +265,10 @@ if __name__ == "__main__":
 
         result_string = " & ".join(
             [
-                rf"{{{str(round(experiment.last_run[metric] * 100, 2)).rstrip('0.').replace('.', ',')}\%}}"
+                rf"{{{metric_type(experiment.last_run[metric])}}}"
                 for dataset in all_datasets
                 for experiment in variation_experiments
-                for metric in chosen_metrics
+                for metric, metric_type in chosen_metrics.items()
                 if experiment.dataset == dataset
             ]
         )
@@ -179,12 +281,12 @@ if __name__ == "__main__":
     \begin{{tabular}}{{{'c'*number_variables}{f"|{'c'*number_metrics}"*number_datasets}}}
         \toprule
         {' &' *number_variables}{dataset_header} \\  {cmidrule_header}
-        {' & '.join([args.variables[o].replace('_', '-') for o in args.variable_order])} {metric_header} \\\midrule
+        {' & '.join([args.variables[o] for o in args.variable_order])} {metric_header} \\\midrule
 {results_block}
         \bottomrule
     \end{{tabular}}
-    \caption{{test}}
-    \label{{test}}
+    \caption{{TODO: caption}}
+    \label{{TODO: label}}
 \end{{table}}"""
 
     print(latex_stub)
