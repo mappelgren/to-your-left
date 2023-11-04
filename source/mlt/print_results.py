@@ -123,6 +123,16 @@ class Run:
                 / (run["word_by_word_precision"] + run["word_by_word_recall"])
             )
 
+        if (
+            "precision_by_word_<pad>" in run.keys()
+            and "recall_by_word_<pad>" in run.keys()
+        ):
+            run["f1_<pad>"] = (
+                2
+                * (run["precision_by_word_<pad>"] * run["recall_by_word_<pad>"])
+                / (run["precision_by_word_<pad>"] + run["recall_by_word_<pad>"])
+            )
+
         for attribute in ["shape", "size", "color"]:
             if (
                 f"precision_{attribute}" in run.keys()
@@ -248,7 +258,7 @@ class SortedOutputProcessor(OutputProcessor):
             ]
             for experiment in sorted_experiments
         ]
-        print(tabulate(rows, headers, tablefmt="orgtbl"))
+        print(tabulate(rows, headers, tablefmt="rounded_outline"))
 
 
 class LatexOutputProcessor(OutputProcessor):
