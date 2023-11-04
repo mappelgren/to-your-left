@@ -752,7 +752,7 @@ class CoordinatePredictorDataset(Dataset, Persistable):
             )
             f.create_dataset(
                 "target_pixels",
-                data=torch.stack([sample.target_index for sample in self.samples]),
+                data=torch.stack([sample.target_pixels for sample in self.samples]),
             )
             f.create_dataset(
                 "attribute_tensor",
