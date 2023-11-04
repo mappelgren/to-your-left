@@ -266,7 +266,6 @@ if __name__ == "__main__":
     if args.bounding_boxes:
         scenes = sorted(os.listdir(args.scene_dir))
 
-        # TODO optimize performance
         max_number_objects = 0
         for scene_file in scenes:
             with open(
@@ -315,6 +314,7 @@ if __name__ == "__main__":
                     number_images = int(len(batch) / max_number_objects)
 
                     with torch.no_grad():
+                        # pylint: disable-next=not-callable
                         features = feature_extractor(torch.stack(batch)).cpu()
 
                     features_by_image = features.view(
@@ -352,6 +352,7 @@ if __name__ == "__main__":
 
                 if len(batch) == args.batch_size or image_index == len(images) - 1:
                     with torch.no_grad():
+                        # pylint: disable-next=not-callable
                         features = feature_extractor(torch.stack(batch)).cpu()
                     i_end = i_start + len(batch)
                     feature_dataset[i_start:i_end] = features

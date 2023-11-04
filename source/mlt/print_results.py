@@ -3,86 +3,14 @@ import glob
 import json
 import os
 import re
+
+# necessary for input()
+# pylint: disable-next=unused-import
+import readline
 from abc import abstractmethod
 from dataclasses import dataclass
 
 from tabulate import tabulate
-
-
-class Experiments:
-    def __init__(self, root_folder, datasets, variables, variable_order) -> None:
-        self.datasets = datasets
-        self.variables = variables
-        self.variable_order = variable_order
-
-        self.experiments: list[Experiment] = []
-        for folder in glob.glob(root_folder):
-            folder_name = folder.split("/")[-1]
-
-            dataset, experiment_variables = self._extract_information_from_folder(
-                folder_name
-            )
-            if dataset not in datasets:
-                continue
-
-            if len(experiment_variables) != len(variables):
-                raise ValueError(f"Number of Variables don't match: {folder_name}")
-            ordered_variables = tuple(experiment_variables[o] for o in variable_order)
-
-            run = Run(os.path.join(folder, "log.txt"))
-            if len(run.epochs) != 0:
-                self.experiments.append(
-                    Experiment(
-                        folder_name=folder_name,
-                        dataset=dataset,
-                        variables=ordered_variables,
-                        run=run,
-                    )
-                )
-
-    def _extract_information_from_folder(self, folder_name):
-        pattern = r"_([^_]+)((_\d+)*)$"
-        match = re.search(pattern, folder_name)
-        if match:
-            dataset = match.group(1)
-            experiment_variables = [
-                int(var) for var in match.group(2).split("_") if var != ""
-            ]
-
-        return dataset, experiment_variables
-
-    def _get_excluded_folders(self):
-        for index, folder in enumerate(
-            [experiment.folder_name for experiment in self.experiments]
-        ):
-            print(f"{index}: {folder}")
-        return input("exclude folders (separated by comma, ranges with hyphen):")
-
-    def exclude_folders(self):
-        excluded_folders = self._get_excluded_folders()
-
-        if len(excluded_folders) != 0:
-            excluded_indices = []
-            for index in excluded_folders.split(","):
-                if "-" in index:
-                    range_indices = index.split("-")
-                    excluded_indices.extend(
-                        range(int(range_indices[0]), int(range_indices[1]) + 1)
-                    )
-                else:
-                    excluded_indices.append(int(index))
-
-            self.experiments = [
-                experiment
-                for index, experiment in enumerate(self.experiments)
-                if index not in excluded_indices
-            ]
-
-    def __getitem__(self, index):
-        return self.experiments[index]
-
-    def __len__(self):
-        return len(self.experiments)
 
 
 class Run:
@@ -190,6 +118,90 @@ class Run:
         return set(self.last_epoch.keys())
 
 
+@dataclass
+class Experiment:
+    folder_name: str
+    dataset: str
+    variables: tuple
+    run: Run
+
+
+class Experiments:
+    def __init__(self, root_folder, datasets, variables, variable_order) -> None:
+        self.datasets = datasets
+        self.variables = variables
+        self.variable_order = variable_order
+
+        self.experiments: list[Experiment] = []
+        for folder in glob.glob(root_folder):
+            folder_name = folder.split("/")[-1]
+
+            dataset, experiment_variables = self._extract_information_from_folder(
+                folder_name
+            )
+            if dataset not in datasets:
+                continue
+
+            if len(experiment_variables) != len(variables):
+                raise ValueError(f"Number of Variables don't match: {folder_name}")
+            ordered_variables = tuple(experiment_variables[o] for o in variable_order)
+
+            run = Run(os.path.join(folder, "log.txt"))
+            if len(run.epochs) != 0:
+                self.experiments.append(
+                    Experiment(
+                        folder_name=folder_name,
+                        dataset=dataset,
+                        variables=ordered_variables,
+                        run=run,
+                    )
+                )
+
+    def _extract_information_from_folder(self, folder_name):
+        pattern = r"_([^_]+)((_\d+)*)$"
+        match = re.search(pattern, folder_name)
+        if match:
+            dataset = match.group(1)
+            experiment_variables = [
+                int(var) for var in match.group(2).split("_") if var != ""
+            ]
+
+        return dataset, experiment_variables
+
+    def _get_excluded_folders(self):
+        for index, folder in enumerate(
+            [experiment.folder_name for experiment in self.experiments]
+        ):
+            print(f"{index}: {folder}")
+        return input("exclude folders (separated by comma, ranges with hyphen):")
+
+    def exclude_folders(self):
+        excluded_folders = self._get_excluded_folders()
+
+        if len(excluded_folders) != 0:
+            excluded_indices = []
+            for index in excluded_folders.split(","):
+                if "-" in index:
+                    range_indices = index.split("-")
+                    excluded_indices.extend(
+                        range(int(range_indices[0]), int(range_indices[1]) + 1)
+                    )
+                else:
+                    excluded_indices.append(int(index))
+
+            self.experiments = [
+                experiment
+                for index, experiment in enumerate(self.experiments)
+                if index not in excluded_indices
+            ]
+
+    def __getitem__(self, index):
+        return self.experiments[index]
+
+    def __len__(self):
+        return len(self.experiments)
+
+
 class OutputProcessor:
     @classmethod
     def to_percent(cls, number):
@@ -200,7 +212,7 @@ class OutputProcessor:
     def to_number(cls, number):
         return rf"{str(round(number, 2)).rstrip('0.').replace('.', ',')}"
 
-    def choose_metrics(self, experiments, metric_types):
+    def choose_metrics(self, experiments):
         all_metrics = set(
             metric
             for experiment in experiments
@@ -211,8 +223,17 @@ class OutputProcessor:
             print(f"{index}: {metric}")
         choice = input("choose important metrics (separated by comma):").split(",")
 
-        if not metric_types:
-            metric_types = ["%"] * len(choice)
+        metric_types = [
+            metric_type
+            for metric_type in input("choose metric types [%, num] (default %):").split(
+                ","
+            )
+            if metric_type in METRIC_TYPES
+        ]
+        if len(metric_types) < len(choice):
+            metric_types.extend(["%"] * (len(choice) - len(metric_types)))
+        metric_types = metric_types[: len(choice)]
+
         return {
             sorted_metrics[int(c)]: METRIC_TYPES[metric_type]
             for c, metric_type in zip(choice, metric_types)
@@ -223,22 +244,34 @@ class OutputProcessor:
         ...
 
 
-METRIC_TYPES = {
-    "%": OutputProcessor.to_percent,
-    "num": OutputProcessor.to_number,
-}
-
-
 class SortedOutputProcessor(OutputProcessor):
-    def __init__(self, experiments: Experiments, metric_types) -> None:
+    def __init__(self, experiments: Experiments) -> None:
         self.experiments = experiments
-        self.chosen_metrics = self.choose_metrics(experiments, metric_types)
+        self.chosen_metrics = self.choose_metrics(experiments)
 
     def print(self):
+        metric_sort_order = [
+            order
+            for order in input(
+                "choose sort order for metrics [h, l] (default h):"
+            ).split(",")
+            if order in ["h", "l"]
+        ]
+        if len(metric_sort_order) < len(self.chosen_metrics):
+            metric_sort_order.extend(
+                ["h"] * (len(self.chosen_metrics) - len(metric_sort_order))
+            )
+
+        metric_sort_order = [
+            1 if order == "h" else -1
+            for order in metric_sort_order[: len(self.chosen_metrics)]
+        ]
+
         sorted_experiments = sorted(
             self.experiments.experiments,
             key=lambda experiment: [
-                experiment.run.last_epoch[metric] for metric in self.chosen_metrics
+                experiment.run.last_epoch[metric] * metric_sort_order[index]
+                for index, metric in enumerate(self.chosen_metrics)
             ],
             reverse=True,
         )
@@ -262,9 +295,9 @@ class SortedOutputProcessor(OutputProcessor):
 
 
 class LatexOutputProcessor(OutputProcessor):
-    def __init__(self, experiments: Experiments, metric_types) -> None:
+    def __init__(self, experiments: Experiments) -> None:
         self.experiments = experiments
-        self.chosen_metrics = self.choose_metrics(experiments, metric_types)
+        self.chosen_metrics = self.choose_metrics(experiments)
 
     def print(self):
         all_datasets = self.experiments.datasets
@@ -340,15 +373,16 @@ class LatexOutputProcessor(OutputProcessor):
         print(latex_stub)
 
 
-@dataclass
-class Experiment:
-    folder_name: str
-    dataset: str
-    variables: tuple
-    run: Run
-
-
-print_type = {"latex": LatexOutputProcessor, "sorted": SortedOutputProcessor}
+METRIC_TYPES = {
+    "%": OutputProcessor.to_percent,
+    "num": OutputProcessor.to_number,
+}
+# fmt: off
+PRINT_TYPES = {
+    "latex": LatexOutputProcessor,
+    "sorted": SortedOutputProcessor
+}
+# fmt: on
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -375,14 +409,8 @@ if __name__ == "__main__":
         help="order of the chosen variables",
     )
     parser.add_argument(
-        "--metric_types",
-        nargs="+",
-        choices=METRIC_TYPES.keys(),
-        help="type of the variable in order of --variables",
-    )
-    parser.add_argument(
         "--output",
-        choices=print_type.keys(),
+        choices=PRINT_TYPES.keys(),
         default="sorted",
         help="how the output should be printed",
     )
@@ -402,5 +430,5 @@ if __name__ == "__main__":
     )
     all_experiments.exclude_folders()
 
-    output_processor = print_type[args.output](all_experiments, args.metric_types)
+    output_processor = PRINT_TYPES[args.output](all_experiments)
     output_processor.print()

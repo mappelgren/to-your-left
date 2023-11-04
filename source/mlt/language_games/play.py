@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from time import gmtime, strftime
 from typing import Callable
 
-import torch
 from egg import core
 from mlt.feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
 from mlt.image_loader import FeatureImageLoader, ImageLoader

@@ -235,12 +235,22 @@ This should point the model towards which object to describe and discriminate fr
 For both setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
 8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
-The following values for the variables are compared:
-\begin{itemize}
-    \item $e$ (only for bounding boxes): 100, 500, 1000
-    \item $LSMT_o$: 100, 500, 1000
-    \item $LSTM_e$: 10, 15, 30
-\end{itemize}
+Table \ref{tab:variables-reference-expression-generation} shows which variables are compared for each model:
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lccc}
+        \toprule
+                                  & $e$                & $LSTM_o$           & $LSTM_e$       \\
+                                  & $[100, 500, 1000]$ & $[100, 500, 1000]$ & $[10, 15, 30]$ \\\midrule
+        bounding box RE generator & \times             & \times             & \times         \\
+        basic RE generator        & -                  & \times             & \times         \\
+        masked RE generator       & -                  & \times             & \times         \\
+        \bottomrule
+    \end{tabular}
+    \caption{Variables for each model where $e$ is the embedding dimension, $LSTM_e$ the embedding dimensions for tokens in the LSTM and $LSTM_o$ the output dimension of the LSTM}
+    \label{tab:variables-reference-expression-generation}
+\end{table}
 
 As already discussed before, this task can be interpreted as a classification task rather than a natural language generation task.
 The main reason for this is that the model is tasked to assign specific attributes to the target object instead of producing free text with a large vocabulary.

@@ -43,11 +43,7 @@ from mlt.preexperiments.test import (
     CoordinatePredictorTester,
     Tester,
 )
-from mlt.shared_models import (
-    BoundingBoxImageEncoder,
-    ClevrImageEncoder,
-    CoordinateClassifier,
-)
+from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
 from torch import nn, optim
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset, random_split
