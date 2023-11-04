@@ -628,6 +628,8 @@ class BoundingBoxCaptioningDataset(Dataset, Persistable):
                     [torch.from_numpy(n) for n in f["non_target_captions"]],
                 )
             ]
+
+            # pylint: disable-next=no-member
             captioner = pickle.loads(f.attrs["captioner"].tobytes())
 
         return cls(captioner, samples)
@@ -972,6 +974,7 @@ class CaptionGeneratorDataset(Dataset, Persistable):
                     [torch.from_numpy(c) for c in f["masked_image"]],
                 )
             ]
+            # pylint: disable-next=no-member
             captioner = pickle.loads(f.attrs["captioner"].tobytes())
 
         return cls(captioner, samples)
