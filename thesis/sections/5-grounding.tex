@@ -298,13 +298,13 @@ While the referring expression for the 'Dale-2' datasets are generally shorter, 
 Furthermore, the model needs to attend to many more locations in the image at the same time to find discriminating factors between those.
 
 \subsubsection*{Results}
-Table \ref{tab:results:bb-re-generator} shows the \textbf{overall accuracy}, \textbf{F1 scores} for each word and the \textbf{non-target accuracies} of the \emph{bounding box RE generator} when trained on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets.
+Table \ref{tab:results:bb-re-generator} shows the \emph{overall accuracy}, \emph{F1 scores} for each word and the \emph{non-target accuracies} of the \textbf{bounding box RE generator} when trained on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets.
 As can be seen, the overall accuracies, in other words perfect matches of the generated referring expression depend very much on the dataset.
 With the \emph{Dale-2} dataset, the model can achieve perfect matches in 99\% of the cases in its best configuration.
 Also the \emph{CLEVR color} dataset allows the model to predict the correct referring expression in 93\% of the samples.
 Opposed to that the model can only generate perfect referring expressions in 69\% of the samples of the \emph{Dale-5} dataset.
-Looking at the \textbf{non-target accuracy}, one of the problems can be identified for the \emph{CLEVR color} dataset.
-Summing the \textbf{non-target accuracy} and the \textbf{overall accuracy}, one gets the accuracy that any of the shown object was described independently if it was the target object.
+Looking at the \emph{non-target accuracy}, one of the problems can be identified for the \emph{CLEVR color} dataset.
+Summing the \emph{non-target accuracy} and the \emph{overall accuracy}, one gets the accuracy that any of the shown object was described independently if it was the target object.
 For the \emph{CLEVR color} dataset, this score lies at 96\% to 97\% in the best configurations, which means that the model described a shown object for almost all the samples.
 In 3\% to 4\% of the cases, the model only picked the wrong object to describe.
 This looks different for the \emph{Dale-5} dataset.
@@ -322,79 +322,95 @@ Indeed, the model achieves an accuracy of 69\% with all three tested embedding s
     \centering
     \begin{tabular}{ccc|ccc|ccc|ccc}
         \toprule
-               &          &          & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                                 \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
-        $e$    & $LSTM_o$ & $LSTM_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                              & \textbf{Acc.} & \textbf{F1}     & \textbf{NT}  & \textbf{Acc.} & \textbf{F1}   & \textbf{NT}  \\\midrule
-        {100}  & {100}    & {10}     & {97\%}                              & {97,5\%}                            & {1\%}                                    & {65\%}        & {88\%}          & {2\%}        & {92\%}        & {81\%}        & {3\%}        \\
-        {100}  & {100}    & {15}     & {97\%}                              & {98\%}                              & {0\%}                                    & {62\%}        & {86,47\%}       & {2\%}        & {92\%}        & {81\%}        & {4\%}        \\
-        {100}  & {100}    & {30}     & {98\%}                              & {98\%}                              & {1\%}                                    & {65\%}        & {87,99\%}       & {2\%}        & {92\%}        & {81\%}        & {4\%}        \\
-        {100}  & {500}    & {10}     & {98\%}                              & {98,5\%}                            & {0\%}                                    & {67\%}        & {88\%}          & {2\%}        & {93\%}        & {82\%}        & {4\%}        \\
-        {100}  & {500}    & {30}     & \textbf{99\%}                       & \textbf{99\%}                       & \textbf{0\%}                             & \textbf{69\%} & \textbf{89,5\%} & \textbf{2\%} & \textbf{93\%} & \textbf{82\%} & \textbf{3\%} \\
-        {100}  & {1000}   & {10}     & {98\%}                              & {98\%}                              & {0\%}                                    & {68\%}        & {88\%}          & {2\%}        & \textbf{93\%} & \textbf{82\%} & \textbf{3\%} \\
-        {500}  & {500}    & {10}     & \textbf{99\%}                       & \textbf{99\%}                       & \textbf{0\%}                             & {67\%}        & {88,99\%}       & {2\%}        & \textbf{93\%} & \textbf{82\%} & \textbf{3\%} \\
-        {500}  & {1000}   & {30}     & \textbf{99\%}                       & \textbf{99\%}                       & \textbf{0\%}                             & {69\%}        & {89\%}          & {2\%}        & {93\%}        & {81\%}        & {4\%}        \\
-        {1000} & {100}    & {10}     & {97\%}                              & {97,99\%}                           & {0\%}                                    & {59\%}        & {85,5\%}        & {2\%}        & {93\%}        & {81\%}        & {4\%}        \\
-        {1000} & {100}    & {30}     & {98\%}                              & {98,5\%}                            & {0\%}                                    & {61\%}        & {87\%}          & {2\%}        & {92\%}        & {81\%}        & {4\%}        \\
-        {1000} & {1000}   & {10}     & \textbf{99\%}                       & \textbf{99\%}                       & \textbf{0\%}                             & \textbf{69\%} & \textbf{89,5\%} & \textbf{2\%} & {93\%}        & {82\%}        & {4\%}        \\
-        {1000} & {1000}   & {15}     & {99\%}                              & {98,5\%}                            & {0\%}                                    & {68\%}        & {89\%}          & {2\%}        & {93\%}        & {81\%}        & {4\%}        \\
+               &          &          & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                               \\\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+        $e$    & $LSTM_o$ & $LSTM_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                              & \textbf{Acc.} & \textbf{F1}    & \textbf{NT} & \textbf{Acc.} & \textbf{F1}    & \textbf{NT} \\\midrule
+        {100}  & {100}    & {10}     & {97}                                & {97,67}                             & {1}                                      & {65}          & {88,17}        & {2}         & {92}          & {94,95}        & {3}         \\
+        {100}  & {100}    & {15}     & {97}                                & {97,77}                             & {0}                                      & {62}          & {86,51}        & {2}         & {92}          & {94,45}        & {4}         \\
+        {100}  & {100}    & {30}     & {98}                                & {97,81}                             & {1}                                      & {65}          & {87,97}        & {2}         & {92}          & {94,47}        & {4}         \\
+        {100}  & {500}    & {10}     & {98}                                & {98,16}                             & {0}                                      & {67}          & {88,13}        & {2}         & {93}          & {95,18}        & {4}         \\
+        {100}  & {500}    & {30}     & \textbf{99}                         & \textbf{98,57}                      & \textbf{0}                               & \textbf{69}   & \textbf{89,53} & \textbf{2}  & \textbf{93}   & \textbf{95,17} & \textbf{3}  \\
+        {100}  & {1000}   & {10}     & {98}                                & {98,28}                             & {0}                                      & {68}          & {88,23}        & {2}         & \textbf{93}   & \textbf{95,41} & \textbf{3}  \\
+        {500}  & {1000}   & {30}     & \textbf{99}                         & \textbf{98,85}                      & \textbf{0}                               & \textbf{69}   & \textbf{89,15} & \textbf{2}  & {93}          & {95,05}        & {4}         \\
+        {500}  & {500}    & {10}     & \textbf{99}                         & \textbf{98,71}                      & \textbf{0}                               & {67}          & {88,99}        & {2}         & \textbf{93}   & \textbf{95,4}  & \textbf{3}  \\
+        {1000} & {100}    & {10}     & {97}                                & {97,72}                             & {0}                                      & {59}          & {85,43}        & {2}         & {93}          & {95,04}        & {4}         \\
+        {1000} & {100}    & {30}     & {98}                                & {98,16}                             & {0}                                      & {61}          & {86,77}        & {2}         & {92}          & {94,68}        & {4}         \\
+        {1000} & {1000}   & {10}     & \textbf{99}                         & \textbf{98,95}                      & \textbf{0}                               & \textbf{69}   & \textbf{89,21} & \textbf{2}  & {93}          & {95,15}        & {4}         \\
+        {1000} & {1000}   & {15}     & {99}                                & {98,67}                             & {0}                                      & {68}          & {88,98}        & {2}         & {93}          & {95,01}        & {4}         \\
         \bottomrule
     \end{tabular}
-    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) of the bounding box caption generator after 30 epochs: $e$ are different embedding sizes, $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
+    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) in \% of the bounding box caption generator after 30 epochs: $e$ are different embedding sizes, $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
     \label{tab:results:bb-re-generator}
 \end{table}
 
-Tables \ref{tab:results:bb-re-generator_size-shape} and \ref{tab:results:bb-re-generator_color} give a more detailed insight in the results.
-They list accuracy, precision and recall metrics for each token for the best configuration of the model with $e=100$, $LSTM_o=500$ and $LSTM_e=30$.
+Tables \ref{tab:results:bb-re-generator_size-shape} and \ref{tab:results:bb-re-generator_color} give a more detailed insight in the results and especially what mistakes the model is making for both the \emph{Dale-5} and \emph{CLEVR color} datasets.
+They list \emph{precision} and \emph{recall} metrics for each token for the best configuration of the model with $e=100$, $LSTM_o=500$ and $LSTM_e=30$.
 The tokens are grouped by attribute and also show the metrics averaged over each of the attributes.
+Since the overall results for the \emph{Dale-2} dataset are already close to perfect, the focus for this analysis lies on the remaining two datasets.
 The metrics of the \emph{<pad>} token indicate if the model produced the correct length of the referring expression, in other words if it was able to determine which attributes are necessary to discriminate the target object from the distractors.
-For both \emph{Dale-2} and the \emph{CLEVR color}, the scores are prefect.
-Former follows the almost perfect \emph{overall accuracy} discussed before, while latter is also not surprising, because all referring expressions for the \emph{CLEVR color} dataset consist of two attributes, shape and color.
+For the \emph{CLEVR color} dataset, the scores are perfect.
+This is not surprising, because all referring expressions for the \emph{CLEVR color} dataset consist of exactly two attributes, shape and color, and the first generated token will always be the only \emph{<pad>} token in the referring expression (corresponding to the unspecified size).
 The \emph{<pad>} token is therefore easy to learn.
-For the \emph{Dale-5} dataset, the model struggles more, to predict the correct length of the referring expression.
+For the \emph{Dale-5} dataset, the model struggles more to predict the correct length of the referring expression.
+\cmtDK[inline]{why?}
 
+When looking at the tokens for the shape, it can be seen that the model is able to identify it very well across all datasets.
+The model predicts the correct shape for all samples using the \emph{CLEVR color} dataset, while both \emph{precision} and \emph{recall} lie around 98,3\% when using the \emph{Dale-5} dataset.
+Even though the score is almost perfect, the slight difference might stem from the fact that all distractors have the same shape in the first case, while distractors can be different in the second case.
+Consequently, the model is only exposed to one shape at a time for each sample, which might simplify its identification.
+
+For the color attribute, the metrics drop significantly for both \emph{Dale-5} and \emph{CLEVR color} to an average of around 93\%.
+Hereby, no meaningful difference can be seen across the datasets, but there are differences between the colors.
+Some colors are predicted with \emph{precision} and \emph{recall} around 95\% to 96\%, while others are only around 90\%.
+However, these differences are not reproducible across multiple runs and configurations.
+The best and worst predicted colors vary and no conclusions can be drawn which colors are easier to predict for the model.
+
+Finally, the size is the most difficult attribute to predict for the model.
+Apart from the \emph{CLEVR color} dataset, where a size never needs to be predicted and also is never predicted, the metrics for the prediction of size tokens are the lowest across all tokens.
+They are the only mistakes, the model makes, when exposed to the \emph{Dale-2} dataset and the average \emph{precision} lies around 23\% below the average of predictions of the color for the \emph{Dale-5} dataset, while the average \emph{recall} lies around 28,82\% below.
+The reason why the \emph{precision} is higher than the \emph{recall} is the \emph{<pad>} token, which is predicted very often instead of a token specifying the size.
+In fact, the opposite relationship is visible for the \emph{precision} and \emph{recall} for said token.
+The much higher absolute number of \emph{<pad>} tokens leads to a smaller relative difference of \%-points shown in the table.
+Again, no conclusion can be drawn if larger or smaller objects are easier to predict, since the results vary across runs and configurations.
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{r|c|cc|c|ccc|c|c}
+    \begin{tabular}{rr|cc|c|ccc|c|c}
         \toprule
-        \textbf{Dataset}                      & {Metric} & {small} & {large} & \textbf{size}   & {cube}  & {cylinder} & {sphere} & \textbf{shape}   & {<pad>} \\\midrule
-        \multirow{3}{*}{\textbf{Dale-2}}      & {Acc.}   & {98\%}  & {94\%}  & \textbf{96\%}   & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
-                                              & {Prec.}  & {99\%}  & {98\%}  & \textbf{98,5\%} & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
-                                              & {Rec.}   & {98\%}  & {94\%}  & \textbf{96\%}   & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\\midrule
-        \multirow{3}{*}{\textbf{Dale-5}}      & {Acc.}   & {62\%}  & {66\%}  & \textbf{64\%}   & {99\%}  & {98\%}     & {98\%}   & \textbf{98,33\%} & {85\%}  \\
-                                              & {Prec.}  & {70\%}  & {69\%}  & \textbf{69,5\%} & {98\%}  & {98\%}     & {98\%}   & \textbf{98\%}    & {82\%}  \\
-                                              & {Rec.}   & {62\%}  & {66\%}  & \textbf{64\%}   & {99\%}  & {98\%}     & {98\%}   & \textbf{98,33\%} & {85\%}  \\\midrule
-        \multirow{3}{*}{\textbf{CLEVR color}} & {Acc.}   & {-}     & {-}     & \textbf{-}      & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
-                                              & {Prec.}  & {-}     & {-}     & \textbf{-}      & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
-                                              & {Rec.}   & {-}     & {-}     & \textbf{-}      & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
+                                         &             & {small} & {large} & \textbf{size}  & {cube}  & {cylinder} & {sphere} & \textbf{shape} & {<pad>} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-2}} & {Precision} & {99,17} & {98,29} & \textbf{98,73} & {99,86} & {99,71}    & {99,67}  & \textbf{99,75} & {99,64} \\
+                                         & {Recall}    & {97,54} & {94,26} & \textbf{95,9}  & {100}   & {99,56}    & {99,67}  & \textbf{99,74} & {99,77} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-5}} & {Precision} & {69,65} & {69,21} & \textbf{69,43} & {98,19} & {98,32}    & {98,39}  & \textbf{98,3}  & {82,22} \\
+                                         & {Recall}    & {62,11} & {66,15} & \textbf{64,13} & {98,79} & {97,87}    & {98,25}  & \textbf{98,3}  & {84,59} \\\midrule
+        \multirowcell{2}[0pt][r]{\textbf{CLEVR}                                                                                                          \\\textbf{color}} & {Precision}  & {-}     & {-}     & \textbf{-}     & {100}   & {100}      & {100}    & \textbf{100}   & {100}   \\
+                                         & {Recall}    & {-}     & {-}     & \textbf{-}     & {100}   & {100}      & {100}    & \textbf{100}   & {100}   \\
         \bottomrule
     \end{tabular}
-    \caption{Accuracy, Precision and Recall for <pad>, size and shape tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. Columns \textbf{shape} and \textbf{size} show the average across all tokens of the respective attribute.}
+    \caption{Precision and Recall in \% for <pad>, size and shape tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The columns \textbf{shape} and \textbf{size} show the average across all tokens of the respective attribute.}
     \label{tab:results:bb-re-generator_size-shape}
 \end{table}
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{r|c|cccccccc|c}
+    \begin{tabular}{rr|cccccccc|c}
         \toprule
-        \textbf{Dataset}                      & {Metric} & {blue} & {brown} & {cyan} & {gray} & {green} & {purple} & {red}   & {yellow} & \textbf{color}   \\\midrule
-        \multirow{3}{*}{\textbf{Dale-2}}      & {Acc.}   & {98\%} & {100\%} & {99\%} & {97\%} & {97\%}  & {99\%}   & {100\%} & {99\%}   & \textbf{98,62\%} \\
-                                              & {Prec.}  & {95\%} & {99\%}  & {98\%} & {99\%} & {99\%}  & {99\%}   & {97\%}  & {100\%}  & \textbf{98,25\%} \\
-                                              & {Rec.}   & {98\%} & {100\%} & {99\%} & {97\%} & {97\%}  & {99\%}   & {100\%} & {99\%}   & \textbf{98,62\%} \\\midrule
-        \multirow{3}{*}{\textbf{Dale-5}}      & {Acc.}   & {92\%} & {90\%}  & {95\%} & {95\%} & {96\%}  & {92\%}   & {89\%}  & {95\%}   & \textbf{93\%}    \\
-                                              & {Prec.}  & {92\%} & {94\%}  & {89\%} & {89\%} & {93\%}  & {91\%}   & {97\%}  & {94\%}   & \textbf{92,38\%} \\
-                                              & {Rec.}   & {92\%} & {90\%}  & {95\%} & {95\%} & {96\%}  & {92\%}   & {89\%}  & {95\%}   & \textbf{93\%}    \\\midrule
-        \multirow{3}{*}{\textbf{CLEVR color}} & {Acc.}   & {93\%} & {92\%}  & {96\%} & {90\%} & {94\%}  & {91\%}   & {94\%}  & {92\%}   & \textbf{92,75\%} \\
-                                              & {Prec.}  & {93\%} & {92\%}  & {94\%} & {94\%} & {92\%}  & {91\%}   & {90\%}  & {95\%}   & \textbf{92,63\%} \\
-                                              & {Rec.}   & {93\%} & {92\%}  & {96\%} & {90\%} & {94\%}  & {91\%}   & {94\%}  & {92\%}   & \textbf{92,75\%} \\
+                                         &             & {blue}  & {brown} & {cyan}  & {gray}  & {green} & {purple} & {red}   & {yellow} & \textbf{color} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-2}} & {Precision} & {94,51} & {98,77} & {97,59} & {98,68} & {98,89} & {98,8}   & {97,47} & {100}    & \textbf{98,09} \\
+                                         & {Recall}    & {97,73} & {100}   & {98,78} & {97,4}  & {96,74} & {98,8}   & {100}   & {98,8}   & \textbf{98,53} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-5}} & {Precision} & {92,12} & {93,82} & {89,13} & {89,12} & {92,63} & {91,12}  & {97,24} & {94,36}  & \textbf{92,44} \\
+                                         & {Recall}    & {92,12} & {89,78} & {94,91} & {94,51} & {95,71} & {92,42}  & {89,34} & {94,85}  & \textbf{92,95} \\\midrule
+        \multirowcell{2}[0pt][r]{\textbf{CLEVR}                                                                                                           \\\textbf{color}} & {Precision}           & {93,46} & {92,37} & {94,47} & {93,86} & {92,04} & {91,13}  & {90,07} & {94,7}   & \textbf{92,76} \\
+                                         & {Recall}    & {92,75} & {92}    & {95,98} & {89,92} & {94,12} & {91,13}  & {94,23} & {91,91}  & \textbf{92,76} \\
 
 
 
 
         \bottomrule
     \end{tabular}
-    \caption{Accuracy, Precision and Recall for color tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The Column \textbf{color} shows the average across all colors.}
+    \caption{Precision and Recall in \% for color tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The column \textbf{color} shows the average across all colors.}
     \label{tab:results:bb-re-generator_color}
 \end{table}
+
+
 
 ResNet-3 produced the best results, when it was used as a feature extractor.
 The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very little in the following epochs.
@@ -432,6 +448,17 @@ The results are shown after 50 epochs, but the scores already start to converge 
     % DK: I only have accuracy scores at. Time? (QUESTION)
 \end{table}
 
+The approach, how the padding is produced and in which order the attributes are concatenated didn't have an effect on the described metrics.
+When the order was reversed and the padding appended, the model was converging slightly faster and reached the limit around two to three epochs earlier.
+The final peak stayed exactly the same and the effects were therefore not studied deeper.
+% SD: Earlier you say that you will only try one method but now you have tried both. Change earlier text; also do you have full performance figures for this setup to include?
+% DK: where? I can't find it. (QUESTION). Since they are the same (and are therefore not central in this study), i didn't inlcude them. (QUESTION)
+
+In conclusion, it can be said that the model is able to extract discriminative features from the shown bounding boxes and produce referring expressions.
+However, the result highly depends on the amount of distractors and the resulting need of more discriminative features to describe the target object.
+While the shape is easily identified, the model has bigger problems to identify the color and especially the size of the target object.
+
+
 The sum of the two columns for the \emph{accuracy} and the \emph{non-target-accuracy} adds to 97\%, when trained on the 'Dale-2' dataset.
 % SD: Not shown in Table 5
 % DK: sum of two columns (addressed; done)
@@ -464,11 +491,6 @@ This was the correct description of a distractor and because of the overlap of t
 % SD: Not in the table?
 % DK: no, because a result of one specific sample (done)
 
-The approach, how the padding is produced and in which order the attributes are concatenated didn't have an effect on the described metrics.
-When the order was reversed and the padding appended, the model was converging slightly faster and reached the limit around two to three epochs earlier.
-The final peak stayed exactly the same and the effects were therefore not studied deeper.
-% SD: Earlier you say that you will only try one method but now you have tried both. Change earlier text; also do you have full performance figures for this setup to include?
-% DK: where? I can't find it. (QUESTION). Since they are the same (and are therefore not central in this study), i didn't inlcude them. (QUESTION)
 
 There are two main possible explanations for the big difference between the two datasets.
 First, as already seen in the experiments before, the bigger number of distractors confuses the model more, where to focus on.

@@ -42,8 +42,8 @@ class CoordinatePredictorTester(Tester):
         return (
             json.dumps(
                 {
-                    "accuracy": f"{accuracy.compute():.2f}",
-                    "mean test loss": f"{mean.compute():.2f}",
+                    "accuracy": f"{accuracy.compute():.4f}",
+                    "mean test loss": f"{mean.compute():.4f}",
                 }
             ),
             test_outputs,
@@ -68,7 +68,7 @@ class BoundingBoxClassifierTester(Tester):
         return (
             json.dumps(
                 {
-                    "accuracy": f"{accuracy.compute():.2f}",
+                    "accuracy": f"{accuracy.compute():.4f}",
                 }
             ),
             test_outputs,
@@ -149,19 +149,19 @@ class CaptionGeneratorTester(Tester):
         logging.getLogger().setLevel(logging.WARNING)
 
         accuracy_by_word = {
-            word: round(accuracy.item(), 2)
+            word: round(accuracy.item(), 4)
             for word, accuracy in zip(
                 DaleCaptionAttributeEncoder.vocab, computed_class_accuracy
             )
         }
         precision_by_word = {
-            word: round(precision.item(), 2)
+            word: round(precision.item(), 4)
             for word, precision in zip(
                 DaleCaptionAttributeEncoder.vocab, computed_class_precisions
             )
         }
         recall_by_word = {
-            word: round(recall.item(), 2)
+            word: round(recall.item(), 4)
             for word, recall in zip(
                 DaleCaptionAttributeEncoder.vocab, computed_class_recall
             )
@@ -176,14 +176,14 @@ class CaptionGeneratorTester(Tester):
         return (
             json.dumps(
                 {
-                    "accuracy": f"{accuracy.compute():.2f}",
-                    "word_by_word_accuracy": f"{computed_accuracy:.2f}",
+                    "accuracy": f"{accuracy.compute():.4f}",
+                    "word_by_word_accuracy": f"{computed_accuracy:.4f}",
                     "accuracy_by_word": accuracy_by_word,
-                    "word_by_word_precision": f"{torch.mean(computed_class_precisions[included_indices]):.2f}",
+                    "word_by_word_precision": f"{torch.mean(computed_class_precisions[included_indices]):.4f}",
                     "precision_by_word": precision_by_word,
-                    "word_by_word_recall": f"{torch.mean(computed_class_recall[included_indices]):.2f}",
+                    "word_by_word_recall": f"{torch.mean(computed_class_recall[included_indices]):.4f}",
                     "recall_by_word": recall_by_word,
-                    "non_target_accuracy": f"{non_target_accuracy.compute():.2f}",
+                    "non_target_accuracy": f"{non_target_accuracy.compute():.4f}",
                 }
             ),
             test_outputs,
