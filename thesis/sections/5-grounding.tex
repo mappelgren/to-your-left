@@ -112,10 +112,7 @@ The 'Dale' datasets are directly comparable to each other for the similar setup 
 Especially interesting is the effect of the increasing the number of distractors and the growing number of attributes that are needed to discriminate the objects.
 
 \subsubsection*{Results}
-As expected, all baselines achieve a random accuracy for each of the datasets.
-The accuracy lies at 50\% for the 'Dale-2' dataset, 22\% for the 'Dale-5' dataset and 12\% for the 'CLEVR color' dataset.
-This changes however, when information about the target object is included.
-Table \ref{tab:results_bounding_box_classifier} lists the accuracies of the models' predictions after 10 epochs.
+Table \ref{tab:results:bounding_box_classifier} lists the accuracies of the models' predictions after 30 epochs for all three different datasets and different embedding sizes $e$.
 
 \begin{table}[ht]
     \centering
@@ -131,26 +128,32 @@ Table \ref{tab:results_bounding_box_classifier} lists the accuracies of the mode
         {1000} & \textbf{100\%}    & {94\%}            & \textbf{94\%}        \\
         \bottomrule
     \end{tabular}
-    \caption{Accuracy scores of the object identifier: $e$ are different embedding sizes}
-    \label{tab:results_bounding_box_classifier}
+    \caption{Accuracy scores of the object identifier after 30 epochs: $e$ are different embedding sizes}
+    \label{tab:results:bounding_box_classifier}
 \end{table}
 
-The model achieves almost perfect accuracy on the 'Dale-2' dataset with 99\%.
-For both other datasets, the accuracy is slightly lower with 94\% and 93\% respectively, but still close to perfect, especially compared to the random baseline.
-First, this shows that the model is able to extract attribute features from the image and manages to combine them with the given information about the target object.
-This worsens slightly, when more objects are introduced.
-More objects lead to more needed attributes to discriminate the objects from each other.
-The model is still able to extract and utilize these additional attributes and combine them with the given attribute encoding of the target object.
+The first trend that is visible is that fewer distractor increase the accuracy of the model.
+The model achieves almost perfect accuracy in all configurations for the \emph{Dale 2} dataset with only two objects.
+With five objects in the \emph{Dale-5} dataset, the accuracy drops to 95\% and with a maximum possible number of 10 objects in the \emph{CLEVR color} dataset the model only achieves 94\% in the best configuration.
+This is not very surprising, since the model has a higher chance of predicting a wrong object, given the random baselines of 50\%, 20\% and 10\%.
+Furthermore, when more objects are shown to the model, more attributes are needed to discriminate the target object from the distractor, since it is more likely that the distractors share attributes with the target object.
+The task is getting therefore more challenging.
+
+A second conclusion is that the model needs a certain embedding space, to represent the features of each image.
+Across all dataset, an embedding space of only 2 dimensions result in a much lower performance compared to the best configuration.
+Even though the model is still able to achieve an accuracy of 30\% to 50\% points over the random baseline, this shows that a bigger embedding size is beneficial to extract and represent the features of the objects.
+Between 50 and 1000 dimensions, the model performs the best and varies only by 1\% point, which may be due to different random initialization of the weights in the model.
+
+In conclusion, the model is able to learn to discriminate the objects based on the visual appearance.
 The model can generate these high results, even with its relatively simple architecture.
 In this architecture, the model doesn't compare the objects directly to each other, but each object is only associated with the attribute encodings.
 A more complex architecture, in which the model is additionally tasked to discriminate the objects directly from each other might even improve the results.
 % SD: The model is able to leatn to discriminate objects based on visual appearance.
-% DK: TODO
+% DK: (done)
 
 \subsection{Referring expression generation}
 \label{sec:referring_expression_generation}
 \subsubsection*{Setup}
-\cmtDK[inline]{new metrics}
 
 Opposed to the previous experiment, where the focus lied on extracting visual features, the model is now tasked to generate referring expressions.
 This is done in two setups.
@@ -295,10 +298,25 @@ While the referring expression for the 'Dale-2' datasets are generally shorter, 
 Furthermore, the model needs to attend to many more locations in the image at the same time to find discriminating factors between those.
 
 \subsubsection*{Results}
-In the next paragraphs, the results of the caption generator are discussed.
-Table \ref{tab:results_caption-generator} shows the different scores of the models when trained on 'Dale-2' and 'Dale-5'.
-ResNet-3 produced the best results, when it was used as a feature extractor.
-The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very little in the following epochs.
+Table \ref{tab:results:bb-re-generator} shows the \textbf{overall accuracy}, \textbf{F1 scores} for each word and the \textbf{non-target accuracies} of the \emph{bounding box RE generator} when trained on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets.
+As can be seen, the overall accuracies, in other words perfect matches of the generated referring expression depend very much on the dataset.
+With the \emph{Dale-2} dataset, the model can achieve perfect matches in 99\% of the cases in its best configuration.
+Also the \emph{CLEVR color} dataset allows the model to predict the correct referring expression in 93\% of the samples.
+Opposed to that the model can only generate perfect referring expressions in 69\% of the samples of the \emph{Dale-5} dataset.
+Looking at the \textbf{non-target accuracy}, one of the problems can be identified for the \emph{CLEVR color} dataset.
+Summing the \textbf{non-target accuracy} and the \textbf{overall accuracy}, one gets the accuracy that any of the shown object was described independently if it was the target object.
+For the \emph{CLEVR color} dataset, this score lies at 96\% to 97\% in the best configurations, which means that the model described a shown object for almost all the samples.
+In 3\% to 4\% of the cases, the model only picked the wrong object to describe.
+This looks different for the \emph{Dale-5} dataset.
+Here, the model describes only in 71\% of the cases one of the shown objects, 69\% the target object and 2\% a distractor.
+The model therefore struggles more with the correct generation of words than with choosing, which object to describe.
+
+When looking at the different configurations, in especially different values for $e$, $LSTM_o$ and $LSTM_e$, it can be seen that the results are not very different for the \emph{Dale-2} and \emph{CLEVR color} datasets.
+However, bigger effects can be identified for the \emph{Dale-5} dataset.
+Here, a low output dimension of the LSTM $LSTM_o$ tends to give lower scores.
+This especially enhanced, when also the embedding dimensions of the tokens $LSTM_e$ is low.
+Again, the image embedding size $e$ doesn't seem to have a big effect, when over 50 dimensions.
+Indeed, the model achieves an accuracy of 69\% with all three tested embedding sizes.
 
 \begin{table}[ht]
     \centering
@@ -320,10 +338,66 @@ The results are shown after 50 epochs, but the scores already start to converge 
         {1000} & {1000}   & {15}     & {99\%}                              & {98,5\%}                            & {0\%}                                    & {68\%}        & {89\%}          & {2\%}        & {93\%}        & {81\%}        & {4\%}        \\
         \bottomrule
     \end{tabular}
-    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) of the bounding box caption generator: $e$ are different embedding sizes, $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
-    \label{tab:results_bounding-box-caption-generator}
+    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) of the bounding box caption generator after 30 epochs: $e$ are different embedding sizes, $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
+    \label{tab:results:bb-re-generator}
 \end{table}
 
+Tables \ref{tab:results:bb-re-generator_size-shape} and \ref{tab:results:bb-re-generator_color} give a more detailed insight in the results.
+They list accuracy, precision and recall metrics for each token for the best configuration of the model with $e=100$, $LSTM_o=500$ and $LSTM_e=30$.
+The tokens are grouped by attribute and also show the metrics averaged over each of the attributes.
+The metrics of the \emph{<pad>} token indicate if the model produced the correct length of the referring expression, in other words if it was able to determine which attributes are necessary to discriminate the target object from the distractors.
+For both \emph{Dale-2} and the \emph{CLEVR color}, the scores are prefect.
+Former follows the almost perfect \emph{overall accuracy} discussed before, while latter is also not surprising, because all referring expressions for the \emph{CLEVR color} dataset consist of two attributes, shape and color.
+The \emph{<pad>} token is therefore easy to learn.
+For the \emph{Dale-5} dataset, the model struggles more, to predict the correct length of the referring expression.
+
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{r|c|cc|c|ccc|c|c}
+        \toprule
+        \textbf{Dataset}                      & {Metric} & {small} & {large} & \textbf{size}   & {cube}  & {cylinder} & {sphere} & \textbf{shape}   & {<pad>} \\\midrule
+        \multirow{3}{*}{\textbf{Dale-2}}      & {Acc.}   & {98\%}  & {94\%}  & \textbf{96\%}   & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
+                                              & {Prec.}  & {99\%}  & {98\%}  & \textbf{98,5\%} & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
+                                              & {Rec.}   & {98\%}  & {94\%}  & \textbf{96\%}   & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\\midrule
+        \multirow{3}{*}{\textbf{Dale-5}}      & {Acc.}   & {62\%}  & {66\%}  & \textbf{64\%}   & {99\%}  & {98\%}     & {98\%}   & \textbf{98,33\%} & {85\%}  \\
+                                              & {Prec.}  & {70\%}  & {69\%}  & \textbf{69,5\%} & {98\%}  & {98\%}     & {98\%}   & \textbf{98\%}    & {82\%}  \\
+                                              & {Rec.}   & {62\%}  & {66\%}  & \textbf{64\%}   & {99\%}  & {98\%}     & {98\%}   & \textbf{98,33\%} & {85\%}  \\\midrule
+        \multirow{3}{*}{\textbf{CLEVR color}} & {Acc.}   & {-}     & {-}     & \textbf{-}      & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
+                                              & {Prec.}  & {-}     & {-}     & \textbf{-}      & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
+                                              & {Rec.}   & {-}     & {-}     & \textbf{-}      & {100\%} & {100\%}    & {100\%}  & \textbf{100\%}   & {100\%} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Accuracy, Precision and Recall for <pad>, size and shape tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. Columns \textbf{shape} and \textbf{size} show the average across all tokens of the respective attribute.}
+    \label{tab:results:bb-re-generator_size-shape}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{r|c|cccccccc|c}
+        \toprule
+        \textbf{Dataset}                      & {Metric} & {blue} & {brown} & {cyan} & {gray} & {green} & {purple} & {red}   & {yellow} & \textbf{color}   \\\midrule
+        \multirow{3}{*}{\textbf{Dale-2}}      & {Acc.}   & {98\%} & {100\%} & {99\%} & {97\%} & {97\%}  & {99\%}   & {100\%} & {99\%}   & \textbf{98,62\%} \\
+                                              & {Prec.}  & {95\%} & {99\%}  & {98\%} & {99\%} & {99\%}  & {99\%}   & {97\%}  & {100\%}  & \textbf{98,25\%} \\
+                                              & {Rec.}   & {98\%} & {100\%} & {99\%} & {97\%} & {97\%}  & {99\%}   & {100\%} & {99\%}   & \textbf{98,62\%} \\\midrule
+        \multirow{3}{*}{\textbf{Dale-5}}      & {Acc.}   & {92\%} & {90\%}  & {95\%} & {95\%} & {96\%}  & {92\%}   & {89\%}  & {95\%}   & \textbf{93\%}    \\
+                                              & {Prec.}  & {92\%} & {94\%}  & {89\%} & {89\%} & {93\%}  & {91\%}   & {97\%}  & {94\%}   & \textbf{92,38\%} \\
+                                              & {Rec.}   & {92\%} & {90\%}  & {95\%} & {95\%} & {96\%}  & {92\%}   & {89\%}  & {95\%}   & \textbf{93\%}    \\\midrule
+        \multirow{3}{*}{\textbf{CLEVR color}} & {Acc.}   & {93\%} & {92\%}  & {96\%} & {90\%} & {94\%}  & {91\%}   & {94\%}  & {92\%}   & \textbf{92,75\%} \\
+                                              & {Prec.}  & {93\%} & {92\%}  & {94\%} & {94\%} & {92\%}  & {91\%}   & {90\%}  & {95\%}   & \textbf{92,63\%} \\
+                                              & {Rec.}   & {93\%} & {92\%}  & {96\%} & {90\%} & {94\%}  & {91\%}   & {94\%}  & {92\%}   & \textbf{92,75\%} \\
+
+
+
+
+        \bottomrule
+    \end{tabular}
+    \caption{Accuracy, Precision and Recall for color tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The Column \textbf{color} shows the average across all colors.}
+    \label{tab:results:bb-re-generator_color}
+\end{table}
+
+ResNet-3 produced the best results, when it was used as a feature extractor.
+The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very little in the following epochs.
 \begin{table}[ht]
     \centering
     \begin{tabular}{cc|ccc|ccc|ccc}
@@ -351,7 +425,7 @@ The results are shown after 50 epochs, but the scores already start to converge 
         \bottomrule
     \end{tabular}
     \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) of the masked caption generator: $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
-    \label{tab:results_masked-caption-generator}
+    \label{tab:results:masked-re-generator}
     % SD: Masking does not work but perhaps this is because you applied convolutional pre-trained filters rather than 0-1. It is harder to detect meaningful patterns since the targets will be smaller and more integrated with other objects.
     % DK: might be the case. in the last language game i use only a linear layer instead of convolutions, but it doesn't help. This however might also be due to other problems. Time? (QUESTION, future work)
     % SD: I would present these for individual classes.
