@@ -400,52 +400,10 @@ Again, no conclusion can be drawn if larger or smaller objects are easier to pre
                                          & {Recall}    & {92,12} & {89,78} & {94,91} & {94,51} & {95,71} & {92,42}  & {89,34} & {94,85}  & \textbf{92,95} \\\midrule
         \multirowcell{2}[0pt][r]{\textbf{CLEVR}                                                                                                           \\\textbf{color}} & {Precision}           & {93,46} & {92,37} & {94,47} & {93,86} & {92,04} & {91,13}  & {90,07} & {94,7}   & \textbf{92,76} \\
                                          & {Recall}    & {92,75} & {92}    & {95,98} & {89,92} & {94,12} & {91,13}  & {94,23} & {91,91}  & \textbf{92,76} \\
-
-
-
-
         \bottomrule
     \end{tabular}
     \caption{Precision and Recall in \% for color tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The column \textbf{color} shows the average across all colors.}
     \label{tab:results:bb-re-generator_color}
-\end{table}
-
-
-
-ResNet-3 produced the best results, when it was used as a feature extractor.
-The results are shown after 50 epochs, but the scores already start to converge after 20 epochs and changed only very little in the following epochs.
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{cc|ccc|ccc|ccc}
-        \toprule
-                 &          & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                         \\  \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
-        $LSTM_o$ & $LSTM_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                              & \textbf{Acc.} & \textbf{F1} & \textbf{NT} & \textbf{Acc.} & \textbf{F1} & \textbf{NT} \\\midrule
-        {100}    & {10}     & {81\%}                              & {75,95\%}                           & {9\%}                                    & {21\%}        & {57\%}      & {23\%}      & {16\%}        & {37\%}      & {31\%}      \\
-        {100}    & {15}     & {78\%}                              & {71,99\%}                           & {11\%}                                   & {17\%}        & {52,98\%}   & {25\%}      & {26\%}        & {43,49\%}   & {30\%}      \\
-        {100}    & {30}     & {83\%}                              & {78,99\%}                           & {7\%}                                    & {19\%}        & {54,46\%}   & {24\%}      & {29\%}        & {45,49\%}   & {26\%}      \\
-        {500}    & {10}     & {83\%}                              & {79,95\%}                           & {6\%}                                    & {27\%}        & {61,98\%}   & {16\%}      & {17\%}        & {38,49\%}   & {32\%}      \\
-        {500}    & {15}     & {83\%}                              & {79,5\%}                            & {7\%}                                    & {28\%}        & {63,5\%}    & {16\%}      & {21\%}        & {40\%}      & {31\%}      \\
-        {500}    & {30}     & {84\%}                              & {83,43\%}                           & {5\%}                                    & {30\%}        & {63,98\%}   & {17\%}      & {21\%}        & {40\%}      & {31\%}      \\
-        {1000}   & {10}     & {84\%}                              & {82,42\%}                           & {5\%}                                    & {31\%}        & {65,5\%}    & {13\%}      & {12\%}        & {32,12\%}   & {34\%}      \\
-        {1000}   & {15}     & {85\%}                              & {82,42\%}                           & {5\%}                                    & {31\%}        & {64,5\%}    & {16\%}      & {16\%}        & {37\%}      & {32\%}      \\
-        {1000}   & {30}     & {85\%}                              & {82,81\%}                           & {4\%}                                    & {31\%}        & {63,98\%}   & {17\%}      & {13\%}        & {36\%}      & {34\%}      \\
-        {1500}   & {10}     & {84\%}                              & {81,42\%}                           & {4\%}                                    & {33\%}        & {67,47\%}   & {14\%}      & {12\%}        & {33,43\%}   & {34\%}      \\
-        {1500}   & {15}     & {85\%}                              & {84,43\%}                           & {4\%}                                    & {35\%}        & {68,99\%}   & {12\%}      & {17\%}        & {38,49\%}   & {31\%}      \\
-        {1500}   & {30}     & {84\%}                              & {80,95\%}                           & {4\%}                                    & {36\%}        & {68,99\%}   & {15\%}      & {14\%}        & {36,97\%}   & {33\%}      \\
-        {2000}   & {10}     & {83\%}                              & {82,89\%}                           & {4\%}                                    & {36\%}        & {69\%}      & {13\%}      & {13\%}        & {36\%}      & {34\%}      \\
-        {2000}   & {15}     & {84\%}                              & {81,89\%}                           & {4\%}                                    & {34\%}        & {67\%}      & {14\%}      & {14\%}        & {33,31\%}   & {33\%}      \\
-        {2000}   & {30}     & {85\%}                              & {82,95\%}                           & {4\%}                                    & {32\%}        & {65,5\%}    & {16\%}      & {18\%}        & {39\%}      & {32\%}      \\
-        {3000}   & {10}     & {82\%}                              & {79,89\%}                           & {4\%}                                    & {34\%}        & {68\%}      & {12\%}      & {12\%}        & {32,31\%}   & {34\%}      \\
-        {3000}   & {15}     & {85\%}                              & {81,89\%}                           & {4\%}                                    & {32\%}        & {65,5\%}    & {15\%}      & {13\%}        & {32,73\%}   & {35\%}      \\
-        {3000}   & {30}     & {83\%}                              & {80,89\%}                           & {3\%}                                    & {30\%}        & {63,5\%}    & {16\%}      & {12\%}        & {32,73\%}   & {34\%}      \\
-        \bottomrule
-    \end{tabular}
-    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) of the masked caption generator: $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
-    \label{tab:results:masked-re-generator}
-    % SD: Masking does not work but perhaps this is because you applied convolutional pre-trained filters rather than 0-1. It is harder to detect meaningful patterns since the targets will be smaller and more integrated with other objects.
-    % DK: might be the case. in the last language game i use only a linear layer instead of convolutions, but it doesn't help. This however might also be due to other problems. Time? (QUESTION, future work)
-    % SD: I would present these for individual classes.
-    % DK: I only have accuracy scores at. Time? (QUESTION)
 \end{table}
 
 The approach, how the padding is produced and in which order the attributes are concatenated didn't have an effect on the described metrics.
@@ -458,43 +416,115 @@ In conclusion, it can be said that the model is able to extract discriminative f
 However, the result highly depends on the amount of distractors and the resulting need of more discriminative features to describe the target object.
 While the shape is easily identified, the model has bigger problems to identify the color and especially the size of the target object.
 
+In the following paragraphs, the results of the \textbf{basic RE generator} as well as the \textbf{masked RE generator} are evaluated.
+Table \ref{tab:results:masked-re-generator} shows the results for the \emph{masked RE generator} after 30 epochs.
+Compared to the \emph{bounding box RE generator}, the task differs substantially.
+Instead of bounding boxes, the model is shown the image of the whole scene.
+Additionally to extracting features of the target object and distractors separately, the model is now tasked to extract these at once for all objects.
+Furthermore, it needs to learn which of the objects is the target object by combining the image with the masked image.
 
-The sum of the two columns for the \emph{accuracy} and the \emph{non-target-accuracy} adds to 97\%, when trained on the 'Dale-2' dataset.
-% SD: Not shown in Table 5
-% DK: sum of two columns (addressed; done)
-This means that the models produce almost always correct descriptions of one of the objects in the image.
-Moreover, these descriptions are also efficient in the sense that they follow the GRE-algorithm of \citet{Dale1995} and only use necessary discriminative attributes.
-Features of both objects are therefore extracted perfectly and associated with the vocabulary.
-% SD: But this is no-surprise since we have fixed the slots.
-% DK: but this applies to all padding methods. (done)
-As expected, the model has difficulties to decide, which of both objects is the target object, since no information is passed to the model.
-With 48\% of the images describing the target object and 49\% of the images describing the distractor, the model uses a random guess.
-This changes, when also the masked image is presented to the model.
-Then, the accuracy for the target object rises with 72\% well above chance.
-Still, the wrong descriptions describe almost every time the distractor object.
-This indicates that the problem doesn't lie in extracting features of objects, but only in deciding which object in the image to describe.
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|ccc|ccc|ccc}
+        \toprule
+                  &           & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                               \\  \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+        $LSTM_o$ & $LSTM_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                              & \textbf{Acc.} & \textbf{F1}    & \textbf{NT} & \textbf{Acc.} & \textbf{F1}    & \textbf{NT} \\\midrule
+        {100}     & {10}      & {81}                                & {76,16}                             & {9}                                      & {21}          & {57,07}        & {23}        & {16}          & {43,69}        & {31}        \\
+        {100}     & {15}      & {78}                                & {72,06}                             & {11}                                     & {17}          & {53,29}        & {25}        & {26}          & {50,87}        & {30}        \\
+        {100}     & {30}      & {83}                                & {78,76}                             & {7}                                      & {19}          & {54,91}        & {24}        & \textbf{29}   & \textbf{53,37} & \textbf{26} \\
+        {500}     & {10}      & {83}                                & {79,78}                             & {6}                                      & {27}          & {62,05}        & {16}        & {17}          & {44,93}        & {32}        \\
+        {500}     & {15}      & {83}                                & {79,75}                             & {7}                                      & {28}          & {63,78}        & {16}        & {21}          & {47,08}        & {31}        \\
+        {500}     & {30}      & {84}                                & {83,03}                             & {5}                                      & {30}          & {64,36}        & {17}        & {21}          & {40}           & {31}        \\
+        {1000}    & {10}      & {84}                                & {82,2}                              & {5}                                      & {31}          & {65,58}        & {13}        & {12}          & {37,67}        & {34}        \\
+        {1000}    & {15}      & {85}                                & {82,62}                             & {5}                                      & {31}          & {64,28}        & {16}        & {16}          & {43,27}        & {32}        \\
+        {1000}    & {30}      & {85}                                & {83,13}                             & {4}                                      & {31}          & {64,06}        & {17}        & {13}          & {41,79}        & {34}        \\
+        {1500}    & {10}      & {84}                                & {81,27}                             & {4}                                      & {33}          & {67,5}         & {14}        & {12}          & {39,04}        & {34}        \\
+        {1500}    & {15}      & \textbf{85}                         & \textbf{84,11}                      & \textbf{4}                               & {35}          & {69,05}        & {12}        & {17}          & {44,98}        & {31}        \\
+        {1500}    & {30}      & {84}                                & {80,93}                             & {4}                                      & \textbf{36}   & \textbf{68,97} & \textbf{15} & {14}          & {42,99}        & {33}        \\
+        {2000}    & {10}      & {83}                                & {82,69}                             & {4}                                      & {36}          & {69,11}        & {13}        & {13}          & {41,85}        & {34}        \\
+        {2000}    & {15}      & {84}                                & {81,95}                             & {4}                                      & {34}          & {66,94}        & {14}        & {14}          & {38,79}        & {33}        \\
+        {2000}    & {30}      & {85}                                & {82,8}                              & {4}                                      & {32}          & {65,52}        & {16}        & {18}          & {45,41}        & {32}        \\
+        {3000}    & {10}      & {82}                                & {79,83}                             & {4}                                      & {34}          & {67,61}        & {12}        & {12}          & {38}           & {34}        \\
+        {3000}    & {15}      & {85}                                & {81,8}                              & {4}                                      & {32}          & {65,64}        & {15}        & {13}          & {38,52}        & {35}        \\
+        {3000}    & {30}      & {83}                                & {80,6}                              & {3}                                      & {30}          & {63,5}         & {16}        & {12}          & {38,45}        & {34}        \\
+        \bottomrule
+    \end{tabular}
+    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) in \% of the masked caption generator: $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
+    \label{tab:results:masked-re-generator}
+    % SD: Masking does not work but perhaps this is because you applied convolutional pre-trained filters rather than 0-1. It is harder to detect meaningful patterns since the targets will be smaller and more integrated with other objects.
+    % DK: might be the case. in the last language game i use only a linear layer instead of convolutions, but it doesn't help. This however might also be due to other problems. Time? (QUESTION, future work)
+    % SD: I would present these for individual classes.
+    % DK: I only have accuracy scores at. Time? (QUESTION)
+\end{table}
 
-When the model is trained on the 'Dale-5' dataset, the results are much worse.
-Now, without masking only in 61\% of the images, the model describes any of the objects in the image, whether it is the target object or a distractor.
-% SD: ?
-% DK: added subclause (done)
-With 21\% of these descriptions being a description of the target object, the model again uses a random guess.
-Interestingly, passing the masked image to the model doesn't help it to identify the correct object.
-The accuracy stays at the same value.
-In contrast, the non-target accuracy is increased by 5\% points.
-The model is more likely to identify a wrong object.
-Furthermore, the word-by-word accuracy increases from 45\% to 54\%.
-This increase is likely due to the fact that the description of the target object often shares some attributes with distractor objects.
-For instance a sample with a target object being a \emph{small red cube} was identified as a \emph{<pad> <pad> cube} when the model didn't receive the masked image.
-When also the masked image is passed to the model, it generates the description \emph{small blue cube}.
-This was the correct description of a distractor and because of the overlap of the attributes, the word-by-word accuracy increased from 33\% to 66\%.
+Consequently, the results are much less accurate.
+This applies to all datasets, even though it is most apparent for the \emph{CLEVR color} dataset.
+While the model still achieves 85\% \emph{overall accuracy} in its best configuration, for the \emph{Dale-2} dataset, the model only reaches 36\% for the \emph{Dale-5} dataset and 29\% for the \emph{CLEVR color} dataset.
+However, these scores are all well above the random baselines of 50\%, 20\% and 10\% respectively.
+Moreover, the referring expression generated for the \emph{Dale-2} dataset are also efficient in the sense that they follow the GRE-algorithm of \citet{Dale1995} and only use necessary discriminative attributes.
+Features of both target object and distractor are therefore extracted and associated with the vocabulary.
+Striking in these results is also the \emph{non-target accuracy}, which is much higher than for the \emph{bounding box RE generator}.
+For the \emph{Dale-2} dataset, it arrives at 11\% in one configuration, for the \emph{Dale-5} dataset, the model describes for at least 12\% of the samples a distractor, for one configuration even in over 25\% of the cases.
+The model is most uncertain, which object to describe when exposed to the \emph{CLEVR color} dataset, where in almost all configurations, it describes a distractor every third sample.
+This shows that the model struggles to learn, which of the objects in the scene is the target object, more specifically, to combine the whole image with the masked image.
+\cmtDK[inline]{compare to basic RE generator}
+Yet, the model is able to extract the attributes from the shown objects.
+This can be seen, when summing up the \emph{overall accuracy} and the \emph{non-target accuracy}.
+This number represents in how many cases any of the shown objects were described.
+For the \emph{Dale-2} dataset, this number lies at 90\% for the best configuration, at 51\% for the \emph{Dale-5} dataset and at 56\% for the \emph{CLEVR color} dataset.
+While being still lower than the same metric for the \emph{bounding box RE generator}, the model fares well in comparison for the \emph{Dale} datasets given the highly increased complexity of the task.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rr|cc|c|ccc|c|c}
+        \toprule
+                                         &             & {small} & {large} & \textbf{size}  & {cube}  & {cylinder} & {sphere} & \textbf{shape} & {<pad>} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-2}} & {Precision} & {68,63} & {76}    & \textbf{72,31} & {98,41} & {98,18}    & {98,92}  & \textbf{98,5}  & {94,77} \\
+                                         & {Recall}    & {30,17} & {34,55} & \textbf{32,36} & {98,7}  & {98,33}    & {98,47}  & \textbf{98,5}  & {98,64} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-5}} & {Precision} & {49,47} & {57,3}  & \textbf{53,38} & {87,09} & {83,26}    & {84,78}  & \textbf{85,04} & {64,99} \\
+                                         & {Recall}    & {24,67} & {26,7}  & \textbf{25,69} & {83,66} & {85,28}    & {86,03}  & \textbf{84,99} & {77,87} \\\midrule
+        \multirowcell{2}[0pt][r]{\textbf{CLEVR}                                                                                                          \\\textbf{color}} & {Precision}  & {-}     & {-}     & \textbf{-}     & {100} & {100} & {99,7} & \textbf{99,9} & {100}   \\
+                                         & {Recall}    & {-}     & {-}     & \textbf{-}     & {99,85} & {99,85}    & {100}    & \textbf{99,9}  & {100}   \\
+        \bottomrule
+    \end{tabular}
+    \caption{Precision and Recall in \% for <pad>, size and shape tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The columns \textbf{shape} and \textbf{size} show the average across all tokens of the respective attribute.}
+    \label{tab:results:bb-re-generator_size-shape}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{rr|cccccccc|c}
+        \toprule
+                                         &             & {blue}  & {brown} & {cyan}  & {gray}  & {green} & {purple} & {red}   & {yellow} & \textbf{color} \\\midrule
+        \multirow{2}{*}{\textbf{Dale-2}} & {Precision} & {88,89} & {85,9}  & {81,82} & {85,53} & {79,76} & {84,52}  & {87,76} & {87,36}  & \textbf{85,19} \\
+                                         & {Recall}    & {89,89} & {83,75} & {87,8}  & {79,27} & {93,06} & {76,34}  & {90,53} & {81,72}  & \textbf{85,3}  \\\midrule
+        \multirow{2}{*}{\textbf{Dale-5}} & {Precision} & {69,51} & {72,73} & {73,48} & {66,27} & {63,23} & {64,32}  & {67,98} & {70,76}  & \textbf{68,53} \\
+                                         & {Recall}    & {72,43} & {71,29} & {73,48} & {60,77} & {74,6}  & {74,87}  & {71,13} & {73,57}  & \textbf{71,52} \\\midrule
+        \multirowcell{2}[0pt][r]{\textbf{CLEVR}                                                                                                           \\\textbf{color}} & {Precision}           & {37,63} & {39,23} & {22,09} & {20,23} & {33,33} & {22,97} & {24,9} & {43,96} & \textbf{30,54} \\
+                                         & {Recall}    & {29,44} & {42,68} & {27,48} & {22,22} & {25,44} & {26,53}  & {26,23} & {37,14}  & \textbf{29,64} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Precision and Recall in \% for color tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The column \textbf{color} shows the average across all colors.}
+    \label{tab:results:bb-re-generator_color}
+\end{table}
+
+% With 21\% of these descriptions being a description of the target object, the model again uses a random guess.
+% Interestingly, passing the masked image to the model doesn't help it to identify the correct object.
+% The accuracy stays at the same value.
+% In contrast, the non-target accuracy is increased by 5\% points.
+% The model is more likely to identify a wrong object.
+% Furthermore, the word-by-word accuracy increases from 45\% to 54\%.
+% This increase is likely due to the fact that the description of the target object often shares some attributes with distractor objects.
+% For instance a sample with a target object being a \emph{small red cube} was identified as a \emph{<pad> <pad> cube} when the model didn't receive the masked image.
+% When also the masked image is passed to the model, it generates the description \emph{small blue cube}.
+% This was the correct description of a distractor and because of the overlap of the attributes, the word-by-word accuracy increased from 33\% to 66\%.
 % SD: Not in the table?
 % DK: no, because a result of one specific sample (done)
 
 
-There are two main possible explanations for the big difference between the two datasets.
-First, as already seen in the experiments before, the bigger number of distractors confuses the model more, where to focus on.
-In the 'Dale-2' dataset, there are only two possibilities, while the four distractors in the 'Dale-5' dataset give the model a bigger choice.
+There are two main explanations for the big difference between the datasets.
+First, as already seen in the previous experiments, a bigger number of distractors confuses the model more where to focus on.
+In the \emph{Dale-2} dataset, there are only two possibilities, while the four distractors in the \emph{Dale-5} dataset and up to nine distractors in the \emph{CLEVR color} give the model a bigger choice.
 % SD: But before you argued, rather pesimistically, that having distractors with the same attributes actaully contributes to greater performance as it is moire likely that the correct word is generated. I would only pose this as a very vague hypothesis to be tested, as you conclude now it is also the case that images with simialr distractors are more difficult to describe correctly. Hence, it is by no way given.
 % DK: TODO
 The second explanation lies in the used GRE-algorithm.
