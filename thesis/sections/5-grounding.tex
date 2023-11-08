@@ -417,7 +417,7 @@ However, the result highly depends on the amount of distractors and the resultin
 While the shape is easily identified, the model has bigger problems to identify the color and especially the size of the target object.
 
 In the following paragraphs, the results of the \textbf{basic RE generator} as well as the \textbf{masked RE generator} are evaluated.
-Table \ref{tab:results:masked-re-generator} shows the results for the \emph{masked RE generator} after 30 epochs.
+Table \ref{tab:results:masked-re-generator} shows the results for the \emph{masked RE generator} after 40 epochs.
 Compared to the \emph{bounding box RE generator}, the task differs substantially.
 Instead of bounding boxes, the model is shown the image of the whole scene.
 Additionally to extracting features of the target object and distractors separately, the model is now tasked to extract these at once for all objects.
@@ -427,29 +427,29 @@ Furthermore, it needs to learn which of the objects is the target object by comb
     \centering
     \begin{tabular}{cc|ccc|ccc|ccc}
         \toprule
-                  &           & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                               \\  \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+                 &          & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                               \\  \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
         $LSTM_o$ & $LSTM_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                              & \textbf{Acc.} & \textbf{F1}    & \textbf{NT} & \textbf{Acc.} & \textbf{F1}    & \textbf{NT} \\\midrule
-        {100}     & {10}      & {81}                                & {76,16}                             & {9}                                      & {21}          & {57,07}        & {23}        & {16}          & {43,69}        & {31}        \\
-        {100}     & {15}      & {78}                                & {72,06}                             & {11}                                     & {17}          & {53,29}        & {25}        & {26}          & {50,87}        & {30}        \\
-        {100}     & {30}      & {83}                                & {78,76}                             & {7}                                      & {19}          & {54,91}        & {24}        & \textbf{29}   & \textbf{53,37} & \textbf{26} \\
-        {500}     & {10}      & {83}                                & {79,78}                             & {6}                                      & {27}          & {62,05}        & {16}        & {17}          & {44,93}        & {32}        \\
-        {500}     & {15}      & {83}                                & {79,75}                             & {7}                                      & {28}          & {63,78}        & {16}        & {21}          & {47,08}        & {31}        \\
-        {500}     & {30}      & {84}                                & {83,03}                             & {5}                                      & {30}          & {64,36}        & {17}        & {21}          & {40}           & {31}        \\
-        {1000}    & {10}      & {84}                                & {82,2}                              & {5}                                      & {31}          & {65,58}        & {13}        & {12}          & {37,67}        & {34}        \\
-        {1000}    & {15}      & {85}                                & {82,62}                             & {5}                                      & {31}          & {64,28}        & {16}        & {16}          & {43,27}        & {32}        \\
-        {1000}    & {30}      & {85}                                & {83,13}                             & {4}                                      & {31}          & {64,06}        & {17}        & {13}          & {41,79}        & {34}        \\
-        {1500}    & {10}      & {84}                                & {81,27}                             & {4}                                      & {33}          & {67,5}         & {14}        & {12}          & {39,04}        & {34}        \\
-        {1500}    & {15}      & \textbf{85}                         & \textbf{84,11}                      & \textbf{4}                               & {35}          & {69,05}        & {12}        & {17}          & {44,98}        & {31}        \\
-        {1500}    & {30}      & {84}                                & {80,93}                             & {4}                                      & \textbf{36}   & \textbf{68,97} & \textbf{15} & {14}          & {42,99}        & {33}        \\
-        {2000}    & {10}      & {83}                                & {82,69}                             & {4}                                      & {36}          & {69,11}        & {13}        & {13}          & {41,85}        & {34}        \\
-        {2000}    & {15}      & {84}                                & {81,95}                             & {4}                                      & {34}          & {66,94}        & {14}        & {14}          & {38,79}        & {33}        \\
-        {2000}    & {30}      & {85}                                & {82,8}                              & {4}                                      & {32}          & {65,52}        & {16}        & {18}          & {45,41}        & {32}        \\
-        {3000}    & {10}      & {82}                                & {79,83}                             & {4}                                      & {34}          & {67,61}        & {12}        & {12}          & {38}           & {34}        \\
-        {3000}    & {15}      & {85}                                & {81,8}                              & {4}                                      & {32}          & {65,64}        & {15}        & {13}          & {38,52}        & {35}        \\
-        {3000}    & {30}      & {83}                                & {80,6}                              & {3}                                      & {30}          & {63,5}         & {16}        & {12}          & {38,45}        & {34}        \\
+        {100}    & {10}     & {81}                                & {76,16}                             & {9}                                      & {21}          & {57,07}        & {23}        & {16}          & {43,69}        & {31}        \\
+        {100}    & {15}     & {78}                                & {72,06}                             & {11}                                     & {17}          & {53,29}        & {25}        & {26}          & {50,87}        & {30}        \\
+        {100}    & {30}     & {83}                                & {78,76}                             & {7}                                      & {19}          & {54,91}        & {24}        & \textbf{29}   & \textbf{53,37} & \textbf{26} \\
+        {500}    & {10}     & {83}                                & {79,78}                             & {6}                                      & {27}          & {62,05}        & {16}        & {17}          & {44,93}        & {32}        \\
+        {500}    & {15}     & {83}                                & {79,75}                             & {7}                                      & {28}          & {63,78}        & {16}        & {21}          & {47,08}        & {31}        \\
+        {500}    & {30}     & {84}                                & {83,03}                             & {5}                                      & {30}          & {64,36}        & {17}        & {21}          & {40}           & {31}        \\
+        {1000}   & {10}     & {84}                                & {82,2}                              & {5}                                      & {31}          & {65,58}        & {13}        & {12}          & {37,67}        & {34}        \\
+        {1000}   & {15}     & {85}                                & {82,62}                             & {5}                                      & {31}          & {64,28}        & {16}        & {16}          & {43,27}        & {32}        \\
+        {1000}   & {30}     & {85}                                & {83,13}                             & {4}                                      & {31}          & {64,06}        & {17}        & {13}          & {41,79}        & {34}        \\
+        {1500}   & {10}     & {84}                                & {81,27}                             & {4}                                      & {33}          & {67,5}         & {14}        & {12}          & {39,04}        & {34}        \\
+        {1500}   & {15}     & \textbf{85}                         & \textbf{84,11}                      & \textbf{4}                               & {35}          & {69,05}        & {12}        & {17}          & {44,98}        & {31}        \\
+        {1500}   & {30}     & {84}                                & {80,93}                             & {4}                                      & {36}          & {68,97}        & {15}        & {14}          & {42,99}        & {33}        \\
+        {2000}   & {10}     & {83}                                & {82,69}                             & {4}                                      & \textbf{36}   & \textbf{69,11} & \textbf{13} & {13}          & {41,85}        & {34}        \\
+        {2000}   & {15}     & {84}                                & {81,95}                             & {4}                                      & {34}          & {66,94}        & {14}        & {14}          & {38,79}        & {33}        \\
+        {2000}   & {30}     & {85}                                & {82,8}                              & {4}                                      & {32}          & {65,52}        & {16}        & {18}          & {45,41}        & {32}        \\
+        {3000}   & {10}     & {82}                                & {79,83}                             & {4}                                      & {34}          & {67,61}        & {12}        & {12}          & {38}           & {34}        \\
+        {3000}   & {15}     & {85}                                & {81,8}                              & {4}                                      & {32}          & {65,64}        & {15}        & {13}          & {38,52}        & {35}        \\
+        {3000}   & {30}     & {83}                                & {80,6}                              & {3}                                      & {30}          & {63,5}         & {16}        & {12}          & {38,45}        & {34}        \\
         \bottomrule
     \end{tabular}
-    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) in \% of the masked caption generator: $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
+    \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) in \% of the masked caption generator after 40 epochs: $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
     \label{tab:results:masked-re-generator}
     % SD: Masking does not work but perhaps this is because you applied convolutional pre-trained filters rather than 0-1. It is harder to detect meaningful patterns since the targets will be smaller and more integrated with other objects.
     % DK: might be the case. in the last language game i use only a linear layer instead of convolutions, but it doesn't help. This however might also be due to other problems. Time? (QUESTION, future work)
@@ -474,6 +474,16 @@ This number represents in how many cases any of the shown objects were described
 For the \emph{Dale-2} dataset, this number lies at 90\% for the best configuration, at 51\% for the \emph{Dale-5} dataset and at 56\% for the \emph{CLEVR color} dataset.
 While being still lower than the same metric for the \emph{bounding box RE generator}, the model fares well in comparison for the \emph{Dale} datasets given the highly increased complexity of the task.
 
+Looking at the effects of the LSTM output size $LSTM_o$ and the LSTM embedding size $LSTM_e$, a difference between the \emph{Dale} datasets and the \emph{CLEVR color} dataset can be identified.
+A higher $LSTM_o$ tends to increase the performance of the model, when presented with the \emph{Dale} datasets until a size of 1500 to 2000 dimensions.
+When it is further increased the model starts to perform worse.
+Furthermore, with a low $LSTM_o$, the model is more likely to identify and describe a distractor, while a higher $LSTM_o$ helps the model to focus on the target object.
+The $LSTM_e$ however doesn't seem to have a big consistent effect on the results. With an $LSTM_o$ of around 1500 to 2000, the model seems to fare slightly better with higher $LSTM_e$ of 15 or 30 dimensions.
+For the \emph{CLEVR color} dataset, the results look different.
+Opposed to the former datasets, a lower $LSTM_o$ helps the model to describe the correct target object.
+On the other side, the \emph{non-target accuracy} stays relatively constant independently of the variables, in other words
+
+
 \begin{table}[ht]
     \centering
     \begin{tabular}{rr|cc|c|ccc|c|c}
@@ -487,8 +497,8 @@ While being still lower than the same metric for the \emph{bounding box RE gener
                                          & {Recall}    & {-}     & {-}     & \textbf{-}     & {99,85} & {99,85}    & {100}    & \textbf{99,9}  & {100}   \\
         \bottomrule
     \end{tabular}
-    \caption{Precision and Recall in \% for <pad>, size and shape tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The columns \textbf{shape} and \textbf{size} show the average across all tokens of the respective attribute.}
-    \label{tab:results:bb-re-generator_size-shape}
+    \caption{Precision and Recall in \% of <pad>, size and shape tokens in the best configuration for each dataset (marked in bold in Table \ref{tab:results:masked-re-generator}). The columns \textbf{shape} and \textbf{size} show the average across all tokens of the respective attribute.}
+    \label{tab:results:masked-re-generator_size-shape}
 \end{table}
 
 \begin{table}[ht]
@@ -504,8 +514,8 @@ While being still lower than the same metric for the \emph{bounding box RE gener
                                          & {Recall}    & {29,44} & {42,68} & {27,48} & {22,22} & {25,44} & {26,53}  & {26,23} & {37,14}  & \textbf{29,64} \\
         \bottomrule
     \end{tabular}
-    \caption{Precision and Recall in \% for color tokens with $e=100$, $LSTM_o=500$ and $LSTM_e=30$. The column \textbf{color} shows the average across all colors.}
-    \label{tab:results:bb-re-generator_color}
+    \caption{Precision and Recall in \% of color tokens in the best configuration for each dataset (marked in bold in Table \ref{tab:results:masked-re-generator}). The column \textbf{color} shows the average across all colors.}
+    \label{tab:results:masked-re-generator_color}
 \end{table}
 
 % With 21\% of these descriptions being a description of the target object, the model again uses a random guess.
