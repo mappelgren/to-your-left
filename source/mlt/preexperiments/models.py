@@ -296,6 +296,62 @@ class DaleAttributeCoordinatePredictor(nn.Module):
         return coordinates
 
 
+class MaskedDaleAttributeCoordinatePredictor(nn.Module):
+    """
+    Output:
+     - x and y coordinates of target object
+
+    Input:
+     - image
+     - attributes (shape, size, color)
+     - center coordinates of all objects
+    """
+
+    def __init__(
+        self,
+        vocab_size,
+        image_embedding_dimension,
+        embedding_dim,
+        encoder_out_dim,
+        image_encoder: ImageEncoder,
+        masked_image_encoder: MaskedImageEncoder,
+        coordinate_classifier: CoordinateClassifier,
+        *_args,
+        **_kwargs
+    ) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.masked_image_encoder = masked_image_encoder
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
+
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
+
+        self.coordinate_classifier = coordinate_classifier
+
+    def forward(self, data):
+        image, attribute_tensor, _, masked_image, *_ = data
+
+        encoded_image = self.image_encoder(image)
+        encoded_masked_image = self.masked_image_encoder(masked_image)
+        concatenated = torch.cat(
+            (encoded_image, encoded_masked_image),
+            dim=1,
+        )
+
+        reduced = self.reduction(concatenated)
+
+        embedded = self.embedding(attribute_tensor)
+        _, (hidden_state, _) = self.lstm(embedded)
+
+        concatenated = torch.cat((reduced, hidden_state.squeeze()), dim=1)
+        coordinates = self.coordinate_classifier(concatenated)
+
+        return coordinates
+
+
 class MaskedCoordinatePredictor(nn.Module):
     """
     Output:
