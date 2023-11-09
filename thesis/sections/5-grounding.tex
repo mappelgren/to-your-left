@@ -287,7 +287,8 @@ The same is done for \textbf{precision} and \textbf{recall}.
 With the \textbf{non-target accuracy}, we identify if the model described another object, which is not the target image.
 This is basically an inverted accuracy score; the lower the score, the better the model fares.
 By this it measures the false negative generated captions.
-For this we generated captions for all the non-target objects and distractors in the images using the GRE-algorithm.
+For this, referring generations are generated for all the non-target objects and distractors in the images using the GRE-algorithm.
+Importantly to notice is that the referring expressions may not uniquely identify a distractor, since multiple distractors with the same shape, color and size are allowed.
 If the generated description of the model describes an object that is not the target object, it gets assigned 100\%.
 If not, independently of describing the target object, no object, or one of the objects insufficiently, it gets assigned 0\%.
 Using this measure, we can get an overview if the model's problem lies in extracting and relating attributes or in understanding which of the presented objects is the target object.

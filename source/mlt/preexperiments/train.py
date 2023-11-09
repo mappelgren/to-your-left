@@ -29,6 +29,7 @@ from mlt.preexperiments.models import (
     DaleAttributeCoordinatePredictor,
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
+    MaskedDaleAttributeCoordinatePredictor,
 )
 from mlt.preexperiments.save import (
     BoundingBoxOutputProcessor,
@@ -148,6 +149,43 @@ models = {
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "image_embedding_dimension": 2048,
+            "coordinate_classifier": CoordinateClassifier,
+        },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "all_masked_dale_attribute_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={
+            "attribute_encoder": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.APPEND,
+                reversed_caption=False,
+            ),
+            "image_masker": AllObjectsImageMasker(),
+        },
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=MaskedDaleAttributeCoordinatePredictor,
+        model_args={
+            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
+            ),
+            "image_embedding_dimension": 4069,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
