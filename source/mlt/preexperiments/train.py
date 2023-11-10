@@ -538,9 +538,7 @@ if __name__ == "__main__":
     output_processor = model_name.output_processor(
         dataset=dataset, **model_name.output_processor_args
     )
-    model_saver = ModelSaver(
-        args.out_dir, args.model, args.dataset, args.save_appendix, output_processor
-    )
+
     tester = model_name.tester()
 
     model_args = model_name.model_args
@@ -610,6 +608,9 @@ if __name__ == "__main__":
         log.append(loss_string + "\n")
         log.append(str(metrics) + "\n")
 
+    model_saver = ModelSaver(
+        args.out_dir, args.model, args.dataset, args.save_appendix, output_processor
+    )
     if args.save_model:
         model_saver.save_model(model, f"{model.__class__.__name__}.pth")
     model_saver.save_log(log, "log.txt")

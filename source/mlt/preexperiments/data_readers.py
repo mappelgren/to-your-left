@@ -12,7 +12,7 @@ import h5py
 import numpy as np
 import torch
 from mlt.image_loader import ImageLoader
-from mlt.util import Persistable
+from mlt.util import Persistable, load_tensor
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -472,10 +472,10 @@ class BoundingBoxClassifierDataset(Dataset, Persistable):
                     )
                 )
                 for sample in zip(
-                    [torch.from_numpy(s) for s in f["bounding_boxes"]],
+                    [load_tensor(s) for s in f["bounding_boxes"]],
                     [str(i, "utf-8") for i in f["image_id"]],
-                    [torch.from_numpy(i) for i in f["target_index"]],
-                    [torch.from_numpy(a) for a in f["attribute_tensor"]],
+                    [load_tensor(t) for t in f["target_index"]],
+                    [load_tensor(a) for a in f["attribute_tensor"]],
                 )
             ]
 
@@ -622,10 +622,10 @@ class BoundingBoxCaptioningDataset(Dataset, Persistable):
                     )
                 )
                 for sample in zip(
-                    [torch.from_numpy(b) for b in f["bounding_boxes"]],
+                    [load_tensor(b) for b in f["bounding_boxes"]],
                     [str(i, "utf-8") for i in f["image_id"]],
-                    [torch.from_numpy(c) for c in f["caption"]],
-                    [torch.from_numpy(n) for n in f["non_target_captions"]],
+                    [load_tensor(c) for c in f["caption"]],
+                    [load_tensor(n) for n in f["non_target_captions"]],
                 )
             ]
 
@@ -792,12 +792,12 @@ class CoordinatePredictorDataset(Dataset, Persistable):
                     )
                 )
                 for sample in zip(
-                    [torch.from_numpy(b) for b in f["images"]],
+                    [load_tensor(b) for b in f["image"]],
                     [str(i, "utf-8") for i in f["image_id"]],
-                    [torch.from_numpy(c) for c in f["target_pixels"]],
-                    [torch.from_numpy(n) for n in f["attribute_tensor"]],
-                    [torch.from_numpy(c) for c in f["masked_image"]],
-                    [torch.from_numpy(n) for n in f["locations"]],
+                    [load_tensor(c) for c in f["target_pixels"]],
+                    [load_tensor(n) for n in f["attribute_tensor"]],
+                    [load_tensor(m) for m in f["masked_image"]],
+                    [load_tensor(l) for l in f["locations"]],
                 )
             ]
         return cls(samples)
@@ -967,11 +967,11 @@ class CaptionGeneratorDataset(Dataset, Persistable):
                     )
                 )
                 for sample in zip(
-                    [torch.from_numpy(b) for b in f["image"]],
+                    [load_tensor(b) for b in f["image"]],
                     [str(i, "utf-8") for i in f["image_id"]],
-                    [torch.from_numpy(c) for c in f["caption"]],
-                    [torch.from_numpy(n) for n in f["non_target_captions"]],
-                    [torch.from_numpy(c) for c in f["masked_image"]],
+                    [load_tensor(c) for c in f["caption"]],
+                    [load_tensor(n) for n in f["non_target_captions"]],
+                    [load_tensor(m) for m in f["masked_image"]],
                 )
             ]
             # pylint: disable-next=no-member

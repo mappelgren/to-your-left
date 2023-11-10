@@ -158,12 +158,12 @@ class Experiments:
                 )
 
     def _extract_information_from_folder(self, folder_name):
-        pattern = r"_([^_]+)((_\d+)*)$"
+        pattern = r"_([^_]+)((_[\de\-\.]+)*)$"
         match = re.search(pattern, folder_name)
         if match:
             dataset = match.group(1)
             experiment_variables = [
-                int(var) for var in match.group(2).split("_") if var != ""
+                float(var) for var in match.group(2).split("_") if var != ""
             ]
 
         return dataset, experiment_variables
