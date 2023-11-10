@@ -1,27 +1,60 @@
 \section{Introduction}
 \label{sec:introduction}
-\cmtDK[inline]{lead from grounding to referring expressions to language games}
-The study of emergent languages, in other words artificial languages created by agents to communicate and solve a goal are studied deeply in the recent years \citep{Kirby2002,Kirby2008,Steels2009,Lazaridou2017,Baroni2020,Baroni2022}.
-The motivation behind this is twofold.
-First, the study of the emergence of artificial language can help to shed light into why and how natural languages evolved.
-This is done in a controlled environment, where researchers can regulate exactly, which information the agents receive, how and what they are able to communicate and which goals they are trained on.
-This approach allows a deep study of the constraints and restrictions that are necessary for language and meanings of symbols to evolve.
-Insights in this field might give indications, under which circumstances natural language evolves.
+Language is a complex system that enables humans to communicate and convey meaning. However, the mere existence of words and grammatical structures is not enough to guarantee effective communication. Without grounding, language remains detached from the physical world, making it difficult for individuals to comprehend and interpret linguistic expressions accurately.
+Grounding bridges the gap between abstract linguistic representations and concrete experiences, providing a shared context and reference point for language users \citep{Roy2002,Bisk2020,Bender2020}. By linking language to sensory perceptions, physical experiences, and the situational context, grounding enhances comprehension, facilitates communication.
+However, one challenge lies in how arbitrary symbols in language can be connected to real-world objects and concepts and acquire meaning, described as the symbol grounding problem by \citet{Harnad1999}.
+Artificial agents can be taught grounding in different ways.
+One approach is to show the agent an image of the scene as visual input together with a textual description of what is to be grounded in this scene.
+This can be for example a description of the whole scene, certain visible objects or also actions that are happening \citep{Ahrens2022,Ilinykh2022,Lu2016,Mitchell2013}.
+By doing this, the agents can learn to identify the same descriptions and symbols for similar visual input.
+In other approaches, the agents can learn to ground language in visual input through interaction and dialogue, either with humans or other agents.
+Thus, agents might develop certain strategies to ground language efficiently \citep{Dobnik2018,Dobnik2021,Zarriess2019}.
 
-Secondly, emergent languages can have benefits over predefined communication protocols.
-Currently, machines communicate, by using protocols based on predefined rules of how messages can be built up.
-These are developed for specific scenarios and goals and don't allow flexible usages if the goal or the environment, machines act in are changing.
-Furthermore, these protocols are often based on readability for humans and include overhead that is not necessary to communicate a specific meaning, but is rather used for transparency.
-A language that emerges, rather than being predefined could mitigate these problems.
+A central part in many of the ways to learn to ground are referring expressions.
+Referring expressions are used to point out a particular subset of entities from a set of similar entities or the surrounding context.
+By that, they can take many forms as noun phrases (e.g. 'the large table', 'the second chair from the right'), proper nouns (e.g. 'Francesca', 'the Big Ben') or complete descriptions (e.g. 'the men that are wearing glasses').
+When referring to objects, they often include inherent attributes of these objects as their color or shape.
+Furthermore, spatial terms play a vital role to refer to and disambiguate objects \citep{Regier1996,  Dobnik2013, Dobnik2021,Ghanimifard2017, Ramisa2015}.
+
+One problem that arises is the question of ambiguity in language and referring expressions.
+Natural language is often used in an underspecified way.
+Interlocutors rely on pragmatic and semantic context to communicate.
+Given for example the following situation:
+Two people are in a room with two chairs.
+If one person asks for 'a chair', the second person would give him the chair that is closer to him.
+In other situations the second person would give him his preferred chair even if it's further away.
+The referring expression is the same in both contexts, but refers to two different entities.
+The difference lies in the pragmatic context that both interlocutors are aware of.
+In case this context is not shared, referring expressions might be misunderstood, because of the underspecification.
+
+Furthermore, the real world is characterized by its continuous nature.
+On the other side, natural language is a set of discrete symbols.
+In the process of mapping this continuum to the discrete symbols, information is lost, since the whole context of the real world can't be captured by the natural language.
+By this, symbols get ambiguous and refer to multiple concepts in the world.
+One example are the shades of color \citep{Zaslavsky2018}.
+Discrete English terms like 'red', 'green' or 'blue' might refer to an infinite number of colors in the real world.
+
+To deal with this, humans rely on communicative protocols to disambiguate referring expressions.
+\citet{Dale1995}, for instance, describe an incremental algorithm how referring expressions are generated.
+The goal of the algorithm is to construct referring expressions incrementally, taking into account the salience of different properties and abstracting away from differences in lexical choice.
+It works by gradually building up a referring expression based on the properties of the object being referred to.
+Hereby, it considers the most salient or distinguishing properties first and then adds additional properties as needed.
+This helps to create concise, effective and disambiguous referring expressions.
+\cmtDK[inline]{co-reference}
+
+Meaning of symbols and referring expression emerge through dialogue between interlocutors \citep{Wittgenstein1953,Clark1986}.
+Moreover, \citet{Wittgenstein1953} introduces the concept of \emph{language games}: small parts of conversation between interlocutors.
+In these language games, the emerged meaning of the referring expressions depends on their context.
+This reasoning was taken up in training artificial agents to learn to refer to entities.
+Hereby, agents need to communicate arbitrary symbols to each other in multiple turns to solve a given task.
+By solving the task, they assign meaning to these symbols and an artificial language emerges.
+This setup allows to control the architecture of the agents, the information the agents receive, how and what they are able to communicate and which goals they are trained on.
+By this, their behavior and the emergence of referring expressions can be studied precisely and consistently.
+In early research, agents and their communication were studied in the context of robotics and rule-based systems \citep{Steels2009,Roy2002,Kirby2002,Kirby2008}, while in current research, agents are based on deep neural networks \citep{Lazaridou2017,Baroni2020,Baroni2022,Kottur2017}
+Furthermore, a focus lies on the nature of the emerged language.
 Agents can for instance learn a compositional language that allows them to combine already learned symbols to create new meaning, when presented with a changed environment and unseen situations \citep{Kharitonov2020,Lazaridou2018,Gupta2020}.
 Additionally, emergent languages can be learned to encode meaning in efficient ways \citep{Chaabouni2019,Zaslavsky2018}.
 
-Different studies conclude that meaning of symbols and sentences in language can only be bound to the real world, both in the literal sense, but also for abstract concepts \citep{Harnad1999,Bender2020,Bisk2020}.
-They need to be grounded.
-One way of grounding meaning can be achieved in multimodal systems, where models need to combine language with another modality for instance visual input.
-Hereby, a task can be to learn how to refer to objects or actions in the visual input, using referring expressions.
-Both generating referring expressions, based on the visual input and understanding given referring expressions by linking them to the visual input ground the meaning of the used language in vision.
-Following these arguments, also artificial emergent languages need to be grounded that the used symbols contain meaning.
 % SD: I would turn the order of this around, it would make the motivation clearer. The introduction should also be much longer with linguistic examples and citations of related work (but I see that you want to keep it for later.)
 % SD: Our goal is to study referring, how we refer to entities and have we interpret the entities referred to. 
 % SD: There is a lot of ambiguity involved as language only maps to the world in an under specified way.  The first problem is that a word may map to several pixels. There is a loss of information/abstraction. The second problem is that referring expressions are under-specified, chair can be any of the 5 chairs. This is to compress information in communication, we say less than we mean. Illustrate both points with examples.
@@ -34,13 +67,13 @@ Following these arguments, also artificial emergent languages need to be grounde
 % DK: TODO
 
 \subsection{Research Questions}
-In this thesis, a deeper look is taken into how agents can ground their emerged language in vision.
+In this thesis, a deeper look is taken into how agents can ground their emerged language in visual input.
 The focus hereby lies on referring expressions and how agents are able to generate and understand them.
 Multiple experiments are designed in a way that agents need to use referring expressions in their messages that are communicated.
 These messages are analyzed with respect to the visual input to answer the two following questions:
 \begin{enumerate}
       % \item Are cooperative agents in language games able to generate and understand artificial referring expressions based on visual input?
-      \item What are the limits of the agent architectures and input representations on learning successfully grounding referring expressions through language games?
+      \item What are the limits of the agents' architectures and input representations on learning successfully grounding referring expressions through language games?
             % SD: What are the limits of the agent architecture and and input representation on learning successful grounding referring expressions through language games?
             % DK: (done)
             % \item If a language emerges, how similar are the referring expressions to referring expressions that are used in English?
@@ -58,17 +91,19 @@ This adds a lot of inherent bias to the dataset, since these photos often focus 
 Additionally, they require external knowledge about the world and the functions of objects which is not present in the image.
 Furthermore, information about the objects and their relations in the image are not present in a structured way.
 The datasets that are created in this thesis aim to reduce this bias and provide all information about the scene and objects in the image.
+In fact, the artificial creation of the dataset allows controlling precisely bias in each scene.
 % SD: We also know the ground truth about the scenes as we know the function that generated them.
-% DK: TODO
+% DK: (done)
 
 Secondly, the thesis evaluates these datasets, by training separate models to generate and understand referring expressions, describing objects in the images.
-By doing this, it is tested if first the models are able to extract useful visual information that doesn't rely on bias and latent patterns in the dataset and secondly shows the impact of different levels of ambiguity in the datasets on the performance of generating and understanding of referring expressions.
+By doing this, it is tested if first the models are able to extract useful visual information that doesn't rely on bias and latent patterns in the textual information in the dataset and secondly shows the impact of different levels of ambiguity in the datasets on the performance of generating and understanding of referring expressions.
 % SD: We can control the properties of these datasets and we can introduce as much bias and ambiguity as we see firm in each experiment to compare with the natural datasets.
-% DK: TODO
+% DK: (done)
 
-Lastly, the thesis brings the separate tasks of generating and understanding of referring expressions together into on single task.
+Lastly, the thesis brings the separate tasks of generating and understanding of referring expressions together into one single task.
+This process resembles the learning of referring expressions in natural language \citep{Clark1986}.
 % SD: Which is how this is done in practice, cf. referring as a collaborative process, the paper by Clark.
-% DK: TODO
+% DK: (done)
 In language games, one agent needs to extract visual information from an image and generate a referring expression that is sent to the second agent.
 The second agent on the other hand needs to understand this referring expressions and combine it with its visual input.
 Only if both of these subtasks succeed, a new artificial language can emerge and the overall task can be solved.
@@ -76,15 +111,15 @@ The emerging language is then analyzed to understand, how the artificial referri
 
 \subsection{Scope}
 The focus of this thesis is the study of referring expressions.
-Referring expressions can hereby be based on attributes of objects, as well as their spatial relations towards other objects.
-In the present study, only attribute relations are studied.
+Referring expressions can hereby be based on inherent attributes of objects, as well as their spatial relations towards other objects.
+In the present study, only the relations of the inherent attributes are studied.
 % SD: What are those?
-% DK: TODO
+% DK: (done)
 Spatial relations add another level of complexity and may be studied in future work.
 % SD: What kind of complexity?
-% DK: TODO
+% DK: (done)
 Furthermore, the emerged language will be interpreted by comparing it to referring expressions in natural language.
 This analysis focuses on the emerged meaning of symbols and if they align with natural language.
 A deeper study of its compositionality or complexity is out of scope.
 % SD: Leave for the last chapter, limitations and future work.
-% DK: TODO
+% DK: (done)
