@@ -2,10 +2,20 @@
 \label{sec:background}
 
 \subsection{Grounding}
-\cmtDK[inline]{importance of grounding and what it is}
-Even though, recent large language models (LLMs) such as BERT \citep{Devlin2019} or GPT-3 \citep{Brown2020} produce impressive results on many tasks in Natural Language Processing, they are often only trained on big amounts of text corpora.
+Symbols of a symbolic system such as words in a natural language are typically processed and manipulated in a purely formal manner, without direct reference to their real-world concepts.
+The question arises, how these symbols can acquire meaning and be connected to the real world without any external interpreter, in other words how the symbols can be grounded in the real world.
+This is known as the symbol grounding problem \citep{Harnad1990}.
+Hereby, \citet{Harnad1990} describes that a high-order \emph{symbolic representation} needs to be grounded bottom-up in two non-symbolic representations.
+\emph{Iconic representations} refer to analogue representations of sensory input like for instance vision in the retina.
+These representations are mapped to \emph{categorical representations} which are filtered clusters of the iconic representation.
+These categories are assigned so-called elementary symbols, in which symbolic representation are grounded.
+
+In computational models this problem is tried to be solved in multiple ways.
+Recent large language models (LLMs) such as BERT \citep{Devlin2019} or GPT-3 \citep{Brown2020} are often trained on big amounts of text corpora produce impressive results on many tasks in Natural Language Processing.
+Meaning of symbols emerges through relating it to its surrounding context of other symbols it appears in.
 In this way, their only way of learning, how to generate language as well as solve these tasks is to find patterns of how words and sentences are used in these large corpora.
-Many researchers criticize this approach, by arguing that these model can't learn meaning just by learning on text.
+This approach is however criticized by many researchers, since the meaning of symbols is still not connected to the real world and only relies on other symbols in an infinite recursion.
+
 In \citep{Bender2020}, the authors argue that meaning is bound to a communicative intent.
 These are the purposes of why humans are using language.
 The intent is always embedded in a broader context that exists outside the language itself.
@@ -16,11 +26,26 @@ Only with this step, the intent can be interpreted by the listeners.
 % SD: Not just real world, also to background knowledge and what the person wants to do. 
 % SD: Grounding is more related to interpretability of expressions rather than intent. Without grounding they cannot be interpreted. The intent shapes WHAT referring expressions are generated in what contexts of the real world.   Hence, intent is a meta thing connecting world, language, knowledge and agent’s experience.
 % DK: first part included, referring expressions are included below (done)
-This grounding is missing, when models only train on abstract textual representations of the world.
+This grounding is missing when models only train on abstract textual representations of the world \citep{Regier1996,Landau1998}.
+
 \citet{Bisk2020} argues that a multimodal approach, including for instance perception as well as social context, is needed to learn meaning in a broader context.
-One added modality to ground language is often vision.
+One added modality to ground language is often visual input.
 Hereby, the model needs to learn how to associate linguistic concepts in text corpora with features, extracted from visual input.
 For instance, a model can learn to associate the noun "dog" with an animal seen in an image or associate the action of "jumping over" with the animal being above an object.
+\cite{Roy2002} for example studies how an artificial agent can ground spatial relations with a visual scene of geometric shapes.
+Hereby, the agent builds up hierarchical knowledge that is used to produce correct description in a rule-based manner.
+In more recent research, complete natural language utterances as well as the visual representations are mapped into an embedding space.
+By aligning both representations, natural language can be connected to a second modality.
+Other research explores how to ground smaller parts of the utterances, as phrases and words and combine them compositional \citep{Larsson2018,Kollar2010}.
+This might allow artificial machines to learn grounded concepts more general.
+
+Furthermore, artificial agents can learn to ground language through dialogue, either with human tutors or with other artificial agents.
+\citet{Skocaj2011} for example teach a robot different objects and concepts.
+By asking questions and participating in the dialogue with a human tutor, the robot builds up and verifies beliefs, and connects them to language and its visual input.
+\citet{Lauria2001} follow a similar approach where a robot is taught to follow instructions to generate a map of its physical surroundings.
+By incorporating dialogue and deep-level reasoning questions the learning gains are enhanced.
+How artificial agents can ground language in dialogue between each other will be studied in this thesis.
+Section \ref{sec:background:language-games} gives an insight in the state of the research.
 
 
 \subsection{Referring expressions}
@@ -32,7 +57,7 @@ In a first step, models can combine linguistic knowledge with visual input, by r
 Hereby, the communicative intent as well as the broader context in which it is used determines which referring expressions are applied.
 By doing this, the models learn how to relate referring expressions against a representation of the environment.
 More specifically, the model learns to connect symbols to a non-symbolic representation.
-This is known as the symbol grounding problem \citep{Harnad1999,Roy2002}.
+This is known as the symbol grounding problem \citep{Harnad1990,Roy2002}.
 Hereby, the question is asked how arbitrary symbols can be connected to the representation they actually stand for.
 
 To solve this problem, multiple challenges arise since language describes the world in a very under-specified way.
@@ -56,6 +81,7 @@ In the referring expression understanding, sometimes referred to as coreference,
 A major challenge in natural language processing is, how machines can
 
 \subsection{Language Games}
+\label{sec:background:language-games}
 \cmtDK[inline]{language games combine generation and understanding}
 \cmtDK[inline]{describe as 'dialogue turns'}
 \cmtDK[inline]{different approaches (robotics, neural models, ...)}
