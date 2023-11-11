@@ -2,7 +2,7 @@ import itertools
 import subprocess
 
 options = [
-    # "--dataset_base_dir=/scratch/guskunkdo",
+    #"--dataset_base_dir=/scratch/guskunkdo",
     "--dataset_base_dir=/home/dominik/Development/",
     # "--lr=0.0002",
     "--epochs=40",
@@ -15,10 +15,10 @@ options = [
 ]
 
 variables = {
-    "--dataset": ["dale-2"],
-    # "--dataset": ["dale-2", "dale-5", "colour"],
-    "--image_embedding_dimension": [300, 500],
-    # "--image_embedding_dimension": [50, 100, 300, 500],
+    #"--dataset": ["dale-2"],
+    "--dataset": ["dale-5", "colour"],
+    #"--image_embedding_dimension": [300, 500],
+    "--image_embedding_dimension": [50, 100, 300, 500],
     "--coordinate_classifier_dimension": [1024, 2048],
     # "--decoder_out_dim": [100, 500, 1000],
     "--encoder_out_dim": [1000, 1500],

@@ -3,10 +3,6 @@
 
 \subsection{Grounding}
 \cmtDK[inline]{importance of grounding and what it is}
-
-\subsection{Referring expressions}
-\cmtDK[inline]{what are referring expressions and how are they studied (generation, understanding, ...)}
-\cmtDK[inline]{incremental GRE algorithm from Dale}
 Even though, recent large language models (LLMs) such as BERT \citep{Devlin2019} or GPT-3 \citep{Brown2020} produce impressive results on many tasks in Natural Language Processing, they are often only trained on big amounts of text corpora.
 In this way, their only way of learning, how to generate language as well as solve these tasks is to find patterns of how words and sentences are used in these large corpora.
 Many researchers criticize this approach, by arguing that these model can't learn meaning just by learning on text.
@@ -25,6 +21,12 @@ This grounding is missing, when models only train on abstract textual representa
 One added modality to ground language is often vision.
 Hereby, the model needs to learn how to associate linguistic concepts in text corpora with features, extracted from visual input.
 For instance, a model can learn to associate the noun "dog" with an animal seen in an image or associate the action of "jumping over" with the animal being above an object.
+
+
+\subsection{Referring expressions}
+\cmtDK[inline]{what are referring expressions and how are they studied (generation, understanding, ...)}
+\cmtDK[inline]{incremental GRE algorithm from Dale}
+
 
 In a first step, models can combine linguistic knowledge with visual input, by referring to objects, seen in an image, with so called referring expressions.
 Hereby, the communicative intent as well as the broader context in which it is used determines which referring expressions are applied.
