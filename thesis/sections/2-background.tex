@@ -49,8 +49,87 @@ Section \ref{sec:background:language-games} gives an insight in the state of the
 
 
 \subsection{Referring expressions}
-\cmtDK[inline]{what are referring expressions and how are they studied (generation, understanding, ...)}
-\cmtDK[inline]{incremental GRE algorithm from Dale}
+\label{sec:background:re}
+A specific case of grounding linguistic information in visual input are referring expressions.
+While a general linguistic expression can be grounded in multiple regions of a visual scene, referring expressions are expected to refer to a unique region \citep{Sanchez2022}.
+Given for example a visual scene with multiple pens lying on a table, the word 'pen' can be grounded in all visible objects.
+A referring expression like 'the red pen on the left' in contrast would only refer to one specific object.
+Referring expressions are however not limited to refer to one single entity, but might also refer to a group of objects as for instance with 'the green pens'.
+Still they refer to a specific subset of entities and concepts.
+
+Hereby, \citet{Krahmer2012} classify referring expressions into four categories:
+\emph{One-place predicates} refer to one single entity in the visual scene without.
+By this, the entity is identifiable without using another entity as basis.
+Often, the referring expressions includes intrinsic attributes of an object or absolute locations in the scene as in 'the red pen on the left'.
+\emph{Relational} referring expressions refer to entities via other entities in the scene.
+Accordingly, a relating between the target entity and distractors is described.
+This includes for example spatial relations like 'the pen behind the cup' or relations based on the entities' properties like 'the largest pen'.
+Referring expressions can also identify \emph{sets} of entities.
+Instead of uniquely referring to on single pen, the referring expression 'the green pens' refers to all objects that are pens and that are green.
+Finally, \emph{gradable} referring expressions involve gradable properties as opposed to absolute values.
+For example, given the referring expression 'the tall building', 'tall' is a gradable property because it can be measured on a scale.
+The success of the referring expression depends on how well it captures the intended level of height compared to other buildings.
+By this, vagueness is introduced and referring expressions depend on context, either present in the visual scene or pragmatic context.
+
+One of the main challenges of referring expressions lies in ambiguity.
+Ambiguity is introduced in two forms.
+First, there is an inherent difference in natural language and the real world it is grounded it, also described in the symbol grounding problem.
+The nature of the world is continuous, while natural language being a formal symbol system uses discrete symbols.
+In especially, natural language utilizes a very limited set symbols to represent the world.
+When trying to map continuous concepts to this limited set of discrete symbols, information nesecarilly gets lost.
+Apparent examples are the color systems in human languages.
+While color grades exist on an infinite spectrum in the real world, languages combine certain color grades into categories \citep{Zaslavsky2018}.
+The word 'red' for example refers to many different shades of red.
+Even more, the shades of color it actually refers to depends also on the pragmatic context and the people uttering it \citep{Monroe2017}.
+The same also applies to spatial references.
+References like 'near to' or 'left to' might refer to objects that are touching each other, but in other contexts also are kilometers away from each other.
+
+The other form of ambiguity is introduced through under-specification of the speakers (e.g. \citet{Dobnik2021}).
+When interlocutors interact in a dialogue, they share some common knowledge.
+The first interlocutor might presuppose that the second interlocutor knows a certain fact.
+Based on this, they might utter a referring expression that together with this shared fact uniquely identifies an entity.
+However, the referring expression on its own is under-specified and might refer to multiple entities.
+Given for example the following situation:
+Two people are in a room with their beverages standing on the table and Person A requests his beverage from Person B.
+A referring expression like 'the beverage close to me' would uniquely identify on of the beverages.
+Despite that, Person A might more likely use 'the beverage' to refer to theirs.
+On its own, the referring expression is under-specified and can refer to both of the present beverages.
+However, both persons share the fact that the targeted beverage belongs to person A, which disambiguates the referring expression in this context.
+In another context, the shared fact would be that Person A wants to try the beverage of Person B.
+Again, this fact would disambiguate the referring expression, but now refer to the second beverage.
+The referring expression is the same in both contexts, but refers to two different entities.
+This creates a challenge for computational models, that need to understand and generate referring expressions if they are only presented with the text, but not with the shared context.
+
+The research of referring expressions can be split into two fields: referring expression generation (REG) and referring expression comprehension (REC).
+In \textbf{referring expression generation}, computational models are trained to generate a referring expression that uniquely identifies an entity given some perceptual, often visual input.
+The research goes back into the 70s, where \citet{Winograd1972} developed an algorithm to generate referring expressions step by step, taking into account the context and the information available at each stage of the generation process.
+A similar approach is described in \citep{Dale1995}.
+Their incremental algorithm is based on the salience of the properties of the present target object and distractor objects.
+The most salient properties are considered first, and added to the referring expression until the referring expression is unambiguous.
+In other words, the object is described unambiguously using the lowest number of words.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/CLEVR_dale-5.png}
+    \caption{The target object in this scene is the \emph{small turquoise sphere}. Using the incremental GRE-algorithm, the target object can be uniquely referred to as \emph{turquoise sphere}}
+    \label{fig:incremental-algorithm}
+\end{figure}
+
+Given for example the image in Figure \ref{fig:incremental-algorithm}.
+Objects in this scene have three attributes that we consider in the following order of salience: a shape, a color and a size.
+This order defines, which attributes can be left out, while still identifying the object uniquely.
+The target object in the given scene is the \emph{small turquoise sphere}.
+In the first step, the attribute with the highest salience, the shape, is selected from the target object.
+This produces the referring expression \emph{sphere}.
+In the next step, it is checked if there are also distractors, described by this referring expression.
+In our case, both cubes and the cylinder are already disambiguated, but the purple sphere can still be described by the produced referring expression.
+Therefore, the algorithm also adds the next lower salient attribute, the color to the referring expression, which produces the \emph{turquoise sphere}.
+With this, also the last remaining distractor is as well disambiguated, and the referring expression describes the target object uniquely.
+The size, the least salient property is therefore not necessary in the referring expression.
+This algorithm will be utilized in this thesis and will be referred to as \emph{the incremental GRE-algorithm}.
+
+Additional to generating an efficient disambiguating referring expressions, a challenge also lies in processing the visual input.
+This especially applies to spatial and geometric positions and relations of objects in a scene, where models struggle to extract geometric information from visual features \citep{Kelleher2017}.
 
 
 In a first step, models can combine linguistic knowledge with visual input, by referring to objects, seen in an image, with so called referring expressions.

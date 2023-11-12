@@ -162,7 +162,7 @@ In the second setup, the model is presented with the complete image and therefor
 
 The bounding boxes are extracted and normalized in the same way as for the object identification task.
 Since for the second setup, the images will also be passed through the feature extractors, they are normalized as well in like manner.
-The referring expressions for the target object are generated using the incremental GRE-algorithm, described in section \ref{GRE}.
+The referring expressions for the target object are generated using the incremental GRE-algorithm, described in section \ref{sec:background:re}.
 By this, the model needs to describe the target object with respect to the distractor objects.
 There are some minor additions concerning the padding of the referring expression.
 As before, the referring expression is padded to a number of three tokens, corresponding to the maximum of three attributes.
