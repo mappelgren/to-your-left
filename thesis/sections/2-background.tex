@@ -115,7 +115,7 @@ In other words, the object is described unambiguously using the lowest number of
     \label{fig:incremental-algorithm}
 \end{figure}
 
-Given for example the image in Figure \ref{fig:incremental-algorithm}.
+Given for example the scene in Figure \ref{fig:incremental-algorithm}.
 Objects in this scene have three attributes that we consider in the following order of salience: a shape, a color and a size.
 This order defines, which attributes can be left out, while still identifying the object uniquely.
 The target object in the given scene is the \emph{small turquoise sphere}.
@@ -130,34 +130,35 @@ This algorithm will be utilized in this thesis and will be referred to as \emph{
 
 Additional to generating an efficient disambiguating referring expressions, a challenge also lies in processing the visual input.
 This especially applies to spatial and geometric positions and relations of objects in a scene, where models struggle to extract geometric information from visual features \citep{Kelleher2017}.
+More complex scenes also involve multiple perspectives, where the models are tasked to produce referring expressions that depend on the spatial perspective of the speaker and the listener \citep{Ahrens2022,Lee2022}.
+In \citep{Dobnik2021}, visual dialogue is analyzed where speakers have different views on cups that are placed on a table.
+When speakers refer to a certain cup, they need to take the perspective of the listener to disambiguate the referring expression; for instance in the referring expression 'the cup on the left', \emph{left} is dependent on the speaker's and listeners' spatial position in relation to the cup.
 
-
-In a first step, models can combine linguistic knowledge with visual input, by referring to objects, seen in an image, with so called referring expressions.
-Hereby, the communicative intent as well as the broader context in which it is used determines which referring expressions are applied.
-By doing this, the models learn how to relate referring expressions against a representation of the environment.
-More specifically, the model learns to connect symbols to a non-symbolic representation.
-This is known as the symbol grounding problem \citep{Harnad1990,Roy2002}.
-Hereby, the question is asked how arbitrary symbols can be connected to the representation they actually stand for.
-
-To solve this problem, multiple challenges arise since language describes the world in a very under-specified way.
-For instance, sensory input for humans as well as for machines only show a very limited representation of the world.
-Vision needs to map a 3-d world into 2-d images.
-During this process, information about the world gets lost, as for example depth can't be perceived easily or objects might be obfuscated in certain perspectives.
-Following, language needs to be connected to a representation of the world that is already not complete.
-Secondly, referring expressions in language themselves are often under-specified.
-Given for example a table with five cups on top, an interlocutor is asked to retrieve one of the cups, referring to it by 'the red cup'.
-This referring expression on its own might be ambiguous and refer to multiple red cups on the table.
-The challenge now arises as how the interlocutor associates the correct cup with this referring expressions.
-This gets even more complex, when perspective is part of the referring expression as for example in 'the cup on the left' where \emph{left} is dependent on the speaker's and interlocutors' spatial position in relation to the cup \citep{Dobnik2021}.
+Current research focuses hereby on generating relational referring expressions, which add more complexity to the task \citep{Ghanimifard2017,Ghanimifard2019,Ramisa2015,Liu2022a}.
+Models need to first extract visual features of multiple objects from the scene.
+Of these extracted objects, a meaningful landmark object needs to be found which helps to refer to the target object.
+Finally, they need to find proper relations between them to describe the target object.
+Relations can be mostly based on the geometric and spatial relation of two objects (e.g. above/below), while the function of objects play a stronger role in other relations (e.g. over/under) \citep{Coventry2005,Dobnik2013}.
 
 % By doing this, the models ground parts of their language in another perception of the real world and get a step closer to learn the actual meaning.
 % SD: They learn how to interpret expressions against some representation. Hence, a reference is a relation between a description and some entity, it’s interpretation. Without this connection referring expressions are useless as we do not know how to interpret this. Textual models might be good for general knowledge such as factual information from news and Wikipedia but as soon as we have NLP applications that interact with other domains, e.g. a ticket booking system or a situated robot involved in patient care, we need to connect language to some other representations to make language interpretable.
 % DK: done
-The learning of referring expressions is therefore split in two fields.
-In the referring expression generation, models learn how to produce referring expressions, when presented with visual input.
-In the referring expression understanding, sometimes referred to as coreference, models are trained on interpreting referring expressions and link them to visual input.
 
-A major challenge in natural language processing is, how machines can
+Referring generation tasks can be hard to evaluate, since often there are many possible referring expressions that are possible and uniquely identify the target object \citep{Mao2016}.
+Instead, the task can be turned around: A model needs to identify an object when presented with a referring expression.
+This is called \textbf{referring expressions comprehension}.
+Many challenges remain similar to the REG task, since the model needs to extract disambiguating visual features from the scenes as well.
+However, the goal is typically to select the best matching region of a given choice in a visual scene \citep{Qiao2020}.
+\cmtDK[inline]{describe methods in paper}
+
+Closely related to the REC task is visual question and answering (VQA).
+In these tasks, a model is given a question about a visual scene.
+The goal is to find an answer in the scene and generate an answer.
+Central to this is to extract referring expressions from the question and ground them in the visual scene.
+In \citep{Johnson2017}, a model is for example shown an image similar to Figure \ref{fig:incremental-algorithm} and asked the question 'Is there a blue cube with the same size as the purple cylinder?'.
+
+
+
 
 \subsection{Language Games}
 \label{sec:background:language-games}

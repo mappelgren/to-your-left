@@ -9,7 +9,7 @@
   doi           = {10.48550/arxiv.2207.02624},
   eprint        = {2207.02624},
   file          = {:papers/Ahrens2022 - Knowing Earlier What Right Means to You_ a Comprehensive VQA Dataset for Grounding Relative Directions Via Multi Task Learning.pdf:PDF},
-  groups        = {Project, AI: Cognitive System, MLT Thesis, Grounding, Referring expressions},
+  groups        = {Project, AI: Cognitive System, MLT Thesis, Grounding, Referring expressions, RE generation},
   keywords      = {cs.CV, cs.CL},
   primaryclass  = {cs.CV}
 }
@@ -416,6 +416,19 @@
   groups    = {MLT Thesis,}
 }
 
+@incollection{Coventry2005,
+  author     = {Kenny R. Coventry and Angelo Cangelosi and Rohanna Rajapakse and Alison Bacon and Stephen Newstead and Dan Joyce and Lynn V. Richards},
+  booktitle  = {Spatial Cognition {IV}. Reasoning, Action, Interaction},
+  publisher  = {Springer Berlin Heidelberg},
+  title      = {Spatial Prepositions and Vague Quantifiers: Implementing the Functional Geometric Framework},
+  year       = {2005},
+  pages      = {98--110},
+  doi        = {10.1007/978-3-540-32255-9_6},
+  file       = {:papers/Coventry2005 - Spatial Prepositions and Vague Quantifiers_ Implementing the Functional Geometric Framework.pdf:PDF},
+  groups     = {AI: Cognitive System, RE generation, MLT Thesis},
+  readstatus = {read}
+}
+
 @article{Dale1995,
   author    = {Dale, Robert and Reiter, Ehud},
   journal   = {Cognitive science},
@@ -561,7 +574,7 @@
   month      = {31 July},
   pages      = {1--6},
   file       = {:papers/Dobnik2013 - Towards an Automatic Identification of Functional and Geometric Spatial Prepositions.pdf:PDF},
-  groups     = {Project, AI: Cognitive System, MLT Thesis, Referring expressions, Grounding},
+  groups     = {Project, AI: Cognitive System, MLT Thesis, Referring expressions, Grounding, RE generation},
   priority   = {prio3},
   readstatus = {read},
   url        = {https://emea01.safelinks.protection.outlook.com/?url=http%3A%2F%2Fpre2013.uvt.nl%2Fpdf%2Fdobnik-kelleher.pdf&data=05%7C01%7C%7C84d038df55584d2b11b608dadea1d8b4%7C84df9e7fe9f640afb435aaaaaaaaaaaa%7C1%7C0%7C638067083956924323%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C3000%7C%7C%7C&sdata=OwxWkerv8%2BVRu8t7sYZ5FZFsJX3Sy4Ad5LVi7h2sB3Y%3D&reserved=0}
@@ -576,7 +589,7 @@
   month     = sep,
   publisher = {SEMDIAL},
   file      = {:papers/Dobnik2021 - The Red Cup on the Left_ Reference, Coreference and Attention in Visual Dialogue.pdf:PDF},
-  groups    = {MLT Thesis, Referring expressions, RE resolution, Grounding},
+  groups    = {MLT Thesis, Referring expressions, RE resolution, Grounding, RE generation},
   url       = {http://semdial.org/anthology/Z21-Dobnik_semdial_0008.pdf}
 }
 
@@ -650,7 +663,7 @@
   publisher = {Association for Computational Linguistics},
   doi       = {10.18653/v1/w19-8668},
   file      = {:papers/Ghanimifard2019 - What Goes into a Word_ Generating Image Descriptions with Top down Spatial Knowledge.pdf:PDF},
-  groups    = {AI: Cognitive System, Project, MLT Thesis, Referring expressions, Grounding}
+  groups    = {AI: Cognitive System, Project, MLT Thesis, Referring expressions, Grounding, RE generation}
 }
 
 @inproceedings{Ghanimifard2017,
@@ -660,7 +673,7 @@
   year       = {2017},
   editor     = {Gardent, Claire and Retor{\'e}, Christian},
   file       = {:papers/Ghanimifard2017 - Learning to Compose Spatial Relations with Grounded Neural Language Models.pdf:PDF},
-  groups     = {AI: Cognitive System, MLT Thesis, Grounding, Referring expressions},
+  groups     = {AI: Cognitive System, MLT Thesis, Grounding, Referring expressions, RE generation},
   journal    = {Proceedings of the 12th International Conference on Computational Semantics ({IWCS}) {---} Long papers},
   priority   = {prio2},
   readstatus = {read},
@@ -906,7 +919,7 @@
   organization = {University of Gothenburg},
   publisher    = {Centre for Linguistic Theory and Studies in Probability (CLASP)},
   file         = {:papers/Kelleher2017 - What Is Not Where_ the Challenge of Integrating Spatial Representations into Deep Learning Architectures.pdf:PDF},
-  groups       = {MLT Thesis, Referring expressions, Grounding}
+  groups       = {MLT Thesis, Referring expressions, Grounding, RE generation}
 }
 
 @inproceedings{Kharitonov2020,
@@ -1162,19 +1175,20 @@
   url       = {https://openreview.net/forum?id=HJGv1Z-AW}
 }
 
-@article{Lee2022,
-  author        = {Jae Hee Lee and Matthias Kerzel and Kyra Ahrens and Cornelius Weber and Stefan Wermter},
-  title         = {What is Right for Me is Not Yet Right for You: A Dataset for Grounding Relative Directions via Multi-Task Learning},
-  year          = {2022},
-  month         = may,
-  abstract      = {Understanding spatial relations is essential for intelligent agents to act and communicate in the physical world. Relative directions are spatial relations that describe the relative positions of target objects with regard to the intrinsic orientation of reference objects. Grounding relative directions is more difficult than grounding absolute directions because it not only requires a model to detect objects in the image and to identify spatial relation based on this information, but it also needs to recognize the orientation of objects and integrate this information into the reasoning process. We investigate the challenging problem of grounding relative directions with end-to-end neural networks. To this end, we provide GRiD-3D, a novel dataset that features relative directions and complements existing visual question answering (VQA) datasets, such as CLEVR, that involve only absolute directions. We also provide baselines for the dataset with two established end-to-end VQA models. Experimental evaluations show that answering questions on relative directions is feasible when questions in the dataset simulate the necessary subtasks for grounding relative directions. We discover that those subtasks are learned in an order that reflects the steps of an intuitive pipeline for processing relative directions.},
-  archiveprefix = {arXiv},
-  doi           = {10.48550/arxiv.2205.02671},
-  eprint        = {2205.02671},
-  file          = {:papers/Lee2022 - What Is Right for Me Is Not yet Right for You_ a Dataset for Grounding Relative Directions Via Multi Task Learning.pdf:PDF},
-  groups        = {Project, AI: Cognitive System, MLT Thesis, Grounding, Referring expressions},
-  keywords      = {cs.CV, cs.AI, cs.LG, I.2.6},
-  primaryclass  = {cs.CV}
+@inproceedings{Lee2022,
+  author    = {Lee, Jae Hee and Kerzel, Matthias and Ahrens, Kyra and Weber, Cornelius and Wermter, Stefan},
+  booktitle = {Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence, {IJCAI-22}},
+  title     = {What is Right for Me is Not Yet Right for You: A Dataset for Grounding Relative Directions via Multi-Task Learning},
+  year      = {2022},
+  editor    = {Lud De Raedt},
+  month     = {7},
+  note      = {Main Track},
+  pages     = {1039--1045},
+  publisher = {International Joint Conferences on Artificial Intelligence Organization},
+  doi       = {10.24963/ijcai.2022/145},
+  file      = {:papers/Lee2022 - What Is Right for Me Is Not yet Right for You_ a Dataset for Grounding Relative Directions Via Multi Task Learning.pdf:PDF},
+  groups    = {MLT Thesis},
+  url       = {https://doi.org/10.24963/ijcai.2022/145}
 }
 
 @inproceedings{Lee2017,
@@ -1227,7 +1241,7 @@
   eprint     = {2205.00363},
   eprinttype = {arxiv},
   file       = {:papers/Liu2022a - Visual Spatial Reasoning.pdf:PDF},
-  groups     = {MLT Thesis, Grounding, Referring expressions, RE resolution},
+  groups     = {MLT Thesis, Grounding, Referring expressions, RE resolution, RE generation},
   keywords   = {Computation and Language (cs.CL), Artificial Intelligence (cs.AI), Computer Vision and Pattern Recognition (cs.CV), FOS: Computer and information sciences, FOS: Computer and information sciences},
   publisher  = {arXiv}
 }
@@ -1333,7 +1347,7 @@
   pages     = {1174--1184},
   publisher = {Association for Computational Linguistics},
   file      = {:papers/Mitchell2013 - Generating Expressions That Refer to Visible Objects.pdf:PDF},
-  groups    = {MLT Thesis, Grounding, Referring expressions},
+  groups    = {MLT Thesis, Grounding, Referring expressions, RE generation},
   url       = {https://aclanthology.org/N13-1137}
 }
 
@@ -1414,7 +1428,7 @@
   publisher  = {Association for Computational Linguistics},
   doi        = {10.18653/v1/d15-1022},
   file       = {:papers/Ramisa2015 - Combining Geometric, Textual and Visual Features for Predicting Prepositions in Image Descriptions.pdf:PDF},
-  groups     = {AI: Cognitive System, MLT Thesis, Referring expressions, Grounding},
+  groups     = {AI: Cognitive System, MLT Thesis, Referring expressions, Grounding, RE generation},
   readstatus = {read}
 }
 
