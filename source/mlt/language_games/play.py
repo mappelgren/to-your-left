@@ -125,6 +125,7 @@ models = {
                 ),
             ),
             "embedding_dimension": 2048,
+            "image_embedding_dimension": 2048,
         },
         receiver=CaptionGeneratorReceiver,
         receiver_args={
@@ -334,6 +335,12 @@ def get_params(params):
         help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
     )
     parser.add_argument(
+        "--receiver_image_embedding",
+        type=int,
+        default=10,
+        help="Output dimensionality of the layer that embeds the image for Receiver (default: 10)",
+    )
+    parser.add_argument(
         "--receiver_decoder_out_dim",
         type=int,
         default=10,
@@ -463,6 +470,7 @@ def main(params):
     sender_args["encoder_out_dim"] = opts.sender_encoder_dim
 
     receiver_args = model.receiver_args
+    receiver_args["image_embedding_dimension"] = opts.receiver_image_embedding
     receiver_args["embedding_dimension"] = opts.receiver_embedding
 
     if "caption_decoder" in receiver_args.keys():
