@@ -515,19 +515,20 @@ if __name__ == "__main__":
         dataset = model_name.dataset.load_file(dataset_file)
         print(f"Dataset {dataset_identifier} loaded.   ")
     else:
-        dataset = model_name.dataset.load(**dataset_args)
+        dataset = model_name.dataset.load(**dataset_args, save_to=dataset_file)
 
-        print(f"Saving dataset {dataset_identifier}...", end="\r")
-        if not os.path.exists(dataset_dir):
-            os.makedirs(dataset_dir)
-        dataset.save(dataset_file)
-        print(f"Dataset {dataset_identifier} saved.   ")
+        # print(f"Saving dataset {dataset_identifier}...", end="\r")
+        # if not os.path.exists(dataset_dir):
+        #     os.makedirs(dataset_dir)
+        # dataset.save(dataset_file)
+        # print(f"Dataset {dataset_identifier} saved.   ")
 
     train_dataset_length = int(0.8 * len(dataset))
     test_dataset_length = len(dataset) - train_dataset_length
     train_dataset, test_dataset = random_split(
         dataset, (train_dataset_length, test_dataset_length)
     )
+
     train_loader = DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=1
     )

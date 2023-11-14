@@ -826,12 +826,23 @@ class CaptionGeneratorDataset(Dataset, Persistable):
     """
 
     def __init__(
-        self, captioner: Captioner, samples: list[CaptionGeneratorSample]
+        self,
+        captioner: Captioner,
+        samples: list[CaptionGeneratorSample],
+        save_to,
     ) -> None:
         super().__init__()
 
         self.captioner = captioner
         self.samples = samples
+        self.file = save_to
+
+        with h5py.File(save_to, "r") as f:
+            self.num_samples = len(f["image"])
+
+        if len(samples) != 0:
+            self.save(save_to)
+            self.samples = []
 
     @classmethod
     def load(
@@ -840,6 +851,7 @@ class CaptionGeneratorDataset(Dataset, Persistable):
         image_loader: ImageLoader,
         max_number_samples,
         captioner: Captioner,
+        save_to: str,
         *_args,
         image_masker: ImageMasker = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
@@ -906,23 +918,23 @@ class CaptionGeneratorDataset(Dataset, Persistable):
         print()
         print("loaded data.")
 
-        return cls(captioner, samples)
+        return cls(captioner, samples, save_to)
 
     def __getitem__(self, index):
-        sample = self.samples[index]
-        return (
-            (
-                sample.image,
-                sample.caption,
-                sample.non_target_captions[:, 1:],
-                sample.masked_image,
-            ),
-            sample.caption[1:],
-            sample.image_id,
-        )
+        with h5py.File(self.file, "r") as f:
+            return (
+                (
+                    load_tensor(f["image"][index]),
+                    load_tensor(f["caption"][index]),
+                    load_tensor(f["non_target_captions"][index])[:, 1:],
+                    load_tensor(f["masked_image"][index]),
+                ),
+                load_tensor(f["caption"][index])[1:],
+                str(f["image_id"][index], "utf-8"),
+            )
 
     def __len__(self) -> int:
-        return len(self.samples)
+        return self.num_samples
 
     def save(self, file_path):
         with h5py.File(file_path, "w") as f:
@@ -951,30 +963,30 @@ class CaptionGeneratorDataset(Dataset, Persistable):
     @classmethod
     def load_file(cls, file_path):
         with h5py.File(file_path, "r") as f:
-            samples = [
-                CaptionGeneratorSample(
-                    **dict(
-                        zip(
-                            [
-                                "image",
-                                "image_id",
-                                "caption",
-                                "non_target_captions",
-                                "masked_image",
-                            ],
-                            sample,
-                        )
-                    )
-                )
-                for sample in zip(
-                    [load_tensor(b) for b in f["image"]],
-                    [str(i, "utf-8") for i in f["image_id"]],
-                    [load_tensor(c) for c in f["caption"]],
-                    [load_tensor(n) for n in f["non_target_captions"]],
-                    [load_tensor(m) for m in f["masked_image"]],
-                )
-            ]
-            # pylint: disable-next=no-member
+            # samples = [
+            #     CaptionGeneratorSample(
+            #         **dict(
+            #             zip(
+            #                 [
+            #                     "image",
+            #                     "image_id",
+            #                     "caption",
+            #                     "non_target_captions",
+            #                     "masked_image",
+            #                 ],
+            #                 sample,
+            #             )
+            #         )
+            #     )
+            #     for sample in zip(
+            #         [load_tensor(b) for b in f["image"]],
+            #         [str(i, "utf-8") for i in f["image_id"]],
+            #         [load_tensor(c) for c in f["caption"]],
+            #         [load_tensor(n) for n in f["non_target_captions"]],
+            #         [load_tensor(m) for m in f["masked_image"]],
+            #     )
+            # ]
+            # # pylint: disable-next=no-member
             captioner = pickle.loads(f.attrs["captioner"].tobytes())
 
-        return cls(captioner, samples)
+        return cls(captioner, [], file_path)

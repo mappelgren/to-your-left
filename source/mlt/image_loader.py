@@ -39,16 +39,19 @@ class FeatureImageLoader(ImageLoader):
         with h5py.File(feature_file, "r") as f:
             feature_data_set = f["features"]
             self.image_size = feature_data_set.attrs["image_size"]
-            self.features = list(feature_data_set)
 
     def get_image(self, image_id):
         image_index = int(image_id[-6:])
+
+        with h5py.File(self.feature_file, "r") as f:
+            feature_data_set = f["features"]
+            features = feature_data_set[image_index]
 
         image = Image.open(os.path.join(self.image_dir, image_id + ".png")).convert(
             "RGB"
         )
 
-        return image, torch.from_numpy(self.features[image_index]), self.image_size
+        return image, torch.from_numpy(features), self.image_size
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.feature_file=}, {self.image_dir=})"

@@ -16,7 +16,7 @@ from mlt.preexperiments.data_readers import (
     CoordinatePredictorDataset,
     CoordinatePredictorSample,
 )
-from mlt.util import Persistable
+from mlt.util import Persistable, load_tensor
 from torch.utils.data import DataLoader, Dataset, Subset
 
 
@@ -343,7 +343,14 @@ class DaleReferentialGameBatchIterator(GameBatchIterator):
 
 class CaptionGeneratorGameDataset(CaptionGeneratorDataset):
     def __getitem__(self, index):
-        return self.samples[index]
+        with h5py.File(self.file, "r") as f:
+            return CaptionGeneratorSample(
+                image_id=str(f["image_id"][index], "utf-8"),
+                image=load_tensor(f["image"][index]),
+                caption=load_tensor(f["caption"][index]),
+                masked_image=load_tensor(f["masked_image"][index]),
+                non_target_captions=load_tensor(f["non_target_captions"][index]),
+            )
 
 
 class CaptionGeneratorGameBatchIterator(GameBatchIterator):
