@@ -124,7 +124,6 @@ models = {
                     number_blocks=3,
                 ),
             ),
-            "embedding_dimension": 2048,
             "image_embedding_dimension": 2048,
         },
         receiver=CaptionGeneratorReceiver,
@@ -132,7 +131,7 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(),
             ),
-            "embedding_dimension": 1024,
+            "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN

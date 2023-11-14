@@ -1,4 +1,5 @@
 import torch
+from mlt.preexperiments.models import CaptionDecoder
 from mlt.shared_models import (
     BoundingBoxImageEncoder,
     CoordinateClassifier,
@@ -65,7 +66,7 @@ class CaptionGeneratorSender(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: MaskedImageEncoder,
-        embedding_dimension: int,
+        image_embedding_dimension: int,
         hidden_size,
         *_args,
         **_kwargs
@@ -73,7 +74,9 @@ class CaptionGeneratorSender(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
 
         self.linear = nn.LazyLinear(hidden_size)
 
@@ -97,8 +100,7 @@ class CaptionGeneratorReceiver(nn.Module):
         self,
         image_encoder: ImageEncoder,
         image_embedding_dimension: int,
-        embedding_dim: int,
-        caption_decoder,
+        caption_decoder: CaptionDecoder,
         encoded_sos,
         *_args,
         **_kwargs
@@ -109,7 +111,7 @@ class CaptionGeneratorReceiver(nn.Module):
             nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
         )
         self.caption_decoder = caption_decoder
-        self.linear = nn.LazyLinear(embedding_dim)
+        self.linear = nn.LazyLinear(caption_decoder.decoder_out_dim)
         self.encoded_sos = torch.tensor(encoded_sos)
 
     def forward(self, message, x, aux_input):

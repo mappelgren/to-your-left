@@ -402,6 +402,7 @@ class CaptionDecoder(nn.Module):
         self, vocab_size, embedding_dim, decoder_out_dim, *_args, **_kwargs
     ) -> None:
         super().__init__()
+        self.decoder_out_dim = decoder_out_dim
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, decoder_out_dim, batch_first=True)
         self.classifier = nn.Linear(decoder_out_dim, vocab_size)
