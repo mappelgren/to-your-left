@@ -6,7 +6,7 @@ import torch
 
 class Persistable(ABC):
     @abstractmethod
-    def save(self, file_path):
+    def save(self, file_path, *args):
         ...
 
     @classmethod

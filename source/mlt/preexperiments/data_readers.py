@@ -828,21 +828,15 @@ class CaptionGeneratorDataset(Dataset, Persistable):
     def __init__(
         self,
         captioner: Captioner,
-        samples: list[CaptionGeneratorSample],
         save_to,
     ) -> None:
         super().__init__()
 
         self.captioner = captioner
-        self.samples = samples
         self.file = save_to
 
         with h5py.File(save_to, "r") as f:
             self.num_samples = len(f["image"])
-
-        if len(samples) != 0:
-            self.save(save_to)
-            self.samples = []
 
     @classmethod
     def load(
@@ -918,7 +912,8 @@ class CaptionGeneratorDataset(Dataset, Persistable):
         print()
         print("loaded data.")
 
-        return cls(captioner, samples, save_to)
+        cls.save(save_to, samples, captioner)
+        return cls(captioner, save_to)
 
     def __getitem__(self, index):
         with h5py.File(self.file, "r") as f:
@@ -936,57 +931,31 @@ class CaptionGeneratorDataset(Dataset, Persistable):
     def __len__(self) -> int:
         return self.num_samples
 
-    def save(self, file_path):
+    @classmethod
+    def save(cls, file_path, samples, captioner):
         with h5py.File(file_path, "w") as f:
             f.create_dataset(
                 "image",
-                data=torch.stack([sample.image for sample in self.samples]),
+                data=torch.stack([sample.image for sample in samples]),
             )
             f.create_dataset(
-                "caption", data=torch.stack([sample.caption for sample in self.samples])
+                "caption", data=torch.stack([sample.caption for sample in samples])
             )
             f.create_dataset(
                 "non_target_captions",
-                data=torch.stack(
-                    [sample.non_target_captions for sample in self.samples]
-                ),
+                data=torch.stack([sample.non_target_captions for sample in samples]),
             )
             f.create_dataset(
                 "masked_image",
-                data=torch.stack([sample.masked_image for sample in self.samples]),
+                data=torch.stack([sample.masked_image for sample in samples]),
             )
-            f.create_dataset(
-                "image_id", data=[sample.image_id for sample in self.samples]
-            )
-            f.attrs["captioner"] = np.void(pickle.dumps(self.captioner))
+            f.create_dataset("image_id", data=[sample.image_id for sample in samples])
+            f.attrs["captioner"] = np.void(pickle.dumps(captioner))
 
     @classmethod
     def load_file(cls, file_path):
         with h5py.File(file_path, "r") as f:
-            # samples = [
-            #     CaptionGeneratorSample(
-            #         **dict(
-            #             zip(
-            #                 [
-            #                     "image",
-            #                     "image_id",
-            #                     "caption",
-            #                     "non_target_captions",
-            #                     "masked_image",
-            #                 ],
-            #                 sample,
-            #             )
-            #         )
-            #     )
-            #     for sample in zip(
-            #         [load_tensor(b) for b in f["image"]],
-            #         [str(i, "utf-8") for i in f["image_id"]],
-            #         [load_tensor(c) for c in f["caption"]],
-            #         [load_tensor(n) for n in f["non_target_captions"]],
-            #         [load_tensor(m) for m in f["masked_image"]],
-            #     )
-            # ]
-            # # pylint: disable-next=no-member
+            # pylint: disable-next=no-member
             captioner = pickle.loads(f.attrs["captioner"].tobytes())
 
-        return cls(captioner, [], file_path)
+        return cls(captioner, file_path)
