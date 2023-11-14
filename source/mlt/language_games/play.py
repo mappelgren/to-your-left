@@ -13,6 +13,7 @@ from mlt.language_games.callbacks import (
     ExcludingInteractionSaver,
     LogSaver,
     PrintMessages,
+    ProgressLogger,
 )
 from mlt.language_games.data_readers import (
     CaptionGeneratorGameBatchIterator,
@@ -428,12 +429,10 @@ def main(params):
         dataset = model.dataset.load_file(dataset_file)
         print(f"Dataset {dataset_identifier} loaded.   ")
     else:
-        dataset = model.dataset.load(**dataset_args)
-
-        print(f"Saving dataset {dataset_identifier}...", end="\r")
         if not os.path.exists(dataset_dir):
             os.makedirs(dataset_dir)
-        dataset.save(dataset_file)
+
+        dataset = model.dataset.load(**dataset_args)
         print(f"Dataset {dataset_identifier} saved.   ")
 
     if model.split_dataset:
@@ -526,10 +525,13 @@ def main(params):
                 )
             )
         else:
-            callbacks.append(
-                core.ConsoleLogger(
-                    print_train_loss=True,
-                ),
+            callbacks.extend(
+                [
+                    core.ConsoleLogger(
+                        print_train_loss=True,
+                    ),
+                    ProgressLogger(batches_per_epoch=opts.batches_per_epoch),
+                ]
             )
 
     if opts.save:

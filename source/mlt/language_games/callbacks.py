@@ -78,3 +78,14 @@ class PrintMessages(Callback):
 
     def on_early_stopping(self, _train_loss, _train_logs, epoch, _test_loss, test_logs):
         self.print_events(test_logs)
+
+
+class ProgressLogger(Callback):
+    def __init__(self, batches_per_epoch) -> None:
+        super().__init__()
+        self.batches_per_epoch = batches_per_epoch
+
+    def on_batch_end(
+        self, logs: Interaction, loss: float, batch_id: int, is_training: bool = True
+    ):
+        print(f"Processing batch {batch_id} / {self.batches_per_epoch}...", end="\r")
