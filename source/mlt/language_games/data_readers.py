@@ -16,7 +16,7 @@ from mlt.preexperiments.data_readers import (
     CoordinatePredictorDataset,
     CoordinatePredictorSample,
 )
-from mlt.util import Persistable, load_tensor
+from mlt.util import Persistor, load_tensor
 from torch.utils.data import DataLoader, Dataset, Subset
 
 
@@ -71,7 +71,7 @@ class GameLoader(DataLoader):
         )
 
 
-class LazaridouReferentialGameDataset(Dataset, Persistable):
+class LazaridouReferentialGameDataset(Dataset):
     def __init__(self, images, concept_dict) -> None:
         super().__init__()
 
@@ -171,20 +171,24 @@ class DaleReferentialGameSample:
     image_id: str
 
 
-class DaleReferentialGameDataset(Dataset, Persistable):
+class DaleReferentialGameDataset(Dataset):
     def __init__(
         self,
-        samples,
+        file_path: str,
     ) -> None:
         super().__init__()
 
-        self.samples: list[DaleReferentialGameSample] = samples
+        self.file = file_path
+
+        with h5py.File(file_path, "r") as f:
+            self.num_samples = len(list(f.values())[0])
 
     @classmethod
     def load(
         cls,
         scenes_json_dir,
         image_loader: ImageLoader,
+        persistor: Persistor,
         *_args,
         max_number_samples=100,
         **_kwargs,
@@ -237,58 +241,20 @@ class DaleReferentialGameDataset(Dataset, Persistable):
             )
         print()
 
-        return cls(samples)
-
-    def save(self, file_path):
-        with h5py.File(file_path, "w") as f:
-            f.create_dataset(
-                "bounding_boxes",
-                data=torch.stack(
-                    [torch.stack(sample.bounding_boxes) for sample in self.samples]
-                ),
-            )
-            f.create_dataset(
-                "target_index", data=[sample.target_index for sample in self.samples]
-            )
-            f.create_dataset(
-                "target_order", data=[sample.target_order for sample in self.samples]
-            )
-            f.create_dataset(
-                "image_id", data=[sample.image_id for sample in self.samples]
-            )
-
-    @classmethod
-    def load_file(cls, file_path):
-        with h5py.File(file_path, "r") as f:
-            samples = [
-                DaleReferentialGameSample(
-                    **dict(
-                        zip(
-                            [
-                                "bounding_boxes",
-                                "image_id",
-                                "target_index",
-                                "target_order",
-                            ],
-                            sample,
-                        )
-                    )
-                )
-                for sample in zip(
-                    [list(torch.from_numpy(s)) for s in f["bounding_boxes"]],
-                    [str(i, "utf-8") for i in f["image_id"]],
-                    f["target_index"],
-                    [a.tolist() for a in f["target_order"]],
-                )
-            ]
-
-        return cls(samples)
+        persistor.save(samples)
+        return cls(persistor.file_path)
 
     def __getitem__(self, index):
-        return self.samples[index]
+        with h5py.File(self.file, "r") as f:
+            return DaleReferentialGameSample(
+                image_id=str(f["image_id"][index], "utf-8"),
+                target_index=load_tensor(f["target_index"][index]),
+                bounding_boxes=load_tensor(f["bounding_boxes"][index]),
+                target_order=load_tensor(f["target_order"][index]),
+            )
 
     def __len__(self) -> int:
-        return len(self.samples)
+        return self.num_samples
 
 
 class DaleReferentialGameBatchIterator(GameBatchIterator):
@@ -322,8 +288,8 @@ class DaleReferentialGameBatchIterator(GameBatchIterator):
         image_ids = []
 
         for sample in samples:
-            sender_inputs.append(torch.stack(sample.bounding_boxes))
-            targets.append(torch.tensor(sample.target_index))
+            sender_inputs.append(sample.bounding_boxes)
+            targets.append(sample.target_index)
 
             receiver_inputs.append(
                 torch.stack([sample.bounding_boxes[i] for i in sample.target_order])
@@ -414,7 +380,15 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
 
 class CoordinatePredictorGameDataset(CoordinatePredictorDataset):
     def __getitem__(self, index):
-        return self.samples[index]
+        with h5py.File(self.file, "r") as f:
+            return CoordinatePredictorSample(
+                image_id=str(f["image_id"][index], "utf-8"),
+                image=load_tensor(f["image"][index]),
+                target_pixels=load_tensor(f["target_pixels"][index]),
+                attribute_tensor=load_tensor(f["attribute_tensor"][index]),
+                locations=load_tensor(f["locations"][index]),
+                masked_image=load_tensor(f["masked_image"][index]),
+            )
 
 
 class CoordinatePredictorGameBatchIterator(GameBatchIterator):

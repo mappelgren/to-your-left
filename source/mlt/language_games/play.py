@@ -44,6 +44,7 @@ from mlt.preexperiments.data_readers import (
 )
 from mlt.preexperiments.models import CaptionDecoder
 from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
+from mlt.util import Persistor
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -424,15 +425,13 @@ def main(params):
     ).hexdigest()
     dataset_dir = os.path.join(opts.out_dir, "datasets")
     dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.h5")
+    persistor = Persistor(dataset_file)
     if os.path.exists(dataset_file):
         print(f"Loading dataset {dataset_identifier}...", end="\r")
-        dataset = model.dataset.load_file(dataset_file)
+        dataset = persistor.load(model.dataset)
         print(f"Dataset {dataset_identifier} loaded.   ")
     else:
-        if not os.path.exists(dataset_dir):
-            os.makedirs(dataset_dir)
-
-        dataset = model.dataset.load(**dataset_args)
+        dataset = model.dataset.load(**dataset_args, persistor=persistor)
         print(f"Dataset {dataset_identifier} saved.   ")
 
     if model.split_dataset:

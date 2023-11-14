@@ -45,6 +45,7 @@ from mlt.preexperiments.test import (
     Tester,
 )
 from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
+from mlt.util import Persistor
 from torch import nn, optim
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset, random_split
@@ -437,11 +438,11 @@ if __name__ == "__main__":
         choices=models.keys(),
         help="model to load",
     )
-    parser.add_argument("--decoder_out_dim", type=int, default=None)
-    parser.add_argument("--encoder_out_dim", type=int, default=None)
-    parser.add_argument("--embedding_dim", type=int, default=None)
-    parser.add_argument("--image_embedding_dimension", type=int, default=None)
-    parser.add_argument("--coordinate_classifier_dimension", type=int, default=None)
+    parser.add_argument("--decoder_out_dim", type=int, default=10)
+    parser.add_argument("--encoder_out_dim", type=int, default=10)
+    parser.add_argument("--embedding_dim", type=int, default=10)
+    parser.add_argument("--image_embedding_dimension", type=int, default=10)
+    parser.add_argument("--coordinate_classifier_dimension", type=int, default=10)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
@@ -510,14 +511,16 @@ if __name__ == "__main__":
     ).hexdigest()
     dataset_dir = os.path.join(args.out_dir, "datasets")
     dataset_file = os.path.join(dataset_dir, f"{dataset_identifier}.h5")
+    persistor = Persistor(dataset_file)
     if os.path.exists(dataset_file):
         print(f"Loading dataset {dataset_identifier}...", end="\r")
-        dataset = model_name.dataset.load_file(dataset_file)
+        dataset = persistor.load(model_name.dataset)
         print(f"Dataset {dataset_identifier} loaded.   ")
     else:
-        if not os.path.exists(dataset_dir):
-            os.makedirs(dataset_dir)
-        dataset = model_name.dataset.load(**dataset_args, save_to=dataset_file)
+        dataset = model_name.dataset.load(
+            **dataset_args,
+            persistor=Persistor(dataset_file),
+        )
         print(f"Dataset {dataset_identifier} saved.   ")
 
     train_dataset_length = int(0.8 * len(dataset))
