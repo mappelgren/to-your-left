@@ -253,7 +253,7 @@ class BaselineCoordinatePredictorSender(nn.Module):
         super().__init__()
         self.hidden_size = hidden_size
 
-    def forward(self, _message, x, _aux_input):
+    def forward(self, x, _aux_input):
         return torch.rand((x.shape[0], self.hidden_size))
 
 
