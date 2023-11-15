@@ -28,12 +28,11 @@ from mlt.language_games.data_readers import (
     LazaridouReferentialGameDataset,
 )
 from mlt.language_games.models import (
-    BaselineCoordinatePredictorSender,
     CaptionGeneratorReceiver,
     CaptionGeneratorSender,
     CoordinatePredictorReceiver,
     DaleAttributeCoordinatePredictorSender,
-    DummyReferentialSender,
+    DummySender,
     MaskedCoordinatePredictorSender,
     ReferentialGameReceiver,
     ReferentialGameSender,
@@ -77,13 +76,13 @@ models = {
         receiver_args={},
         loss_function=classification_loss,
     ),
-    "test_discriminator": ModelDefinition(
+    "baseline_discriminator": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
         split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=DaleReferentialGameBatchIterator,
-        sender=DummyReferentialSender,
+        sender=DummySender,
         sender_args={},
         receiver=ReferentialGameReceiver,
         receiver_args={},
@@ -100,6 +99,32 @@ models = {
         receiver=ReferentialGameReceiver,
         receiver_args={},
         loss_function=classification_loss,
+    ),
+    "baseline_caption_generator": ModelDefinition(
+        dataset=CaptionGeneratorGameDataset,
+        dataset_args={
+            "captioner": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
+                reversed_caption=False,
+            ),
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        iterator=CaptionGeneratorGameBatchIterator,
+        sender=DummySender,
+        sender_args={"hidden_size": 10},
+        receiver=CaptionGeneratorReceiver,
+        receiver_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "image_embedding_dimension": 2048,
+            "caption_decoder": CaptionDecoder,
+            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
+                DaleCaptionAttributeEncoder.SOS_TOKEN
+            ),
+        },
+        loss_function=captioning_loss,
     ),
     "caption_generator": ModelDefinition(
         dataset=CaptionGeneratorGameDataset,
@@ -211,7 +236,7 @@ models = {
         split_dataset=False,
         image_loader=FeatureImageLoader,
         iterator=CoordinatePredictorGameBatchIterator,
-        sender=BaselineCoordinatePredictorSender,
+        sender=DummySender,
         sender_args={
             "hidden_size": 10,
         },

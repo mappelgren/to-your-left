@@ -9,7 +9,7 @@ from mlt.shared_models import (
 from torch import nn
 
 
-class DummyReferentialSender(nn.Module):
+class DummySender(nn.Module):
     def __init__(self, hidden_size, *_args, **_kwargs) -> None:
         super().__init__()
         self.hidden_size = hidden_size
@@ -246,15 +246,6 @@ class MaskedCoordinatePredictorSender(nn.Module):
         hidden = self.linear(reduced)
 
         return hidden
-
-
-class BaselineCoordinatePredictorSender(nn.Module):
-    def __init__(self, hidden_size, *_args, **_kwargs) -> None:
-        super().__init__()
-        self.hidden_size = hidden_size
-
-    def forward(self, x, _aux_input):
-        return torch.rand((x.shape[0], self.hidden_size), device=x.device)
 
 
 class CoordinatePredictorReceiver(nn.Module):
