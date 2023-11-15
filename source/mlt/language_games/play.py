@@ -28,6 +28,7 @@ from mlt.language_games.data_readers import (
     LazaridouReferentialGameDataset,
 )
 from mlt.language_games.models import (
+    BaselineCoordinatePredictorSender,
     CaptionGeneratorReceiver,
     CaptionGeneratorSender,
     CoordinatePredictorReceiver,
@@ -193,6 +194,26 @@ models = {
                 ),
             ),
             "embedding_dimension": 2048,
+        },
+        receiver=CoordinatePredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "embedding_dimension": 1024,
+            "coordinate_classifier": CoordinateClassifier,
+        },
+        loss_function=pixel_loss,
+    ),
+    "baseline_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={},
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        iterator=CoordinatePredictorGameBatchIterator,
+        sender=BaselineCoordinatePredictorSender,
+        sender_args={
+            "hidden_size": 10,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={

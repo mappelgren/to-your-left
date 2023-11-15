@@ -248,6 +248,15 @@ class MaskedCoordinatePredictorSender(nn.Module):
         return hidden
 
 
+class BaselineCoordinatePredictorSender(nn.Module):
+    def __init__(self, hidden_size, *_args, **_kwargs) -> None:
+        super().__init__()
+        self.hidden_size = hidden_size
+
+    def forward(self, _message, x, _aux_input):
+        return torch.rand((x.shape[0], self.hidden_size))
+
+
 class CoordinatePredictorReceiver(nn.Module):
     def __init__(
         self,
