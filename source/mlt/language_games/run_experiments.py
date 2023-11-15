@@ -10,25 +10,27 @@ options = [
     "--lr=0.0002",
     "--feature_file=resnet_3_no-avgpool_no-fc.h5",
     "--max_samples=10000",
-    "--model=discriminator",
+    "--model=caption_generator",
     "--mode=gs",
     "--sender_cell=lstm",
     "--receiver_cell=lstm",
     "--save",
     # -- model specifics --
-    "--sender_embedding=500",
+    "--sender_image_embedding=500",
     # "--sender_encoder_dim=",
-    "--receiver_embedding=100",
-    # "--receiver_decoder_out_dim=",
+    "--receiver_image_embedding=100",
+    "--receiver_decoder_out_dim=1500",
+    "--receiver_embedding=500",
     # "--coordinate_classifier_dimension=",
     "--temperature=1",
 ]
 
 variables = {
-    "--sender_hidden": [100, 500, 1000],
-    "--receiver_hidden": [10, 30, 50, 100, 500, 1000],
+    "--dataset": ["dale-2", "dale-5", "colour"],
+    "--sender_hidden": [100, 500],
+    "--receiver_hidden": [10, 50, 500],
     "--vocab_size": [1, 10, 16, 50, 100],
-    "--max_len": [1, 2, 3, 4, 5, 6],
+    "--max_len": [1, 2, 3, 4, 6],
 }
 
 if __name__ == "__main__":
@@ -58,7 +60,9 @@ if __name__ == "__main__":
         ]
 
     for index, combination in enumerate(itertools.product(*variables.values())):
-        save_appendix = "_".join(str(i) for i in combination)
+        save_appendix = "_".join(
+            str(i) for i in combination if i not in variables.get("--dataset", [])
+        )
         subprocess.run(
             [
                 "python",

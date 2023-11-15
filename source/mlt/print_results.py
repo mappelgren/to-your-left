@@ -29,7 +29,10 @@ class Run:
                             for sub_k, sub_v in v.items():
                                 flattened[f"{k}_{sub_k}"] = float(sub_v)
                         else:
-                            flattened[k] = float(v)
+                            try:
+                                flattened[k] = float(v)
+                            except ValueError:
+                                continue
 
                     extended = self.calculate_metrics(flattened)
 
@@ -41,6 +44,13 @@ class Run:
         return run
 
     def _calculate_f1(self, run):
+        if "precision_by_word_<pad>" in run.keys():
+            precision_prefix = "precision_by_word_"
+            recall_prefix = "recall_by_word_"
+        else:
+            precision_prefix = "prec_"
+            recall_prefix = "rec_"
+
         if (
             "word_by_word_precision" in run.keys()
             and "word_by_word_recall" in run.keys()
@@ -52,13 +62,13 @@ class Run:
             )
 
         if (
-            "precision_by_word_<pad>" in run.keys()
-            and "recall_by_word_<pad>" in run.keys()
+            f"{precision_prefix}<pad>" in run.keys()
+            and f"{recall_prefix}<pad>" in run.keys()
         ):
             run["f1_<pad>"] = (
                 2
-                * (run["precision_by_word_<pad>"] * run["recall_by_word_<pad>"])
-                / (run["precision_by_word_<pad>"] + run["recall_by_word_<pad>"])
+                * (run[f"{precision_prefix}<pad>"] * run[f"{recall_prefix}<pad>"])
+                / (run[f"{precision_prefix}<pad>"] + run[f"{recall_prefix}<pad>"])
             )
 
         for attribute in ["shape", "size", "color"]:
@@ -79,6 +89,15 @@ class Run:
         return run
 
     def _calculate_metrics_by_attribute(self, run):
+        if "precision_by_word_<pad>" in run.keys():
+            prefixes = {
+                "precision": "precision_by_word_",
+                "recall": "recall_by_word_",
+                "accuracy": "accuracy_by_word_",
+            }
+        else:
+            prefixes = {"precision": "prec_", "recall": "rec_", "accuracy": "acc_"}
+
         attributes = {
             "shape": ["sphere", "cube", "cylinder"],
             "size": [
@@ -97,14 +116,14 @@ class Run:
             ],
         }
 
-        for metric in ["precision", "recall", "accuracy"]:
+        for metric, metric_prefix in prefixes.items():
             for attribute, values in attributes.items():
                 for value in values:
-                    if f"{metric}_by_word_{value}" not in run.keys():
+                    if f"{metric_prefix}{value}" not in run.keys():
                         return run
 
                 run[f"{metric}_{attribute}"] = sum(
-                    run[f"{metric}_by_word_{value}"] for value in values
+                    run[f"{metric_prefix}{value}"] for value in values
                 ) / len(values)
 
         return run
