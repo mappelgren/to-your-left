@@ -149,15 +149,38 @@ Instead, the task can be turned around: A model needs to identify an object when
 This is called \textbf{referring expressions comprehension}.
 Many challenges remain similar to the REG task, since the model needs to extract disambiguating visual features from the scenes as well.
 However, the goal is typically to select the best matching region of a given choice in a visual scene \citep{Qiao2020}.
-\cmtDK[inline]{describe methods in paper}
+They describe seven different approaches how the challenge is approached in the current research.
+In \emph{joint embedding} approaches, both visual input and the textual referring expressions are embedded into the same embedding space.
+By doing this, the model is able to find similarities and combine them.
+In some cases, an attention mechanism is applied on top.
+This allows the model to focus on important parts of each representation for the specific task.
+\emph{Modular models} are split up in multiple submodels that split up the complete task and solve them step by step.
+This helps to reduce the complexity of a task, as well as making more transparent, where models fail and succeed.
+\emph{Graph-based models} try to make use of the structure in a visual scene when multiple objects are present and the model is tasked to disambiguate them.
+In a first step, the visual features of the image are transferred into a graph that captures objects' properties and their relations.
+This graph is then combined with the referring expression to extract, which of the nodes is represented by it.
+To give a bigger focus on syntactic and semantic structure in a referring expression (which might get underrepresented by sentence-level representations of e.g. an LSTM), some models utilize \emph{external parsers}.
+These make use classical methods as for example dependency parsers, to parse the referring expressions.
+\emph{Weakly supervised} models are used when there is a lack of large datasets that annotate the relation between a referring expression and the corresponding regions in the image.
+Instead, they can operate on datasets that only include the visual scene with a matching referring expression.
+This is done by selecting a matching region in the visual scene and then reproducing the input referring expression from that region.
+During testing, the model only extracts the region from a given referring expression.
+While most of the described approaches grounding the referring expression in multiple steps, by first identifying possible regions around objects in the visual scene and then combining each proposal with the representation of the referring expression, \emph{one-stage approaches} combine them into one step.
+The image is processed as a whole and combined with the embedded referring expression.
+The model then predicts a bounding box around the referred entity.
+Finally, \emph{Visual-Language pre-training} tries to jointly learn from visual and textual representations, instead of separate visual and textual processors in the other approaches.
+Models like ViLBERT \citep{Lu2019} learn joint representations of language and visual input.
+These can then be fine-tuned on the specific referring expression comprehension task.
 
-Closely related to the REC task is visual question and answering (VQA).
+Closely related to the REC task is visual question and answering (VQA) \citep{Ahrens2022,Antol2015,Ilinykh2022,Xu2016}.
 In these tasks, a model is given a question about a visual scene.
 The goal is to find an answer in the scene and generate an answer.
 Central to this is to extract referring expressions from the question and ground them in the visual scene.
 In \citep{Johnson2017}, a model is for example shown an image similar to Figure \ref{fig:incremental-algorithm} and asked the question 'Is there a blue cube with the same size as the purple cylinder?'.
-
-
+To answer this, the model needs to understand two referring expressions and try to ground them in the image.
+In some cases the model can't ground a referring expression, when no object in the scene matches the referring expression.
+In the paper, it is solved by using a modular design of the model, where in a first step the question is translated into a sequence of instructions that defines, how the model is supposed to extract information from the image.
+In the first part, the referring expression is parsed, while in the second part the model grounds it in the visual input.
 
 
 \subsection{Language Games}
