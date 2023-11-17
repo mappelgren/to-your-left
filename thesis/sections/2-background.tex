@@ -217,6 +217,48 @@ In the first part, the referring expression is parsed, while in the second part 
 %     \item why relating objects?
 % \end{itemize}
 
+In this thesis, referring expression generation and referring expression comprehension are studied at the same time.
+This is done using language games between two artificial agents.
+The term of 'language games' was first introduced by \citet{Wittgenstein1953}.
+Following his argumentation, meaning of words and language is not absolute, but is situated in human dialogue.
+Hereby, two interlocutors converse in language games, that define how the utterances are meant and interpreted.
+The words' meaning is not just based on the context or surrounding words, but more on the situation, including pragmatic and social context.
+The rules in each of these situations differ and therefore the meanings and semantics of words and sentences may differ from situation to situation.
+This is summarized as a language game.
+These can be any small parts of conversations, for instance between a teacher and a student teaching a new concept or between two persons, discussing a specific topic.
+An interjection 'Water!' may be a warning, an answer to a question, a request or something else, depending on the context.
+% SD: Because referring expressions are ambiguous participants rely on language games to resolve the reference in context.
+% SD: Give an example of a game?
+% DK: TODO
+This applies as well to the ambiguous referring expressions, as in the example about the beverages described in section \ref{sec:background:re}.
+Which referring expression Person A uses to ask for the beverage, depends on the assumed shared knowledge.
+With other interlocutors or situations, other referring expressions are uttered.
+
+This reasoning was taken up, when trying to train artificial entities to produce a language.
+One of the original games is the signaling game, proposed by \citet{Lewis1969}.
+In this game, a sender needs to send a message to a receiver, based on information only available to the sender.
+The sender interprets the message and proposes an action to take.
+Both sender and receiver are rewarded in the same way if the proposed action was correct.
+Hence, both agents need to invent a language together, fit to the conditions of the game.
+
+The entities can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
+Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
+Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
+% SD: Examples of architectures from Baroni. The EGG framework.
+% DK: TODO
+
+
+
+In a language game, multiple agents need to solve a task by communicating with each other.
+The means of communication are very restricted.
+Typically, the agents are given a set of arbitrary symbols, a vocabulary, the agents can use to convey information.
+These symbols initially don't have any meaning, but by using and interpreting symbols repeatedly to solve the task the agents learn to use certain symbols, to encode specific information.
+By this, a new artificial language emerges between these agents.
+The emergence of a language however is highly dependent on the constraints posed on (1) the agents' architectures, (2) the way of communication, (3) the perceptual input for the agents and (4) the task, they need to solve.
+
+
+
+
 The center of this thesis evolves around language games between deep neural models.
 Hereby, multiple deep neural agents need to solve a task, by communicating with symbols, which initially are not associated with any meaning.
 By using and interpreting these symbols in there communication, the agents start to give these symbols and their combinations meaning.
