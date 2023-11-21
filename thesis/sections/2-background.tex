@@ -231,17 +231,39 @@ An interjection 'Water!' may be a warning, an answer to a question, a request or
 % SD: Give an example of a game?
 % DK: TODO
 This applies as well to the ambiguous referring expressions, as in the example about the beverages described in section \ref{sec:background:re}.
-Which referring expression Person A uses to ask for the beverage, depends on the assumed shared knowledge.
+Which referring expression, Person A uses to ask for the beverage, depends on the assumed shared knowledge.
 With other interlocutors or situations, other referring expressions are uttered.
 
 This reasoning was taken up, when trying to train artificial entities to produce a language.
 One of the original games is the signaling game, proposed by \citet{Lewis1969}.
-In this game, a sender needs to send a message to a receiver, based on information only available to the sender.
-The sender interprets the message and proposes an action to take.
+These games are made up of a sender and a receiver.
+The sender has access to the state of the world, while the receiver does not.
+The sender can choose from a fixed set of signals to communicate information to the receiver.
+The receiver, upon receiving the signal, must take an action based on that information.
+The goal of both the sender and the receiver is for the receiver to take the correct action in every state, as both players have a common interest in achieving the same outcomes.
 Both sender and receiver are rewarded in the same way if the proposed action was correct.
 Hence, both agents need to invent a language together, fit to the conditions of the game.
 
-The entities can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
+Central in language games is that the means of communication are very restricted.
+Typically, the agents are given a set of arbitrary symbols, a vocabulary, the agents can use to convey information.
+These symbols initially don't have any meaning, but by using and interpreting symbols repeatedly to solve the task the agents learn to use certain symbols, to encode specific information.
+By this, a new artificial language emerges between these agents.
+The emergence of a language however is highly dependent on the constraints posed on (1) the agents' architectures, (2) the way of communication, (3) the perceptual input for the agents and (4) the task, they need to solve.
+
+
+
+Language games and the emergence of language are studied in different environments.
+Agents can be robots that are situated in the real world.
+In \citep{Steels2009} the authors explore spatial language, in especially language that focuses on spatial positions movements.
+Two robots are moving freely in a space until they see each other as well as target object.
+The object is target is moved, which is registered by both robots.
+The robots now need to communicate the movement to each other using language games.
+Hereby, the experiments show that perspective and the capability of aligning the perspective with the other robot is central for the success of communication and an emergence of a language, when agents are embodied and have a specific view on the surrounding world.
+
+In more recent work, deep neural models are utilized for the agents.
+
+
+The agents can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
 Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
 Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
 % SD: Examples of architectures from Baroni. The EGG framework.
@@ -249,12 +271,6 @@ Guided by the task and the rules, how agents can generate and interpret symbols,
 
 
 
-In a language game, multiple agents need to solve a task by communicating with each other.
-The means of communication are very restricted.
-Typically, the agents are given a set of arbitrary symbols, a vocabulary, the agents can use to convey information.
-These symbols initially don't have any meaning, but by using and interpreting symbols repeatedly to solve the task the agents learn to use certain symbols, to encode specific information.
-By this, a new artificial language emerges between these agents.
-The emergence of a language however is highly dependent on the constraints posed on (1) the agents' architectures, (2) the way of communication, (3) the perceptual input for the agents and (4) the task, they need to solve.
 
 
 
