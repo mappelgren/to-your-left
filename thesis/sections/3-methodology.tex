@@ -194,6 +194,7 @@ Table \ref{tab:image_encoder} shows the layers and their output dimensions when 
 \end{table}
 
 \subsection{EGG framework}
+\label{sec:methodology:egg}
 The goal of this thesis is to run and compare different setups of language games systematically.
 To do this, all experiments rely on the \emph{\textbf{E}mergence of lan\textbf{G}uage in \textbf{G}ames} (EGG) framework \citep{Kharitonov2019} which is implemented in PyTorch.
 % SD: What is the framework? We saw that language games can be implemented very differently, with robots, as code, etc. it is a neural model.
@@ -236,6 +237,7 @@ The \emph{game} is then calculating a loss for each of these outputs separately.
 These losses are summed up to a total loss that is used to adapt the weights in both agents as well as in both LSTMs.
 
 \subsection{Optimization in language games}
+\label{sec:methodology:optimization}
 The traditional approach to solve problems with a discrete channel relies on the REINFORCE algorithm \citep{Williams1992}.
 It uses the concept of Monte Carlo sampling to estimate the gradient of the expected cumulative reward with respect to the policy parameters.
 The basic idea is to collect trajectories by following the policy, compute the cumulative rewards for each trajectory, and then update the policy parameters to increase the probabilities of actions that led to higher rewards.
@@ -279,7 +281,7 @@ Looking at the environmental issues, the models used in this thesis consist of o
 Larger models as the feature extractors are already pretrained and add no additional consumption.
 
 Finally, the purpose of this thesis is to analyze the results and the emerged language and draw conclusions, how emerged languages can be grounded better in the environment.
-For that reason, the final models can't be uses in any real world applications and produce potential harm.
+For that reason, the final models can't be used in any real world applications and produce potential harm.
 On the other hand, this work can on the long run mitigate harm as it provides a study of models, how they would behave on real data.
 This therefore contributes towards interpretability of AI.
 % SD: The work can on the long run mitigate harm as it is provides a study of models, how they would behave on real data and therefore contributes towards interpretability of AI.

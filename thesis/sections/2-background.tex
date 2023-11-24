@@ -134,7 +134,7 @@ More complex scenes also involve multiple perspectives, where the models are tas
 In \citep{Dobnik2021}, visual dialogue is analyzed where speakers have different views on cups that are placed on a table.
 When speakers refer to a certain cup, they need to take the perspective of the listener to disambiguate the referring expression; for instance in the referring expression 'the cup on the left', \emph{left} is dependent on the speaker's and listeners' spatial position in relation to the cup.
 
-Current research focuses hereby on generating relational referring expressions, which add more complexity to the task \citep{Ghanimifard2017,Ghanimifard2019,Ramisa2015,Liu2022a}.
+Current research focuses hereby on generating relational referring expressions, which add more complexity to the task \citep{Ghanimifard2017,Ghanimifard2019,Ramisa2015,Liu2023}.
 Models need to first extract visual features of multiple objects from the scene.
 Of these extracted objects, a meaningful landmark object needs to be found which helps to refer to the target object.
 Finally, they need to find proper relations between them to describe the target object.
@@ -185,11 +185,6 @@ In the first part, the referring expression is parsed, while in the second part 
 
 \subsection{Language Games}
 \label{sec:background:language-games}
-\cmtDK[inline]{language games combine generation and understanding}
-\cmtDK[inline]{describe as 'dialogue turns'}
-\cmtDK[inline]{different approaches (robotics, neural models, ...)}
-\cmtDK[inline]{different study interests (linguistically, non-linguistically)}
-\cmtDK[inline]{continuous learning}
 % \begin{itemize}
 %     \item why language games?
 %           \begin{itemize}
@@ -218,129 +213,202 @@ In the first part, the referring expression is parsed, while in the second part 
 % \end{itemize}
 
 In this thesis, referring expression generation and referring expression comprehension are studied at the same time.
-This is done using language games between two artificial agents.
-The term of 'language games' was first introduced by \citet{Wittgenstein1953}.
+This is done by using language games between two artificial agents.
+The term 'language games' was first introduced by \citet{Wittgenstein1953}.
 Following his argumentation, meaning of words and language is not absolute, but is situated in human dialogue.
 Hereby, two interlocutors converse in language games, that define how the utterances are meant and interpreted.
 The words' meaning is not just based on the context or surrounding words, but more on the situation, including pragmatic and social context.
 The rules in each of these situations differ and therefore the meanings and semantics of words and sentences may differ from situation to situation.
 This is summarized as a language game.
-These can be any small parts of conversations, for instance between a teacher and a student teaching a new concept or between two persons, discussing a specific topic.
+These can be any small parts of conversations, for instance between a teacher explaining a new concept to a student, or between two people, discussing a specific topic.
 An interjection 'Water!' may be a warning, an answer to a question, a request or something else, depending on the context.
 % SD: Because referring expressions are ambiguous participants rely on language games to resolve the reference in context.
 % SD: Give an example of a game?
 % DK: TODO
 This applies as well to the ambiguous referring expressions, as in the example about the beverages described in section \ref{sec:background:re}.
-Which referring expression, Person A uses to ask for the beverage, depends on the assumed shared knowledge.
-With other interlocutors or situations, other referring expressions are uttered.
+Which referring expression Person A uses to ask for the beverage, depends on the assumed shared knowledge.
+With other interlocutors or situations, different referring expressions are uttered.
 
-This reasoning was taken up, when trying to train artificial entities to produce a language.
+This reasoning was taken up when trying to train artificial entities to produce a language.
 One of the original games is the signaling game, proposed by \citet{Lewis1969}.
-These games are made up of a sender and a receiver.
+These games are composed of a sender and a receiver.
 The sender has access to the state of the world, while the receiver does not.
 The sender can choose from a fixed set of signals to communicate information to the receiver.
 The receiver, upon receiving the signal, must take an action based on that information.
-The goal of both the sender and the receiver is for the receiver to take the correct action in every state, as both players have a common interest in achieving the same outcomes.
+The goal of both sender and receiver is for the receiver to take the correct action in every state, as both players have a common interest in achieving the same outcomes.
 Both sender and receiver are rewarded in the same way if the proposed action was correct.
 Hence, both agents need to invent a language together, fit to the conditions of the game.
 
 The study of the emergence of an artificial language serves multiple goals.
 First, the study of the emergence of artificial language can help to shed light into why and how natural languages evolved \citep{Bartlett2005,Kirby2002,Kirby2008,Noukhovitch2021}.
-This approach allows a deep study of the constraints and restrictions that are necessary that symbols start to be connected with meaning and get grounded in the real world.
-Insights in this field might give indications, under which circumstances natural language evolves.
+This approach allows a deep study of the constraints and restrictions that are necessary so that symbols start to be connected with meaning and get grounded in the real world.
+Insights in this field might give indications for in which circumstances natural language evolves.
 On the other hand, research analyzes how the emerged language looks and how the agents represent information in messages and symbols \citep{Baroni2022,Lazaridou2017,Chaabouni2022,Kottur2017}.
 Some studies observe different properties of the emerged languages, such as compositionality, complexity or efficiency, and study how the agents can be biased towards producing a language that holds certain properties.
-Eventually, this can produce languages that agents can use in practical applications instead of relying on predefined unflexible protocols.
+Eventually, this can produce languages that agents can use in practical applications instead of relying on the predefined unflexible protocols that are currently used.
 
-Central in language games is that the means of communication are very restricted.
-Typically, the agents are given a set of arbitrary symbols, a vocabulary, the agents can use to convey information.
-These symbols initially don't have any meaning, but by using and interpreting symbols repeatedly to solve the task the agents learn to use certain symbols, to encode specific information.
+In language games it is central that the means of communication are very restricted.
+Typically, the agents are given a set of arbitrary symbols, a vocabulary, that the agents can use to convey information.
+These symbols initially don't have any meaning, but by using and interpreting them repeatedly to solve the task the agents learn to use certain of those symbols, to encode specific information.
 By this, a new artificial language emerges between these agents.
-The emergence of a language however is highly dependent on the constraints posed on (1) the agents' architectures, (2) the way of communication, (3) the perceptual input for the agents and (4) the task, they need to solve \citep{Baroni2022}.
+The emergence of a language however is highly dependent on the constraints posed on (1) the agents' architectures, (2) the way of communication, (3) the perceptual input for the agents and (4) the task they need to solve \citep{Baroni2022}.
 
-Language games and the emergence of language are studied in different environments.
-Agents can be robots that are situated in the real world.
-In \citep{Steels2009} the authors explore spatial language, in especially language that focuses on spatial positions movements.
-Two robots are moving freely in a space until they see each other as well as target object.
-The object is target is moved, which is registered by both robots.
+In \citep{Steels2009} two robots are trained by using language games.
+The authors explore how spatial language, more specifically language that focuses on spatial positions and movements, emerges when the agents are situated in the real world and can perceive each other.
+Two robots equipped with a camera are moving freely in a space until they see each other as well as the target object of the game.
+The target object is moved by the researchers, and that movement is registered by both robots.
 The robots now need to communicate the movement to each other using language games.
-Hereby, the experiments show that perspective and the capability of aligning the perspective with the other robot is central for the success of communication and an emergence of a language, when agents are embodied and have a specific view on the surrounding world.
+Hereby, the experiments show that when agents are embodied and have a specific view on the surrounding world the capability of aligning their own perspective with the other's is central for the success of communication and the emergence of a language.
 
 In more recent work, deep neural models are utilized for the agents.
+Instead of being embodied, agents only receive visual input, without any perception that the other agent is present.
+In \citep{Lazaridou2017}, two agents play a discrimination game.
+The same set of images is shown to both agents.
+While they are unordered for the receiver, the sender always sees the target image as its first image.
+The task is now for the sender to communicate the target image in a way that the receiver can discriminate it from the distractors and then point towards it.
+Hereby, two of the constraints mentioned above are studied at once.
+First, the way of communication is constrained in the way that the sender can only communicate one symbol per message, which results in the agents clustering images into categories that are described with a symbol.
+Secondly, two different sender architectures are compared: the 'agnostic' sender that encodes each image separately and then produces the message, and the 'informed' sender that uses convolutions to combine both images for better discrimination.
+While both architectures are able to solve the task with an emerged language, the emerged language of the informed sender converges faster and makes use of more symbols than the agnostic sender.
 
-
-The agents can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
-Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
-Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
+While the previously described examples always study prosocial agents (agents that have a common goal), \citet{Cao2018} examine self-interested agents.
+Hereby, multiple agents need to distribute a set of items between them.
+Each item has a utility score for each agent that is only visible to themselves.
+The goal for each agent is to gain the highest utility score by choosing the correct items.
+To do that, the agents first negotiate with arbitrary symbols in a 'linguistic' channel.
+At any time, any agent can choose to end the negotiation by proposing how to distribute the items, using predefined symbols in the 'proposal channel'.
+These can be accepted or rejected by the other agents.
+Their experiments show that in this self-interested setup, the agents utilize the proposal channel well to solve the task, but no language emerges in the linguistic channel.
+However, in a similar setup with prosocial agents, they start to utilize the linguistic channel and create an artificial language.
 % SD: Examples of architectures from Baroni. The EGG framework.
 % DK: TODO
-
-
-The entities can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
-Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
-Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
-% SD: Examples of architectures from Baroni. The EGG framework.
-% DK: TODO
-
-
-
-The center of this thesis evolves around language games between deep neural models.
-Hereby, multiple deep neural agents need to solve a task, by communicating with symbols, which initially are not associated with any meaning.
-By using and interpreting these symbols in there communication, the agents start to give these symbols and their combinations meaning.
-After this process, a new artificial language emerged, with which the agents can communicate with each other.
 
 % SD: Give an example of a language games. Symbols are invented at random. However, the constraints of interaction control how new symbols are introduced and when existing symbols are re-used and used. Agents cannot invent unlimited number of symbols to refer to every event the6 encounter as they have limited memory and therefore they are driven by abstraction. On the other hand, the symbols must be flexible enough. The other agent must be able to resolve the symbols they hear based on the context. Hence, a successful interaction is when a describer is producing such symbols that interpreter can easily interpret within the context, here an image. This is also how a reward function is defined and loss is propagated.
 % DK: TODO
-
-Section \ref{sec:aims_languages} explains reasons why research in this field is conducted and how it may help in further research.
-Section \ref{sec:setup-lg} shows in more detail how the language games are set up and how exactly agents can communicate and the language emerges.
-Section \ref{sec:properties-el} discusses, how the emerged languages can be built up.
-Finally, section \ref{sec:referring} discusses how the language games will be used in this thesis, to explore how agents can refer to objects in images.
-
-\subsubsection{Aims of emerged languages}
-\label{sec:aims_languages}
-The setup of language games allows for very controlled rules of how agents can behave.
-% SD: Rephrase, language games provide interactive constraints within which language can emerge. But what are these? In this thesis we will study some, such as agent’s memory and layer representation and the feature representation, the structure of the world and its ambiguity.
-% DK: TODO
-
-
 \subsubsection{Setup of language games}
-\label{sec:setup-lg}
-The term of 'language games' was first introduced by \citet{Wittgenstein1953}.
-The author describes language games as uses of language between multiple interlocutors.
-These can be any small parts of conversations, for instance between a teacher and a student teaching a new concept or between two persons, discussing a topic.
-The rules in each of these situations differ and therefore the meanings and semantics of words and sentences may differ from situation to situation.
-An interjection 'Water!' may be a warning, an answer to a question, a request or something else, depending on the context.
-% SD: Because referring expressions are ambiguous participants rely on language games to resolve the reference in context.
-% SD: Give an example of a game?
-% DK: TODO
-meanings are bound to the rules of the language games.
+\label{sec:background:lg:setup}
+In this thesis, the language games are studied with prosocial non-embodied agents that are deep neural networks.
+They can exchange multiple symbols to communicate after being presented with images.
+This is done using the \emph{EGG} framework that allows a high configuration of the agents' architectures, of the ways of communication, and of the technical constraints \citep{Kharitonov2019}.
 
-This reasoning was taken up, when trying to train artificial entities to produce a language.
-One of the original games is the signaling game, proposed by \citet{Lewis1969}.
-In this game, a sender needs to send a message to a receiver, based on information only available to the sender.
-Based on the message, the receiver proposes an action.
-Both sender and receiver are rewarded in the same way if the proposed action was correct.
-Hence, both agents need to invent a language together, fit to the conditions of the game.
+Using the framework, how the messages of the sender are produced can be controlled.
+For instance the sender can send single symbols or use different kinds of RNNs to produce a sequence as a message.
+The same applies to the receiver for parsing the message.
 
-The entities can be set into real or simulated interactive situation, a language game, that meaning and a language can emerge \citep{Kirby2002}.
-Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
-Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
-% SD: Examples of architectures from Baroni. The EGG framework.
-% DK: TODO
+Furthermore, a central problem in language games is how to train the sender.
+Usually every layer in the receiver model is differentiable and therefore standard backpropagation methods can be used to update the weights in the receiver.
+However, the sender's messages are discrete symbols and the loss coming from the receiver can therefore not be simply passed on to the sender.
+A classic solution to this problem is to use REINFORCE algorithms \citep{Williams1992} that can handle discrete symbols.
+More recently, Gumbel-Softmax relaxation \citep{Jang2017} is used to turn the discrete categorical distribution into a continuous probability distribution.
+Doing this, receiver and sender act as a whole deep neural model that can be completely backpropagated with standard methods.
+The methods are discussed deeper in section \ref{sec:methodology:optimization}.
+When setting up the language game with the EGG, both REINFORCE and Gumbel-Softmax relaxation can be used.
 
-% This reasoning was taken up, when trying to train deep neural models to produce language.
-% These models need to be set into an interactive situation, a language game, that meaning and a language can emerge (\citet{Baroni2020}).
-% Multiple deep neural models, called agents, communicate with a set of symbols to solve a task.
-% Guided by the task and the rules, how agents can generate and interpret symbols, a language can emerge.
+In classical machine learning problems, the models are trained using a train dataset for multiple epochs.
+To verify the performance, the model is verified on unseen test samples, which allows to test the ability to generalize its learned knowledge.
+Opposed to that, the main goal of language games is not to solve a specific task, but instead the success of communication with a useful emerged language.
+Consequently, the agents are trained continuously, and the testing doesn't validate the model on unseen samples, but instead is used to extract the exchanged messages, namely the emerged language.
+In other words, during training, the agents are shown randomly drawn samples from the dataset for each game.
+This is done repeatedly for $k$ 'games' so that the agents improve and ground their knowledge in the used symbols.
+During the testing, the agents are frozen and again randomly drawn samples are shown.
+The messages that the agents are exchanging now represent the language that emerged after $k$ language games which can be analyzed.
+
+Section \ref{sec:methodology:egg} explains the framework in more detail.
 
 \subsubsection{Properties of the emerged language}
-\label{sec:properties-el}
+\label{sec:background:lg:properties}
+When agents develop an artificial language, they can learn to use it in different ways.
+Several studies research the properties of emerged languages, in particular if they share properties with human languages.
+One important property is the capability of forming new meanings by combining multiple symbols in a message, so-called compositionality \citep{Chaabouni2020, Gupta2020,Kharitonov2020, Lazaridou2018}.
+\citet{Lazaridou2018} construct a referential game where agents are presented with symbolic input instead of visual input in form of images.
+More specifically, each of the objects, target object and distractors, are represented as one-hot vectors where each dimension corresponds to an attribute of the object.
+This setup should bias the agents to rely directly on these given attributes in the messages to communicate the target object, instead of first having to extract every possible attribute, for instance  from visual features.
+Hence, this helps them to develop a compositional language.
+A compositional language should help the agents to communicate objects with unseen combination of attributes during training.
+Therefore, to analyze the degree of compositionality in the emerged language, the authors present the agents with new combinations of objects and measure the accuracy.
+Even if the accuracy drops lower, the fact that it is still above the random baseline shows that the agents are able to generalize to a certain degree.
+Furthermore, they utilize new combinations of symbols in their messages.
+However, \citet{Kharitonov2020} show that compositionality is not necessarily tied to the ability to generalize.
+In their experiments, non-compositional languages that emerge are able to generalize better than their compositional counterparts.
 
+One essential property of human languages is \emph{Zip's Law of Abbreviation}, in other words that more frequent words tend to be shorter.
+In \citep{Chaabouni2019}, the researchers analyze if this law also applies to emerged languages.
+They find that without any pressure to produce shorter strings the agents produce a language that follows the inverse rule: the most frequent inputs are associated with longer messages.
+Only when long messages are penalized, a language which follows similar rules as human languages emerges.
 
-\subsubsection{Referring to objects and grounding}
-\label{sec:referring}
+Finally, a strong focus in the study of emerged languages lies in interpretability \citep{Dessi2021,Lazaridou2017,Chaabouni2021}.
+While the agents ground the symbols in their input and certain symbols correspond to certain categories, they do not necessarily align with human categories and words.
+However, agents can be biased to use similar categories, as shown in \citep{Lazaridou2017}.
+This is done by infusing human labels during training so that the agents ground the visual input not only in their artificial language, but also in human language.
+More specifically, their experimental setup is a referential game, where the sender needs to describe the target image in a set of distractors to the receiver.
+Alternating with describing the target image to the receiver, the sender is trained to classify its input with human labels.
+The results show that this setup doesn't have any negative effect on the communicative success, but instead it only biases the agents to align their vocabulary with human descriptions.
+This makes the emerged language much easier to interpret for humans.
 
 \subsection{Artificial dataset}
-\cmtDK[inline]{'world shapes language'}
-\cmtDK[inline]{different types of biases -> reduce and control}
+Language is heavily influenced by the perception and the environment \citep{Hofstadter2013,Dobnik2017,Ji2022}.
+This is for instance very apparent in color naming systems across different languages \citep{Zaslavsky2018}.
+Which and how many words are used to refer to a specific color is dependent on the perceptual and social context around the speakers.
+Different studies show that while all languages tend to share similar basic color categories, some languages' systems are based on different underlying principles.
+Color names in the language of the Berinmo people from Papua New Guinea for example  reference natural objects and hence color categories are different from non-referential English color names \citep{Davidoff2001,Steels2005}.
+Further, this fact can be applied to more abstract constructs like metaphors, which often reference perceived events in the world \citep{Lakoff1980}.
+Perceiving that cats always land on the ground on their feet is for example the origin of the metaphor 'as nimble as a cat'.
+
+This influence on the language by the perception of the world is not only limited to human language learning and evolution, but it as well applies to machines that are trained to produce language.
+Many models in different disciplines of Natural Language Processing are trained on datasets such as the MS COCO dataset \citep{Lin2014} or the Flickr30k dataset \citep{Young2014}, which are sourced from uploaded photos in social networks.
+While these datasets often contain a large amount of samples, they can contain structural biases.
+The photos usually feature and center on specific objects, people or animals.
+This is not necessarily a faithful representation of human perception of the world, in which these entities are for instance partially hidden, shown from the back or appear at the edges of the field of view.
+The datasets might therefore give a euphemized view on the world.
+Furthermore, the datasets can contain underlying patterns in the semantic information of the photos \citep{Hendricks2018,Johnson2017a,Hudson2019}.
+For instance, when dogs are photographed, they usually appear running on a meadow.
+An image captioning model might learn to predict the caption 'a dog running on a meadow' for all images containing a dog, independently if the dog is actually running on a meadow or sitting in the living room, just because of the higher frequency in the dataset.
+In other words, the model might utilize these underlying structural biases rather than relying on the extracted visual information from the image.
+
+Different approaches are taken to mitigate this problem.
+While some research focuses on improving the models (e.g. \citet{Hendricks2018,Lu2017}), others create artificial datasets.
+Using artificial datasets, one can control exactly which structural patterns occur.
+Furthermore, all ground truths as for example spatial positions of objects are known and can be used for training models.
+Figure \ref{fig:artificial-datasets} shows several examples of different artificial datasets.
+Real world photos often contain a lot of distracting visual information that poses challenges for models to identify the relevant information.
+In \citep{Ghanimifard2017} and \citep{Ji2022}, the authors for example create abstract visual scenes that only contain specific concepts, like for instance spatial positions.
+With no distracting concepts present, researchers can focus only on the effects of the concept that is relevant for the respective study.
+Other datasets consist for example of comic-like scenes \citep{Zitnick2013,Zhang2016}.
+These scenes, while still being abstract also contain functional objects.
+This adds more complexity for predicting spatial relations.
+More recently, datasets are created using 3D environments \citep{Johnson2017a,Lee2022,Ahrens2022}.
+Scenes created in this way resemble photos taken in the real world and models can more easily transfer the learned knowledge to real world photos.
+Extending this reasoning, several datasets include embodied perspectives.
+Images are for example taken from the perspective of a person in the scene \citep{Dobnik2015} or from the perspective of an embodied robot navigating a 3D environment \citep{Hill2021}.
+
+\begin{figure}[ht]
+    \centering
+    \subfigure[Abstract spatial templates \citep{Ghanimifard2017}]{
+        \includegraphics[width=0.3\linewidth]{figures/dataset_Ghanimifard.png}
+    }
+    \subfigure[Abstract tangram shapes \citep{Ji2022}]{
+        \includegraphics[width=0.3\linewidth]{figures/dataset_Ji.png}
+    }
+    \subfigure[comic-like scenes \citep{Zhang2016}]{
+        \includegraphics[width=0.3\linewidth]{figures/dataset_Zhang.png}
+    }
+    \subfigure[3D-generated scenes \citep{Lee2022}]{
+        \includegraphics[width=0.3\linewidth]{figures/dataset_Lee.png}
+    }
+    \subfigure[3D-generated scenes including perspective \citep{Dobnik2015}]{
+        \includegraphics[width=0.3\linewidth]{figures/dataset_Dobnik.png}
+    }
+    \subfigure[embodied robot in a 3D environment \citep{Hill2021}]{
+        \includegraphics[width=0.3\linewidth]{figures/dataset_Hill.png}
+    }
+    \caption{Example images from different artificial datasets}
+    \label{fig:artificial-datasets}
+\end{figure}
+
+This thesis utilizes an artificial dataset for two reasons.
+First, all ground truth information about the scenes can be extracted during their generation.
+This includes spatial positions of entities placed in the scene, their properties and relations to other entities.
+Having all information present, several different tasks for the models can be created using the same generated images.
+More importantly, the usage of an artificial dataset allows for perfect control over the bias present in the images, in particular which entities are present, and which properties and attributes they have.
+As detailed before, perceptual input shapes the language that describes and interacts with it.
+When agents in a language game describe and refer to entities present in a scene, the emerged language is expected to utilize these biases by making use of the controlled attributes in the scenes.
