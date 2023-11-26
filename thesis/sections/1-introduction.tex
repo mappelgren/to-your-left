@@ -18,14 +18,8 @@ Furthermore, spatial terms play a vital role to refer to and disambiguate object
 
 One problem that arises is the question of ambiguity in language and referring expressions.
 Natural language is often used in an underspecified way.
-Interlocutors rely on pragmatic and semantic context to communicate.
-Given for example the following situation:
-Two people are in a room with two chairs.
-If one person asks for 'a chair', the second person would give him the chair that is closer to him.
-In other situations the second person would give him his preferred chair even if it's further away.
-The referring expression is the same in both contexts, but refers to two different entities.
-The difference lies in the pragmatic context that both interlocutors are aware of.
-In case this context is not shared, referring expressions might be misunderstood, because of the underspecification.
+Interlocutors rely on pragmatic and semantic context to communicate, particular interlocutors share a common ground which is used to disambiguate referring expressions.
+In case a common ground is not shared, referring expressions might be misunderstood, because of their underspecification.
 
 Furthermore, the real world is characterized by its continuous nature.
 On the other side, natural language is a set of discrete symbols.
@@ -40,7 +34,14 @@ The goal of the algorithm is to construct referring expressions incrementally, t
 It works by gradually building up a referring expression based on the properties of the object being referred to.
 Hereby, it considers the most salient or distinguishing properties first and then adds additional properties as needed.
 This helps to create concise, effective and unambiguous referring expressions.
-\cmtDK[inline]{co-reference}
+
+On the other side, humans as well as machines need to be able to comprehend referring expressions.
+Often this task is defined as identifying a unique target object from a set of distractors in a visual scene \citep{Mao2016}.
+Hereby, many different architectures for models are studied that try to solve this task \citep{Qiao2020}.
+In some approaches the models for example embed both the referring expression and bounding boxes around objects in the visual scene in the same embedding space to align them.
+In other approaches, models don't rely on bounding boxes, but extract features from the whole visual scene and combine them with the referring expression in one step.
+An extension of referring expression comprehension are visual question and answering tasks (VQA), in which a model is presented with a question and a visual scene that should be used to answer the question (e.g. \citep{Antol2015}).
+In these tasks, the model often needs to extract multiple referring expressions at the same time and ground them in the visual scene.
 
 Meaning of symbols and referring expression emerge through dialogue between interlocutors \citep{Wittgenstein1953,Clark1986}.
 Moreover, \citet{Wittgenstein1953} introduces the concept of \emph{language games}: small parts of conversation between interlocutors.
@@ -86,12 +87,12 @@ These messages are analyzed with respect to the visual input to answer the two f
 \subsection{Contribution}
 This thesis aims to add three contributions to the field of research.
 First, new artificial visual datasets are created, consisting of images, depicting objects and their attribute and spatial relations.
-Many existing datasets that are used to study referring expressions that use real images are based on photos taking by humans.
-This adds a lot of inherent bias to the dataset, since these photos often focus on similar objects and actions.
+Many existing datasets that are used to study referring expressions use real photos taking by humans.
+This adds a lot of inherent bias to the dataset, since these photos for instance often focus on similar objects and actions.
 Additionally, they require external knowledge about the world and the functions of objects which is not present in the image.
 Furthermore, information about the objects and their relations in the image are not present in a structured way.
 The datasets that are created in this thesis aim to reduce this bias and provide all information about the scene and objects in the image.
-In fact, the artificial creation of the dataset allows controlling precisely bias in each scene.
+In fact, the artificial creation of the dataset allows controlling precisely for the bias in each scene which can be utilized by agents in a language game.
 % SD: We also know the ground truth about the scenes as we know the function that generated them.
 % DK: (done)
 

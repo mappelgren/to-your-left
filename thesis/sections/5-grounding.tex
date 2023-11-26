@@ -58,9 +58,7 @@ By doing this large objects in the front of the scene fill the bounding box comp
 They also might contain noise in the form of parts of adjacent objects.
 Preliminary experiments indicated however that a more complex method for extracting the bounding boxes, depending on spatial position in the scene to reduce the noise didn't improve the results.
 Therefore, bounding boxes in this thesis rely on the former simpler approach.
-Since, each bounding box will be passed through on of the feature extractors, described in section \ref{sec:feature-extractors} they need to be normalized first.
-As described in \citep{He2016,Simonyan2015}, the bounding boxes are resized to 256 pixels for the shorter side, then cropped around the center to a square of 224 \times\ 224 pixels.
-Finally, the RGB channels are normalized, by subtracting the means (0,485; 0,456; 0,406) and dividing the result by the standard deviation (0,229; 0,224; 0,225) for each channel respectively.
+Since, each bounding box will be passed through on of the feature extractors, they are preprocessed as described in section \ref{sec:feature-extractors}.
 The array of bounding boxes is padded with matrix of zeros to the maximum possible number of objects present in a scene across the dataset.
 For the 'Dale-2' dataset, this corresponds to a maximum of two bounding boxes, 5 bounding boxes for the 'Dale-5' dataset and 10 for the 'CLEVR color' dataset.
 For each sample in the dataset the bounding boxes are shuffled.
@@ -197,9 +195,14 @@ Can the model solve the task, or do specific attributes used by humans pose chal
 % SD: In this case it should be using the same attributes as humans as we are training it on human labels.
 % DK: (rephrased; done)
 
-% TODO include figure
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.5\linewidth]{figures/arch_bb_caption_generator.png}
+    \caption{Simplified architecture of the bounding box RE generator}
+    \label{fig:bb_re_generator_architecture}
+\end{figure}
 
-In the first setup, the \emph{bounding box RE generator}, the model receives the bounding boxes as input.
+In the first setup, the \emph{bounding box RE generator}, the model receives the bounding boxes as input (see Figure \ref{fig:bb_re_generator_architecture}).
 The first bounding box is always the target object, while the remaining bounding boxes are shuffled.
 As in the previous experiment, each bounding box is passed through \emph{ResNet-avg} and projected afterwards to an image embedding dimension $e$ with a linear layer.
 All thus encoded bounding boxes are concatenated and again compressed to the decoder output dimension $LSTM_o$ using another linear layer.
@@ -210,28 +213,28 @@ The output of the LSTM is passed through a linear layer at each step to determin
 During testing, the LSTM is always forced to generate three tokens, with an embedded start-of-sequence token as first input to the LSTM.
 Each token in the sequence is determined greedily, by selecting the highest logit in the output of each step in the LSTM.
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.5\linewidth]{figures/arch_caption_generator.png}
-    \caption{Simplified architecture of the masked caption generator}
-    \label{fig:caption_generator_architecture}
-\end{figure}
-
 In the second setup two different models are compared against each other.
 The first model, the \emph{basic RE generator} acts as the baseline and only receives the complete image as the input.
 The image is passed through \emph{ResNet-3} and subsequently processed by additional convolution layers, described in section \ref{sec:image-processing}.
 The resulting vector is then reduced to decoder output dimension $LSTM_o$ by a linear layer and as for the bounding boxes acts as the initial hidden state for the LSTM.
 The LSTM is trained in the same way as above.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.5\linewidth]{figures/arch_caption_generator.png}
+    \caption{Simplified architecture of the masked RE generator}
+    \label{fig:masked_re_generator_architecture}
+\end{figure}
+
 Using this approach, the model doesn't have any information about the target object and is therefore expected to produce referring expressions for a randomly selected object on the scene.
-Therefore, it is extended in a second step with attention to the target object, the \emph{masked RE generator}.
+Therefore, it is extended in a second step with attention to the target object, the \emph{masked RE generator} (see Figure \ref{fig:masked_re_generator_architecture}).
 % SD: You add attention to the target object.
 % DK: (added; done)
 A masked version of the image is created and passed to the model.
 For this, a fixed size squared area of 96 \times\ 96 pixels around the center of the target object is filled in white, while the rest of the image is filled in black.
 Both original and masked image are processed together with convolutional layers as described in section \ref{sec:image-processing}.
 % SD: This is normally implemented as a filter of 1 and 0 corresponding to pixels. As such it then corresponds to attention, cf. paper with Mehdi.
-% DK: (QUESTION)
+% DK: (done)
 The result is then again projected to the decoder output dimension $d$ by a linear layer and then used as the initial hidden state for the LSTM.
 This should point the model towards which object to describe and discriminate from the distractors.
 
