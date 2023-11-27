@@ -157,16 +157,16 @@ In the later chapters, it will be referred to these adaptions using the name in 
 \label{sec:image-processing}
 In the experiments different agent architectures are compared.
 To make these architectures comparable, the agents' models are composed of submodules that solve a specific subtask.
-Submodules can for example be image processing modules or text parsing modules.
+Submodules can for example be image encoder modules or text parsing modules.
 Hereby, different ways of solving the subtask are manifested in multiple exchangeable submodules.
-For instance, one image processing module uses CNNs while another image processing module uses a traditional approach.
+For instance, one image encoder module uses CNNs while another image encoder module uses a traditional approach.
 These can simply be exchanged in an agent's model without needing to adapt the whole agent.
 Consequently, the experiments stay comparable, since the differences are only added or removed submodules.
 
 The feature extractors described in section \ref{sec:feature-extractors} are not enough to be solely used to encode the images used in this thesis.
 Even though final layers that contain very task and domain specific knowledge can be removed, the previous layers still don't contain any information about the new domain and task.
 For this reason they need to be extended with further layers that are not frozen and can learn and store information about the new domain by connecting the pretrained general knowledge with the specific task.
-These additional layers on top of the feature extractors that make up the image processing submodule, however, are always trained from scratch for each of the experiments and tasks.
+These additional layers on top of the feature extractors that make up the \emph{image encoder} submodule, however, are always trained from scratch for each of the experiments and tasks.
 In this thesis, only this submodule is used to encode images for all the conducted experiments.
 
 \citet{Johnson2017} describe an architecture that was used for training baseline models on the CLEVR dataset.
@@ -216,7 +216,7 @@ The model will have problems to align these extracted features with the masked i
     \label{fig:masked-combination}
 \end{figure}
 
-For that reason, another submodule for masked images is used.
+For that reason, another submodule for masked images is used, the \emph{masked image encoder}.
 In this submodule, the original image and the masked image are combined at an earlier stage, when both have the same structure (see Figure \ref{fig:masked-combination}).
 In particular, both images are processed in exactly the same way, by passing it through a feature extractor and then through the above described extending layers until layer 6, the max pool layer.
 Even though  the masked image doesn't contain similar features to the images the feature extractors are pretrained on, this method still provided better results in the experiments.
