@@ -455,7 +455,7 @@ if __name__ == "__main__":
     parser.add_argument("--decoder_out_dim", type=int, default=10)
     parser.add_argument("--encoder_out_dim", type=int, default=10)
     parser.add_argument("--embedding_dim", type=int, default=10)
-    parser.add_argument("--image_embedding_dimension", type=int, default=10)
+    parser.add_argument("--image_embedding_dimension", type=int, default=None)
     parser.add_argument("--coordinate_classifier_dimension", type=int, default=10)
 
     # -- TRAINING --

@@ -1,5 +1,3 @@
-import random
-
 import torch
 from mlt.shared_models import (
     BoundingBoxImageEncoder,
