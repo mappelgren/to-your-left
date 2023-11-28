@@ -51,7 +51,7 @@ Here, four different ways to encode and refer to the target object are tested.
         \includegraphics[width=0.34\linewidth]{figures/arch_coordinate_predictor_dale.png}
         \label{fig:coordinate_predictor_dale_architecture}
     }
-    \caption{Simplified architecture of the coordinate predictors}
+    \caption{Simplified architectures of the reference resolvers}
     % SD: How are these encoded?
     % DK: (done)
 \end{figure}
@@ -115,7 +115,7 @@ It therefore can only rely on its own extracted visual features and the inherent
 % DK: TODO
 Both original and masked image are processed as described in \ref{sec:image-processing} and afterwards passed through the coordinate predictor.
 
-For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
+For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $1\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
 8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
 Table \ref{tab:variables-reference-resolution} shows the variables that are changed during the experiments for each of the models.
@@ -124,13 +124,13 @@ Table \ref{tab:variables-reference-resolution} shows the variables that are chan
     \centering
     \begin{tabular}{lcccc}
         \toprule
-                              & $e_i$              & $c$               & $LSTM_e$  & $LSTM_o$               \\
-                              & $[100, 500, 1000]$ & $[512,1024,2048]$ & $[15,30]$ & $[500,1000,1500,2000]$ \\\midrule
-        reference resolver    & \times             & \times            & -         & -                      \\
-        + one-hot             & \times             & \times            & -         & -                      \\
-        + one-hot + locations & \times             & \times            & -         & -                      \\
-        + incremental RE      & \times             & \times            & \times    & \times                 \\
-        + masking             & \times             & \times            & -         & -                      \\
+                              & $e_i$                       & $c$               & $LSTM_e$  & $LSTM_o$      \\
+                              & $[50, 100, 300, 500, 1000]$ & $[512,1024,2048]$ & $[15,30]$ & $[1000,1500]$ \\\midrule
+        reference resolver    & \times                      & \times            & -         & -             \\
+        + one-hot             & \times                      & \times            & -         & -             \\
+        + one-hot + locations & \times                      & \times            & -         & -             \\
+        + incremental RE      & \times                      & \times            & \times    & \times        \\
+        + masking             & \times                      & \times            & -         & -             \\
         \bottomrule
     \end{tabular}
     \caption{Variables for each model where $e_i$ is the image embedding dimension, $c$ the dimensions of the coordinate predictor, $LSTM_e$ the embedding dimensions for tokens in the LSTM and $LSTM_o$ the output dimension of the LSTM}
@@ -156,7 +156,7 @@ A high accuracy may indicate that the model could identify this specific object 
 
 The reference resolution models are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
 The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.
-Since the model relies on the extracted features of either VGG or ResNet, locational information of the objects in the image might not be present anymore.
+Since the model relies on the extracted features of ResNet, locational information of the objects in the image might not be present anymore.
 This is due the fact that CNNs compress information of the image summarizing small regions (convolutions) several times.
 While this extracts the key features of objects in an image and might capture relational position between these objects, absolute locations might get lost as shown by \citet{Kelleher2017}.
 % SD: Explain. w3 had a paper with John Kelleher on what spatial information is encoded in CNNs
@@ -170,162 +170,271 @@ Here, the models should make use of the additional given referring expressions a
 Latter task is assumed to be significantly harder.
 
 \subsubsection*{Results}
+Tables \ref{tab:results:reference-resolver} to \ref{tab:results:reference-resolver-masked} show the results of the five adaptions of the reference resolver.
+Across the first three models (basic reference resolver, +one-hot, +one-hot+locations), the same patterns can be seen.
+
+The \textbf{basic reference resolver} acts as a baseline for the other models.
+Since this model doesn't have any information about the target object, it shouldn't be able to point towards the correct target object.
+However, this model should learn underlying structures in the images that it can use to make better predictions.
+Indeed, the model converges on all datasets to a certain limit.
+Random guesses of the coordinates correspond to a mean distance of 95 pixels, given the image size of 224\times224 pixels, which the model can beat for all datasets.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|cc|cc|cc|cc}
+        \toprule
+               &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$  & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100}  & {512}  & {2,45}                                    & {96\%}                              & {38,16}                             & {35\%}                                   & {46,44}       & {18\%}        & {51,8}        & {12\%}        \\
+        {100}  & {1024} & {2,18}                                    & {94\%}                              & {37,23}                             & {38\%}                                   & {47,38}       & {18\%}        & {52,04}       & {13\%}        \\
+        {100}  & {2048} & {3,44}                                    & {99\%}                              & {36,8}                              & {40\%}                                   & {46,77}       & {18\%}        & {51,29}       & {13\%}        \\
+        {500}  & {512}  & {2,71}                                    & {96\%}                              & {37,1}                              & {37\%}                                   & {47,28}       & {18\%}        & {51,01}       & {14\%}        \\
+        {500}  & {1024} & {2,61}                                    & {97\%}                              & {36,2}                              & {39\%}                                   & {48,6}        & {17\%}        & {52,73}       & {12\%}        \\
+        {500}  & {2048} & {5,18}                                    & {99\%}                              & {36,09}                             & {40\%}                                   & {44,81}       & {18\%}        & {51,8}        & {13\%}        \\
+        {1000} & {512}  & {3,11}                                    & {98\%}                              & {37,58}                             & {36\%}                                   & {46,8}        & {19\%}        & {49,95}       & {14\%}        \\
+        {1000} & {1024} & {7,91}                                    & {100\%}                             & {37,78}                             & {39\%}                                   & {47,11}       & {18\%}        & {54,18}       & {11\%}        \\
+        {1000} & {2048} & {4,64}                                    & {100\%}                             & {37,01}                             & {42\%}                                   & {45,72}       & {21\%}        & {49,98}       & {13\%}        \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean loss and accuracy of the basic reference resolver for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
+    \label{tab:results:reference-resolver}
+\end{table}
+
+\begin{table}[b]
+    \centering
+    \begin{tabular}{cc|cc|cc|cc|cc}
+        \toprule
+               &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$  & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100}  & {512}  & {2,95}                                    & {98\%}                              & {37,27}                             & {34\%}                                   & {47,05}       & {18\%}        & {51,25}       & {12\%}        \\
+        {100}  & {1024} & {3,64}                                    & {98\%}                              & {37,19}                             & {37\%}                                   & {46,39}       & {19\%}        & {50,25}       & {14\%}        \\
+        {100}  & {2048} & {6,15}                                    & {99\%}                              & {37,04}                             & {39\%}                                   & {45,77}       & {18\%}        & {50,55}       & {14\%}        \\
+        {500}  & {512}  & {3,29}                                    & {98\%}                              & {38,58}                             & {34\%}                                   & {47,25}       & {18\%}        & {50,56}       & {14\%}        \\
+        {500}  & {1024} & {2,15}                                    & {93\%}                              & {37,18}                             & {40\%}                                   & {47,57}       & {18\%}        & {51,75}       & {14\%}        \\
+        {500}  & {2048} & {2,86}                                    & {98\%}                              & {35,71}                             & {41\%}                                   & {46,62}       & {18\%}        & {52,67}       & {11\%}        \\
+        {1000} & {512}  & {3,6}                                     & {97\%}                              & {36,37}                             & {36\%}                                   & {46,37}       & {18\%}        & {51,6}        & {12\%}        \\
+        {1000} & {1024} & {2,02}                                    & {94\%}                              & {36,86}                             & {38\%}                                   & {48,35}       & {17\%}        & {51,41}       & {15\%}        \\
+        {1000} & {2048} & {4,49}                                    & {99\%}                              & {36,5}                              & {41\%}                                   & {46,04}       & {18\%}        & {51,22}       & {13\%}        \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean loss and accuracy of the \emph{reference resolver + one-hot} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
+    \label{tab:results:reference-resolver-one-hot}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|cc|cc|cc|cc}
+        \toprule
+               &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$  & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100}  & {512}  & {3,02}                                    & {97\%}                              & {36,88}                             & {37\%}                                   & {47,04}       & {16\%}        & {51,36}       & {12\%}        \\
+        {100}  & {1024} & {2,48}                                    & {95\%}                              & {38,24}                             & {33\%}                                   & {46,91}       & {15\%}        & {52,67}       & {12\%}        \\
+        {100}  & {2048} & {3,8}                                     & {100\%}                             & {37,89}                             & {32\%}                                   & {45,33}       & {13\%}        & {49,12}       & {11\%}        \\
+        {500}  & {512}  & {3,6}                                     & {98\%}                              & {35,56}                             & {42\%}                                   & {47,41}       & {16\%}        & {51,86}       & {12\%}        \\
+        {500}  & {1024} & {2,51}                                    & {98\%}                              & {36,56}                             & {39\%}                                   & {45,88}       & {17\%}        & {51,73}       & {12\%}        \\
+        {500}  & {2048} & {2,37}                                    & {97\%}                              & {37,33}                             & {35\%}                                   & {48,04}       & {16\%}        & {53,68}       & {11\%}        \\
+        {1000} & {512}  & {1,97}                                    & {93\%}                              & {36,07}                             & {42\%}                                   & {47,34}       & {19\%}        & {51,74}       & {12\%}        \\
+        {1000} & {1024} & {2,99}                                    & {94\%}                              & {36,23}                             & {41\%}                                   & {45,64}       & {19\%}        & {53,27}       & {12\%}        \\
+        {1000} & {2048} & {3}                                       & {98\%}                              & {37,62}                             & {33\%}                                   & {46,54}       & {17\%}        & {52,26}       & {14\%}        \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean loss and accuracy of the \emph{reference resolver + one-hot + locations} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
+    \label{tab:results:reference-resolver-one-hot-location}
+\end{table}
+
+Table \ref{tab:results:reference-resolver} shows the results.
+When trained on the 'CLEVR single' dataset, the model can minimize the mean loss consistently across all variations of the variables to a few pixels.
+In effect, this means, that the model is able to almost always predict the correct location of the center of the target object.
+Since no distractor is present, the model also doesn't need any description of the target object and only needs to discriminate the object from the background.
+This shows that the model is in general able to derive geometrical information from abstract feature, extracted by a feature extractor.
+Geometrical information therefore doesn't get completely lost during this abstraction, but the model is able to point to a specific object, as long as only one object is part of the image.
+% SD: Because it is in the same location?
+% DK: (done)
+
+However, the model has more difficulties when distractors are present in the image.
+For the 'Dale-2' dataset, the mean loss converges towards 35 to 39 pixels
+The model was able to extract some structural information from the image, but the predictions are not consistently on the target object.
+Looking at the accuracy, the best variations of the models are only able to point in 41\% to 42\% of the samples towards the correct object, which lies just below a random guess of 50\%.
+Using the 'Dale-5' and the 'CLEVR color' datasets, the results are similar.
+While the mean loss stays consistently around 46 to 48 pixels and 50 to 53 pixels respectively, they are still far below the random baseline.
+Also the accuracies, lie a bit below the random guesses of 20\% and 15\% respectively.
+However, it is visible that more present distractors in the scene challenge the model more.
+% SD: What is the image size? What is the size of a typical object? 50 sounds quite good. Attention is predicting one of 7x7 blocks. Is 50 more or less than 1/7 of an image? 
+% DK: (done)
+
+Looking at the image embedding size $e_i$ and the coordinate predictor dimension $c$, it seems, they don't have any significant effect on the results.
+The results staying the same across all variations indicates that the increase compared to the random baseline is just due to learning an underlying structural pattern of how scenes are set up.
+This hypothesis will be discussed further below with examples from the predictions.
+
+Interestingly, providing the model with the target object encoded as a \textbf{one-hot vector} and the \textbf{locations} of all objects doesn't improve the results.
+% SD: Perhaps arranging the objects sequentially would help the model learn spatial contiguity, see my earlier comment.
+% DK: TODO
+Tables \ref{tab:results:reference-resolver-one-hot} and \ref{tab:results:reference-resolver-one-hot-location} show the same results as for the \emph{basic reference resolver}.
+It seems that the model is not able to combine the image representation with the representation of that target object or the locations of all objects and another representation is needed.
+
+\begin{table}[hb]
+    \centering
+    \begin{tabular}{cccc|cc|cc|cc}
+        \toprule
+              &        &          &          & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                 \\  \cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$ & $c$    & $LSTM_o$ & $LSTM_e$ & \textbf{loss}                       & \textbf{Acc.}                       & \textbf{loss}                            & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {50}  & {1024} & {1000}   & {15}     & {22,64}                             & {63,55\%}                           & {48,23}                                  & {14,95\%}     & {52,62}       & {11\%}        \\
+        {50}  & {2048} & {1500}   & {15}     & {21,35}                             & {65,9\%}                            & {46,95}                                  & {16,75\%}     & {52,2}        & {11,35\%}     \\
+        {100} & {1024} & {1000}   & {15}     & \textbf{16,08}                      & \textbf{75,5\%}                     & {47,62}                                  & {16,5\%}      & {50,65}       & {12,8\%}      \\
+        {100} & {1024} & {1000}   & {30}     & {20,69}                             & {69,5\%}                            & {46,9}                                   & {16,45\%}     & {51,23}       & {12,2\%}      \\
+        {100} & {1024} & {1500}   & {15}     & {21,24}                             & {66,3\%}                            & {48,78}                                  & {15,55\%}     & {52,21}       & {12,25\%}     \\
+        {100} & {2048} & {1000}   & {15}     & {19,46}                             & {70,1\%}                            & {46,79}                                  & {16,9\%}      & {50,24}       & {13,3\%}      \\
+        {100} & {2048} & {1500}   & {15}     & {21,19}                             & {66,65\%}                           & {46,79}                                  & {16,65\%}     & {50,55}       & {11,3\%}      \\
+        {300} & {1024} & {1000}   & {15}     & {20,63}                             & {68\%}                              & {46,91}                                  & {17,4\%}      & {50,39}       & {11,75\%}     \\
+        {300} & {1024} & {1500}   & {15}     & {21,38}                             & {66,15\%}                           & {46,36}                                  & {15,55\%}     & {51,29}       & {12,25\%}     \\
+        {300} & {2048} & {1000}   & {15}     & {21,12}                             & {66,95\%}                           & {46,98}                                  & {16,65\%}     & {51,4}        & {12,85\%}     \\
+        {300} & {2048} & {1500}   & {15}     & \textbf{14,01}                      & \textbf{79,45\%}                    & {47,41}                                  & {16,9\%}      & {51,32}       & {12,6\%}      \\
+        {300} & {2048} & {1500}   & {30}     & {22,09}                             & {64,75\%}                           & {46,77}                                  & {17,65\%}     & {49,75}       & {13,4\%}      \\
+        {500} & {1024} & {1000}   & {15}     & {35,14}                             & {41,25\%}                           & {46,41}                                  & {16,6\%}      & {50,63}       & {12,8\%}      \\
+        {500} & {2048} & {1500}   & {15}     & {36,52}                             & {41,95\%}                           & {44,9}                                   & {18,65\%}     & {50,02}       & {13,4\%}      \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean loss and accuracy of the \emph{reference resolver + incremental RE} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension, $c$ the coordinate predictor dimension, $LSTM_o$ the output dimension of the LSTM and $LSTM_e$ the embedding dimensions for tokens in the LSTM}
+    \label{tab:results:reference-resolver-gre}
+\end{table}
+
+Encoding the attributes of the target object with the \textbf{incremental GRE-algorithm} finally improves the model's performance.
+Table \ref{tab:results:reference-resolver-gre} shows the results of selected configurations.
+Using the 'Dale-2' dataset, the model is able to predict the center coordinates of the target object for most of the images.
+The results, hereby, are dependent on the different variables.
+The best results are achieved with $e_i=300$, $c=2048$, $LSTM_o=1500$ and $LSTM_e=15$ and this configuration will be used in the succeeding analysis and the remaining language games experiments.
+With this configuration the mean distance of the model's predictions is around 14 pixels, and they lie in around 79,45\% of the cases on the target object.
+This is far below the random guess of the center coordinates as well as better than a random choice between the objects.
+Comparing it to the other configurations, it becomes apparent that an image embedding size $e_i$ between 100 and 300 dimensions provides the model with enough information from the image.
+Contrary to this, a relatively high decoder size of the LSTM $LSTM_o$ that decodes the referring expression is necessary.
+However, it seems to be dependent on $e_i$.
+A larger $e_i$ requires a larger $LSTM_o$.
+Preliminary experiments have shown that lower sizes didn't provide any good results.
+Furthermore, lower embedding dimensions of the tokens $LSTM_e$ tend to give better results.
+An $LSTM_e$ around the vocabulary size of 14 gave the best results while for instance more dimensions with 30 always worsened the model.
+
+Using the 'Dale-5' and 'CLEVR color' datasets, providing the incremental referring expression to the model didn't help.
+The results are similar to the baseline with no information about the target object.
+
+Finally, Table \ref{tab:results:reference-resolver-masked} shows the results, when the model is additionally provided with the \textbf{masked image}.
+Hereby, the model is able to predict correct locations using all datasets.
+All configurations achieve mean distances of a few pixels and accuracies of almost 100\%.
+This shows that the model can make use of the masked image.
+However, this is also not surprising since the model doesn't need to use the original image, but can completely rely on the mask.
+Since the mask only includes the target object but no distractors, it corresponds to the 'CLEVR single' dataset which as already seen in the results before is an easy task to learn for the model.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|cc|cc|cc}
+        \toprule
+               &        & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+        $e_i$  & $c$    & \textbf{loss}                       & \textbf{Acc.}                       & \textbf{loss}                            & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100}  & {512}  & {8,01}                              & {98\%}                              & {6,77}                                   & {100\%}       & {6,05}        & {95\%}        \\
+        {100}  & {1024} & {8,77}                              & {99\%}                              & {3,61}                                   & {98\%}        & {5,29}        & {93\%}        \\
+        {100}  & {2048} & {8,71}                              & {99\%}                              & {4,28}                                   & {96\%}        & {3,24}        & {93\%}        \\
+        {500}  & {512}  & {14,27}                             & {99\%}                              & {9,97}                                   & {99\%}        & {5,9}         & {94\%}        \\
+        {500}  & {1024} & {8,6}                               & {99\%}                              & {2,07}                                   & {94\%}        & {13,03}       & {95\%}        \\
+        {500}  & {2048} & {2,67}                              & {95\%}                              & {10,57}                                  & {96\%}        & {4,24}        & {98\%}        \\
+        {1000} & {512}  & {6,59}                              & {95\%}                              & {9,2}                                    & {99\%}        & {7,76}        & {100\%}       \\
+        {1000} & {1024} & {5,85}                              & {99\%}                              & {12,24}                                  & {98\%}        & {8,08}        & {99\%}        \\
+        {1000} & {2048} & {6,03}                              & {99\%}                              & {9,12}                                   & {97\%}        & {14,29}       & {99\%}        \\
+        \bottomrule
+    \end{tabular}
+    \caption{Mean loss and accuracy of the \emph{reference resolver + masking} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
+    \label{tab:results:reference-resolver-masked}
+\end{table}
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{figures/coordinate-predictor_loss.png}
-    \caption{Mean distance between predicted coordinates and ground truth in pixels on different datasets}
+    \caption{Mean loss of training and testing data with all datasets, using attributes encoded with the incremental GRE algorithm. The following variables are used for all models: $e_i=300$, $c=2048$, $LSTM_o=1500$, $LSTM_e=15$}
     \label{fig:coordinate-predictor_loss}
 \end{figure}
 
-Figure \ref{fig:coordinate-predictor_loss} shows the results of the coordinate predictor that doesn't include any information about the target object.
-The used feature extractor for these results is \emph{Resnet-3}, but the results don't differ meaningfully from results with other feature extractors.
-As can be seen, the success between the different datasets are significant.
-The more objects are present in an image, the worse the model performs.
-The model converges for the CLEVR single dataset after around 20 epochs to a mean distance of around 2 pixels.
-This prediction even though not perfectly on the center point is always on the object.
-Opposed to that, using the Dale-2 dataset with two objects, the mean distance lies between 37 and 38 pixels already after the first epoch and doesn't drop with increasing number of epochs.
-With five objects in the Dale-5 dataset, the model only predicts a mean distance of around 45 pixels in the beginning, which worsens with a rising number of epochs to 48 pixels.
-
-An interesting observation is the difference of the mean distances between training and testing data.
-% SD: How can we have epochs on the testing data? There is no updates so i5 does not make sense.
-% DK: TODO
-The training distance is constantly approaching zero, while the testing loss is staying constant or even getting higher.
-This points to the fact that the model is not generalizing the task by learning abstract patterns that can be applied to unseen data, but is instead memorizing the training data.
-That is especially visible for the Dale-5 dataset, where learning the patterns of the training data looses even the ability to interpret some patterns in the testing data.
-Applying a higher dropout didn't have an impact on the results.
+Figure \ref{fig:coordinate-predictor_loss} gives more insight in why the models don't converge to a lower mean loss.
+It shows how the mean loss changes during the training after each epoch.
+Hereby, the figure shows the graph for the best performing configuration of the model that is presented with the incremental referring expression, using $e_i=300$, $c=2048$, $LSTM_o=1500$ and $LSTM_e=15$.
+The different colors correspond to the different datasets.
+Two lines are shown for each dataset.
+The solid line represents the loss when trained on the training data.
+The dotted line shows the mean distance to the target object of the model's predictions when presented with the unseen test data.
+In particular, after each epoch, the model is frozen and tested on the test split.
+After this, the weights are unfrozen again and the training is continued.
+As can be seen, the training loss of the model always converges towards a low value.
+Unsurprisingly, the datasets with fewer distractors are faster to learn than ones with more.
+For both successful datasets, 'CLEVR single' and 'Dale-2', also the training loss converges towards the same value.
+However, the testing curves for the remaining two datasets don't match their corresponding training curve.
+Indeed, both curves stay at the same value until around epoch 9.
+Then the loss of the training starts to drop while the loss in the testing starts to rise.
+That indicates that until epoch 9, the model learns to general structural patterns in the images that apply to the complete dataset, both training and testing split.
+After this, the model begins to memorize the training samples.
+This knowledge is not transferrable to the test split and indeed even harms the test performance slightly.
+That behavior can be observed for all models and configurations that don't outperform the baseline.
+Preliminary experiments showed that applying dropout to help the model to generalize didn't increase the performance which shows that the architecture is not able to extract the necessary features from the images and the referring expression and combine them.
 % SD: The results show that the model is learning something from the training data but this is not the feature that should be learning as the performance on the test data is low. Actually, is it low, it is 10, 35 and 45 pixels. We should not expect any difference between epochs as there is no training. Hence, a flat line is expected.
-% DK: TODO
-
-This behavior is indeed not very surprising.
-First, results with the 'CLEVR single' dataset show that the model is able to derive geometrical information from abstract feature, extracted by a feature extractor.
-Geometrical information therefore doesn't get lost during this abstraction, but the model is able to point to a specific object, as long as only one object is part of the image.
-% SD: Because it is in the same location?
-% DK: TODO
-Secondly, more than one objects present in an image confuses the model, and it is not able to consistently point to one of them.
-This can have multiple reasons, for instance that the models lacks the ability to separate objects in the extracted features.
-But even in case, the model is able to do that and could determine the location of each object in the scene given the feature, it would not be able to tell, which of these is the actual target object.
-The guess is then more or less random.
-This especially applies to the Dale-2 dataset, where an identification of the target object just based on one distractor is impossible; both of the present objects are unique.
-For the Dale-5 dataset, the model could in theory learn that the target object is always the one object which is unique in respect to its and the distractors' attributes.
-This task on the other hand seems very difficult to learn.
-In conclusion, the models are able to predict geometrical coordinates, but need more information about the target object to identify it.
-
-When the target object \textbf{attributes are encoded as one-hot vectors} and added to the input, the results don't improve.
-One factor that now has a much higher impact is the feature extractor that is used.
-Table \ref{tab:feature-extractor-mean-distances} compares the mean distances the models predict for the different feature extractors.
-The results are shown for the models trained on the Dale-2 and Dale-5 datasets for training and test data.
-First, a big difference can be seen between the datasets.
-The models only converge to a minimum mean distance of around 46 pixels to the correct coordinates for the Dale-5 dataset, looking at the test data.
-In most cases, it stays above 50 pixels.
-% SD: What is the image size? What is the size of a typical object? 50 sounds quite good. Attention is predicting one of 7x7 blocks. Is 50 more or less than 1/7 of an image? 
-% DK: TODO
-Using the Dale-2 dataset, the behavior is a little different.
-All ResNet extractors with four residual blocks and an additional average pooling and optionally a classifier layers reach similar scores as the experiments before without any one-hot encodings.
-Interestingly, without the classifier layer, the model doesn't converge at all and the mean distances jump up and down between the epochs.
-This effect also applies when using less residual blocks.
-Using the VGG, only VGG-cls2 achieve a similar performance, while the others predict coordinates between 43 and 46 pixels away.
-
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{rcccc}
-        \toprule
-                            & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}}                                   \\\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-                            & train                               & test                                & train          & test           \\\midrule
-        \textbf{VGG-0}      & 30,27                               & 46,20                               & \textbf{32,17} & 54,40          \\
-        \textbf{VGG-avg}    & \textbf{29,99}                      & 45,08                               & 32,32          & 52,67          \\
-        \textbf{VGG-cls1}   & 37,99                               & 43,28                               & 46,57          & 50,75          \\
-        \textbf{VGG-cls2}   & 38,87                               & \textbf{39,02}                      & 47,48          & 49,91          \\
-        \textbf{VGG-cls3}   & 39,99                               & 44,32                               & 47,26          & \textbf{46,77} \\\midrule
-        \textbf{ResNet-3}   & 78,26                               & 65,23                               & 92,07          & 91,12          \\
-        \textbf{ResNet-4}   & 44,14                               & 55,24                               & \textbf{36,48} & 58,28          \\
-        \textbf{ResNet-avg} & \textbf{33,06}                      & \textbf{39,18}                      & 47,64          & 46,38          \\
-        \textbf{ResNet-cls} & 37,57                               & 38,10                               & 44,72          & \textbf{45,92} \\
-        \bottomrule
-    \end{tabular}
-    \caption{Mean test losses for different feature extractors with one-hot attribute encodings after 20 epochs}
-    \label{tab:feature-extractor-mean-distances}
-    % SD: Explanation of labels
-    % DK: TODO
-\end{table}
-
-Secondly, the training loss now looks also different.
-In almost no cases, the models converge to a lower mean distance than with the test data, meaning a higher precision in their predictions, as they did in the experiment before.
-The only exception is ResNet-3 as a feature extractor.
-In other words, the models are again not able to generalize, but in specific cases memorize the patterns in the train data.
-This hints to the fact that only specific layers of the feature extractors contain information that is generally usable to identify and discriminate objects.
-Especially the lower layers with fewer residual blocks in the case of ResNet and no classifier layers for the VGG seem to not encode knowledge that can be utilized for this task.
-Higher layers, with more specific encoded information need to be used for this research.
-The experiments in the following sections are set up using these higher layers.
-
-Adding \textbf{information about the center coordinates} of all objects should have helped the models to get a list of possible predictions.
-In theory, the model could learn to choose between these coordinates by relating them to the extracted features of the image.
-This hypothesis doesn't hold.
-All results for both datasets Dale-2 and Dale-5 are the exact same as without included information about the locations.
-The problem therefore doesn't seem to lie in predicting coordinates in general, but predicting the coordinates of the target object.
-% SD: Perhaps arranging the objects sequentially would help the model learn spatial contiguity, see my earlier comment.
-% DK: TODO
-The model is still not able to understand, which object is the target object.
-For that reason, a better representation of the target object is necessary.
-
-In a next step, information about the attributes is included using the \textbf{incremental GRE-algorithm}.
-Again, the mean distance of the predictions as well as the accuracy doesn't improve compared to the previous experiments.
-% SD: Table with these results?
-% DK: the table would show the same figures as the existing table. Should be still included? (QUESTION)
+% DK: (done)
 
 \begin{figure}[ht]
     \centering
     \subfigure['Dale-2', train split]{
-        \includegraphics[width=.92\linewidth]{figures/visualization_dale-2_train.png}
+        \includegraphics[width=.839\linewidth]{figures/visualization_dale-2_train.png}
         \label{fig:visualizations_dale-2_train}
     }
     \subfigure['Dale-2', test split]{
-        \includegraphics[width=.92\linewidth]{figures/visualization_dale-2_test.png}
+        \includegraphics[width=.839\linewidth]{figures/visualization_dale-2_test.png}
         \label{fig:visualizations_dale-2_test}
     }
     \subfigure['Dale-5', train split]{
-        \includegraphics[width=.92\linewidth]{figures/visualization_dale-5_train.png}
+        \includegraphics[width=.839\linewidth]{figures/visualization_dale-5_train.png}
         \label{fig:visualizations_dale-5_train}
     }
     \subfigure['Dale-5', test split]{
-        \includegraphics[width=.92\linewidth]{figures/visualization_dale-5_test.png}
+        \includegraphics[width=.839\linewidth]{figures/visualization_dale-5_test.png}
         \label{fig:visualizations_dale-5_test}
     }
-    \caption{Visualization of the models' predictions in the 'Dale' datasets}
-    \label{fig:visualizations_dale}
+    \subfigure['CLEVR color', train split]{
+        \includegraphics[width=.839\linewidth]{figures/visualization_colour_train.png}
+        \label{fig:visualizations_colour_train}
+    }
+    \subfigure['CLEVR color', test split]{
+        \includegraphics[width=.839\linewidth]{figures/visualization_colour_test.png}
+        \label{fig:visualizations_colour_test}
+    }
+    \caption{Examples of the models' predictions on the 'Dale' and 'CLEVR color' datasets. The green circle represents the target object, the red object the model's prediction. Notice that the images are shown in the original size while the model processes them normalized. Hence, the distances don't correspond to the axes.}
+    \label{fig:visualizations}
 \end{figure}
 
 An interesting pattern appears when doing a qualitative analysis of the models' predictions.
-Here, we visualized the predicted coordinates compared to the ground truth coordinates.
+Here, the predicted coordinates compared to the ground truth coordinates are visualized (Figure \ref{fig:visualizations}), using the best performing model with $e_i=300$, $c=2048$, $LSTM_o=1500$ and $LSTM_e=15$.
 Figure \ref{fig:visualizations_dale-2_train} shows random examples of predictions for images in the train dataset of Dale-2.
 The green circle shows the ground truth center coordinates of the target object, while the red circle shows the prediction of the model.
 As can be seen, the predictions are very precise.
-Figure \ref{fig:visualizations_dale-2_complete_train} combines the predictions and ground truths across all images in the train dataset.
+Figure \ref{fig:visualizations_complete} combines the predictions and ground truths across all images in the train dataset.
 This shows general patterns of the models predictions over the complete dataset.
 Here, all predicted coordinates are placed as red circles into the image, while all ground truth coordinates are placed as green circles.
-The resulting shape is a rhombus, which reflects that all objects are placed usually central into the scene.
+For the predictions on the 'Dale-2' dataset, the resulting shape is a rhombus, which reflects that all objects are placed usually central into the scene (see Figure \ref{fig:visualizations_dale-2_complete_train}).
 As expected the green and red rhombus align mostly in the same area for the train split of the 'Dale-2' dataset.
 % SD: But this image does not show clearly whether the circles for the same object match. You could calculate the average error in distance between the ground truth and predicted coordinates.
 % DK: that is done in the quantitative analysis (mean square error above). The visualization should show general learned patterns of the model (as in this case predictions toard the center)
+Figures \ref{fig:visualizations_dale-5_train} and \ref{fig:visualizations_dale-5_complete_train} show the same patterns for the 'Dale-5' dataset, while Figures \ref{fig:visualizations_colour_train} and \ref{fig:visualizations_colour_complete_train} show it for the 'CLEVR color' dataset.
 
-The results look very different for the test split.
-As can be seen in Figure \ref{fig:visualizations_dale-2_test}, the three randomly selected predictions don't align with the ground truth coordinates.
-For all the images, the predictions don't lie on any object.
-In the left image as well as in the central image, the predictions are closer to the target object than towards the distractor, but are still quite imprecise.
+The results look very different when using the predictions for the test split.
+As discussed in the paragraphs above, the model performs well on the 'Dale-2' dataset which is also reflected in the qualitative analysis.
+The visualization of the test split resembles the train split very much.
+However, the other two datasets show differences.
+As can be seen in Figures \ref{fig:visualizations_dale-5_test} and \ref{fig:visualizations_colour_test}, the three randomly selected predictions don't align with the ground truth coordinates.
+While for some images they lie on a distractor, on some images, the prediction is on the background.
+However, they tend to be in an area towards the target object, but are still quite imprecise.
 % SD: They are closer to the target than distractor and you can see that it is working to a point. But remember this task is very challenging and I wouldn't say the results are so negative.
 % DK: right, this is addressed in the conclusions below
-These findings align with the mean distance scores, described in the sections before.
+These findings align with the mean distance scores, described in the paragraphs before.
 However, it seems that the model's predictions are all towards the center of the image.
-This can be seen clearer in Figure \ref{fig:visualizations_dale-2_complete_test}.
+This can be seen clearer in Figures \ref{fig:visualizations_dale-5_complete_test} and \ref{fig:visualizations_colour_complete_test}.
 Again, the green circles form the shape of rhombus.
 In contrast, the predictions in red almost all cluster in the center of the image.
 They form roughly the shape of a smaller rhombus.
 % SD: There is a bias towards the centre but I would not say that the model has not learned anything. I'm surprised that it works so well given the feature representation we have, i.e. no geometric features.
 % DK: again, conclusion below
-This behavior can be observed for all datasets and architectures of the model.
-Figures \ref{fig:visualizations_dale-5_train}, \ref{fig:visualizations_dale-5_test}, \ref{fig:visualizations_dale-5_complete_train} and \ref{fig:visualizations_dale-5_complete_test} show the results for the 'Dale-5' dataset.
-Here, the model more likely predicts the center coordinates of a distractor object as seen in the right image, which is also reflected in the lower score of the mean distance.
-Also the combined visualization shows the same clustering of predictions in the center of the scene, but the pattern of the smaller rhombus is more visible.
 % SD: The centre bias could be the way the error function is used, that is averages all distances and of course this has a tendency to some middle distance. A solution would be to have better geometric features that could take these errors better into account.
 % DK: TODO (future work)
 
@@ -347,23 +456,36 @@ Also the combined visualization shows the same clustering of predictions in the 
         \includegraphics[width=0.42\linewidth]{figures/visualization_dale-5_test_complete.png}
         \label{fig:visualizations_dale-5_complete_test}
     }
-    \caption{Visualization of the models' predictions in the Dale datasets}
+    \subfigure['CLEVR color', train split]{
+        \includegraphics[width=0.42\linewidth]{figures/visualization_colour_train_complete.png}
+        \label{fig:visualizations_colour_complete_train}
+    }
+    \subfigure['CLEVR color', test split]{
+        \includegraphics[width=0.42\linewidth]{figures/visualization_colour_test_complete.png}
+        \label{fig:visualizations_colour_complete_test}
+    }
+    \caption{The images show all the model's predictions (red circles) and the ground truths (green circles) combined for the 'Dale' and 'CLEVR color' datasets}
     % SD: I Haven't checked the earlier captions, but the captions should be informative in the sense that one does not need to look for the text to understand them. Hence, include a brief summary of what each figure contains.
-    % DK: TODO
-    \label{fig:visualizations_dale_complete}
+    % DK: (done)
+    \label{fig:visualizations_complete}
 \end{figure}
 
-These results allow two conclusions.
-First, the models are biased to predict coordinates in the center of the image.
+These results allow three conclusions.
+First, the underlying structure in all images is the placement of objects in the center of the scene.
+The models, learn to use the structure and are biased to predict coordinates towards the center.
 % SD: centre - using British English?
 % DK: so far I used always American English (hopefully consistently)
 The reason for this is likely that the model can produce a relatively low loss, without relying on many extracted features of the objects.
 Since all objects are always located in the center of the image and never in its corners, a prediction of any coordinate in the center is on average closer to the target object than any random prediction or predictions of coordinates at the borders of the image.
-The model therefore learns only, where any object is likely located and can minimize the mean distance to a certain extent with this strategy.
+The model therefore learns only, where \emph{any} object is likely located and can minimize the mean distance to a certain extent with this strategy.
 
-Second, even though the models are biased towards the center of the image, the predictions are still often leaning towards the location where many objects lie.
-This can be seen for the 'Dale-5' dataset, especially in left and central image in Figure \ref{fig:visualizations_dale-5_test}.
+Secondly, even though the models are biased towards the center of the image, the predictions are still often leaning towards the location where many objects lie.
+This can be seen for the 'CLEVR color' dataset, especially in left and central image in Figure \ref{fig:visualizations_colour_test}.
 Again, by this strategy, the model can minimize the mean distance, since the probability is high that the target object lies in this cluster of objects.
-Concluding, the model is able to extract, where objects are located in the image, but can't make use of the referring expressions, to decide which of these objects is the target object.
+
+Thirdly, when few distractors are present in the scene, the model is able to combine the encoding of the referring expression with the encoding of the image.
+In particular, it is able to learn which of the objects in the image is described by the referring expression.
+As soon as more objects are present, the task gets to difficult and the model only relies on the general patterns in the dataset.
+Concluding, the model is able to extract, where objects are located in the image, but can't consistently make use of the referring expressions, to decide which of these objects is the target object.
 % SD: There is a centre bias and the model can partially locate the target. The task is hard. The features are not optimal for this task. Future would should focus on using geometric features - we should have tried these and I'm sure we would get better results. Another extension would be making pointing less precise, i.e. focus on a single point, i.e. using a circle of 20 pixels or a 7x7 grid as in the attention mechanism. This would simplify the task.
 % DK: TODO (future work)

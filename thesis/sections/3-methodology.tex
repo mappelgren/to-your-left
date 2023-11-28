@@ -83,15 +83,15 @@ Features are important parts or patterns in an image, which can have different l
 They can for example be low-level features, as geometric information about lines and edges in an image, or also very abstract information about whole objects.
 Traditional approaches involve extracting key points and descriptors from an image and using them to represent the image \citep{Harris1988,Lowe1999,Bay2006}.
 More recently, convolutional neural networks (CNN) became popular due to their ability to learn complex features automatically from raw image data.
-These are also used in this thesis as a first layer to extract important information from the image. Hereby, two different architectures are tested.
+These are also used in this thesis as a first layer to extract important information from the image. Hereby, there are currently two different architectures.
 
-First, we use the VGG19 \citep{Simonyan2015} which is an architecture based on many convolutional layers.
+First, the VGG19 \citep{Simonyan2015} is used which is an architecture based on many convolutional layers.
 Using 16 to 19 convolutional layers with small convolution filters helps the model to solve localization and classification tasks on the training dataset, but also enables it to generalize onto other datasets.
 After the convolutional layers, the data is passed first through an average pooling layer which outputs 512\times7\times7 dimensions.
 Next follow three linear layers with \emph{ReLU} non-linearities in between.
 After flattening the input, these classification layers output 4069, 4069 and 1000 dimensions respectively.
 
-Secondly, we include the ResNet-101 \citep{He2016}.
+The second architecture is ResNet-101 \citep{He2016}.
 This architecture tries to overcome the degradation of very deep networks, where the accuracy rapidly drops after it gets saturated.
 This is done using residual blocks.
 A residual block consists of two or three convolutional layers and a residual connection, also known as a shortcut connection.
@@ -116,9 +116,13 @@ Even though images of the CLEVR framework are generated to resemble the real wor
 Furthermore, the original task for the pretraining is a classification task, whilst this thesis is interested in generating and understanding referring expressions.
 % SD: What are the differences? Mainly in the domain of objects and scenes. What data are VGG19 and ResNet trained on?
 % DK: (added; done)
-For this reason, multiple different adaptions of these architectures are compared.
-Table \ref{tab:feature-extractor-archs} lists the different adaptions for both VGG19 and ResNet-101 that will be used in this research.
-In the later chapters, it will be referred to these adaptions using the name in the table.
+For this reason, multiple different adaptions of these architectures are usually used.
+Table \ref{tab:feature-extractor-archs} lists the different adaptions for both VGG19 and ResNet-101, where later layers are omitted.
+Preliminary results showed that early layers like \emph{ResNet-1} to \emph{ResNet-3} or \emph{VGG-0} and \emph{VGG-avg} provided better results.
+This corresponds to the hypothesis that later layers include too much task specific knowledge from pretraining.
+There was no visible difference between \emph{VGG} and \emph{ResNet}, so \emph{ResNet} is used in all experiments due to its more efficient architecture.
+However, \emph{ResNet-1} and \emph{ResNet-2} contain a high number of dimensions, that slows the training and raises the amount of needed memory on the GPU.
+Some experiments couldn't be performed using these layers, so all experiments are run, using \emph{ResNet-3}.
 
 \begin{table}[ht]
     \centering
@@ -141,6 +145,8 @@ In the later chapters, it will be referred to these adaptions using the name in 
     \caption{Different adaptions of VGG19 and ResNet-101 used in this research}
     \label{tab:feature-extractor-archs}
 \end{table}
+
+
 
 % Furthermore, we experimented with both the pretrained models as well as with the architectures trained from scratch with a random initialization for the weights.
 % This reason for this was to test if the success of an experiment was actually making use of the pretrained knowledge incorporated in the models.

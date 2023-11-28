@@ -30,6 +30,7 @@ from mlt.preexperiments.models import (
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
     MaskedDaleAttributeCoordinatePredictor,
+    RandomCoordinatePredictor,
 )
 from mlt.preexperiments.save import (
     BoundingBoxOutputProcessor,
@@ -267,6 +268,19 @@ models = {
             "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier,
         },
+        loss_function=pixel_loss,
+        tester=CoordinatePredictorTester,
+        output_processor=PixelOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
+    "random_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorDataset,
+        dataset_args={},
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=RandomCoordinatePredictor,
+        model_args={},
         loss_function=pixel_loss,
         tester=CoordinatePredictorTester,
         output_processor=PixelOutputProcessor,

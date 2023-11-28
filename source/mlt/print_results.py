@@ -223,13 +223,13 @@ class Experiments:
 
 class OutputProcessor:
     @classmethod
-    def to_percent(cls, number):
-        rounded = str(round(number * 100, 2)).replace(".", ",").rstrip("0").rstrip(",")
+    def to_percent(cls, number, r=2):
+        rounded = str(round(number * 100, r)).replace(".", ",").rstrip("0").rstrip(",")
         return rf"{rounded}%"
 
     @classmethod
-    def to_number(cls, number):
-        return rf"{str(round(number, 2)).rstrip('0.').replace('.', ',')}"
+    def to_number(cls, number, r=2):
+        return rf"{str(round(number, r)).replace('.', ',').rstrip('0').rstrip(',')}"
 
     def choose_metrics(self, experiments):
         all_metrics = set(
@@ -358,7 +358,7 @@ class LatexOutputProcessor(OutputProcessor):
             ]
 
             variable_string = "        " + " & ".join(
-                [f"{{{variable}}}" for variable in variation]
+                [f"{{{self.to_number(variable, 10)}}}" for variable in variation]
             )
 
             result_string = " & ".join(

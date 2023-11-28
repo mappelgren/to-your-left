@@ -1,3 +1,5 @@
+import random
+
 import torch
 from mlt.shared_models import (
     BoundingBoxImageEncoder,
@@ -395,6 +397,28 @@ class MaskedCoordinatePredictor(nn.Module):
         coordinates = self.coordinate_classifier(reduced)
 
         return coordinates
+
+
+class RandomCoordinatePredictor(nn.Module):
+    """
+    Output:
+     - x and y coordinates of target object
+
+    Input:
+    """
+
+    def __init__(self, *_args, **_kwargs) -> None:
+        super().__init__()
+
+        self.dummy = nn.Linear(1, 1)
+
+    def forward(self, data):
+        image, *_ = data
+        # 224 = image width and height
+        return (
+            torch.rand((image.shape[0], 2), device=image.device, requires_grad=True)
+            * 224
+        )
 
 
 class CaptionDecoder(nn.Module):

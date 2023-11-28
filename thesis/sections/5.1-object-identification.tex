@@ -37,7 +37,6 @@ The model, the \textbf{object identifier} is split into three submodules, the \e
 Each normalized bounding box of the sample is encoded with the \emph{bounding box encoder}.
 Hereby, they are passed through \emph{ResNet-avg}.
 The preceding layers \emph{ResNet-1} to \emph{ResNet-4} couldn't be compared due to memory restrictions on the GPU.
-A deeper analysis of the effects of different feature extractors will be done in the following chapters.
 The resulting vector is flattened and projected to the embedding dimension $e$ via a linear layer.
 % SD: This is quite low? Why only 10?
 % DK: different embedding sizes are tested (done)
