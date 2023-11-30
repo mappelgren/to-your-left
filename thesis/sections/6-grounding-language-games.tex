@@ -1,8 +1,5 @@
 \section{Grounding referring expressions in language games}
 \label{sec:language-games}
-\cmtDK[inline]{'epochs', training/testing (success), optimizer, ...}
-\cmtDK[inline]{max message length}
-
 The experiments that are executed using language games have a similar structure as the experiments in the previous chapters, since those provided the basis for the language games.
 % SD: But there is an importnat difference that now we have two neural netweorks, the sender and the receiver.
 % DK: TODO
@@ -18,24 +15,31 @@ All weights of the agents are adapted in the same way.
 The vocabulary that the sender can draw from to produce a message is made up of initially arbitrary symbols.
 The meaning of these symbols is created as soon as the sender uses them in one of the message, and the receiver is able to use it to solve the task successfully.
 Over time, specific meanings are reinforced and a language emerges.
-The number of possible words, namely the size of the vocabulary can be varied.
+Hereby, the production of the messages is constrained in two ways.
+First, the size of the vocabulary is varied.
+A smaller size forces the agents to compress their information more which is a prerequisite for the emergence of a language.
+With more different words, they can express more information, but it is harder to learn.
+Different sizes are compared to analyze its effect on the emerged language.
+Secondly, the maximum possible length of a message is constrained.
+Again, a shorter message requires more compression, while the longer message allows for more information exchange.
 % SD: But possibly you would describe the language game setup already before on the background or method chapter. I would move all text there and make the language games description much more detailed, also giving examples. What is happening in terms of interaction? How is this modelled with the neural networks? It is important to emphasise this difference.
-% DK: TODO
+% DK: (in both beginning and here, done)
 
-First, we will discuss \emph{discrimination games}, because they have the simplest setup.
-% SD: What is this setup?
-% DK: TODO
-Furthermore, other language games that research this topic use a very similar setup.
-In the next step, we will describe \emph{caption generators} that are set up as a language game.
-Here, the sender describes the scene, while the receiver needs to generate a caption.
-In the last step, we try to lose as much human bias as possible and the models are trained on just 'pointing' towards the target object, by again predicting its center coordinates.
-% SD: Why are we not testing it on all 3 games?
-% SD: Not sure what you mean here? Why do we loose human bias? 
-% DK: TODO
+As the experiments before, three different tasks are set up.
+For the \emph{object identification} task, the agents play discrimination games similar to the setup in \citep{Lazaridou2017}.
+For the \emph{RE generation} task, the receiver needs to generate a human language referring expression based on the emerged language referring expression by the sender.
+Since, it is possible that the agents simply learn to align these two languages, the agents are tasked to point towards the center coordinates of the target object in the final task, the \emph{reference resolution} task.
 
-The languages that emerge are analyzed in two ways.
-An analysis of the frequency of used symbols and messages, as well as an examination for which images and objects they are used indicates the structure of the language and meanings of the symbols.
-In a second step, the language is compared to several referring expressions in natural language.
-By doing this, it can be seen if the models learned to use similar ways of referring to objects as humans do, or if they rely on different approaches.
+As discussed in Section \ref{sec:background:lg:setup}, language games are evaluated on the success of communication and the emergence of a language.
+The testing phase is not necessarily used to test the generalization capabilities of the agents, but more to extract a sample of the emerged language.
+It is therefore not as important that the samples in the testing phase are unseen samples.
+Hence, for both training and testing a certain number of samples are randomly drawn from the complete dataset.
+In these experiments, the dataset consists of 10.000 scenes in total.
+To train the agents, 12.800 games are played (using 12.800 randomly drawn samples from the dataset) with a batch size of 32 samples.
+To retrieve the samples of the emerged language, after the agents are trained, they are frozen and play 2.048 games with randomly drawn samples from the dataset.
+This yields 2.048 interactions that will be used to analyze the emerged language.
 
-\cmtDK[inline]{discuss training/epochs/batches, vocab size, message length, gs temperature}
+All agents are trained using the \emph{Adam} optimizer \citep{Kingma2015}.
+LSTMs are used to produce and parse the message between the agents.
+Gumbel-Softmax relaxation is applied to train the agents with those discrete messages.
+Hereby, a temperature of $\tau=1$ is used which showed the best results in preliminary experiments.
