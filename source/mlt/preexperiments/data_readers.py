@@ -13,7 +13,6 @@ import torch
 from mlt.image_loader import ImageLoader
 from mlt.util import Persistor, load_tensor
 from PIL import Image
-from torch import nn
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.models import ResNet101_Weights
@@ -236,6 +235,15 @@ class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
 class CoordinateEncoder:
     def __init__(self, preprocess) -> None:
         self.preprocess = preprocess
+
+    def get_region(self, object_index, scene, image_size, number_regions):
+        x, y = self.get_object_coordinates(object_index, scene, image_size)
+
+        region_size = self.preprocess.crop_size[0] / number_regions
+        x_region = int(x / region_size)
+        y_region = int(y / region_size)
+
+        return x_region + (number_regions * y_region)
 
     def get_object_coordinates(self, object_index, scene, image_size):
         x, y, _ = scene["objects"][object_index]["pixel_coords"]
@@ -580,6 +588,7 @@ class CoordinatePredictorSample:
 
     # target
     target_pixels: torch.Tensor
+    target_region: torch.Tensor
 
     # addtional (optional) information
     attribute_tensor: torch.Tensor = torch.tensor(0)
@@ -646,11 +655,16 @@ class CoordinatePredictorDataset(Dataset):
                 scene,
                 image_size,
             )
+            # magic number 7 = size of cnn layers (128 x 7 x 7)
+            target_region = coordinate_encoder.get_region(
+                target_object, scene, image_size, 7
+            )
 
             sample = CoordinatePredictorSample(
                 image_id=image_id,
                 image=processed_image,
                 target_pixels=torch.tensor([target_x, target_y]),
+                target_region=torch.tensor(target_region),
             )
 
             if attribute_encoder is not None:
@@ -702,6 +716,21 @@ class MaskPredictorDataset(CoordinatePredictorDataset):
                     masked_image,
                 ),
                 masked_image[0, :].flatten(),
+                str(f["image_id"][index], "utf-8"),
+            )
+
+
+class AttentionPredictorDataset(CoordinatePredictorDataset):
+    def __getitem__(self, index):
+        with h5py.File(self.file, "r") as f:
+            return (
+                (
+                    load_tensor(f["image"][index]),
+                    load_tensor(f["attribute_tensor"][index]),
+                    load_tensor(f["locations"][index]),
+                    load_tensor(f["masked_image"][index]),
+                ),
+                load_tensor(f["target_region"][index]),
                 str(f["image_id"][index], "utf-8"),
             )
 

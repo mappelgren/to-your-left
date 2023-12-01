@@ -9,6 +9,7 @@ from mlt.feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
 from mlt.image_loader import ClevrImageLoader, FeatureImageLoader
 from mlt.preexperiments.data_readers import (
     AllObjectsImageMasker,
+    AttentionPredictorDataset,
     BoundingBoxCaptioningDataset,
     BoundingBoxClassifierDataset,
     CaptionGeneratorDataset,
@@ -27,6 +28,7 @@ from mlt.preexperiments.models import (
     CaptionDecoder,
     CaptionGenerator,
     CoordinatePredictor,
+    DaleAttributeAttentionPredictor,
     DaleAttributeCoordinatePredictor,
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
@@ -42,6 +44,7 @@ from mlt.preexperiments.save import (
     StandardOutputProcessor,
 )
 from mlt.preexperiments.test import (
+    AttentionPredictorTester,
     BoundingBoxClassifierTester,
     CaptionGeneratorTester,
     CoordinatePredictorTester,
@@ -319,6 +322,32 @@ models = {
             "output_fields": ("image_id", "x", "y", "target_x", "target_y")
         },
     ),
+    "dale_attribute_attention_predictor": ModelDefinition(
+        dataset=AttentionPredictorDataset,
+        dataset_args={
+            "attribute_encoder": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.APPEND,
+                reversed_caption=False,
+            )
+        },
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=DaleAttributeAttentionPredictor,
+        model_args={
+            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        loss_function=nn.CrossEntropyLoss(),
+        tester=AttentionPredictorTester,
+        output_processor=StandardOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "region", "target_region")
+        },
+    ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
         dataset_args={},
@@ -489,6 +518,7 @@ if __name__ == "__main__":
     parser.add_argument("--image_embedding_dimension", type=int, default=None)
     parser.add_argument("--coordinate_classifier_dimension", type=int, default=10)
     parser.add_argument("--mask_predictor_dimension", type=int, default=10)
+    parser.add_argument("--projection_dimension", type=int, default=100)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")

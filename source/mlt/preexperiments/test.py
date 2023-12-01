@@ -24,6 +24,33 @@ class DummyTester(Tester):
         return (json.dumps({"accuracy": 100}), [])
 
 
+class AttentionPredictorTester(Tester):
+    def test(self, model, test_loader, device):
+        model.eval()
+        accuracy = MulticlassAccuracy(device=device)
+
+        test_outputs = []
+        for model_input, ground_truth, image_id in test_loader:
+            model_input = [t.to(device) for t in model_input]
+            ground_truth = ground_truth.to(device)
+
+            output = model(model_input).detach()
+            max_indices = torch.max(output, dim=1)[1]
+
+            test_outputs.extend(zip(image_id, max_indices, ground_truth))
+
+            accuracy.update(max_indices, ground_truth)
+
+        return (
+            json.dumps(
+                {
+                    "accuracy": f"{accuracy.compute():.4f}",
+                }
+            ),
+            test_outputs,
+        )
+
+
 class CoordinatePredictorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
