@@ -37,6 +37,7 @@ from mlt.preexperiments.models import (
     RandomCoordinatePredictor,
 )
 from mlt.preexperiments.save import (
+    AttentionPredictorProcessor,
     BoundingBoxOutputProcessor,
     CaptionOutputProcessor,
     ModelSaver,
