@@ -243,7 +243,20 @@ class CoordinateEncoder:
         x_region = int(x / region_size)
         y_region = int(y / region_size)
 
-        return x_region + (number_regions * y_region)
+        region_map = torch.zeros((number_regions * number_regions))
+        for x_offset in range(-1, 2):
+            for y_offset in range(-1, 2):
+                if (
+                    x_region + x_offset >= 0
+                    and x_region + x_offset < number_regions
+                    and y_region + y_offset >= 0
+                    and y_region + y_offset < number_regions
+                ):
+                    region_map[
+                        (x_region + x_offset) + (number_regions * (y_region + y_offset))
+                    ] = 1
+
+        return region_map
 
     def get_object_coordinates(self, object_index, scene, image_size):
         x, y, _ = scene["objects"][object_index]["pixel_coords"]
@@ -664,7 +677,7 @@ class CoordinatePredictorDataset(Dataset):
                 image_id=image_id,
                 image=processed_image,
                 target_pixels=torch.tensor([target_x, target_y]),
-                target_region=torch.tensor(target_region),
+                target_region=target_region,
             )
 
             if attribute_encoder is not None:

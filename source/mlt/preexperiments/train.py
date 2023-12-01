@@ -19,6 +19,7 @@ from mlt.preexperiments.data_readers import (
     OneHotAttributeEncoder,
     SingleObjectImageMasker,
 )
+from mlt.preexperiments.losses import attention_loss, pixel_loss
 from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
     AttributeLocationCoordinatePredictor,
@@ -59,12 +60,6 @@ from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset, random_split
 from torcheval.metrics import Mean
 from torchvision.models import ResNet101_Weights
-
-
-def pixel_loss(model_output, ground_truth):
-    loss = torch.diagonal(torch.cdist(model_output, ground_truth.float()))
-
-    return torch.mean(loss)
 
 
 @dataclass
@@ -342,7 +337,7 @@ models = {
             ),
             "projection_dimension": 100,
         },
-        loss_function=nn.CrossEntropyLoss(),
+        loss_function=nn.BCELoss(),
         tester=AttentionPredictorTester,
         output_processor=AttentionPredictorProcessor,
         output_processor_args={

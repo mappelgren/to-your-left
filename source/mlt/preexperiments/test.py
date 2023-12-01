@@ -4,12 +4,14 @@ from abc import abstractmethod
 
 import torch
 from mlt.preexperiments.data_readers import DaleCaptionAttributeEncoder
+from torch import nn
 from torcheval.metrics import (
     BinaryAccuracy,
     Mean,
     MulticlassAccuracy,
     MulticlassPrecision,
     MulticlassRecall,
+    MultilabelAccuracy,
 )
 
 
@@ -27,7 +29,12 @@ class DummyTester(Tester):
 class AttentionPredictorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
-        accuracy = MulticlassAccuracy(device=device)
+        # accuracy = MulticlassAccuracy(device=device)
+        multilabel = MultilabelAccuracy(device=device)
+        loss_function = nn.BCELoss()
+
+        model_outputs = []
+        ground_truths = []
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
@@ -37,15 +44,18 @@ class AttentionPredictorTester(Tester):
             output = model(model_input).detach()
             max_indices = torch.max(output, dim=1)[1]
 
-            test_outputs.extend(zip(image_id, max_indices, ground_truth))
+            test_outputs.extend(zip(image_id, output, ground_truth))
 
-            accuracy.update(max_indices, ground_truth)
+            model_outputs.extend(output)
+            ground_truths.extend(ground_truth)
 
+            multilabel.update(output, ground_truth)
+            # accuracy.update(output, ground_truth)
+
+        loss = loss_function(torch.stack(model_outputs), torch.stack(ground_truths))
         return (
             json.dumps(
-                {
-                    "accuracy": f"{accuracy.compute():.4f}",
-                }
+                {"accuracy": f"{multilabel.compute():.4f}", "loss": f"{loss:.4f}"}
             ),
             test_outputs,
         )
