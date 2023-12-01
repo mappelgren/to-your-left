@@ -14,6 +14,7 @@ from mlt.preexperiments.data_readers import (
     CaptionGeneratorDataset,
     CoordinatePredictorDataset,
     DaleCaptionAttributeEncoder,
+    MaskPredictorDataset,
     OneHotAttributeEncoder,
     SingleObjectImageMasker,
 )
@@ -30,6 +31,7 @@ from mlt.preexperiments.models import (
     MaskedCaptionGenerator,
     MaskedCoordinatePredictor,
     MaskedDaleAttributeCoordinatePredictor,
+    MaskedMaskPredictor,
     RandomCoordinatePredictor,
 )
 from mlt.preexperiments.save import (
@@ -43,9 +45,10 @@ from mlt.preexperiments.test import (
     BoundingBoxClassifierTester,
     CaptionGeneratorTester,
     CoordinatePredictorTester,
+    DummyTester,
     Tester,
 )
-from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
+from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier, MaskPredictor
 from mlt.util import Persistor
 from torch import nn, optim
 from torch.nn import Module
@@ -288,6 +291,34 @@ models = {
             "output_fields": ("image_id", "x", "y", "target_x", "target_y")
         },
     ),
+    "masked_mask_predictor": ModelDefinition(
+        dataset=MaskPredictorDataset,
+        dataset_args={"image_masker": SingleObjectImageMasker()},
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=MaskedMaskPredictor,
+        model_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
+            ),
+            "image_embedding_dimension": 4096,
+            "mask_predictor": MaskPredictor,
+        },
+        loss_function=nn.BCELoss(),
+        tester=DummyTester,
+        output_processor=StandardOutputProcessor,
+        output_processor_args={
+            "output_fields": ("image_id", "x", "y", "target_x", "target_y")
+        },
+    ),
     "bounding_box_classifier": ModelDefinition(
         dataset=BoundingBoxClassifierDataset,
         dataset_args={},
@@ -457,6 +488,7 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_dim", type=int, default=10)
     parser.add_argument("--image_embedding_dimension", type=int, default=None)
     parser.add_argument("--coordinate_classifier_dimension", type=int, default=10)
+    parser.add_argument("--mask_predictor_dimension", type=int, default=10)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
@@ -576,6 +608,11 @@ if __name__ == "__main__":
     if "coordinate_classifier" in model_args.keys():
         model_args["coordinate_classifier"] = model_args["coordinate_classifier"](
             classifier_dimension=args.coordinate_classifier_dimension
+        )
+
+    if "mask_predictor" in model_args.keys():
+        model_args["mask_predictor"] = model_args["mask_predictor"](
+            classifier_dimension=args.mask_predictor_dimension
         )
 
     model = model_name.model(**model_args).to(device)

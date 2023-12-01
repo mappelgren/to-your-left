@@ -19,6 +19,11 @@ class Tester:
         pass
 
 
+class DummyTester(Tester):
+    def test(self, model, test_loader, device):
+        return (json.dumps({"accuracy": 100}), [])
+
+
 class CoordinatePredictorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()

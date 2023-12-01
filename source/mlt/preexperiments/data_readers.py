@@ -13,6 +13,7 @@ import torch
 from mlt.image_loader import ImageLoader
 from mlt.util import Persistor, load_tensor
 from PIL import Image
+from torch import nn
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.models import ResNet101_Weights
@@ -60,6 +61,29 @@ class PreprocessScratch:
         ratio = 1.5
         self.resize_size = (image_size * ratio, image_size)
         self.crop_size = None
+
+    def __call__(self, image):
+        return self.transform(image)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.image_size=})"
+
+
+class PreprocessMask:
+    def __init__(self, image_size):
+        self.image_size = image_size
+
+        self.transform = transforms.Compose(
+            [
+                transforms.Resize(image_size),
+                transforms.PILToTensor(),
+                transforms.ConvertImageDtype(torch.float),
+                transforms.CenterCrop(self.image_size),
+            ]
+        )
+        ratio = 1.5
+        self.resize_size = (image_size * ratio, image_size)
+        self.crop_size = image_size
 
     def __call__(self, image):
         return self.transform(image)
@@ -638,7 +662,7 @@ class CoordinatePredictorDataset(Dataset):
                 )
 
             if image_masker is not None:
-                sample.masked_image = preprocess(
+                sample.masked_image = PreprocessMask(224)(
                     image_masker.get_masked_image(image, scene, target_object)
                 )
 
@@ -664,6 +688,22 @@ class CoordinatePredictorDataset(Dataset):
 
     def __len__(self) -> int:
         return self.num_samples
+
+
+class MaskPredictorDataset(CoordinatePredictorDataset):
+    def __getitem__(self, index):
+        with h5py.File(self.file, "r") as f:
+            masked_image = load_tensor(f["masked_image"][index])
+            return (
+                (
+                    load_tensor(f["image"][index]),
+                    load_tensor(f["attribute_tensor"][index]),
+                    load_tensor(f["locations"][index]),
+                    masked_image,
+                ),
+                masked_image[0, :].flatten(),
+                str(f["image_id"][index], "utf-8"),
+            )
 
 
 @dataclass

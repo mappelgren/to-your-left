@@ -4,6 +4,7 @@ from mlt.shared_models import (
     CoordinateClassifier,
     ImageEncoder,
     MaskedImageEncoder,
+    MaskPredictor,
 )
 from torch import nn
 
@@ -395,6 +396,50 @@ class MaskedCoordinatePredictor(nn.Module):
         coordinates = self.coordinate_classifier(reduced)
 
         return coordinates
+
+
+class MaskedMaskPredictor(nn.Module):
+    """
+    Output:
+     - mask around the target object
+
+    Input:
+     - image
+     - masked image
+    """
+
+    def __init__(
+        self,
+        image_encoder: ImageEncoder,
+        masked_image_encoder: MaskedImageEncoder,
+        image_embedding_dimension: int,
+        mask_predictor: MaskPredictor,
+        *_args,
+        **_kwargs
+    ) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.masked_image_encoder = masked_image_encoder
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+        )
+
+        self.mask_predictor = mask_predictor
+
+    def forward(self, data):
+        image, _, _, masked_image, *_ = data
+
+        encoded_image = self.image_encoder(image)
+        encoded_masked_image = self.masked_image_encoder(masked_image)
+
+        concatenated = torch.cat(
+            (encoded_image, encoded_masked_image),
+            dim=1,
+        )
+        reduced = self.reduction(concatenated)
+        mask = self.mask_predictor(reduced)
+
+        return mask
 
 
 class RandomCoordinatePredictor(nn.Module):
