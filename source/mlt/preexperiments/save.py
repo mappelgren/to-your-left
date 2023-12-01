@@ -65,6 +65,24 @@ class BoundingBoxOutputProcessor(StandardOutputProcessor):
         return processed_output
 
 
+class AttentionPredictorProcessor(StandardOutputProcessor):
+    def process(self, outputs):
+        processed_output = [self.output_fields]
+
+        for image_id, output, ground_truth in outputs:
+            # test data
+            if output.dim() == 0:
+                index = output
+
+            # train data
+            else:
+                index = torch.max(output, dim=0).indices
+
+            processed_output.append((image_id, str(int(index)), str(int(ground_truth))))
+
+        return processed_output
+
+
 class PixelOutputProcessor(StandardOutputProcessor):
     def process(self, outputs):
         processed_output = [self.output_fields]

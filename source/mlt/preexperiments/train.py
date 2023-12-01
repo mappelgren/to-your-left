@@ -343,7 +343,7 @@ models = {
         },
         loss_function=nn.CrossEntropyLoss(),
         tester=AttentionPredictorTester,
-        output_processor=StandardOutputProcessor,
+        output_processor=AttentionPredictorProcessor,
         output_processor_args={
             "output_fields": ("image_id", "region", "target_region")
         },
