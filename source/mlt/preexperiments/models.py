@@ -471,12 +471,6 @@ class DaleAttributeAttentionPredictor(nn.Module):
         self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
         self.attribute_projection = nn.LazyLinear(projection_dimension)
 
-        self.mlp = nn.Sequential(
-            nn.LazyLinear(projection_dimension),
-            nn.ReLU(),
-            nn.LazyLinear(projection_dimension),
-        )
-
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, data):

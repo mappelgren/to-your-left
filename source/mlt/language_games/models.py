@@ -272,3 +272,29 @@ class CoordinatePredictorReceiver(nn.Module):
         coordinates = self.coordinate_classifier(concatenated)
 
         return coordinates
+
+
+class AttentionPredictorReceiver(nn.Module):
+    def __init__(
+        self, image_encoder: ImageEncoder, projection_dimension: int, *_args, **_kwargs
+    ) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.image_projection = nn.LazyLinear(projection_dimension)
+
+        self.message_projection = nn.LazyLinear(projection_dimension)
+
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, message, x, _aux_input):
+        image = x
+        encoded_image = self.image_encoder(image).flatten(start_dim=2).permute(0, 2, 1)
+        projected_image = nn.functional.tanh(self.image_projection(encoded_image))
+
+        projected_message = nn.functional.tanh(
+            self.message_projection(message.squeeze())
+        ).unsqueeze(2)
+
+        dot = torch.matmul(projected_image, projected_message).squeeze()
+
+        return self.softmax(dot)

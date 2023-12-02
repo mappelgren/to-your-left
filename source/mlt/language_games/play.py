@@ -16,6 +16,7 @@ from mlt.language_games.callbacks import (
     ProgressLogger,
 )
 from mlt.language_games.data_readers import (
+    AttentionPredictorGameBatchIterator,
     CaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameDataset,
     CoordinatePredictorGameBatchIterator,
@@ -28,6 +29,7 @@ from mlt.language_games.data_readers import (
     LazaridouReferentialGameDataset,
 )
 from mlt.language_games.models import (
+    AttentionPredictorReceiver,
     CaptionGeneratorReceiver,
     CaptionGeneratorSender,
     CoordinatePredictorReceiver,
@@ -39,12 +41,18 @@ from mlt.language_games.models import (
 )
 from mlt.language_games.test import captioning_loss, classification_loss, pixel_loss
 from mlt.preexperiments.data_readers import (
+    AttentionPredictorDataset,
     DaleCaptionAttributeEncoder,
     SingleObjectImageMasker,
 )
 from mlt.preexperiments.models import CaptionDecoder
-from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
+from mlt.shared_models import (
+    ClevrAttentionImageEncoder,
+    ClevrImageEncoder,
+    CoordinateClassifier,
+)
 from mlt.util import Persistor
+from torch import nn
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -230,6 +238,40 @@ models = {
         },
         loss_function=pixel_loss,
     ),
+    "masked_attention_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "image_masker": SingleObjectImageMasker(),
+            "number_regions": 14,
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        iterator=AttentionPredictorGameBatchIterator,
+        sender=MaskedCoordinatePredictorSender,
+        sender_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
+            ),
+            "embedding_dimension": 2048,
+        },
+        receiver=AttentionPredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrAttentionImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        loss_function=nn.BCELoss(),
+    ),
     "baseline_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorGameDataset,
         dataset_args={},
@@ -398,6 +440,12 @@ def get_params(params):
         type=int,
         default=10,
         help="Dimensions for the coordinate predictor for Receiver (default: 10)",
+    )
+    parser.add_argument(
+        "--projection_dimension",
+        type=int,
+        default=10,
+        help="Projection dimension to combin message and image (default: 10)",
     )
 
     # -- OUTPUT --

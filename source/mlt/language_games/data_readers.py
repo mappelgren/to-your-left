@@ -385,6 +385,7 @@ class CoordinatePredictorGameDataset(CoordinatePredictorDataset):
                 image_id=str(f["image_id"][index], "utf-8"),
                 image=load_tensor(f["image"][index]),
                 target_pixels=load_tensor(f["target_pixels"][index]),
+                target_region=load_tensor(f["target_region"][index]),
                 attribute_tensor=load_tensor(f["attribute_tensor"][index]),
                 locations=load_tensor(f["locations"][index]),
                 masked_image=load_tensor(f["masked_image"][index]),
@@ -435,6 +436,61 @@ class CoordinatePredictorGameBatchIterator(GameBatchIterator):
         return (
             torch.stack(sender_inputs),
             torch.stack(targets),
+            torch.stack(receiver_inputs),
+            {
+                "masked_image": torch.stack(masked_images),
+                "attribute_tensor": torch.stack(attibute_tensors),
+                "image_id": torch.tensor(image_ids),
+            },
+        )
+
+
+class AttentionPredictorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[CoordinatePredictorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        target_pixels = []
+        target_regions = []
+        receiver_inputs = []
+        masked_images = []
+        attibute_tensors = []
+        image_ids = []
+
+        for sample in samples:
+            sender_inputs.append(sample.image)
+            target_pixels.append(sample.target_pixels)
+            target_regions.append(sample.target_region)
+
+            receiver_inputs.append(sample.image)
+            masked_images.append(sample.masked_image)
+            attibute_tensors.append(sample.attribute_tensor)
+            image_ids.append(int(sample.image_id[-6:]))
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(target_regions),
             torch.stack(receiver_inputs),
             {
                 "masked_image": torch.stack(masked_images),
