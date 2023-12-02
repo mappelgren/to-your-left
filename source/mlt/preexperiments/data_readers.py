@@ -308,7 +308,9 @@ class CoordinateEncoder:
             new_x = int(new_x - ((new_image_x - self.preprocess.crop_size[0]) / 2))
             new_y = int(new_y - ((new_image_y - self.preprocess.crop_size[0]) / 2))
 
-        return new_x, new_y
+        return min(max(0, new_x), self.preprocess.crop_size[0]), min(
+            max(0, new_y), self.preprocess.crop_size[0]
+        )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.preprocess=})"
