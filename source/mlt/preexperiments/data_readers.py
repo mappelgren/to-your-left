@@ -640,6 +640,8 @@ class CoordinatePredictorDataset(Dataset):
         encode_locations=False,
         image_masker: ImageMasker = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        # magic number 7 = size of cnn layers (128 x 7 x 7)
+        number_regions=7,
         **_kwargs,
     ) -> None:
         coordinate_encoder = CoordinateEncoder(preprocess)
@@ -668,9 +670,8 @@ class CoordinatePredictorDataset(Dataset):
                 scene,
                 image_size,
             )
-            # magic number 7 = size of cnn layers (128 x 7 x 7)
             target_region = coordinate_encoder.get_region(
-                target_object, scene, image_size, 7
+                target_object, scene, image_size, number_regions
             )
 
             sample = CoordinatePredictorSample(

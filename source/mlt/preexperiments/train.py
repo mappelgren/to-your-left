@@ -19,7 +19,7 @@ from mlt.preexperiments.data_readers import (
     OneHotAttributeEncoder,
     SingleObjectImageMasker,
 )
-from mlt.preexperiments.losses import attention_loss, pixel_loss
+from mlt.preexperiments.losses import pixel_loss
 from mlt.preexperiments.models import (
     AttributeCoordinatePredictor,
     AttributeLocationCoordinatePredictor,
@@ -53,7 +53,12 @@ from mlt.preexperiments.test import (
     DummyTester,
     Tester,
 )
-from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier, MaskPredictor
+from mlt.shared_models import (
+    ClevrAttentionImageEncoder,
+    ClevrImageEncoder,
+    CoordinateClassifier,
+    MaskPredictor,
+)
 from mlt.util import Persistor
 from torch import nn, optim
 from torch.nn import Module
@@ -324,7 +329,8 @@ models = {
             "attribute_encoder": DaleCaptionAttributeEncoder(
                 padding_position=DaleCaptionAttributeEncoder.PaddingPosition.APPEND,
                 reversed_caption=False,
-            )
+            ),
+            "number_regions": 14,
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=DaleAttributeAttentionPredictor,
@@ -332,7 +338,7 @@ models = {
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "image_encoder": ClevrImageEncoder(
+            "image_encoder": ClevrAttentionImageEncoder(
                 feature_extractor=DummyFeatureExtractor(),
             ),
             "projection_dimension": 100,

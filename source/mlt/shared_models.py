@@ -34,6 +34,29 @@ class ClevrImageEncoder(ImageEncoder):
         return f"{self.__class__.__name__}({self.feature_extractor=})"
 
 
+class ClevrAttentionImageEncoder(ImageEncoder):
+    def __init__(
+        self,
+        feature_extractor: FeatureExtractor,
+    ) -> None:
+        super().__init__()
+        self.feature_extractor = feature_extractor
+
+        self.process_image = nn.Sequential(
+            feature_extractor,
+            nn.LazyConv2d(128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.LazyConv2d(128, kernel_size=3, padding=1),
+            nn.ReLU(),
+        )
+
+    def forward(self, image):
+        return self.process_image(image)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.feature_extractor=})"
+
+
 class BoundingBoxImageEncoder(ImageEncoder):
     def __init__(
         self,
