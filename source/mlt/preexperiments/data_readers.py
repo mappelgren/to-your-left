@@ -279,10 +279,27 @@ class CoordinateEncoder:
         image_x, image_y = image_size
 
         if len(self.preprocess.resize_size) == 1:
-            new_image_x = self.preprocess.resize_size[0]
-            new_image_y = self.preprocess.resize_size[0]
+            new_image_x = (
+                self.preprocess.resize_size[0]
+                * image_size[0]
+                / min(image_size[1], image_size[0])
+            )
+            new_image_y = (
+                self.preprocess.resize_size[0]
+                * image_size[1]
+                / min(image_size[1], image_size[0])
+            )
         else:
-            new_image_x, new_image_y = self.preprocess.resize_size
+            new_image_x = (
+                self.preprocess.resize_size[0]
+                * image_size[0]
+                / min(image_size[1], image_size[0])
+            )
+            new_image_y = (
+                self.preprocess.resize_size[1]
+                * image_size[1]
+                / min(image_size[1], image_size[0])
+            )
 
         new_x = int(old_x * (new_image_x / image_x))
         new_y = int(old_y * (new_image_y / image_y))
