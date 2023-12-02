@@ -8,6 +8,7 @@ from torcheval.metrics import (
     MulticlassAccuracy,
     MulticlassPrecision,
     MulticlassRecall,
+    MultilabelAccuracy,
 )
 
 
@@ -150,4 +151,23 @@ def pixel_loss(
 
     return distances, {
         "accuracy": accuracy.compute().detach().clone().float(),
+    }
+
+
+def attention_loss(
+    _sender_input,
+    _message,
+    _receiver_input,
+    receiver_output,
+    labels,
+    _aux_input,
+):
+    device = receiver_output.device
+    multilabel = MultilabelAccuracy(threshold=0.05, device=device)
+
+    loss = F.binary_cross_entropy(receiver_output, labels)
+    multilabel.update(receiver_output, labels)
+
+    return loss, {
+        "accuracy": multilabel.compute().detach().clone().float(),
     }

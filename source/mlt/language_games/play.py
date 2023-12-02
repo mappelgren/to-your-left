@@ -39,9 +39,13 @@ from mlt.language_games.models import (
     ReferentialGameReceiver,
     ReferentialGameSender,
 )
-from mlt.language_games.test import captioning_loss, classification_loss, pixel_loss
+from mlt.language_games.test import (
+    attention_loss,
+    captioning_loss,
+    classification_loss,
+    pixel_loss,
+)
 from mlt.preexperiments.data_readers import (
-    AttentionPredictorDataset,
     DaleCaptionAttributeEncoder,
     SingleObjectImageMasker,
 )
@@ -270,7 +274,7 @@ models = {
             ),
             "projection_dimension": 100,
         },
-        loss_function=nn.BCELoss(),
+        loss_function=attention_loss,
     ),
     "baseline_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorGameDataset,
