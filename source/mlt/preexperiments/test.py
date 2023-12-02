@@ -30,7 +30,7 @@ class AttentionPredictorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
         # accuracy = MulticlassAccuracy(device=device)
-        multilabel = MultilabelAccuracy(device=device)
+        multilabel = MultilabelAccuracy(threshold=0.05, device=device)
         loss_function = nn.BCELoss()
 
         model_outputs = []
@@ -42,7 +42,6 @@ class AttentionPredictorTester(Tester):
             ground_truth = ground_truth.to(device)
 
             output = model(model_input).detach()
-            max_indices = torch.max(output, dim=1)[1]
 
             test_outputs.extend(zip(image_id, output, ground_truth))
 
