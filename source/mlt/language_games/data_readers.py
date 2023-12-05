@@ -15,6 +15,8 @@ from mlt.preexperiments.data_readers import (
     CaptionGeneratorSample,
     CoordinatePredictorDataset,
     CoordinatePredictorSample,
+    OneHotGeneratorDataset,
+    OneHotGeneratorSample,
 )
 from mlt.util import Persistor, load_tensor
 from torch.utils.data import DataLoader, Dataset, Subset
@@ -187,7 +189,7 @@ class DaleReferentialGameDataset(Dataset):
     def load(
         cls,
         scenes_json_dir,
-        image_loader: ImageLoader,
+        bounding_box_loader: ImageLoader,
         persistor: Persistor,
         *_args,
         max_number_samples=100,
@@ -212,7 +214,7 @@ class DaleReferentialGameDataset(Dataset):
                 scene = json.load(f)
 
             image_id = scene_file.removesuffix(".json")
-            _, bounding_boxes, _ = image_loader.get_image(image_id)
+            _, bounding_boxes, _ = bounding_box_loader.get_image(image_id)
 
             target_object = scene["groups"]["target"][0]
 
@@ -307,6 +309,72 @@ class DaleReferentialGameBatchIterator(GameBatchIterator):
         )
 
 
+class OneHotGeneratorGameDataset(OneHotGeneratorDataset):
+    def __getitem__(self, index):
+        with h5py.File(self.file, "r") as f:
+            return OneHotGeneratorSample(
+                image_id=str(f["image_id"][index], "utf-8"),
+                image=load_tensor(f["image"][index]),
+                attribute_encoding=load_tensor(f["attribute_encoding"][index]),
+                target_encoding=load_tensor(f["target_encoding"][index]),
+                non_target_encodings=load_tensor(f["non_target_encodings"][index]),
+                bounding_boxes=load_tensor(f["bounding_boxes"][index]),
+            )
+
+
+class OneHotGeneratorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[OneHotGeneratorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        targets = []
+        receiver_inputs = []
+        non_target_encodings = []
+        train_modes = []
+        image_ids = []
+
+        for sample in samples:
+            sender_inputs.append(sample.bounding_boxes)
+            targets.append(sample.target_encoding)
+
+            receiver_inputs.append(sample.image)
+            non_target_encodings.append(sample.non_target_encodings)
+            train_modes.append(self.train_mode)
+            image_ids.append(int(sample.image_id[-6:]))
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(targets),
+            torch.stack(receiver_inputs),
+            {
+                "non_target_encodings": torch.stack(non_target_encodings),
+                "train_mode": torch.tensor(train_modes),
+                "image_id": torch.tensor(image_ids),
+            },
+        )
+
+
 class CaptionGeneratorGameDataset(CaptionGeneratorDataset):
     def __getitem__(self, index):
         with h5py.File(self.file, "r") as f:
@@ -316,6 +384,7 @@ class CaptionGeneratorGameDataset(CaptionGeneratorDataset):
                 caption=load_tensor(f["caption"][index]),
                 masked_image=load_tensor(f["masked_image"][index]),
                 non_target_captions=load_tensor(f["non_target_captions"][index]),
+                bounding_boxes=load_tensor(f["bounding_boxes"][index]),
             )
 
 
@@ -378,6 +447,62 @@ class CaptionGeneratorGameBatchIterator(GameBatchIterator):
         )
 
 
+class BoundingBoxCaptionGeneratorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[CaptionGeneratorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        targets = []
+        receiver_inputs = []
+        captions = []
+        non_target_captions = []
+        train_modes = []
+        image_ids = []
+
+        for sample in samples:
+            sender_inputs.append(sample.bounding_boxes)
+            targets.append(sample.caption[1:])
+
+            receiver_inputs.append(sample.image)
+            captions.append(sample.caption)
+            non_target_captions.append(sample.non_target_captions)
+            train_modes.append(self.train_mode)
+            image_ids.append(int(sample.image_id[-6:]))
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(targets),
+            torch.stack(receiver_inputs),
+            {
+                "caption": torch.stack(captions),
+                "non_target_captions": torch.stack(non_target_captions),
+                "train_mode": torch.tensor(train_modes),
+                "image_id": torch.tensor(image_ids),
+            },
+        )
+
+
 class CoordinatePredictorGameDataset(CoordinatePredictorDataset):
     def __getitem__(self, index):
         with h5py.File(self.file, "r") as f:
@@ -389,6 +514,7 @@ class CoordinatePredictorGameDataset(CoordinatePredictorDataset):
                 attribute_tensor=load_tensor(f["attribute_tensor"][index]),
                 locations=load_tensor(f["locations"][index]),
                 masked_image=load_tensor(f["masked_image"][index]),
+                bounding_boxes=load_tensor(f["bounding_boxes"][index]),
             )
 
 
@@ -471,7 +597,6 @@ class AttentionPredictorGameBatchIterator(GameBatchIterator):
         ]
 
         sender_inputs = []
-        target_pixels = []
         target_regions = []
         receiver_inputs = []
         masked_images = []
@@ -480,7 +605,6 @@ class AttentionPredictorGameBatchIterator(GameBatchIterator):
 
         for sample in samples:
             sender_inputs.append(sample.image)
-            target_pixels.append(sample.target_pixels)
             target_regions.append(sample.target_region)
 
             receiver_inputs.append(sample.image)
@@ -495,6 +619,53 @@ class AttentionPredictorGameBatchIterator(GameBatchIterator):
             {
                 "masked_image": torch.stack(masked_images),
                 "attribute_tensor": torch.stack(attibute_tensors),
+                "image_id": torch.tensor(image_ids),
+            },
+        )
+
+
+class BoundingBoxAttentionPredictorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[CoordinatePredictorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        target_regions = []
+        receiver_inputs = []
+        image_ids = []
+
+        for sample in samples:
+            sender_inputs.append(sample.bounding_boxes)
+            target_regions.append(sample.target_region)
+
+            receiver_inputs.append(sample.image)
+            image_ids.append(int(sample.image_id[-6:]))
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(target_regions),
+            torch.stack(receiver_inputs),
+            {
                 "image_id": torch.tensor(image_ids),
             },
         )

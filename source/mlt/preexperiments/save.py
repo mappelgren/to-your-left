@@ -65,7 +65,7 @@ class BoundingBoxOutputProcessor(StandardOutputProcessor):
         return processed_output
 
 
-class AttentionPredictorProcessor(StandardOutputProcessor):
+class MultiHotPredictorProcessor(StandardOutputProcessor):
     def process(self, outputs):
         processed_output = [self.output_fields]
 
@@ -73,10 +73,8 @@ class AttentionPredictorProcessor(StandardOutputProcessor):
             processed_output.append(
                 (
                     image_id,
-                    str([round(float(region), 4) for region in output]).replace(
-                        ",", ";"
-                    ),
-                    str([round(float(region), 4) for region in ground_truth]).replace(
+                    str([round(float(label), 4) for label in output]).replace(",", ";"),
+                    str([round(float(label), 4) for label in ground_truth]).replace(
                         ",", ";"
                     ),
                 )

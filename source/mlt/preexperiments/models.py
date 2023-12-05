@@ -644,3 +644,52 @@ class MaskedCaptionGenerator(nn.Module):
             caption.append(word)
 
         return torch.cat(caption, dim=1)
+
+
+class OneHotGenerator(nn.Module):
+    """
+    Output:
+     - caption
+
+    Input:
+     - image
+    """
+
+    def __init__(
+        self,
+        image_encoder: ImageEncoder,
+        vocab_size: int,
+        embedding_dim: int,
+        encoder_out_dim: int,
+        projection_dimension: int,
+        number_attributes: int,
+        *_args,
+        **_kwargs,
+    ) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.image_projection = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(projection_dimension)
+        )
+
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
+        self.attribute_projection = nn.LazyLinear(projection_dimension)
+
+        self.attribute_predictor = nn.Sequential(
+            nn.LazyLinear(number_attributes), nn.Softmax(dim=1)
+        )
+
+    def forward(self, data):
+        image, attribute_tensor, *_ = data
+
+        encoded_image = self.image_encoder(image).flatten(start_dim=2).permute(0, 2, 1)
+        projected_image = self.image_projection(encoded_image)
+
+        embedded = self.embedding(attribute_tensor)
+        _, (hidden_state, _) = self.lstm(embedded)
+        projected_attributes = self.attribute_projection(hidden_state.squeeze())
+
+        cat = torch.cat((projected_image, projected_attributes), dim=1)
+
+        return self.attribute_predictor(cat)

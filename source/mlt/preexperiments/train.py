@@ -17,6 +17,7 @@ from mlt.preexperiments.data_readers import (
     DaleCaptionAttributeEncoder,
     MaskPredictorDataset,
     OneHotAttributeEncoder,
+    OneHotGeneratorDataset,
     SingleObjectImageMasker,
 )
 from mlt.preexperiments.losses import pixel_loss
@@ -35,13 +36,14 @@ from mlt.preexperiments.models import (
     MaskedCoordinatePredictor,
     MaskedDaleAttributeCoordinatePredictor,
     MaskedMaskPredictor,
+    OneHotGenerator,
     RandomCoordinatePredictor,
 )
 from mlt.preexperiments.save import (
-    AttentionPredictorProcessor,
     BoundingBoxOutputProcessor,
     CaptionOutputProcessor,
     ModelSaver,
+    MultiHotPredictorProcessor,
     PixelOutputProcessor,
     StandardOutputProcessor,
 )
@@ -51,6 +53,7 @@ from mlt.preexperiments.test import (
     CaptionGeneratorTester,
     CoordinatePredictorTester,
     DummyTester,
+    OneHotGeneratorTester,
     Tester,
 )
 from mlt.shared_models import (
@@ -345,7 +348,7 @@ models = {
         },
         loss_function=nn.BCELoss(),
         tester=AttentionPredictorTester,
-        output_processor=AttentionPredictorProcessor,
+        output_processor=MultiHotPredictorProcessor,
         output_processor_args={
             "output_fields": ("image_id", "region", "target_region")
         },
@@ -468,6 +471,32 @@ models = {
             "output_fields": ("image_id", "caption", "target_caption")
         },
     ),
+    "one_hot_generator": ModelDefinition(
+        dataset=OneHotGeneratorDataset,
+        dataset_args={
+            "attribute_encoder": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
+                reversed_caption=False,
+            ),
+            "target_attribute_encoder": OneHotAttributeEncoder(),
+        },
+        preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
+        model=OneHotGenerator,
+        model_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "number_attributes": 13,
+        },
+        loss_function=nn.BCELoss(),
+        tester=OneHotGeneratorTester,
+        output_processor=MultiHotPredictorProcessor,
+        output_processor_args={"output_fields": ("image_id", "predicted", "target")},
+    ),
 }
 
 # names of the datasets and their foldernames
@@ -493,7 +522,13 @@ if __name__ == "__main__":
     )
     parser.add_argument("--dataset", choices=datasets.keys(), help="datasets, to load")
     parser.add_argument(
-        "--feature_file",
+        "--image_feature_file",
+        type=str,
+        default=None,
+        help="Name of the hd5 file containing extracted image features",
+    )
+    parser.add_argument(
+        "--bounding_box_feature_file",
         type=str,
         default=None,
         help="Name of the hd5 file containing extracted image features",
@@ -561,15 +596,18 @@ if __name__ == "__main__":
     scene_json_dir = os.path.join(
         args.dataset_base_dir, datasets[args.dataset], "scenes/"
     )
-    feature_file = os.path.join(
-        args.dataset_base_dir, datasets[args.dataset], "features", args.feature_file
-    )
 
     model_name = models[args.model]
 
-    if args.feature_file is not None:
+    if args.image_feature_file is not None:
+        image_feature_file = os.path.join(
+            args.dataset_base_dir,
+            datasets[args.dataset],
+            "features",
+            args.image_feature_file,
+        )
         image_loader = FeatureImageLoader(
-            feature_file=feature_file, image_dir=image_dir
+            feature_file=image_feature_file, image_dir=image_dir
         )
     else:
         image_loader = ClevrImageLoader(
@@ -577,9 +615,23 @@ if __name__ == "__main__":
             preprocess=model_name.preprocess,
         )
 
+    if args.bounding_box_feature_file is not None:
+        bounding_box_feature_file = os.path.join(
+            args.dataset_base_dir,
+            datasets[args.dataset],
+            "features",
+            args.bounding_box_feature_file,
+        )
+        bounding_box_loader = FeatureImageLoader(
+            feature_file=bounding_box_feature_file, image_dir=image_dir
+        )
+    else:
+        bounding_box_loader = None
+
     dataset_args = {
         "scenes_json_dir": scene_json_dir,
         "image_loader": image_loader,
+        "bounding_box_loader": bounding_box_loader,
         "max_number_samples": args.max_samples,
         **model_name.dataset_args,
     }

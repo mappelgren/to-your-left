@@ -626,6 +626,7 @@ class CoordinatePredictorSample:
     attribute_tensor: torch.Tensor = torch.tensor(0)
     locations: torch.Tensor = torch.tensor(0)
     masked_image: torch.Tensor = torch.tensor(0)
+    bounding_boxes: torch.Tensor = torch.tensor(0)
 
 
 class CoordinatePredictorDataset(Dataset):
@@ -655,6 +656,7 @@ class CoordinatePredictorDataset(Dataset):
         max_number_samples,
         persistor: Persistor,
         *_args,
+        bounding_box_loader: ImageLoader = None,
         attribute_encoder: AttributeEncoder = None,
         encode_locations=False,
         image_masker: ImageMasker = None,
@@ -699,6 +701,22 @@ class CoordinatePredictorDataset(Dataset):
                 target_pixels=torch.tensor([target_x, target_y]),
                 target_region=target_region,
             )
+
+            if bounding_box_loader is not None:
+                _, bounding_boxes, _ = bounding_box_loader.get_image(image_id)
+
+                target_object = scene["groups"]["target"][0]
+
+                # move target bounding box to first position
+                bounding_boxes = [
+                    bounding_boxes[target_object],
+                    *[
+                        box
+                        for index, box in enumerate(bounding_boxes)
+                        if index != target_object
+                    ],
+                ]
+                sample.bounding_boxes = bounding_boxes
 
             if attribute_encoder is not None:
                 sample.attribute_tensor = attribute_encoder.encode(scene, target_object)
@@ -777,6 +795,7 @@ class CaptionGeneratorSample:
     caption: torch.Tensor
 
     # additional attributes
+    bounding_boxes: torch.Tensor = torch.tensor(0)
     masked_image: torch.Tensor = torch.tensor(0)
     non_target_captions: torch.Tensor = torch.tensor(0)
 
@@ -812,6 +831,7 @@ class CaptionGeneratorDataset(Dataset):
         captioner: Captioner,
         persistor: Persistor,
         *_args,
+        bounding_box_loader: ImageLoader = None,
         image_masker: ImageMasker = None,
         preprocess=ResNet101_Weights.DEFAULT.transforms(),
         **_kwargs,
@@ -854,6 +874,22 @@ class CaptionGeneratorDataset(Dataset):
                 non_target_captions=torch.stack(captions),
             )
 
+            if bounding_box_loader is not None:
+                _, bounding_boxes, _ = bounding_box_loader.get_image(image_id)
+
+                target_object = scene["groups"]["target"][0]
+
+                # move target bounding box to first position
+                bounding_boxes = [
+                    bounding_boxes[target_object],
+                    *[
+                        box
+                        for index, box in enumerate(bounding_boxes)
+                        if index != target_object
+                    ],
+                ]
+                sample.bounding_boxes = bounding_boxes
+
             if image_masker is not None:
                 sample.masked_image = preprocess(
                     image_masker.get_masked_image(image, scene, target_object)
@@ -890,6 +926,149 @@ class CaptionGeneratorDataset(Dataset):
                     load_tensor(f["masked_image"][index]),
                 ),
                 load_tensor(f["caption"][index])[1:],
+                str(f["image_id"][index], "utf-8"),
+            )
+
+    def __len__(self) -> int:
+        return self.num_samples
+
+
+@dataclass
+class OneHotGeneratorSample:
+    image_id: str
+    image: torch.Tensor
+
+    # target
+    target_encoding: torch.Tensor
+
+    # additional attributes
+    attribute_encoding: torch.Tensor = torch.tensor(0)
+    bounding_boxes: torch.Tensor = torch.tensor(0)
+    non_target_encodings: torch.Tensor = torch.tensor(0)
+
+
+class OneHotGeneratorDataset(Dataset):
+    """
+    Input:
+     - image
+
+    Ouput:
+     - caption in form of (size, color, shape) e.g. large green sphere
+    """
+
+    def __init__(
+        self,
+        file_path,
+    ) -> None:
+        super().__init__()
+
+        self.file = file_path
+
+        with h5py.File(file_path, "r") as f:
+            self.num_samples = len(list(f.values())[0])
+
+    @classmethod
+    def load(
+        cls,
+        scenes_json_dir,
+        image_loader: ImageLoader,
+        max_number_samples,
+        target_attribute_encoder: AttributeEncoder,
+        persistor: Persistor,
+        *_args,
+        attribute_encoder: AttributeEncoder = None,
+        bounding_box_loader: ImageLoader = None,
+        **_kwargs,
+    ) -> None:
+        samples: list[OneHotGeneratorSample] = []
+
+        scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
+        selected_scenes = random.sample(scenes, max_number_samples)
+
+        max_number_of_distractors = 0
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                scene = json.load(f)
+
+            image_id = scene_file.removesuffix(".json")
+            _, processed_image, _ = image_loader.get_image(image_id)
+
+            target_object = scene["groups"]["target"][0]
+
+            number_of_objects = len(scene["objects"])
+            max_number_of_distractors = max(
+                number_of_objects - 1, max_number_of_distractors
+            )
+            encodings = []
+            for obj_index in range(number_of_objects):
+                encodings.append(target_attribute_encoder.encode(scene, obj_index))
+
+            target_encoding = encodings.pop(target_object)
+
+            sample = OneHotGeneratorSample(
+                image_id=image_id,
+                image=processed_image,
+                target_encoding=target_encoding,
+                non_target_encodings=torch.stack(encodings),
+            )
+
+            if attribute_encoder is not None:
+                sample.attribute_encoding = attribute_encoder.encode(
+                    scene, target_object
+                )
+
+            if bounding_box_loader is not None:
+                _, bounding_boxes, _ = bounding_box_loader.get_image(image_id)
+
+                target_object = scene["groups"]["target"][0]
+
+                # move target bounding box to first position
+                bounding_boxes = [
+                    bounding_boxes[target_object],
+                    *[
+                        box
+                        for index, box in enumerate(bounding_boxes)
+                        if index != target_object
+                    ],
+                ]
+                sample.bounding_boxes = bounding_boxes
+
+            samples.append(sample)
+
+        # pad non-target captions
+        for sample in samples:
+            padding = [torch.zeros_like(sample.non_target_encodings[0])] * (
+                max_number_of_distractors - len(sample.non_target_encodings)
+            )
+            if len(padding) > 0:
+                sample.non_target_encodings = torch.cat(
+                    (
+                        sample.non_target_encodings,
+                        torch.stack(padding),
+                    )
+                )
+
+        print()
+        print("loaded data.")
+
+        persistor.save(samples)
+        return cls(persistor.file_path)
+
+    def __getitem__(self, index):
+        with h5py.File(self.file, "r") as f:
+            return (
+                (
+                    load_tensor(f["image"][index]),
+                    load_tensor(f["attribute_encoding"][index]),
+                    load_tensor(f["non_target_encodings"][index]),
+                ),
+                load_tensor(f["target_encoding"][index]),
                 str(f["image_id"][index], "utf-8"),
             )
 

@@ -4,6 +4,7 @@ from abc import abstractmethod
 
 import torch
 from mlt.preexperiments.data_readers import DaleCaptionAttributeEncoder
+from numpy import dtype
 from torch import nn
 from torcheval.metrics import (
     BinaryAccuracy,
@@ -225,6 +226,70 @@ class CaptionGeneratorTester(Tester):
                     "word_by_word_recall": f"{torch.mean(computed_class_recall[included_indices]):.4f}",
                     "recall_by_word": recall_by_word,
                     "non_target_accuracy": f"{non_target_accuracy.compute():.4f}",
+                }
+            ),
+            test_outputs,
+        )
+
+
+class OneHotGeneratorTester(Tester):
+    def test(self, model, test_loader, device):
+        model.eval()
+        accuracy = Mean(device=device)
+        color_accuracy = Mean(device=device)
+        shape_accuracy = Mean(device=device)
+        size_accuracy = Mean(device=device)
+        loss_function = nn.BCELoss()
+
+        model_outputs = []
+        ground_truths = []
+
+        test_outputs = []
+        for model_input, ground_truth, image_id in test_loader:
+            model_input = [t.to(device) for t in model_input]
+            ground_truth = ground_truth.to(device)
+
+            output = model(model_input).detach()
+            test_outputs.extend(zip(image_id, output, ground_truth))
+
+            model_outputs.extend(output)
+            ground_truths.extend(ground_truth)
+
+            ground_truth_colors = ground_truth[:, 0:8]
+            output_color = torch.nn.functional.one_hot(
+                torch.argmax(output[:, 0:8], dim=1),
+                num_classes=ground_truth_colors.shape[1],
+            )
+            color_hits = torch.sum(ground_truth_colors * output_color, dim=1)
+            color_accuracy.update(color_hits)
+
+            ground_truth_shapes = ground_truth[:, 8:11]
+            output_shape = torch.nn.functional.one_hot(
+                torch.argmax(output[:, 8:11], dim=1),
+                num_classes=ground_truth_shapes.shape[1],
+            )
+            shape_hits = torch.sum(ground_truth_shapes * output_shape, dim=1)
+            shape_accuracy.update(shape_hits)
+
+            ground_truth_sizes = ground_truth[:, 11:12]
+            output_size = torch.nn.functional.one_hot(
+                torch.argmax(output[:, 11:12], dim=1),
+                num_classes=ground_truth_sizes.shape[1],
+            )
+            size_hits = torch.sum(ground_truth_sizes * output_size, dim=1)
+            size_accuracy.update(size_hits)
+
+            accuracy.update(color_hits * shape_hits * size_hits)
+
+        loss = loss_function(torch.stack(model_outputs), torch.stack(ground_truths))
+        return (
+            json.dumps(
+                {
+                    "accuracy": f"{accuracy.compute():.4f}",
+                    "color_accuracy": f"{color_accuracy.compute():.4f}",
+                    "shape_accuracy": f"{shape_accuracy.compute():.4f}",
+                    "size_accuracy": f"{size_accuracy.compute():.4f}",
+                    "loss": f"{loss:.4f}",
                 }
             ),
             test_outputs,

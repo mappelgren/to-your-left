@@ -69,7 +69,7 @@ class CaptionGeneratorSender(nn.Module):
         image_embedding_dimension: int,
         hidden_size,
         *_args,
-        **_kwargs
+        **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -103,7 +103,7 @@ class CaptionGeneratorReceiver(nn.Module):
         caption_decoder: CaptionDecoder,
         encoded_sos,
         *_args,
-        **_kwargs
+        **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -151,6 +151,38 @@ class CaptionGeneratorReceiver(nn.Module):
             return torch.stack(predicted).permute(1, 2, 0)
 
 
+class OneHotGeneratorReceiver(nn.Module):
+    def __init__(
+        self,
+        image_encoder: ImageEncoder,
+        projection_dimension: int,
+        number_attributes: int,
+        *_args,
+        **_kwargs,
+    ) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.image_projection = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(projection_dimension)
+        )
+
+        self.message_projection = nn.LazyLinear(projection_dimension)
+
+        self.attribute_predictor = nn.Sequential(
+            nn.LazyLinear(number_attributes), nn.Softmax(dim=1)
+        )
+
+    def forward(self, message, x, _aux_input):
+        image = x
+        encoded_image = self.image_encoder(image).flatten(start_dim=2).permute(0, 2, 1)
+        projected_image = self.image_projection(encoded_image)
+        projected_message = self.message_projection(message)
+
+        cat = torch.cat((projected_image, projected_message), dim=1)
+
+        return self.attribute_predictor(cat)
+
+
 class DaleAttributeCoordinatePredictorSender(nn.Module):
     """
     Output:
@@ -171,7 +203,7 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
         image_embedding_dimension,
         hidden_size,
         *_args,
-        **_kwargs
+        **_kwargs,
     ) -> None:
         super().__init__()
 
@@ -220,7 +252,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
         embedding_dimension: int,
         hidden_size,
         *_args,
-        **_kwargs
+        **_kwargs,
     ) -> None:
         super().__init__()
 
@@ -255,7 +287,7 @@ class CoordinatePredictorReceiver(nn.Module):
         embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
-        **_kwargs
+        **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
@@ -298,3 +330,79 @@ class AttentionPredictorReceiver(nn.Module):
         dot = torch.matmul(projected_image, projected_message).squeeze()
 
         return self.softmax(dot)
+
+
+class DaleAttributeSender(nn.Module):
+    """
+    Output:
+     - x and y coordinates of target object
+
+    Input:
+     - image
+     - attributes (shape, size, color)
+     - center coordinates of all objects
+    """
+
+    def __init__(
+        self,
+        vocab_size,
+        projection_dimension,
+        dale_embedding_dim,
+        dale_encoder_out_dim,
+        image_encoder: ImageEncoder,
+        hidden_size,
+        *_args,
+        **_kwargs,
+    ) -> None:
+        super().__init__()
+        self.image_encoder = image_encoder
+        self.image_projection = nn.LazyLinear(projection_dimension)
+
+        self.embedding = nn.Embedding(vocab_size, dale_embedding_dim)
+        self.lstm = nn.LSTM(dale_embedding_dim, dale_encoder_out_dim, batch_first=True)
+        self.attribute_projection = nn.LazyLinear(projection_dimension)
+
+        self.hidden = nn.LazyLinear(hidden_size)
+
+    def forward(self, x, aux_input):
+        image = x
+        attribute_tensor = aux_input["attribute_tensor"]
+
+        encoded_image = self.image_encoder(image).flatten(start_dim=2).permute(0, 2, 1)
+        projected_image = nn.functional.tanh(self.image_projection(encoded_image))
+
+        embedded = self.embedding(attribute_tensor)
+        _, (hidden_state, _) = self.lstm(embedded)
+        projected_attributes = nn.functional.tanh(
+            self.attribute_projection(hidden_state.squeeze())
+        ).unsqueeze(2)
+
+        dot = torch.matmul(projected_image, projected_attributes).squeeze()
+
+        return self.hidden(dot)
+
+
+class AttributeSender(nn.Module):
+    """
+    Output:
+     - x and y coordinates of target object
+
+    Input:
+     - image
+     - attributes (shape, size, color)
+     - center coordinates of all objects
+    """
+
+    def __init__(
+        self,
+        hidden_size,
+        *_args,
+        **_kwargs,
+    ) -> None:
+        super().__init__()
+        self.hidden = nn.LazyLinear(hidden_size)
+
+    def forward(self, _x, aux_input):
+        attribute_tensor = aux_input["attribute_tensor"]
+
+        return self.hidden(attribute_tensor)

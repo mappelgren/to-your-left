@@ -1,9 +1,9 @@
+import argparse
 import os
+import re
 from glob import glob
 
 import torch
-
-root_dir = "/home/dominik/Nextcloud/020_Masterstudium/Language Technology/LT2402_Master Thesis/experiments/runs/language-games/masked_coordinate_predictor/"
 
 dataset_mapping = {
     "dale-2": "CLEVR_UNAMBIGOUS-DALE-TWO",
@@ -37,17 +37,37 @@ def save_csv(run_dir, dataset, split, file_name):
         label = label.tolist()
         image_name = f"{dataset_mapping[dataset]}_{str(int(image_id)).zfill(6)}"
 
+        # attention predictor
+        if len(final_output) > 2:
+            final_output = str(
+                [round(float(region), 4) for region in final_output]
+            ).replace(",", ";")
+            label = str([round(float(region), 4) for region in label]).replace(",", ";")
+        # coordinate predictor
+        else:
+            final_output = f"{final_output[0]},{final_output[1]}"
+            label = f"{label[0]},{label[1]}"
+
         with open(
             os.path.join(run_dir, f"{file_name}_outputs.csv"), "a", encoding="utf-8"
         ) as f:
-            f.write(
-                f"{image_name},{final_output[0]},{final_output[1]},{label[0]},{label[1]}\n"
-            )
+            f.write(f"{image_name},{final_output},{label}\n")
 
 
 if __name__ == "__main__":
-    for dataset_folder in glob(os.path.join(root_dir, "*")):
-        dataset = dataset_folder.split("/")[-1]
-        for run in glob(os.path.join(dataset_folder, "*")):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--root_dir",
+        type=str,
+        help="Path to the root directory of all results",
+    )
+
+    args = parser.parse_args()
+
+    for run in glob(os.path.join(args.root_dir, "*")):
+        pattern = r"_([^_]+)((_[\de\-\.]+)*)$"
+        match = re.search(pattern, run)
+        if match:
+            dataset = match.group(1)
             save_csv(run, dataset, "train", "train")
             save_csv(run, dataset, "validation", "test")

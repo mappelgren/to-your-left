@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from mlt.preexperiments.data_readers import DaleCaptionAttributeEncoder
 from torcheval.metrics import (
     BinaryAccuracy,
+    Mean,
     MulticlassAccuracy,
     MulticlassPrecision,
     MulticlassRecall,
@@ -133,6 +134,64 @@ def captioning_loss(
     }
 
 
+def one_hot_loss(
+    _sender_input,
+    _message,
+    _receiver_input,
+    receiver_output,
+    labels,
+    _aux_input,
+):
+    device = receiver_output.device
+    accuracy = Mean(device=device)
+    color_accuracy = Mean(device=device)
+    shape_accuracy = Mean(device=device)
+    size_accuracy = Mean(device=device)
+
+    ground_truth_colors = labels[:, 0:8]
+    output_color = torch.nn.functional.one_hot(
+        torch.argmax(receiver_output[:, 0:8], dim=1),
+        num_classes=ground_truth_colors.shape[1],
+    )
+    color_hits = torch.sum(ground_truth_colors * output_color, dim=1)
+    color_accuracy.update(color_hits)
+
+    ground_truth_shapes = labels[:, 8:11]
+    output_shape = torch.nn.functional.one_hot(
+        torch.argmax(receiver_output[:, 8:11], dim=1),
+        num_classes=ground_truth_shapes.shape[1],
+    )
+    shape_hits = torch.sum(ground_truth_shapes * output_shape, dim=1)
+    shape_accuracy.update(shape_hits)
+
+    ground_truth_sizes = labels[:, 11:12]
+    output_size = torch.nn.functional.one_hot(
+        torch.argmax(receiver_output[:, 11:12], dim=1),
+        num_classes=ground_truth_sizes.shape[1],
+    )
+    size_hits = torch.sum(ground_truth_sizes * output_size, dim=1)
+    size_accuracy.update(size_hits)
+
+    complete_hits = color_hits * shape_hits * size_hits
+    accuracy.update(complete_hits)
+
+    loss = F.binary_cross_entropy(receiver_output, labels)
+
+    logging.getLogger().setLevel(logging.ERROR)
+    computed_accuracy = accuracy.compute()
+    computed_color_accuracy = color_accuracy.compute()
+    computed_shape_accuracy = shape_accuracy.compute()
+    computed_size_accuracy = size_accuracy.compute()
+    logging.getLogger().setLevel(logging.WARNING)
+
+    return loss, {
+        "accuracy": computed_accuracy.detach().clone().float(),
+        "color_accuracy": computed_color_accuracy.detach().clone().float(),
+        "shape_accuracy": computed_shape_accuracy.detach().clone().float(),
+        "size_accuracy": computed_size_accuracy.detach().clone().float(),
+    }
+
+
 def pixel_loss(
     _sender_input,
     _message,
@@ -163,7 +222,7 @@ def attention_loss(
     _aux_input,
 ):
     device = receiver_output.device
-    multilabel = MultilabelAccuracy(threshold=0.05, device=device)
+    multilabel = MultilabelAccuracy(threshold=0.18, device=device)
 
     loss = F.binary_cross_entropy(receiver_output, labels)
     multilabel.update(receiver_output, labels)

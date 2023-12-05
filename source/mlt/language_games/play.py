@@ -17,6 +17,8 @@ from mlt.language_games.callbacks import (
 )
 from mlt.language_games.data_readers import (
     AttentionPredictorGameBatchIterator,
+    BoundingBoxAttentionPredictorGameBatchIterator,
+    BoundingBoxCaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameDataset,
     CoordinatePredictorGameBatchIterator,
@@ -27,15 +29,20 @@ from mlt.language_games.data_readers import (
     GameLoader,
     LazaridouReferentialGameBatchIterator,
     LazaridouReferentialGameDataset,
+    OneHotGeneratorGameBatchIterator,
+    OneHotGeneratorGameDataset,
 )
 from mlt.language_games.models import (
     AttentionPredictorReceiver,
+    AttributeSender,
     CaptionGeneratorReceiver,
     CaptionGeneratorSender,
     CoordinatePredictorReceiver,
     DaleAttributeCoordinatePredictorSender,
+    DaleAttributeSender,
     DummySender,
     MaskedCoordinatePredictorSender,
+    OneHotGeneratorReceiver,
     ReferentialGameReceiver,
     ReferentialGameSender,
 )
@@ -43,10 +50,12 @@ from mlt.language_games.test import (
     attention_loss,
     captioning_loss,
     classification_loss,
+    one_hot_loss,
     pixel_loss,
 )
 from mlt.preexperiments.data_readers import (
     DaleCaptionAttributeEncoder,
+    OneHotAttributeEncoder,
     SingleObjectImageMasker,
 )
 from mlt.preexperiments.models import CaptionDecoder
@@ -56,7 +65,6 @@ from mlt.shared_models import (
     CoordinateClassifier,
 )
 from mlt.util import Persistor
-from torch import nn
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -68,6 +76,7 @@ class ModelDefinition:
     split_dataset: bool
     iterator: GameBatchIterator
     image_loader: ImageLoader
+    bounding_box_loader: ImageLoader
     sender: Module
     sender_args: dict
     receiver: Module
@@ -81,6 +90,7 @@ models = {
         dataset_args={},
         split_dataset=False,
         image_loader=None,
+        bounding_box_loader=None,
         iterator=LazaridouReferentialGameBatchIterator,
         sender=ReferentialGameSender,
         sender_args={},
@@ -92,7 +102,8 @@ models = {
         dataset=DaleReferentialGameDataset,
         dataset_args={},
         split_dataset=False,
-        image_loader=FeatureImageLoader,
+        image_loader=None,
+        bounding_box_loader=FeatureImageLoader,
         iterator=DaleReferentialGameBatchIterator,
         sender=DummySender,
         sender_args={},
@@ -104,7 +115,8 @@ models = {
         dataset=DaleReferentialGameDataset,
         dataset_args={},
         split_dataset=False,
-        image_loader=FeatureImageLoader,
+        image_loader=None,
+        bounding_box_loader=FeatureImageLoader,
         iterator=DaleReferentialGameBatchIterator,
         sender=ReferentialGameSender,
         sender_args={},
@@ -122,6 +134,7 @@ models = {
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
         iterator=CaptionGeneratorGameBatchIterator,
         sender=DummySender,
         sender_args={"hidden_size": 10},
@@ -149,6 +162,7 @@ models = {
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
         iterator=CaptionGeneratorGameBatchIterator,
         sender=CaptionGeneratorSender,
         sender_args={
@@ -179,6 +193,54 @@ models = {
         },
         loss_function=captioning_loss,
     ),
+    "bounding_box_caption_generator": ModelDefinition(
+        dataset=CaptionGeneratorGameDataset,
+        dataset_args={
+            "captioner": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
+                reversed_caption=False,
+            ),
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=FeatureImageLoader,
+        iterator=BoundingBoxCaptionGeneratorGameBatchIterator,
+        sender=ReferentialGameSender,
+        sender_args={},
+        receiver=CaptionGeneratorReceiver,
+        receiver_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "image_embedding_dimension": 2048,
+            "caption_decoder": CaptionDecoder,
+            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
+                DaleCaptionAttributeEncoder.SOS_TOKEN
+            ),
+        },
+        loss_function=captioning_loss,
+    ),
+    "bounding_box_one_hot_generator": ModelDefinition(
+        dataset=OneHotGeneratorGameDataset,
+        dataset_args={
+            "target_attribute_encoder": OneHotAttributeEncoder(),
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=FeatureImageLoader,
+        iterator=OneHotGeneratorGameBatchIterator,
+        sender=ReferentialGameSender,
+        sender_args={},
+        receiver=OneHotGeneratorReceiver,
+        receiver_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+            "number_attributes": 13,
+        },
+        loss_function=one_hot_loss,
+    ),
     "dale_attribute_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorGameDataset,
         dataset_args={
@@ -189,6 +251,7 @@ models = {
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
         iterator=CoordinatePredictorGameBatchIterator,
         sender=DaleAttributeCoordinatePredictorSender,
         sender_args={
@@ -215,6 +278,7 @@ models = {
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
         iterator=CoordinatePredictorGameBatchIterator,
         sender=MaskedCoordinatePredictorSender,
         sender_args={
@@ -250,6 +314,7 @@ models = {
         },
         split_dataset=False,
         image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
         iterator=AttentionPredictorGameBatchIterator,
         sender=MaskedCoordinatePredictorSender,
         sender_args={
@@ -276,11 +341,107 @@ models = {
         },
         loss_function=attention_loss,
     ),
+    "baseline_attention_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "number_regions": 14,
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
+        iterator=AttentionPredictorGameBatchIterator,
+        sender=DummySender,
+        sender_args={
+            "hidden_size": 10,
+        },
+        receiver=AttentionPredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrAttentionImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        loss_function=attention_loss,
+    ),
+    "dale_attention_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "attribute_encoder": DaleCaptionAttributeEncoder(
+                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.APPEND,
+                reversed_caption=False,
+            ),
+            "number_regions": 14,
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
+        iterator=AttentionPredictorGameBatchIterator,
+        sender=DaleAttributeSender,
+        sender_args={
+            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "image_encoder": ClevrAttentionImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        receiver=AttentionPredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrAttentionImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        loss_function=attention_loss,
+    ),
+    "attribute_attention_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "attribute_encoder": OneHotAttributeEncoder(),
+            "number_regions": 14,
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
+        iterator=AttentionPredictorGameBatchIterator,
+        sender=AttributeSender,
+        sender_args={"hidden_size": 10},
+        receiver=AttentionPredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrAttentionImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        loss_function=attention_loss,
+    ),
+    "bounding_box_attention_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={
+            "number_regions": 14,
+        },
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=FeatureImageLoader,
+        iterator=BoundingBoxAttentionPredictorGameBatchIterator,
+        sender=ReferentialGameSender,
+        sender_args={},
+        receiver=AttentionPredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrAttentionImageEncoder(
+                feature_extractor=DummyFeatureExtractor(),
+            ),
+            "projection_dimension": 100,
+        },
+        loss_function=attention_loss,
+    ),
     "baseline_coordinate_predictor": ModelDefinition(
         dataset=CoordinatePredictorGameDataset,
         dataset_args={},
         split_dataset=False,
         image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
         iterator=CoordinatePredictorGameBatchIterator,
         sender=DummySender,
         sender_args={
@@ -318,10 +479,16 @@ def get_params(params):
     )
     parser.add_argument("--dataset", choices=datasets.keys(), help="datasets, to load")
     parser.add_argument(
-        "--feature_file",
+        "--image_feature_file",
         type=str,
         default=None,
         help="Path to the hd5 file containing extracted image features",
+    )
+    parser.add_argument(
+        "--bounding_box_feature_file",
+        type=str,
+        default=None,
+        help="Path to the hd5 file containing extracted bounding box features",
     )
     parser.add_argument(
         "--data_root_dir",
@@ -357,25 +524,19 @@ def get_params(params):
         choices=models.keys(),
         help="model to load",
     )
+    parser.add_argument(
+        "--baseline",
+        default=False,
+        action="store_true",
+        help="sender sends random messages",
+    )
 
     # -- TRAINING --
-    parser.add_argument(
-        "--mode",
-        type=str,
-        default="rf",
-        help="Selects whether Reinforce or Gumbel-Softmax relaxation is used for training {rf, gs} (default: rf)",
-    )
     parser.add_argument(
         "--temperature",
         type=float,
         default=1.0,
         help="GS temperature for the sender, only relevant in Gumbel-Softmax (gs) mode (default: 1.0)",
-    )
-    parser.add_argument(
-        "--sender_entropy_coeff",
-        type=float,
-        default=1e-1,
-        help="Reinforce entropy regularization coefficient for Sender, only relevant in Reinforce (rf) mode (default: 1e-1)",
     )
 
     # -- AGENTS --
@@ -434,6 +595,12 @@ def get_params(params):
         help="Output dimensionality of the layer that embeds the image for Receiver (default: 10)",
     )
     parser.add_argument(
+        "--receiver_captioning_embedding",
+        type=int,
+        default=10,
+        help="Output dimensionality of the captioning tokens (default: 10)",
+    )
+    parser.add_argument(
         "--receiver_decoder_out_dim",
         type=int,
         default=10,
@@ -447,6 +614,18 @@ def get_params(params):
     )
     parser.add_argument(
         "--projection_dimension",
+        type=int,
+        default=10,
+        help="Projection dimension to combin message and image (default: 10)",
+    )
+    parser.add_argument(
+        "--dale_embedding_dim",
+        type=int,
+        default=10,
+        help="Projection dimension to combin message and image (default: 10)",
+    )
+    parser.add_argument(
+        "--dale_encoder_out_dim",
         type=int,
         default=10,
         help="Projection dimension to combin message and image (default: 10)",
@@ -497,22 +676,39 @@ def main(params):
     scene_json_dir = os.path.join(
         opts.dataset_base_dir, datasets[opts.dataset], "scenes/"
     )
-    feature_file = os.path.join(
-        opts.dataset_base_dir, datasets[opts.dataset], "features", opts.feature_file
+    image_feature_file = os.path.join(
+        opts.dataset_base_dir,
+        datasets[opts.dataset],
+        "features",
+        opts.image_feature_file,
+    )
+    bounding_box_feature_file = os.path.join(
+        opts.dataset_base_dir,
+        datasets[opts.dataset],
+        "features",
+        opts.bounding_box_feature_file,
     )
 
     model = models[opts.model]
 
     if model.image_loader:
         image_loader = model.image_loader(
-            feature_file=feature_file, image_dir=image_dir
+            feature_file=image_feature_file, image_dir=image_dir
         )
     else:
         image_loader = None
 
+    if model.bounding_box_loader:
+        bounding_box_loader = model.bounding_box_loader(
+            feature_file=bounding_box_feature_file, image_dir=image_dir
+        )
+    else:
+        bounding_box_loader = None
+
     dataset_args = {
         "scenes_json_dir": scene_json_dir,
         "image_loader": image_loader,
+        "bounding_box_loader": bounding_box_loader,
         "max_number_samples": opts.max_samples,
         "data_root_dir": opts.data_root_dir,
         **model.dataset_args,
@@ -563,14 +759,18 @@ def main(params):
     sender_args["image_embedding_dimension"] = opts.sender_image_embedding
     sender_args["hidden_size"] = opts.sender_hidden
     sender_args["encoder_out_dim"] = opts.sender_encoder_dim
+    sender_args["projection_dimension"] = opts.projection_dimension
+    sender_args["dale_embedding_dim"] = opts.dale_embedding_dim
+    sender_args["dale_encoder_out_dim"] = opts.dale_encoder_out_dim
 
     receiver_args = model.receiver_args
     receiver_args["image_embedding_dimension"] = opts.receiver_image_embedding
     receiver_args["embedding_dimension"] = opts.receiver_embedding
+    receiver_args["projection_dimension"] = opts.projection_dimension
 
     if "caption_decoder" in receiver_args.keys():
         receiver_args["caption_decoder"] = receiver_args["caption_decoder"](
-            embedding_dim=opts.receiver_embedding,
+            embedding_dim=opts.receiver_captioning_embedding,
             decoder_out_dim=opts.receiver_decoder_out_dim,
             vocab_size=len(DaleCaptionAttributeEncoder.vocab),
         )
@@ -580,7 +780,11 @@ def main(params):
         )
 
     receiver = model.receiver(**receiver_args)
-    sender = model.sender(**sender_args)
+
+    if opts.baseline:
+        sender = DummySender(**sender_args)
+    else:
+        sender = model.sender(**sender_args)
 
     gs_sender = core.RnnSenderGS(
         sender,
