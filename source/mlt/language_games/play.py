@@ -676,22 +676,16 @@ def main(params):
     scene_json_dir = os.path.join(
         opts.dataset_base_dir, datasets[opts.dataset], "scenes/"
     )
-    image_feature_file = os.path.join(
-        opts.dataset_base_dir,
-        datasets[opts.dataset],
-        "features",
-        opts.image_feature_file,
-    )
-    bounding_box_feature_file = os.path.join(
-        opts.dataset_base_dir,
-        datasets[opts.dataset],
-        "features",
-        opts.bounding_box_feature_file,
-    )
 
     model = models[opts.model]
 
     if model.image_loader:
+        image_feature_file = os.path.join(
+            opts.dataset_base_dir,
+            datasets[opts.dataset],
+            "features",
+            opts.image_feature_file,
+        )
         image_loader = model.image_loader(
             feature_file=image_feature_file, image_dir=image_dir
         )
@@ -699,6 +693,12 @@ def main(params):
         image_loader = None
 
     if model.bounding_box_loader:
+        bounding_box_feature_file = os.path.join(
+            opts.dataset_base_dir,
+            datasets[opts.dataset],
+            "features",
+            opts.bounding_box_feature_file,
+        )
         bounding_box_loader = model.bounding_box_loader(
             feature_file=bounding_box_feature_file, image_dir=image_dir
         )
@@ -852,7 +852,9 @@ def main(params):
                     train_epochs=[opts.n_epochs],
                     test_epochs=[opts.n_epochs],
                 ),
-                LogSaver(out_dir=out_dir, command=str(opts)),
+                LogSaver(
+                    out_dir=out_dir, command=str(opts), sender=sender, receiver=receiver
+                ),
             ]
         )
 

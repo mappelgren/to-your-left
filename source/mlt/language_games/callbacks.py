@@ -9,13 +9,19 @@ from egg.core.interaction import Interaction
 
 
 class LogSaver(Callback):
-    def __init__(self, out_dir: str, command: str) -> None:
+    def __init__(self, out_dir: str, command: str, sender, receiver) -> None:
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
 
         self.file_path = os.path.join(out_dir, "log.txt")
         with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(pprint.pformat(command) + "\n")
+
+            f.write("Sender:\n")
+            f.write(str(sender) + "\n\n")
+
+            f.write("Receiver:\n")
+            f.write(str(receiver) + "\n")
 
     def on_epoch_end(self, loss: float, logs: Interaction, epoch: int):
         self._save_log(loss, logs, "train", epoch)
