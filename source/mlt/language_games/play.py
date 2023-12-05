@@ -836,9 +836,12 @@ def main(params):
             )
 
     if opts.save:
+        time = strftime("%Y-%m-%d_%H-%M-%S", gmtime())
+        baseline = "_baseline" if opts.baseline else ""
+        save_appendix = "_" + opts.save_appendix if opts.save_appendix != "" else ""
         out_dir = os.path.join(
             opts.out_dir,
-            f"{strftime('%Y-%m-%d_%H-%M-%S', gmtime())}_{opts.model}_{opts.dataset}{'_' + opts.save_appendix if opts.save_appendix != '' else ''}",
+            f"{time}_{opts.model}{baseline}_{opts.dataset}{save_appendix}",
         )
         callbacks.extend(
             [
