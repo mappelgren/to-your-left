@@ -9,24 +9,24 @@ from torch import nn
 
 
 class DummySender(nn.Module):
-    def __init__(self, hidden_size, *_args, **_kwargs) -> None:
+    def __init__(self, sender_hidden, *_args, **_kwargs) -> None:
         super().__init__()
-        self.hidden_size = hidden_size
+        self.sender_hidden = sender_hidden
 
     def forward(self, x, _aux_input):
-        return torch.rand((x.shape[0], self.hidden_size), device=x.device)
+        return torch.rand((x.shape[0], self.sender_hidden), device=x.device)
 
 
 class ReferentialGameSender(nn.Module):
     def __init__(
-        self, hidden_size, *_args, image_embedding_dimension=256, **_kwargs
+        self, sender_hidden, *_args, sender_image_embedding=256, **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
-            image_embedding_dimension=image_embedding_dimension
+            image_embedding_dimension=sender_image_embedding
         )
 
-        self.lin = nn.LazyLinear(hidden_size, bias=False)
+        self.lin = nn.LazyLinear(sender_hidden, bias=False)
 
     def forward(self, x, _aux_input):
         encoded_images = []
@@ -40,13 +40,13 @@ class ReferentialGameSender(nn.Module):
 
 
 class ReferentialGameReceiver(nn.Module):
-    def __init__(self, *_args, image_embedding_dimension=256, **_kwargs) -> None:
+    def __init__(self, *_args, receiver_image_embedding=256, **_kwargs) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
-            image_embedding_dimension=image_embedding_dimension
+            image_embedding_dimension=receiver_image_embedding
         )
 
-        self.linear_message = nn.LazyLinear(image_embedding_dimension, bias=False)
+        self.linear_message = nn.LazyLinear(receiver_image_embedding, bias=False)
 
         self.softmax = nn.LogSoftmax(dim=1)
 
@@ -67,8 +67,8 @@ class CaptionGeneratorSender(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
-        hidden_size: int,
+        sender_image_embedding: int,
+        sender_hidden: int,
         *_args,
         **_kwargs,
     ) -> None:
@@ -76,10 +76,10 @@ class CaptionGeneratorSender(nn.Module):
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
         self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+            nn.Flatten(), nn.LazyLinear(sender_image_embedding)
         )
 
-        self.linear = nn.LazyLinear(hidden_size)
+        self.linear = nn.LazyLinear(sender_hidden)
 
     def forward(self, x, aux_input):
         image = x
@@ -100,7 +100,7 @@ class CaptionGeneratorReceiver(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        receiver_image_embedding: int,
         caption_decoder: CaptionDecoder,
         encoded_sos,
         *_args,
@@ -109,7 +109,7 @@ class CaptionGeneratorReceiver(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+            nn.Flatten(), nn.LazyLinear(receiver_image_embedding)
         )
         self.caption_decoder = caption_decoder
         self.linear = nn.LazyLinear(caption_decoder.decoder_out_dim)
@@ -156,7 +156,7 @@ class OneHotGeneratorReceiver(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        projection_dimension: int,
+        receiver_projection: int,
         number_attributes: int,
         *_args,
         **_kwargs,
@@ -164,10 +164,10 @@ class OneHotGeneratorReceiver(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.image_projection = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(projection_dimension)
+            nn.Flatten(), nn.LazyLinear(receiver_projection)
         )
 
-        self.message_projection = nn.LazyLinear(projection_dimension)
+        self.message_projection = nn.LazyLinear(receiver_projection)
 
         self.attribute_predictor = nn.Sequential(
             nn.LazyLinear(number_attributes), nn.Softmax(dim=1)
@@ -197,12 +197,12 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
 
     def __init__(
         self,
-        vocab_size,
-        embedding_dimension,
-        encoder_out_dim,
+        sender_encoder_vocab_size,
+        sender_encoder_embedding,
+        sender_encoder_out,
         image_encoder: ImageEncoder,
-        image_embedding_dimension,
-        hidden_size,
+        sender_image_embedding,
+        sender_hidden,
         *_args,
         **_kwargs,
     ) -> None:
@@ -210,13 +210,17 @@ class DaleAttributeCoordinatePredictorSender(nn.Module):
 
         self.image_encoder = image_encoder
         self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
+            nn.Flatten(), nn.LazyLinear(sender_image_embedding)
         )
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dimension)
-        self.lstm = nn.LSTM(embedding_dimension, encoder_out_dim, batch_first=True)
+        self.embedding = nn.Embedding(
+            sender_encoder_vocab_size, sender_encoder_embedding
+        )
+        self.lstm = nn.LSTM(
+            sender_encoder_embedding, sender_encoder_out, batch_first=True
+        )
 
-        self.linear = nn.LazyLinear(hidden_size)
+        self.linear = nn.LazyLinear(sender_hidden)
 
     def forward(self, x, aux_input):
         image = x
@@ -250,8 +254,8 @@ class MaskedCoordinatePredictorSender(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: ImageEncoder,
-        embedding_dimension: int,
-        hidden_size,
+        sender_image_embedding: int,
+        sender_hidden,
         *_args,
         **_kwargs,
     ) -> None:
@@ -259,9 +263,11 @@ class MaskedCoordinatePredictorSender(nn.Module):
 
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(sender_image_embedding)
+        )
 
-        self.linear = nn.LazyLinear(hidden_size)
+        self.linear = nn.LazyLinear(sender_hidden)
 
     def forward(self, x, aux_input):
         image = x
@@ -285,14 +291,16 @@ class CoordinatePredictorReceiver(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        embedding_dimension: int,
+        receiver_image_embedding: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(embedding_dimension))
+        self.reduction = nn.Sequential(
+            nn.Flatten(), nn.LazyLinear(receiver_image_embedding)
+        )
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -309,13 +317,13 @@ class CoordinatePredictorReceiver(nn.Module):
 
 class AttentionPredictorReceiver(nn.Module):
     def __init__(
-        self, image_encoder: ImageEncoder, projection_dimension: int, *_args, **_kwargs
+        self, image_encoder: ImageEncoder, receiver_projection: int, *_args, **_kwargs
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.image_projection = nn.LazyLinear(projection_dimension)
+        self.image_projection = nn.LazyLinear(receiver_projection)
 
-        self.message_projection = nn.LazyLinear(projection_dimension)
+        self.message_projection = nn.LazyLinear(receiver_projection)
 
         self.softmax = nn.Softmax(dim=1)
 
@@ -346,24 +354,28 @@ class DaleAttributeSender(nn.Module):
 
     def __init__(
         self,
-        vocab_size,
-        projection_dimension,
-        dale_embedding_dim,
-        dale_encoder_out_dim,
+        sender_encoder_vocab_size,
+        sender_encoder_embedding,
+        sender_encoder_out,
         image_encoder: ImageEncoder,
-        hidden_size,
+        sender_projection,
+        sender_hidden,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.image_projection = nn.LazyLinear(projection_dimension)
+        self.image_projection = nn.LazyLinear(sender_projection)
 
-        self.embedding = nn.Embedding(vocab_size, dale_embedding_dim)
-        self.lstm = nn.LSTM(dale_embedding_dim, dale_encoder_out_dim, batch_first=True)
-        self.attribute_projection = nn.LazyLinear(projection_dimension)
+        self.embedding = nn.Embedding(
+            sender_encoder_vocab_size, sender_encoder_embedding
+        )
+        self.lstm = nn.LSTM(
+            sender_encoder_embedding, sender_encoder_out, batch_first=True
+        )
+        self.attribute_projection = nn.LazyLinear(sender_projection)
 
-        self.hidden = nn.LazyLinear(hidden_size)
+        self.hidden = nn.LazyLinear(sender_hidden)
 
     def forward(self, x, aux_input):
         image = x
@@ -396,12 +408,12 @@ class AttributeSender(nn.Module):
 
     def __init__(
         self,
-        hidden_size,
+        sender_hidden,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
-        self.hidden = nn.LazyLinear(hidden_size)
+        self.hidden = nn.LazyLinear(sender_hidden)
 
     def forward(self, _x, aux_input):
         attribute_tensor = aux_input["attribute_tensor"]

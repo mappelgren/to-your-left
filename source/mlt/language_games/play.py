@@ -137,14 +137,12 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "image_embedding_dimension": 2048,
         },
         receiver=CaptionGeneratorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -171,7 +169,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -195,7 +192,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "projection_dimension": 100,
             "number_attributes": 13,
         },
         loss_function=one_hot_loss,
@@ -214,18 +210,16 @@ models = {
         iterator=CoordinatePredictorGameBatchIterator,
         sender=DaleAttributeCoordinatePredictorSender,
         sender_args={
-            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "sender_encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 1024,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "embedding_dimension": 1024,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -254,14 +248,12 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "embedding_dimension": 2048,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "embedding_dimension": 1024,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -291,14 +283,12 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "embedding_dimension": 2048,
         },
         receiver=AttentionPredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
-            "projection_dimension": 100,
         },
         loss_function=attention_loss,
     ),
@@ -317,20 +307,18 @@ models = {
         iterator=AttentionPredictorGameBatchIterator,
         sender=DaleAttributeSender,
         sender_args={
-            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "sender_encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "sender_encoder_embedding": len(DaleCaptionAttributeEncoder.vocab),
+            "sender_encoder_out": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
-            "projection_dimension": 100,
         },
         receiver=AttentionPredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
-            "projection_dimension": 100,
         },
         loss_function=attention_loss,
     ),
@@ -345,13 +333,12 @@ models = {
         bounding_box_loader=None,
         iterator=AttentionPredictorGameBatchIterator,
         sender=AttributeSender,
-        sender_args={"hidden_size": 10},
+        sender_args={},
         receiver=AttentionPredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
-            "projection_dimension": 100,
         },
         loss_function=attention_loss,
     ),
@@ -371,7 +358,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
-            "projection_dimension": 100,
         },
         loss_function=attention_loss,
     ),
@@ -591,20 +577,26 @@ def get_params(params):
 
 
 def get_model_params(model, opts):
-    params = []
+    params = {}
 
     signature = inspect.signature(model.__init__)
     for name, par in signature.parameters.items():
         if name not in ["self", "_args", "_kwargs"]:
             match par.annotation.__qualname__:
                 case CaptionDecoder.__qualname__:
-                    sub_params = get_model_params(CaptionDecoder, opts)
-                    params.append({"CaptionDecoder": sub_params})
+                    params = params | get_model_params(CaptionDecoder, opts)
                 case _:
                     if name in opts:
-                        params.append(name)
+                        params[name] = opts[name]
 
     return params
+
+
+def set_model_params(model_args, params):
+    for param, param_value in params.items():
+        model_args[param] = param_value
+
+    return model_args
 
 
 def main(params):
@@ -614,11 +606,6 @@ def main(params):
     print(opts, flush=True)
 
     model = models[opts.model]
-
-    print("\nSender:")
-    pprint(get_model_params(model.sender, opts))
-    print("\nReceiver:")
-    pprint(get_model_params(model.receiver, opts))
 
     image_dir = os.path.join(opts.dataset_base_dir, datasets[opts.dataset], "images/")
     scene_json_dir = os.path.join(
@@ -700,29 +687,21 @@ def main(params):
         seed=7,
     )
 
-    sender_args = model.sender_args
-    sender_args["embedding_dimension"] = opts.sender_embedding
-    sender_args["image_embedding_dimension"] = opts.sender_image_embedding
-    sender_args["hidden_size"] = opts.sender_hidden
-    sender_args["encoder_out_dim"] = opts.sender_encoder_dim
-    sender_args["projection_dimension"] = opts.projection_dimension
-    sender_args["dale_embedding_dim"] = opts.dale_embedding_dim
-    sender_args["dale_encoder_out_dim"] = opts.dale_encoder_out_dim
+    sender_params = get_model_params(model.sender, opts)
+    sender_args = set_model_params(model.sender_args, sender_params)
 
-    receiver_args = model.receiver_args
-    receiver_args["image_embedding_dimension"] = opts.receiver_image_embedding
-    receiver_args["embedding_dimension"] = opts.receiver_embedding
-    receiver_args["projection_dimension"] = opts.projection_dimension
+    receiver_params = get_model_params(model.receiver, opts)
+    receiver_args = set_model_params(model.receiver_args, receiver_params)
 
     if "caption_decoder" in receiver_args.keys():
         receiver_args["caption_decoder"] = receiver_args["caption_decoder"](
-            embedding_dim=opts.receiver_captioning_embedding,
-            decoder_out_dim=opts.receiver_decoder_out_dim,
+            embedding_dim=receiver_args["receiver_decoder_embedding"],
+            decoder_out_dim=receiver_args["receiver_decoder_out"],
             vocab_size=len(DaleCaptionAttributeEncoder.vocab),
         )
     if "coordinate_classifier" in receiver_args.keys():
         receiver_args["coordinate_classifier"] = receiver_args["coordinate_classifier"](
-            classifier_dimension=opts.coordinate_classifier_dimension
+            classifier_dimension=receiver_args["coordinate_classifier"]
         )
 
     receiver = model.receiver(**receiver_args)

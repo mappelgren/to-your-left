@@ -42,19 +42,19 @@ class BoundingBoxClassifier(nn.Module):
 class BoundingBoxCaptionGenerator(nn.Module):
     def __init__(
         self,
-        decoder_out_dim,
+        decoder_out,
         caption_decoder,
         encoded_sos,
         *_args,
-        image_embedding_dimension=256,
+        image_embedding=256,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = BoundingBoxImageEncoder(
-            image_embedding_dimension=image_embedding_dimension
+            image_embedding_dimension=image_embedding
         )
 
-        self.lin = nn.LazyLinear(decoder_out_dim, bias=False)
+        self.lin = nn.LazyLinear(decoder_out, bias=False)
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 
@@ -104,15 +104,13 @@ class BoundingBoxAttributeClassifier(nn.Module):
      - bounding boxes of objects
     """
 
-    def __init__(self, image_embedding_dimension, *_args, **_kwargs) -> None:
+    def __init__(self, image_embedding, *_args, **_kwargs) -> None:
         super().__init__()
 
         # self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
-        self.linear_attributes = nn.LazyLinear(image_embedding_dimension)
+        self.linear_attributes = nn.LazyLinear(image_embedding)
 
         self.softmax = nn.LogSoftmax(dim=1)
 
@@ -142,16 +140,14 @@ class CoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
         self.coordinate_classifier = coordinate_classifier
 
     def forward(self, data):
@@ -177,16 +173,14 @@ class AttributeCoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -215,16 +209,14 @@ class AttributeLocationCoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -261,10 +253,10 @@ class DaleAttributeCoordinatePredictor(nn.Module):
 
     def __init__(
         self,
-        vocab_size,
-        image_embedding_dimension,
-        embedding_dim,
-        encoder_out_dim,
+        encoder_vocab_size,
+        encoder_embedding,
+        encoder_out,
+        image_embedding,
         image_encoder: ImageEncoder,
         coordinate_classifier: CoordinateClassifier,
         *_args,
@@ -272,12 +264,10 @@ class DaleAttributeCoordinatePredictor(nn.Module):
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
+        self.embedding = nn.Embedding(encoder_vocab_size, encoder_embedding)
+        self.lstm = nn.LSTM(encoder_embedding, encoder_out, batch_first=True)
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -309,10 +299,10 @@ class MaskedDaleAttributeCoordinatePredictor(nn.Module):
 
     def __init__(
         self,
-        vocab_size,
-        image_embedding_dimension,
-        embedding_dim,
-        encoder_out_dim,
+        encoder_vocab_size,
+        encoder_embedding,
+        encoder_out,
+        image_embedding,
         image_encoder: ImageEncoder,
         masked_image_encoder: ImageEncoder,
         coordinate_classifier: CoordinateClassifier,
@@ -322,12 +312,10 @@ class MaskedDaleAttributeCoordinatePredictor(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
+        self.embedding = nn.Embedding(encoder_vocab_size, encoder_embedding)
+        self.lstm = nn.LSTM(encoder_embedding, encoder_out, batch_first=True)
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -367,7 +355,7 @@ class MaskedCoordinatePredictor(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs,
@@ -375,9 +363,7 @@ class MaskedCoordinatePredictor(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
         self.coordinate_classifier = coordinate_classifier
 
@@ -411,7 +397,7 @@ class MaskedMaskPredictor(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         mask_predictor: MaskPredictor,
         *_args,
         **_kwargs,
@@ -419,9 +405,7 @@ class MaskedMaskPredictor(nn.Module):
         super().__init__()
         self.image_encoder = image_encoder
         self.masked_image_encoder = masked_image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
         self.mask_predictor = mask_predictor
 
@@ -454,21 +438,21 @@ class DaleAttributeAttentionPredictor(nn.Module):
 
     def __init__(
         self,
-        vocab_size,
-        projection_dimension,
-        embedding_dim,
-        encoder_out_dim,
+        projection,
+        encoder_vocab_size,
+        encoder_embedding,
+        encoder_out,
         image_encoder: ImageEncoder,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.image_projection = nn.LazyLinear(projection_dimension)
+        self.image_projection = nn.LazyLinear(projection)
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
-        self.attribute_projection = nn.LazyLinear(projection_dimension)
+        self.embedding = nn.Embedding(encoder_vocab_size, encoder_embedding)
+        self.lstm = nn.LSTM(encoder_embedding, encoder_out, batch_first=True)
+        self.attribute_projection = nn.LazyLinear(projection)
 
         self.softmax = nn.Softmax(dim=1)
 
@@ -513,13 +497,13 @@ class RandomCoordinatePredictor(nn.Module):
 
 class CaptionDecoder(nn.Module):
     def __init__(
-        self, vocab_size, embedding_dim, decoder_out_dim, *_args, **_kwargs
+        self, decoder_vocab_size, decoder_embedding, decoder_out_dim, *_args, **_kwargs
     ) -> None:
         super().__init__()
         self.decoder_out_dim = decoder_out_dim
-        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, decoder_out_dim, batch_first=True)
-        self.classifier = nn.Linear(decoder_out_dim, vocab_size)
+        self.embeddings = nn.Embedding(decoder_vocab_size, decoder_embedding)
+        self.lstm = nn.LSTM(decoder_embedding, decoder_out_dim, batch_first=True)
+        self.classifier = nn.Linear(decoder_out_dim, decoder_vocab_size)
 
     def forward(self, caption, input_states):
         embedded = self.embeddings(caption)
@@ -540,7 +524,7 @@ class CaptionGenerator(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         caption_decoder,
         encoded_sos,
         *_args,
@@ -548,9 +532,7 @@ class CaptionGenerator(nn.Module):
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
 
@@ -596,7 +578,7 @@ class MaskedCaptionGenerator(nn.Module):
         self,
         image_encoder: ImageEncoder,
         masked_image_encoder: ImageEncoder,
-        image_embedding_dimension: int,
+        image_embedding: int,
         caption_decoder,
         encoded_sos,
         *_args,
@@ -607,9 +589,7 @@ class MaskedCaptionGenerator(nn.Module):
         self.masked_image_encoder = masked_image_encoder
         self.caption_decoder = caption_decoder
         self.encoded_sos = torch.tensor(encoded_sos)
-        self.reduction = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(image_embedding_dimension)
-        )
+        self.reduction = nn.Sequential(nn.Flatten(), nn.LazyLinear(image_embedding))
 
     def forward(self, data):
         image, caption, _, masked_image, *_ = data
@@ -657,23 +637,21 @@ class OneHotGenerator(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        vocab_size: int,
-        embedding_dim: int,
-        encoder_out_dim: int,
-        projection_dimension: int,
+        encoder_vocab_size: int,
+        encoder_embedding: int,
+        encoder_out: int,
+        projection: int,
         number_attributes: int,
         *_args,
         **_kwargs,
     ) -> None:
         super().__init__()
         self.image_encoder = image_encoder
-        self.image_projection = nn.Sequential(
-            nn.Flatten(), nn.LazyLinear(projection_dimension)
-        )
+        self.image_projection = nn.Sequential(nn.Flatten(), nn.LazyLinear(projection))
 
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, encoder_out_dim, batch_first=True)
-        self.attribute_projection = nn.LazyLinear(projection_dimension)
+        self.embedding = nn.Embedding(encoder_vocab_size, encoder_embedding)
+        self.lstm = nn.LSTM(encoder_embedding, encoder_out, batch_first=True)
+        self.attribute_projection = nn.LazyLinear(projection)
 
         self.attribute_predictor = nn.Sequential(
             nn.LazyLinear(number_attributes), nn.Softmax(dim=1)
