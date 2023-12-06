@@ -4,7 +4,6 @@ from abc import abstractmethod
 
 import torch
 from mlt.preexperiments.data_readers import DaleCaptionAttributeEncoder
-from numpy import dtype
 from torch import nn
 from torcheval.metrics import (
     BinaryAccuracy,
@@ -12,7 +11,6 @@ from torcheval.metrics import (
     MulticlassAccuracy,
     MulticlassPrecision,
     MulticlassRecall,
-    MultilabelAccuracy,
 )
 
 
@@ -30,12 +28,8 @@ class DummyTester(Tester):
 class AttentionPredictorTester(Tester):
     def test(self, model, test_loader, device):
         model.eval()
-        # accuracy = MulticlassAccuracy(device=device)
-        multilabel = MultilabelAccuracy(threshold=0.05, device=device)
-        loss_function = nn.BCELoss()
-
-        model_outputs = []
-        ground_truths = []
+        bb_probability_mass = Mean(device=device)
+        loss = Mean(device=device)
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
@@ -46,16 +40,15 @@ class AttentionPredictorTester(Tester):
 
             test_outputs.extend(zip(image_id, output, ground_truth))
 
-            model_outputs.extend(output)
-            ground_truths.extend(ground_truth)
+            bb_probability_mass.update(torch.sum(output * ground_truth, dim=1))
+            loss.update(nn.functional.binary_cross_entropy(output, ground_truth))
 
-            multilabel.update(output, ground_truth)
-            # accuracy.update(output, ground_truth)
-
-        loss = loss_function(torch.stack(model_outputs), torch.stack(ground_truths))
         return (
             json.dumps(
-                {"accuracy": f"{multilabel.compute():.4f}", "loss": f"{loss:.4f}"}
+                {
+                    "bb_probability_mass": f"{bb_probability_mass.compute():.4f}",
+                    "loss": f"{loss.compute():.4f}",
+                }
             ),
             test_outputs,
         )
@@ -239,10 +232,7 @@ class OneHotGeneratorTester(Tester):
         color_accuracy = Mean(device=device)
         shape_accuracy = Mean(device=device)
         size_accuracy = Mean(device=device)
-        loss_function = nn.BCELoss()
-
-        model_outputs = []
-        ground_truths = []
+        loss = Mean(device=device)
 
         test_outputs = []
         for model_input, ground_truth, image_id in test_loader:
@@ -252,36 +242,17 @@ class OneHotGeneratorTester(Tester):
             output = model(model_input).detach()
             test_outputs.extend(zip(image_id, output, ground_truth))
 
-            model_outputs.extend(output)
-            ground_truths.extend(ground_truth)
-
-            ground_truth_colors = ground_truth[:, 0:8]
-            output_color = torch.nn.functional.one_hot(
-                torch.argmax(output[:, 0:8], dim=1),
-                num_classes=ground_truth_colors.shape[1],
-            )
-            color_hits = torch.sum(ground_truth_colors * output_color, dim=1)
+            color_hits = self._get_attribute_hits(output, ground_truth, 0, 8)
             color_accuracy.update(color_hits)
-
-            ground_truth_shapes = ground_truth[:, 8:11]
-            output_shape = torch.nn.functional.one_hot(
-                torch.argmax(output[:, 8:11], dim=1),
-                num_classes=ground_truth_shapes.shape[1],
-            )
-            shape_hits = torch.sum(ground_truth_shapes * output_shape, dim=1)
+            shape_hits = self._get_attribute_hits(output, ground_truth, 8, 11)
             shape_accuracy.update(shape_hits)
-
-            ground_truth_sizes = ground_truth[:, 11:12]
-            output_size = torch.nn.functional.one_hot(
-                torch.argmax(output[:, 11:12], dim=1),
-                num_classes=ground_truth_sizes.shape[1],
-            )
-            size_hits = torch.sum(ground_truth_sizes * output_size, dim=1)
+            size_hits = self._get_attribute_hits(output, ground_truth, 11, 12)
             size_accuracy.update(size_hits)
 
             accuracy.update(color_hits * shape_hits * size_hits)
 
-        loss = loss_function(torch.stack(model_outputs), torch.stack(ground_truths))
+            loss.update(nn.functional.binary_cross_entropy(output, ground_truth))
+
         return (
             json.dumps(
                 {
@@ -289,8 +260,18 @@ class OneHotGeneratorTester(Tester):
                     "color_accuracy": f"{color_accuracy.compute():.4f}",
                     "shape_accuracy": f"{shape_accuracy.compute():.4f}",
                     "size_accuracy": f"{size_accuracy.compute():.4f}",
-                    "loss": f"{loss:.4f}",
+                    "loss": f"{loss.compute():.4f}",
                 }
             ),
             test_outputs,
         )
+
+    def _get_attribute_hits(self, output, ground_truth, start_index, end_index):
+        ground_truth_attribute = ground_truth[:, start_index:end_index]
+        output_attribute = nn.functional.one_hot(
+            torch.argmax(output[:, start_index:end_index], dim=1),
+            num_classes=ground_truth_attribute.shape[1],
+        )
+        hits = torch.sum(ground_truth_attribute * output_attribute, dim=1)
+
+        return hits

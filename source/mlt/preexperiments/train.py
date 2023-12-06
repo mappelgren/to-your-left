@@ -56,12 +56,7 @@ from mlt.preexperiments.test import (
     OneHotGeneratorTester,
     Tester,
 )
-from mlt.shared_models import (
-    ClevrAttentionImageEncoder,
-    ClevrImageEncoder,
-    CoordinateClassifier,
-    MaskPredictor,
-)
+from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier, MaskPredictor
 from mlt.util import Persistor
 from torch import nn, optim
 from torch.nn import Module
@@ -94,7 +89,7 @@ models = {
         model=CoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
@@ -131,7 +126,7 @@ models = {
         model=AttributeCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
@@ -158,7 +153,7 @@ models = {
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
@@ -186,7 +181,7 @@ models = {
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -196,6 +191,7 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "image_embedding_dimension": 4069,
             "coordinate_classifier": CoordinateClassifier,
@@ -217,7 +213,7 @@ models = {
         model=AttributeLocationCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
@@ -236,7 +232,7 @@ models = {
         model=MaskedCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -246,6 +242,7 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier,
@@ -264,7 +261,7 @@ models = {
         model=MaskedCoordinatePredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -274,6 +271,7 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier,
@@ -305,7 +303,7 @@ models = {
         model=MaskedMaskPredictor,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -315,6 +313,7 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "image_embedding_dimension": 4096,
             "mask_predictor": MaskPredictor,
@@ -341,8 +340,8 @@ models = {
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
             "projection_dimension": 100,
         },
@@ -419,7 +418,7 @@ models = {
         model=CaptionGenerator,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 1024,
             "caption_decoder": CaptionDecoder,
@@ -447,7 +446,7 @@ models = {
         model=MaskedCaptionGenerator,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -457,6 +456,7 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
@@ -484,7 +484,7 @@ models = {
         model=OneHotGenerator,
         model_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "projection_dimension": 100,
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),

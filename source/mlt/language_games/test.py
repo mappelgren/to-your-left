@@ -9,7 +9,6 @@ from torcheval.metrics import (
     MulticlassAccuracy,
     MulticlassPrecision,
     MulticlassRecall,
-    MultilabelAccuracy,
 )
 
 
@@ -148,28 +147,11 @@ def one_hot_loss(
     shape_accuracy = Mean(device=device)
     size_accuracy = Mean(device=device)
 
-    ground_truth_colors = labels[:, 0:8]
-    output_color = torch.nn.functional.one_hot(
-        torch.argmax(receiver_output[:, 0:8], dim=1),
-        num_classes=ground_truth_colors.shape[1],
-    )
-    color_hits = torch.sum(ground_truth_colors * output_color, dim=1)
+    color_hits = _get_attribute_hits(receiver_output, labels, 0, 8)
     color_accuracy.update(color_hits)
-
-    ground_truth_shapes = labels[:, 8:11]
-    output_shape = torch.nn.functional.one_hot(
-        torch.argmax(receiver_output[:, 8:11], dim=1),
-        num_classes=ground_truth_shapes.shape[1],
-    )
-    shape_hits = torch.sum(ground_truth_shapes * output_shape, dim=1)
+    shape_hits = _get_attribute_hits(receiver_output, labels, 8, 11)
     shape_accuracy.update(shape_hits)
-
-    ground_truth_sizes = labels[:, 11:12]
-    output_size = torch.nn.functional.one_hot(
-        torch.argmax(receiver_output[:, 11:12], dim=1),
-        num_classes=ground_truth_sizes.shape[1],
-    )
-    size_hits = torch.sum(ground_truth_sizes * output_size, dim=1)
+    size_hits = _get_attribute_hits(receiver_output, labels, 11, 12)
     size_accuracy.update(size_hits)
 
     complete_hits = color_hits * shape_hits * size_hits
@@ -190,6 +172,17 @@ def one_hot_loss(
         "shape_accuracy": computed_shape_accuracy.detach().clone().float(),
         "size_accuracy": computed_size_accuracy.detach().clone().float(),
     }
+
+
+def _get_attribute_hits(output, ground_truth, start_index, end_index):
+    ground_truth_attribute = ground_truth[:, start_index:end_index]
+    output_attribute = F.one_hot(
+        torch.argmax(output[:, start_index:end_index], dim=1),
+        num_classes=ground_truth_attribute.shape[1],
+    )
+    hits = torch.sum(ground_truth_attribute * output_attribute, dim=1)
+
+    return hits
 
 
 def pixel_loss(
@@ -222,11 +215,11 @@ def attention_loss(
     _aux_input,
 ):
     device = receiver_output.device
-    multilabel = MultilabelAccuracy(threshold=0.18, device=device)
+    bb_probability_mass = Mean(device=device)
 
     loss = F.binary_cross_entropy(receiver_output, labels)
-    multilabel.update(receiver_output, labels)
+    bb_probability_mass.update(torch.sum(receiver_output * labels, dim=1))
 
     return loss, {
-        "accuracy": multilabel.compute().detach().clone().float(),
+        "bb_probability_mass": bb_probability_mass.compute().detach().clone().float(),
     }

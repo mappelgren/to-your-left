@@ -4,7 +4,6 @@ from mlt.shared_models import (
     BoundingBoxImageEncoder,
     CoordinateClassifier,
     ImageEncoder,
-    MaskedImageEncoder,
 )
 from torch import nn
 
@@ -67,9 +66,9 @@ class CaptionGeneratorSender(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        masked_image_encoder: MaskedImageEncoder,
+        masked_image_encoder: ImageEncoder,
         image_embedding_dimension: int,
-        hidden_size,
+        hidden_size: int,
         *_args,
         **_kwargs,
     ) -> None:
@@ -250,7 +249,7 @@ class MaskedCoordinatePredictorSender(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        masked_image_encoder: MaskedImageEncoder,
+        masked_image_encoder: ImageEncoder,
         embedding_dimension: int,
         hidden_size,
         *_args,

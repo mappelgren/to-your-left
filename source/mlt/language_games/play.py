@@ -1,8 +1,10 @@
 import argparse
 import hashlib
+import inspect
 import os
 import sys
 from dataclasses import dataclass
+from pprint import pprint
 from time import gmtime, strftime
 from typing import Callable
 
@@ -59,11 +61,7 @@ from mlt.preexperiments.data_readers import (
     SingleObjectImageMasker,
 )
 from mlt.preexperiments.models import CaptionDecoder
-from mlt.shared_models import (
-    ClevrAttentionImageEncoder,
-    ClevrImageEncoder,
-    CoordinateClassifier,
-)
+from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
 from mlt.util import Persistor
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
@@ -98,19 +96,6 @@ models = {
         receiver_args={},
         loss_function=classification_loss,
     ),
-    "baseline_discriminator": ModelDefinition(
-        dataset=DaleReferentialGameDataset,
-        dataset_args={},
-        split_dataset=False,
-        image_loader=None,
-        bounding_box_loader=FeatureImageLoader,
-        iterator=DaleReferentialGameBatchIterator,
-        sender=DummySender,
-        sender_args={},
-        receiver=ReferentialGameReceiver,
-        receiver_args={},
-        loss_function=classification_loss,
-    ),
     "discriminator": ModelDefinition(
         dataset=DaleReferentialGameDataset,
         dataset_args={},
@@ -123,33 +108,6 @@ models = {
         receiver=ReferentialGameReceiver,
         receiver_args={},
         loss_function=classification_loss,
-    ),
-    "baseline_caption_generator": ModelDefinition(
-        dataset=CaptionGeneratorGameDataset,
-        dataset_args={
-            "captioner": DaleCaptionAttributeEncoder(
-                padding_position=DaleCaptionAttributeEncoder.PaddingPosition.PREPEND,
-                reversed_caption=False,
-            ),
-        },
-        split_dataset=False,
-        image_loader=FeatureImageLoader,
-        bounding_box_loader=None,
-        iterator=CaptionGeneratorGameBatchIterator,
-        sender=DummySender,
-        sender_args={"hidden_size": 10},
-        receiver=CaptionGeneratorReceiver,
-        receiver_args={
-            "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
-            ),
-            "image_embedding_dimension": 2048,
-            "caption_decoder": CaptionDecoder,
-            "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
-                DaleCaptionAttributeEncoder.SOS_TOKEN
-            ),
-        },
-        loss_function=captioning_loss,
     ),
     "caption_generator": ModelDefinition(
         dataset=CaptionGeneratorGameDataset,
@@ -167,7 +125,7 @@ models = {
         sender=CaptionGeneratorSender,
         sender_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -177,13 +135,14 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "image_embedding_dimension": 2048,
         },
         receiver=CaptionGeneratorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
@@ -210,7 +169,7 @@ models = {
         receiver=CaptionGeneratorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
@@ -234,7 +193,7 @@ models = {
         receiver=OneHotGeneratorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "projection_dimension": 100,
             "number_attributes": 13,
@@ -257,14 +216,14 @@ models = {
         sender_args={
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "image_embedding_dimension": 1024,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "embedding_dimension": 1024,
             "coordinate_classifier": CoordinateClassifier,
@@ -283,7 +242,7 @@ models = {
         sender=MaskedCoordinatePredictorSender,
         sender_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -293,13 +252,14 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "embedding_dimension": 2048,
         },
         receiver=CoordinatePredictorReceiver,
         receiver_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "embedding_dimension": 1024,
             "coordinate_classifier": CoordinateClassifier,
@@ -319,7 +279,7 @@ models = {
         sender=MaskedCoordinatePredictorSender,
         sender_args={
             "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
             "masked_image_encoder": ClevrImageEncoder(
                 feature_extractor=ResnetFeatureExtractor(
@@ -329,35 +289,14 @@ models = {
                     fine_tune=False,
                     number_blocks=3,
                 ),
+                max_pool=True,
             ),
             "embedding_dimension": 2048,
         },
         receiver=AttentionPredictorReceiver,
         receiver_args={
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
-            ),
-            "projection_dimension": 100,
-        },
-        loss_function=attention_loss,
-    ),
-    "baseline_attention_predictor": ModelDefinition(
-        dataset=CoordinatePredictorGameDataset,
-        dataset_args={
-            "number_regions": 14,
-        },
-        split_dataset=False,
-        image_loader=FeatureImageLoader,
-        bounding_box_loader=None,
-        iterator=AttentionPredictorGameBatchIterator,
-        sender=DummySender,
-        sender_args={
-            "hidden_size": 10,
-        },
-        receiver=AttentionPredictorReceiver,
-        receiver_args={
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
             "projection_dimension": 100,
         },
@@ -381,15 +320,15 @@ models = {
             "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
             "projection_dimension": 100,
         },
         receiver=AttentionPredictorReceiver,
         receiver_args={
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
             "projection_dimension": 100,
         },
@@ -409,8 +348,8 @@ models = {
         sender_args={"hidden_size": 10},
         receiver=AttentionPredictorReceiver,
         receiver_args={
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
             "projection_dimension": 100,
         },
@@ -429,33 +368,12 @@ models = {
         sender_args={},
         receiver=AttentionPredictorReceiver,
         receiver_args={
-            "image_encoder": ClevrAttentionImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
             "projection_dimension": 100,
         },
         loss_function=attention_loss,
-    ),
-    "baseline_coordinate_predictor": ModelDefinition(
-        dataset=CoordinatePredictorGameDataset,
-        dataset_args={},
-        split_dataset=False,
-        image_loader=FeatureImageLoader,
-        bounding_box_loader=None,
-        iterator=CoordinatePredictorGameBatchIterator,
-        sender=DummySender,
-        sender_args={
-            "hidden_size": 10,
-        },
-        receiver=CoordinatePredictorReceiver,
-        receiver_args={
-            "image_encoder": ClevrImageEncoder(
-                feature_extractor=DummyFeatureExtractor(),
-            ),
-            "embedding_dimension": 1024,
-            "coordinate_classifier": CoordinateClassifier,
-        },
-        loss_function=pixel_loss,
     ),
 }
 
@@ -595,7 +513,7 @@ def get_params(params):
         help="Output dimensionality of the layer that embeds the image for Receiver (default: 10)",
     )
     parser.add_argument(
-        "--receiver_captioning_embedding",
+        "--receiver_decoder_embedding",
         type=int,
         default=10,
         help="Output dimensionality of the captioning tokens (default: 10)",
@@ -607,13 +525,19 @@ def get_params(params):
         help="Output dimensionality of the layer that embeds the caption for Receiver (default: 10)",
     )
     parser.add_argument(
-        "--coordinate_classifier_dimension",
+        "--sender_coordinate_classifier",
         type=int,
         default=10,
         help="Dimensions for the coordinate predictor for Receiver (default: 10)",
     )
     parser.add_argument(
-        "--projection_dimension",
+        "--sender_projection",
+        type=int,
+        default=10,
+        help="Projection dimension to combin message and image (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_projection",
         type=int,
         default=10,
         help="Projection dimension to combin message and image (default: 10)",
@@ -622,13 +546,13 @@ def get_params(params):
         "--dale_embedding_dim",
         type=int,
         default=10,
-        help="Projection dimension to combin message and image (default: 10)",
+        help="Projection dimension to combine message and image (default: 10)",
     )
     parser.add_argument(
         "--dale_encoder_out_dim",
         type=int,
         default=10,
-        help="Projection dimension to combin message and image (default: 10)",
+        help="Projection dimension to combine message and image (default: 10)",
     )
 
     # -- OUTPUT --
@@ -666,18 +590,40 @@ def get_params(params):
     return args
 
 
+def get_model_params(model, opts):
+    params = []
+
+    signature = inspect.signature(model.__init__)
+    for name, par in signature.parameters.items():
+        if name not in ["self", "_args", "_kwargs"]:
+            match par.annotation.__qualname__:
+                case CaptionDecoder.__qualname__:
+                    sub_params = get_model_params(CaptionDecoder, opts)
+                    params.append({"CaptionDecoder": sub_params})
+                case _:
+                    if name in opts:
+                        params.append(name)
+
+    return params
+
+
 def main(params):
     opts = get_params(params)
     if opts.validation_batch_size == 0:
         opts.validation_batch_size = opts.batch_size
     print(opts, flush=True)
 
+    model = models[opts.model]
+
+    print("\nSender:")
+    pprint(get_model_params(model.sender, opts))
+    print("\nReceiver:")
+    pprint(get_model_params(model.receiver, opts))
+
     image_dir = os.path.join(opts.dataset_base_dir, datasets[opts.dataset], "images/")
     scene_json_dir = os.path.join(
         opts.dataset_base_dir, datasets[opts.dataset], "scenes/"
     )
-
-    model = models[opts.model]
 
     if model.image_loader:
         image_feature_file = os.path.join(

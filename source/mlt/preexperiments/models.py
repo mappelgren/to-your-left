@@ -3,7 +3,6 @@ from mlt.shared_models import (
     BoundingBoxImageEncoder,
     CoordinateClassifier,
     ImageEncoder,
-    MaskedImageEncoder,
     MaskPredictor,
 )
 from torch import nn
@@ -315,7 +314,7 @@ class MaskedDaleAttributeCoordinatePredictor(nn.Module):
         embedding_dim,
         encoder_out_dim,
         image_encoder: ImageEncoder,
-        masked_image_encoder: MaskedImageEncoder,
+        masked_image_encoder: ImageEncoder,
         coordinate_classifier: CoordinateClassifier,
         *_args,
         **_kwargs,
@@ -367,7 +366,7 @@ class MaskedCoordinatePredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        masked_image_encoder: MaskedImageEncoder,
+        masked_image_encoder: ImageEncoder,
         image_embedding_dimension: int,
         coordinate_classifier: CoordinateClassifier,
         *_args,
@@ -411,7 +410,7 @@ class MaskedMaskPredictor(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        masked_image_encoder: MaskedImageEncoder,
+        masked_image_encoder: ImageEncoder,
         image_embedding_dimension: int,
         mask_predictor: MaskPredictor,
         *_args,
@@ -596,7 +595,7 @@ class MaskedCaptionGenerator(nn.Module):
     def __init__(
         self,
         image_encoder: ImageEncoder,
-        masked_image_encoder: MaskedImageEncoder,
+        masked_image_encoder: ImageEncoder,
         image_embedding_dimension: int,
         caption_decoder,
         encoded_sos,

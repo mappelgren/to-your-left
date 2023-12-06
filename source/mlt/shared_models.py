@@ -12,35 +12,11 @@ class ImageEncoder(ABC, nn.Module):
 
 class ClevrImageEncoder(ImageEncoder):
     def __init__(
-        self,
-        feature_extractor: FeatureExtractor,
+        self, feature_extractor: FeatureExtractor, max_pool: bool = True
     ) -> None:
         super().__init__()
         self.feature_extractor = feature_extractor
-
-        self.process_image = nn.Sequential(
-            feature_extractor,
-            nn.LazyConv2d(128, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.LazyConv2d(128, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-        )
-
-    def forward(self, image):
-        return self.process_image(image)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.feature_extractor=})"
-
-
-class ClevrAttentionImageEncoder(ImageEncoder):
-    def __init__(
-        self,
-        feature_extractor: FeatureExtractor,
-    ) -> None:
-        super().__init__()
-        self.feature_extractor = feature_extractor
+        self.max_pool = max_pool
 
         self.process_image = nn.Sequential(
             feature_extractor,
@@ -50,11 +26,14 @@ class ClevrAttentionImageEncoder(ImageEncoder):
             nn.ReLU(),
         )
 
+        if max_pool:
+            self.process_image.append(nn.MaxPool2d(kernel_size=2, stride=2))
+
     def forward(self, image):
         return self.process_image(image)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.feature_extractor=})"
+        return f"{self.__class__.__name__}({self.feature_extractor=},{self.max_pool=})"
 
 
 class BoundingBoxImageEncoder(ImageEncoder):
@@ -75,24 +54,6 @@ class BoundingBoxImageEncoder(ImageEncoder):
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.image_embedding_dimension=})"
-
-
-class MaskedImageEncoder(ImageEncoder):
-    def __init__(
-        self,
-        encoder_out_dim,
-    ) -> None:
-        super().__init__()
-
-        self.encoder_out_dim = encoder_out_dim
-
-        self.process_image = nn.Sequential(nn.Flatten(), nn.LazyLinear(encoder_out_dim))
-
-    def forward(self, masked_image):
-        return self.process_image(masked_image)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.encoder_out_dim=})"
 
 
 class CoordinateClassifier(nn.Module):
