@@ -112,7 +112,7 @@ class CaptionGeneratorReceiver(nn.Module):
             nn.Flatten(), nn.LazyLinear(receiver_image_embedding)
         )
         self.caption_decoder = caption_decoder
-        self.linear = nn.LazyLinear(caption_decoder.decoder_out_dim)
+        self.linear = nn.LazyLinear(caption_decoder.decoder_out)
         self.encoded_sos = torch.tensor(encoded_sos)
 
     def forward(self, message, x, aux_input):

@@ -4,7 +4,6 @@ import inspect
 import os
 import sys
 from dataclasses import dataclass
-from pprint import pprint
 from time import gmtime, strftime
 from typing import Callable
 
@@ -459,86 +458,62 @@ def get_params(params):
     parser.add_argument(
         "--sender_hidden",
         type=int,
-        default=10,
         help="Size of the hidden layer of Sender (default: 10)",
     )
     parser.add_argument(
         "--sender_embedding",
         type=int,
-        default=10,
         help="Output dimensionality of the layer that embeds symbols produced at previous step in Sender (default: 10)",
     )
     parser.add_argument(
         "--sender_image_embedding",
         type=int,
-        default=10,
         help="Output dimensionality of the layer that embeds the image in Sender (default: 10)",
     )
     parser.add_argument(
-        "--sender_encoder_dim",
+        "--sender_encoder_out",
         type=int,
-        default=10,
         help="Size of the LSTM encoder of Sender when attributes are encoded with descriptions (default: 10)",
-    )
-    parser.add_argument(
-        "--receiver_hidden",
-        type=int,
-        default=10,
-        help="Size of the hidden layer of Receiver (default: 10)",
-    )
-    parser.add_argument(
-        "--receiver_embedding",
-        type=int,
-        default=10,
-        help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
-    )
-    parser.add_argument(
-        "--receiver_image_embedding",
-        type=int,
-        default=10,
-        help="Output dimensionality of the layer that embeds the image for Receiver (default: 10)",
-    )
-    parser.add_argument(
-        "--receiver_decoder_embedding",
-        type=int,
-        default=10,
-        help="Output dimensionality of the captioning tokens (default: 10)",
-    )
-    parser.add_argument(
-        "--receiver_decoder_out_dim",
-        type=int,
-        default=10,
-        help="Output dimensionality of the layer that embeds the caption for Receiver (default: 10)",
     )
     parser.add_argument(
         "--sender_coordinate_classifier",
         type=int,
-        default=10,
         help="Dimensions for the coordinate predictor for Receiver (default: 10)",
     )
     parser.add_argument(
         "--sender_projection",
         type=int,
-        default=10,
         help="Projection dimension to combin message and image (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_hidden",
+        type=int,
+        help="Size of the hidden layer of Receiver (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_embedding",
+        type=int,
+        help="Output dimensionality of the layer that embeds the message symbols for Receiver (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_image_embedding",
+        type=int,
+        help="Output dimensionality of the layer that embeds the image for Receiver (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_decoder_embedding",
+        type=int,
+        help="Output dimensionality of the captioning tokens (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_decoder_out",
+        type=int,
+        help="Output dimensionality of the layer that embeds the caption for Receiver (default: 10)",
     )
     parser.add_argument(
         "--receiver_projection",
         type=int,
-        default=10,
         help="Projection dimension to combin message and image (default: 10)",
-    )
-    parser.add_argument(
-        "--dale_embedding_dim",
-        type=int,
-        default=10,
-        help="Projection dimension to combine message and image (default: 10)",
-    )
-    parser.add_argument(
-        "--dale_encoder_out_dim",
-        type=int,
-        default=10,
-        help="Projection dimension to combine message and image (default: 10)",
     )
 
     # -- OUTPUT --
@@ -576,7 +551,13 @@ def get_params(params):
     return args
 
 
-def get_model_params(model, opts):
+class colors:
+    GREEN = "\033[38;5;28m"
+    RED = "\033[38;5;88m"
+    ENDC = "\033[0m"
+
+
+def get_model_params(model, opts, prefix):
     params = {}
 
     signature = inspect.signature(model.__init__)
@@ -584,10 +565,12 @@ def get_model_params(model, opts):
         if name not in ["self", "_args", "_kwargs"]:
             match par.annotation.__qualname__:
                 case CaptionDecoder.__qualname__:
-                    params = params | get_model_params(CaptionDecoder, opts)
+                    params = params | get_model_params(CaptionDecoder, opts, prefix)
                 case _:
+                    if not name.startswith(prefix):
+                        name = prefix + name
                     if name in opts:
-                        params[name] = opts[name]
+                        params[name] = getattr(opts, name)
 
     return params
 
@@ -687,17 +670,39 @@ def main(params):
         seed=7,
     )
 
-    sender_params = get_model_params(model.sender, opts)
+    sender_params = get_model_params(model.sender, opts, "sender_")
     sender_args = set_model_params(model.sender_args, sender_params)
 
-    receiver_params = get_model_params(model.receiver, opts)
+    receiver_params = get_model_params(model.receiver, opts, "receiver_")
     receiver_args = set_model_params(model.receiver_args, receiver_params)
+
+    params_check = True
+    message_params = {
+        "sender_hidden": opts.sender_hidden,
+        "sender_embedding": opts.sender_embedding,
+        "receiver_hidden": opts.receiver_hidden,
+        "receiver_embedding": opts.receiver_embedding,
+    }
+    for param, value in sorted((sender_args | receiver_args | message_params).items()):
+        if param not in opts:
+            continue
+
+        if value is None:
+            color = colors.RED
+            params_check = False
+        else:
+            color = colors.GREEN
+
+        print(f"{param} = {color}{value}{colors.ENDC}")
+
+    if not params_check:
+        return
 
     if "caption_decoder" in receiver_args.keys():
         receiver_args["caption_decoder"] = receiver_args["caption_decoder"](
-            embedding_dim=receiver_args["receiver_decoder_embedding"],
-            decoder_out_dim=receiver_args["receiver_decoder_out"],
-            vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+            decoder_embedding=receiver_args["receiver_decoder_embedding"],
+            decoder_out=receiver_args["receiver_decoder_out"],
+            decoder_vocab_size=len(DaleCaptionAttributeEncoder.vocab),
         )
     if "coordinate_classifier" in receiver_args.keys():
         receiver_args["coordinate_classifier"] = receiver_args["coordinate_classifier"](

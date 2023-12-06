@@ -497,13 +497,13 @@ class RandomCoordinatePredictor(nn.Module):
 
 class CaptionDecoder(nn.Module):
     def __init__(
-        self, decoder_vocab_size, decoder_embedding, decoder_out_dim, *_args, **_kwargs
+        self, decoder_vocab_size, decoder_embedding, decoder_out, *_args, **_kwargs
     ) -> None:
         super().__init__()
-        self.decoder_out_dim = decoder_out_dim
+        self.decoder_out = decoder_out
         self.embeddings = nn.Embedding(decoder_vocab_size, decoder_embedding)
-        self.lstm = nn.LSTM(decoder_embedding, decoder_out_dim, batch_first=True)
-        self.classifier = nn.Linear(decoder_out_dim, decoder_vocab_size)
+        self.lstm = nn.LSTM(decoder_embedding, decoder_out, batch_first=True)
+        self.classifier = nn.Linear(decoder_out, decoder_vocab_size)
 
     def forward(self, caption, input_states):
         embedded = self.embeddings(caption)
