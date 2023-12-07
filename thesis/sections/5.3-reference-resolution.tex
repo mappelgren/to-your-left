@@ -172,7 +172,10 @@ The model is then tasked to predict the matrix $A = (a_{ij})$, where:
 \end{align*}
 
 To do this, the model combines a representation of the image and a representation of the target object.
-More specifically, the image is encoded using the \emph{image encoder} submodule
+More specifically, the image is encoded using the \emph{image encoder} submodule, omitting the last \emph{max pool} layer.
+By this, the resulting matrix has 128\times14\times14 dimension, corresponding to the 14\time14 regions.
+For the target object, the incremental RE is passed through an LSTM as described before.
+Both encodings are passed through two linear layers separately to project them to the projection dimension $p$, followed by the $tanh$ function.
 
 
 
