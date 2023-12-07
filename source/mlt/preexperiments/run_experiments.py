@@ -6,7 +6,7 @@ variables = {
     "--dataset_base_dir": ["/home/dominik/Development/"],
     "--lr": ["0.0002"],
     "--epochs": ["30"],
-    "--feature_file": ["resnet_3_no-avgpool_no-fc.h5"],
+    "--image_feature_file": ["resnet_3_no-avgpool_no-fc.h5"],
     "--max_samples": ["10000"],
     "--device": ["cuda"],
     "--model": ["dale_attribute_attention_predictor"],
