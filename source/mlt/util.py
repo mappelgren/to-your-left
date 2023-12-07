@@ -1,4 +1,5 @@
 import builtins
+import inspect
 import os
 import pickle
 from dataclasses import fields
@@ -6,6 +7,7 @@ from dataclasses import fields
 import h5py
 import numpy
 import torch
+from mlt.preexperiments.models import CaptionDecoder
 
 
 def load_tensor(data):
@@ -58,3 +60,34 @@ class Persistor:
                 for attr, attr_value in f.attrs.items()
             }
             return cls(self.file_path, **attributes)
+
+
+class colors:
+    GREEN = "\033[38;5;28m"
+    RED = "\033[38;5;88m"
+    ENDC = "\033[0m"
+
+
+def get_model_params(model, opts, prefix=""):
+    params = {}
+
+    signature = inspect.signature(model.__init__)
+    for name, par in signature.parameters.items():
+        if name not in ["self", "_args", "_kwargs"]:
+            match par.annotation.__qualname__:
+                case CaptionDecoder.__qualname__:
+                    params = params | get_model_params(CaptionDecoder, opts, prefix)
+                case _:
+                    if not name.startswith(prefix):
+                        name = prefix + name
+                    if name in opts:
+                        params[name] = getattr(opts, name)
+
+    return params
+
+
+def set_model_params(model_args, params):
+    for param, param_value in params.items():
+        model_args[param] = param_value
+
+    return model_args

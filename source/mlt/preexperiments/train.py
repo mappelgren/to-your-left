@@ -1,6 +1,7 @@
 import argparse
 import hashlib
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -57,7 +58,7 @@ from mlt.preexperiments.test import (
     Tester,
 )
 from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier, MaskPredictor
-from mlt.util import Persistor
+from mlt.util import Persistor, colors, get_model_params, set_model_params
 from torch import nn, optim
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset, random_split
@@ -91,7 +92,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -128,7 +128,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -149,13 +148,12 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=DaleAttributeCoordinatePredictor,
         model_args={
-            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_embedding": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_encoder_out": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -177,9 +175,9 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=MaskedDaleAttributeCoordinatePredictor,
         model_args={
-            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_embedding": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
@@ -193,7 +191,6 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "image_embedding_dimension": 4069,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -215,7 +212,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 2048,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -244,7 +240,6 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -273,7 +268,6 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "image_embedding_dimension": 4096,
             "coordinate_classifier": CoordinateClassifier,
         },
         loss_function=pixel_loss,
@@ -315,7 +309,6 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "image_embedding_dimension": 4096,
             "mask_predictor": MaskPredictor,
         },
         loss_function=nn.BCELoss(),
@@ -337,13 +330,12 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=DaleAttributeAttentionPredictor,
         model_args={
-            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_embedding": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_encoder_out": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
-            "projection_dimension": 100,
         },
         loss_function=nn.BCELoss(),
         tester=AttentionPredictorTester,
@@ -372,9 +364,7 @@ models = {
         },
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxAttributeClassifier,
-        model_args={
-            "image_embedding_dimension": 10,
-        },
+        model_args={},
         loss_function=nn.CrossEntropyLoss(),
         tester=BoundingBoxClassifierTester,
         output_processor=BoundingBoxOutputProcessor,
@@ -393,7 +383,6 @@ models = {
         preprocess=ResNet101_Weights.IMAGENET1K_V2.transforms(),
         model=BoundingBoxCaptionGenerator,
         model_args={
-            "image_embedding_dimension": 256,
             "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -420,7 +409,6 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "image_embedding_dimension": 1024,
             "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -458,7 +446,6 @@ models = {
                 ),
                 max_pool=True,
             ),
-            "image_embedding_dimension": 2048,
             "caption_decoder": CaptionDecoder,
             "encoded_sos": DaleCaptionAttributeEncoder.get_encoded_word(
                 DaleCaptionAttributeEncoder.SOS_TOKEN
@@ -486,10 +473,9 @@ models = {
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=True
             ),
-            "projection_dimension": 100,
-            "vocab_size": len(DaleCaptionAttributeEncoder.vocab),
-            "embedding_dim": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_out_dim": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_embedding": len(DaleCaptionAttributeEncoder.vocab),
+            "encoder_out": len(DaleCaptionAttributeEncoder.vocab),
             "number_attributes": 13,
         },
         loss_function=nn.BCELoss(),
@@ -549,13 +535,13 @@ if __name__ == "__main__":
         choices=models.keys(),
         help="model to load",
     )
-    parser.add_argument("--decoder_out_dim", type=int, default=10)
-    parser.add_argument("--encoder_out_dim", type=int, default=10)
-    parser.add_argument("--embedding_dim", type=int, default=10)
-    parser.add_argument("--image_embedding_dimension", type=int, default=None)
+    parser.add_argument("--decoder_out", type=int, default=10)
+    parser.add_argument("--encoder_out", type=int, default=10)
+    parser.add_argument("--encoder_embedding", type=int, default=10)
+    parser.add_argument("--image_embedding", type=int, default=None)
     parser.add_argument("--coordinate_classifier_dimension", type=int, default=10)
     parser.add_argument("--mask_predictor_dimension", type=int, default=10)
-    parser.add_argument("--projection_dimension", type=int, default=100)
+    parser.add_argument("--projection", type=int, default=100)
 
     # -- TRAINING --
     parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
@@ -672,31 +658,40 @@ if __name__ == "__main__":
 
     tester = model_name.tester()
 
-    model_args = model_name.model_args
-    if args.decoder_out_dim:
-        model_args["decoder_out_dim"] = args.decoder_out_dim
-    if args.encoder_out_dim:
-        model_args["encoder_out_dim"] = args.encoder_out_dim
-    if args.image_embedding_dimension:
-        model_args["image_embedding_dimension"] = args.image_embedding_dimension
-    else:
-        model_args["image_embedding_dimension"] = args.decoder_out_dim
+    model_params = get_model_params(model_name.model, args)
+    model_args = set_model_params(model_name.model_args, model_params)
+
+    params_check = True
+    for param, value in sorted(model_args.items()):
+        if param not in args:
+            continue
+
+        if value is None:
+            color = colors.RED
+            params_check = False
+        else:
+            color = colors.GREEN
+
+        print(f"{param} = {color}{value}{colors.ENDC}")
+
+    if not params_check:
+        sys.exit()
 
     if "caption_decoder" in model_args.keys():
         model_args["caption_decoder"] = model_args["caption_decoder"](
-            embedding_dim=args.embedding_dim,
-            decoder_out_dim=args.decoder_out_dim,
-            vocab_size=len(DaleCaptionAttributeEncoder.vocab),
+            decoder_embedding=args.embedding_dim,
+            decoder_out=args.decoder_out_dim,
+            decoder_vocab_size=len(DaleCaptionAttributeEncoder.vocab),
         )
 
     if "coordinate_classifier" in model_args.keys():
         model_args["coordinate_classifier"] = model_args["coordinate_classifier"](
-            classifier_dimension=args.coordinate_classifier_dimension
+            coordinate_classifier_dimension=args.coordinate_classifier_dimension
         )
 
     if "mask_predictor" in model_args.keys():
         model_args["mask_predictor"] = model_args["mask_predictor"](
-            classifier_dimension=args.mask_predictor_dimension
+            mask_predictor_dimension=args.mask_predictor_dimension
         )
 
     model = model_name.model(**model_args).to(device)

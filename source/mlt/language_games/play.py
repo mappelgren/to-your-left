@@ -1,6 +1,5 @@
 import argparse
 import hashlib
-import inspect
 import os
 import sys
 from dataclasses import dataclass
@@ -61,7 +60,7 @@ from mlt.preexperiments.data_readers import (
 )
 from mlt.preexperiments.models import CaptionDecoder
 from mlt.shared_models import ClevrImageEncoder, CoordinateClassifier
-from mlt.util import Persistor
+from mlt.util import Persistor, colors, get_model_params, set_model_params
 from torch.nn import Module
 from torch.utils.data import Dataset, random_split
 
@@ -549,37 +548,6 @@ def get_params(params):
     )
     args = core.init(parser, params)
     return args
-
-
-class colors:
-    GREEN = "\033[38;5;28m"
-    RED = "\033[38;5;88m"
-    ENDC = "\033[0m"
-
-
-def get_model_params(model, opts, prefix):
-    params = {}
-
-    signature = inspect.signature(model.__init__)
-    for name, par in signature.parameters.items():
-        if name not in ["self", "_args", "_kwargs"]:
-            match par.annotation.__qualname__:
-                case CaptionDecoder.__qualname__:
-                    params = params | get_model_params(CaptionDecoder, opts, prefix)
-                case _:
-                    if not name.startswith(prefix):
-                        name = prefix + name
-                    if name in opts:
-                        params[name] = getattr(opts, name)
-
-    return params
-
-
-def set_model_params(model_args, params):
-    for param, param_value in params.items():
-        model_args[param] = param_value
-
-    return model_args
 
 
 def main(params):

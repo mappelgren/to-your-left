@@ -57,15 +57,15 @@ class BoundingBoxImageEncoder(ImageEncoder):
 
 
 class CoordinateClassifier(nn.Module):
-    def __init__(self, classifier_dimension) -> None:
+    def __init__(self, coordinate_classifier_dimension) -> None:
         super().__init__()
-        self.classifier_dimension = classifier_dimension
+        self.coordinate_classifier_dimension = coordinate_classifier_dimension
 
         self.classifier = nn.Sequential(
-            nn.LazyLinear(classifier_dimension),
+            nn.LazyLinear(coordinate_classifier_dimension),
             nn.Dropout(0.2),
             nn.ReLU(),
-            nn.LazyLinear(classifier_dimension),
+            nn.LazyLinear(coordinate_classifier_dimension),
             nn.Dropout(0.2),
             nn.ReLU(),
             nn.LazyLinear(2),
@@ -75,19 +75,19 @@ class CoordinateClassifier(nn.Module):
         return self.classifier(data)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.classifier_dimension=})"
+        return f"{self.__class__.__name__}({self.coordinate_classifier_dimension=})"
 
 
 class MaskPredictor(nn.Module):
-    def __init__(self, classifier_dimension) -> None:
+    def __init__(self, mask_predictor_dimension) -> None:
         super().__init__()
-        self.classifier_dimension = classifier_dimension
+        self.mask_predictor_dimension = mask_predictor_dimension
 
         self.classifier = nn.Sequential(
-            nn.LazyLinear(classifier_dimension),
+            nn.LazyLinear(mask_predictor_dimension),
             nn.Dropout(0.2),
             nn.ReLU(),
-            nn.LazyLinear(classifier_dimension),
+            nn.LazyLinear(mask_predictor_dimension),
             nn.Dropout(0.2),
             nn.ReLU(),
             nn.LazyLinear(50176),
@@ -98,4 +98,4 @@ class MaskPredictor(nn.Module):
         return self.classifier(data)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.classifier_dimension=})"
+        return f"{self.__class__.__name__}({self.mask_predictor_dimension=})"
