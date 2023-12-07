@@ -173,7 +173,7 @@ The feature extractors described in section \ref{sec:feature-extractors} are not
 Even though final layers that contain very task and domain specific knowledge can be removed, the previous layers still don't contain any information about the new domain and task.
 For this reason they need to be extended with further layers that are not frozen and can learn and store information about the new domain by connecting the pretrained general knowledge with the specific task.
 These additional layers on top of the feature extractors that make up the \emph{image encoder} submodule, however, are always trained from scratch for each of the experiments and tasks.
-In this thesis, only this submodule is used to encode images for all the conducted experiments.
+In this thesis, only this submodule is used to encode images for all the conducted experiments, except otherwise specified.
 
 \citet{Johnson2017} describe an architecture that was used for training baseline models on the CLEVR dataset.
 This architecture will be used as the submodule.

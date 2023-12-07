@@ -3,30 +3,30 @@ import itertools
 import subprocess
 
 options = [
-    "--n_epochs=9",
-    "--validation_freq=9",
-    "--batch_size=32",
-    "--batches_per_epoch=40",
-    "--lr=0.0002",
-    "--feature_file=resnet_3_no-avgpool_no-fc.h5",
-    "--max_samples=10000",
-    "--model=caption_generator",
-    "--mode=gs",
+    "--save",
     "--sender_cell=lstm",
     "--receiver_cell=lstm",
-    "--save",
-    # -- model specifics --
-    "--sender_image_embedding=500",
-    # "--sender_encoder_dim=",
-    "--receiver_image_embedding=100",
-    "--receiver_decoder_out_dim=1500",
-    "--receiver_embedding=500",
-    # "--coordinate_classifier_dimension=",
-    "--temperature=1",
+    "--image_feature_file=resnet_3_no-avgpool_no-fc.h5",
+    "--bounding_box_feature_file=bounding_box_resnet_4_avgpool_no-fc.h5",
 ]
 
 variables = {
+    "--n_epochs": [100],
+    "--batch_size": [32],
+    "--batches_per_epoch": [40],
+    "--validation_freq": [10],
+    "--lr": [0.0002],
+    "--max_samples": [10000],
+    "--temperature": [1],
+    "--model": ["caption_generator"],
     "--dataset": ["dale-2", "dale-5", "colour"],
+    # -- model specifics --
+    "--sender_image_embedding": [500],
+    # "--sender_encoder_dim": [100],
+    "--receiver_image_embedding": [100],
+    "--receiver_decoder_out": [1500],
+    "--receiver_embedding": [500],
+    # "--receiver_coordinate_classifier_dimension": [100],
     "--sender_hidden": [100, 500],
     "--receiver_hidden": [10, 50, 500],
     "--vocab_size": [1, 10, 16, 50, 100],
@@ -60,9 +60,6 @@ if __name__ == "__main__":
         ]
 
     for index, combination in enumerate(itertools.product(*variables.values())):
-        save_appendix = "_".join(
-            str(i) for i in combination if i not in variables.get("--dataset", [])
-        )
         subprocess.run(
             [
                 "python",
@@ -73,7 +70,6 @@ if __name__ == "__main__":
                     f"{option}={value}"
                     for option, value in zip(variables.keys(), combination)
                 ],
-                f"--save_appendix={save_appendix}",
                 *additional,
             ],
             check=False,

@@ -13,18 +13,22 @@ One of them could be to describe the target object with human language, using th
 The main goal however is to let the language of the agents emerge as natural as possible.
 Including human referring expressions into the task would bias also the emerged language towards attributes and words, used in natural language.
 For this reason, the final task of the receiver will be to 'point' to the target object.
-The models are therefore tasked to predict the center coordinates of the target object.
+In this section, this is done in two ways.
+First, the models are tasked to predict the center coordinates of the target object (\emph{coordinate reference resolver}).
 % SD: Reference resolution with identification of location. The other task, object identification is also resolving reference but it is easier as you are only picking objects. The first task also involves spatial knowledge.
 % DK: (done)
-With this approach, the models receive few natural language information, but are still able to rely on all information present in the image to discriminate the objects.
+This requires a very high precision of the model in extracting spatial information.
+However, the exact location is not necessarily important to highlight, which object the model predicts to be the target object, and might challenge the model too much.
+Therefore, in a second approach, the model is tasked to predict a region around the target object (\emph{attention reference resolver}).
+This reduces the necessary amount of spatial information and might be easier to learn for the models.
+With both approaches, the models receive few natural language information, but are still able to rely on all information present in the image to discriminate the objects.
 
-To achieve this goal, multiple setups of models are trained.
-In the simplest setup, the \textbf{reference resolver}, the model receives only the image as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
+In the simplest setup, the \textbf{coordinate reference resolver}, the model receives only the image as an input and produces two numbers as an output, the predicted x- and y-coordinate of the target object.
 % SD: What are the features?
 % SD: Note that these are visual features and not spatial features. It is true that visual features also encode some spatial information, how visual features relate to each other, but such information is very different from the spatial information required to predict coordinates in a coordinate frames, and hence we expect the task will be very hard.
 % DK: TODO
 Again, the image is encoded, using the \emph{image encoder} submodule, described in Section \ref{sec:image-processing}.
-The \emph{coordinate predictor} submodule takes the encoder image to predict x- and and y-coordinates of the target image,
+The \emph{coordinate predictor} submodule takes the encoder image to predict x- and y-coordinates of the target image,
 Hereby, the encoded image is flattened and passed through two linear layers with a \emph{ReLU} non-linearity in between.
 These reduce the dimensions first to the coordinate predictor dimension $c$ and finally to 2.
 
@@ -51,7 +55,7 @@ Here, four different ways to encode and refer to the target object are tested.
         \includegraphics[width=0.34\linewidth]{figures/arch_coordinate_predictor_dale.png}
         \label{fig:coordinate_predictor_dale_architecture}
     }
-    \caption{Simplified architectures of the reference resolvers}
+    \caption{Simplified architectures of the \emph{coordinate reference resolvers}}
     % SD: How are these encoded?
     % DK: (done)
 \end{figure}
@@ -124,13 +128,13 @@ Table \ref{tab:variables-reference-resolution} shows the variables that are chan
     \centering
     \begin{tabular}{lcccc}
         \toprule
-                              & $e_i$                       & $c$               & $LSTM_e$  & $LSTM_o$      \\
-                              & $[50, 100, 300, 500, 1000]$ & $[512,1024,2048]$ & $[15,30]$ & $[1000,1500]$ \\\midrule
-        reference resolver    & \times                      & \times            & -         & -             \\
-        + one-hot             & \times                      & \times            & -         & -             \\
-        + one-hot + locations & \times                      & \times            & -         & -             \\
-        + incremental RE      & \times                      & \times            & \times    & \times        \\
-        + masking             & \times                      & \times            & -         & -             \\
+                                      & $e_i$                 & $c$               & $LSTM_e$  & $LSTM_o$      \\
+                                      & $[50, 100, 300, 500]$ & $[512,1024,2048]$ & $[15,30]$ & $[1000,1500]$ \\\midrule
+        coordinate reference resolver & \times                & \times            & -         & -             \\
+        + one-hot                     & \times                & \times            & -         & -             \\
+        + one-hot + locations         & \times                & \times            & -         & -             \\
+        + incremental RE              & \times                & \times            & \times    & \times        \\
+        + masking                     & \times                & \times            & -         & -             \\
         \bottomrule
     \end{tabular}
     \caption{Variables for each model where $e_i$ is the image embedding dimension, $c$ the dimensions of the coordinate predictor, $LSTM_e$ the embedding dimensions for tokens in the LSTM and $LSTM_o$ the output dimension of the LSTM}
@@ -153,6 +157,24 @@ These scores are averaged for the epoch and result in an accuracy score, where 1
 % DK: TODO
 This of course doesn't give a perfect representation since the size of the objects varies, but it will still show, how precise each individual prediction is.
 A high accuracy may indicate that the model could identify this specific object better.
+
+In the second approach, the \textbf{attention reference resolver} predicts a region around the center of the target object.
+For this, the image is divided into 14\times14 regions.
+The target area is located around the center of the target object, consisting of 3\times3 regions.
+Hereby, the center of the target object is located in the central region.
+The model is then tasked to predict the matrix $A = (a_{ij})$, where:
+\begin{align*}
+    a_{ij} =
+    \begin{cases}
+        1, & \text{if region $i,j$ in target area} \\
+        0, & \text{otherwise}
+    \end{cases}
+\end{align*}
+
+To do this, the model combines a representation of the image and a representation of the target object.
+More specifically, the image is encoded using the \emph{image encoder} submodule
+
+
 
 The reference resolution models are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
 The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.
@@ -183,17 +205,14 @@ Random guesses of the coordinates correspond to a mean distance of 95 pixels, gi
     \centering
     \begin{tabular}{cc|cc|cc|cc|cc}
         \toprule
-               &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
-        $e_i$  & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
-        {100}  & {512}  & {2,45}                                    & {96\%}                              & {38,16}                             & {35\%}                                   & {46,44}       & {18\%}        & {51,8}        & {12\%}        \\
-        {100}  & {1024} & {2,18}                                    & {94\%}                              & {37,23}                             & {38\%}                                   & {47,38}       & {18\%}        & {52,04}       & {13\%}        \\
-        {100}  & {2048} & {3,44}                                    & {99\%}                              & {36,8}                              & {40\%}                                   & {46,77}       & {18\%}        & {51,29}       & {13\%}        \\
-        {500}  & {512}  & {2,71}                                    & {96\%}                              & {37,1}                              & {37\%}                                   & {47,28}       & {18\%}        & {51,01}       & {14\%}        \\
-        {500}  & {1024} & {2,61}                                    & {97\%}                              & {36,2}                              & {39\%}                                   & {48,6}        & {17\%}        & {52,73}       & {12\%}        \\
-        {500}  & {2048} & {5,18}                                    & {99\%}                              & {36,09}                             & {40\%}                                   & {44,81}       & {18\%}        & {51,8}        & {13\%}        \\
-        {1000} & {512}  & {3,11}                                    & {98\%}                              & {37,58}                             & {36\%}                                   & {46,8}        & {19\%}        & {49,95}       & {14\%}        \\
-        {1000} & {1024} & {7,91}                                    & {100\%}                             & {37,78}                             & {39\%}                                   & {47,11}       & {18\%}        & {54,18}       & {11\%}        \\
-        {1000} & {2048} & {4,64}                                    & {100\%}                             & {37,01}                             & {42\%}                                   & {45,72}       & {21\%}        & {49,98}       & {13\%}        \\
+              &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$ & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100} & {512}  & {2,45}                                    & {96\%}                              & {38,16}                             & {35\%}                                   & {46,44}       & {18\%}        & {51,8}        & {12\%}        \\
+        {100} & {1024} & {2,18}                                    & {94\%}                              & {37,23}                             & {38\%}                                   & {47,38}       & {18\%}        & {52,04}       & {13\%}        \\
+        {100} & {2048} & {3,44}                                    & {99\%}                              & {36,8}                              & {40\%}                                   & {46,77}       & {18\%}        & {51,29}       & {13\%}        \\
+        {500} & {512}  & {2,71}                                    & {96\%}                              & {37,1}                              & {37\%}                                   & {47,28}       & {18\%}        & {51,01}       & {14\%}        \\
+        {500} & {1024} & {2,61}                                    & {97\%}                              & {36,2}                              & {39\%}                                   & {48,6}        & {17\%}        & {52,73}       & {12\%}        \\
+        {500} & {2048} & {5,18}                                    & {99\%}                              & {36,09}                             & {40\%}                                   & {44,81}       & {18\%}        & {51,8}        & {13\%}        \\
         \bottomrule
     \end{tabular}
     \caption{Mean loss and accuracy of the basic reference resolver for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
@@ -204,17 +223,14 @@ Random guesses of the coordinates correspond to a mean distance of 95 pixels, gi
     \centering
     \begin{tabular}{cc|cc|cc|cc|cc}
         \toprule
-               &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
-        $e_i$  & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
-        {100}  & {512}  & {2,95}                                    & {98\%}                              & {37,27}                             & {34\%}                                   & {47,05}       & {18\%}        & {51,25}       & {12\%}        \\
-        {100}  & {1024} & {3,64}                                    & {98\%}                              & {37,19}                             & {37\%}                                   & {46,39}       & {19\%}        & {50,25}       & {14\%}        \\
-        {100}  & {2048} & {6,15}                                    & {99\%}                              & {37,04}                             & {39\%}                                   & {45,77}       & {18\%}        & {50,55}       & {14\%}        \\
-        {500}  & {512}  & {3,29}                                    & {98\%}                              & {38,58}                             & {34\%}                                   & {47,25}       & {18\%}        & {50,56}       & {14\%}        \\
-        {500}  & {1024} & {2,15}                                    & {93\%}                              & {37,18}                             & {40\%}                                   & {47,57}       & {18\%}        & {51,75}       & {14\%}        \\
-        {500}  & {2048} & {2,86}                                    & {98\%}                              & {35,71}                             & {41\%}                                   & {46,62}       & {18\%}        & {52,67}       & {11\%}        \\
-        {1000} & {512}  & {3,6}                                     & {97\%}                              & {36,37}                             & {36\%}                                   & {46,37}       & {18\%}        & {51,6}        & {12\%}        \\
-        {1000} & {1024} & {2,02}                                    & {94\%}                              & {36,86}                             & {38\%}                                   & {48,35}       & {17\%}        & {51,41}       & {15\%}        \\
-        {1000} & {2048} & {4,49}                                    & {99\%}                              & {36,5}                              & {41\%}                                   & {46,04}       & {18\%}        & {51,22}       & {13\%}        \\
+              &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$ & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100} & {512}  & {2,95}                                    & {98\%}                              & {37,27}                             & {34\%}                                   & {47,05}       & {18\%}        & {51,25}       & {12\%}        \\
+        {100} & {1024} & {3,64}                                    & {98\%}                              & {37,19}                             & {37\%}                                   & {46,39}       & {19\%}        & {50,25}       & {14\%}        \\
+        {100} & {2048} & {6,15}                                    & {99\%}                              & {37,04}                             & {39\%}                                   & {45,77}       & {18\%}        & {50,55}       & {14\%}        \\
+        {500} & {512}  & {3,29}                                    & {98\%}                              & {38,58}                             & {34\%}                                   & {47,25}       & {18\%}        & {50,56}       & {14\%}        \\
+        {500} & {1024} & {2,15}                                    & {93\%}                              & {37,18}                             & {40\%}                                   & {47,57}       & {18\%}        & {51,75}       & {14\%}        \\
+        {500} & {2048} & {2,86}                                    & {98\%}                              & {35,71}                             & {41\%}                                   & {46,62}       & {18\%}        & {52,67}       & {11\%}        \\
         \bottomrule
     \end{tabular}
     \caption{Mean loss and accuracy of the \emph{reference resolver + one-hot} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
@@ -225,17 +241,14 @@ Random guesses of the coordinates correspond to a mean distance of 95 pixels, gi
     \centering
     \begin{tabular}{cc|cc|cc|cc|cc}
         \toprule
-               &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
-        $e_i$  & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
-        {100}  & {512}  & {3,02}                                    & {97\%}                              & {36,88}                             & {37\%}                                   & {47,04}       & {16\%}        & {51,36}       & {12\%}        \\
-        {100}  & {1024} & {2,48}                                    & {95\%}                              & {38,24}                             & {33\%}                                   & {46,91}       & {15\%}        & {52,67}       & {12\%}        \\
-        {100}  & {2048} & {3,8}                                     & {100\%}                             & {37,89}                             & {32\%}                                   & {45,33}       & {13\%}        & {49,12}       & {11\%}        \\
-        {500}  & {512}  & {3,6}                                     & {98\%}                              & {35,56}                             & {42\%}                                   & {47,41}       & {16\%}        & {51,86}       & {12\%}        \\
-        {500}  & {1024} & {2,51}                                    & {98\%}                              & {36,56}                             & {39\%}                                   & {45,88}       & {17\%}        & {51,73}       & {12\%}        \\
-        {500}  & {2048} & {2,37}                                    & {97\%}                              & {37,33}                             & {35\%}                                   & {48,04}       & {16\%}        & {53,68}       & {11\%}        \\
-        {1000} & {512}  & {1,97}                                    & {93\%}                              & {36,07}                             & {42\%}                                   & {47,34}       & {19\%}        & {51,74}       & {12\%}        \\
-        {1000} & {1024} & {2,99}                                    & {94\%}                              & {36,23}                             & {41\%}                                   & {45,64}       & {19\%}        & {53,27}       & {12\%}        \\
-        {1000} & {2048} & {3}                                       & {98\%}                              & {37,62}                             & {33\%}                                   & {46,54}       & {17\%}        & {52,26}       & {14\%}        \\
+              &        & \multicolumn{2}{c}{\textbf{CLEVR single}} & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+        $e_i$ & $c$    & \textbf{loss}                             & \textbf{Acc.}                       & \textbf{loss}                       & \textbf{Acc.}                            & \textbf{loss} & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100} & {512}  & {3,02}                                    & {97\%}                              & {36,88}                             & {37\%}                                   & {47,04}       & {16\%}        & {51,36}       & {12\%}        \\
+        {100} & {1024} & {2,48}                                    & {95\%}                              & {38,24}                             & {33\%}                                   & {46,91}       & {15\%}        & {52,67}       & {12\%}        \\
+        {100} & {2048} & {3,8}                                     & {100\%}                             & {37,89}                             & {32\%}                                   & {45,33}       & {13\%}        & {49,12}       & {11\%}        \\
+        {500} & {512}  & {3,6}                                     & {98\%}                              & {35,56}                             & {42\%}                                   & {47,41}       & {16\%}        & {51,86}       & {12\%}        \\
+        {500} & {1024} & {2,51}                                    & {98\%}                              & {36,56}                             & {39\%}                                   & {45,88}       & {17\%}        & {51,73}       & {12\%}        \\
+        {500} & {2048} & {2,37}                                    & {97\%}                              & {37,33}                             & {35\%}                                   & {48,04}       & {16\%}        & {53,68}       & {11\%}        \\
         \bottomrule
     \end{tabular}
     \caption{Mean loss and accuracy of the \emph{reference resolver + one-hot + locations} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}
@@ -327,17 +340,14 @@ Since the mask only includes the target object but no distractors, it correspond
     \centering
     \begin{tabular}{cc|cc|cc|cc}
         \toprule
-               &        & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
-        $e_i$  & $c$    & \textbf{loss}                       & \textbf{Acc.}                       & \textbf{loss}                            & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
-        {100}  & {512}  & {8,01}                              & {98\%}                              & {6,77}                                   & {100\%}       & {6,05}        & {95\%}        \\
-        {100}  & {1024} & {8,77}                              & {99\%}                              & {3,61}                                   & {98\%}        & {5,29}        & {93\%}        \\
-        {100}  & {2048} & {8,71}                              & {99\%}                              & {4,28}                                   & {96\%}        & {3,24}        & {93\%}        \\
-        {500}  & {512}  & {14,27}                             & {99\%}                              & {9,97}                                   & {99\%}        & {5,9}         & {94\%}        \\
-        {500}  & {1024} & {8,6}                               & {99\%}                              & {2,07}                                   & {94\%}        & {13,03}       & {95\%}        \\
-        {500}  & {2048} & {2,67}                              & {95\%}                              & {10,57}                                  & {96\%}        & {4,24}        & {98\%}        \\
-        {1000} & {512}  & {6,59}                              & {95\%}                              & {9,2}                                    & {99\%}        & {7,76}        & {100\%}       \\
-        {1000} & {1024} & {5,85}                              & {99\%}                              & {12,24}                                  & {98\%}        & {8,08}        & {99\%}        \\
-        {1000} & {2048} & {6,03}                              & {99\%}                              & {9,12}                                   & {97\%}        & {14,29}       & {99\%}        \\
+              &        & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                 \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+        $e_i$ & $c$    & \textbf{loss}                       & \textbf{Acc.}                       & \textbf{loss}                            & \textbf{Acc.} & \textbf{loss} & \textbf{Acc.} \\\midrule
+        {100} & {512}  & {8,01}                              & {98\%}                              & {6,77}                                   & {100\%}       & {6,05}        & {95\%}        \\
+        {100} & {1024} & {8,77}                              & {99\%}                              & {3,61}                                   & {98\%}        & {5,29}        & {93\%}        \\
+        {100} & {2048} & {8,71}                              & {99\%}                              & {4,28}                                   & {96\%}        & {3,24}        & {93\%}        \\
+        {500} & {512}  & {14,27}                             & {99\%}                              & {9,97}                                   & {99\%}        & {5,9}         & {94\%}        \\
+        {500} & {1024} & {8,6}                               & {99\%}                              & {2,07}                                   & {94\%}        & {13,03}       & {95\%}        \\
+        {500} & {2048} & {2,67}                              & {95\%}                              & {10,57}                                  & {96\%}        & {4,24}        & {98\%}        \\
         \bottomrule
     \end{tabular}
     \caption{Mean loss and accuracy of the \emph{reference resolver + masking} for different configurations of the model after 40 epochs: $e_i$ is the image embedding dimension and $c$ the coordinate predictor dimension}

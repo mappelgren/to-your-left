@@ -5,6 +5,7 @@ build/
 dist/
 *.egg-info/
 *.h5
+.ipynb_checkpoints/
 
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
