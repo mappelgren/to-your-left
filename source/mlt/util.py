@@ -8,6 +8,7 @@ import h5py
 import numpy
 import torch
 from mlt.preexperiments.models import CaptionDecoder
+from mlt.shared_models import CoordinateClassifier
 
 
 def load_tensor(data):
@@ -77,6 +78,10 @@ def get_model_params(model, opts, prefix=""):
             match par.annotation.__qualname__:
                 case CaptionDecoder.__qualname__:
                     params = params | get_model_params(CaptionDecoder, opts, prefix)
+                case CoordinateClassifier.__qualname__:
+                    params = params | get_model_params(
+                        CoordinateClassifier, opts, prefix
+                    )
                 case _:
                     if not name.startswith(prefix):
                         name = prefix + name

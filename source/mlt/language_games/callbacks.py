@@ -9,13 +9,16 @@ from egg.core.interaction import Interaction
 
 
 class LogSaver(Callback):
-    def __init__(self, out_dir: str, command: str, sender, receiver) -> None:
+    def __init__(
+        self, out_dir: str, command: str, variables: str, sender, receiver
+    ) -> None:
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
 
         self.file_path = os.path.join(out_dir, "log.txt")
         with open(self.file_path, "w", encoding="utf-8") as f:
             f.write(pprint.pformat(command) + "\n")
+            f.write(f"appendix: {variables}\n")
 
             f.write("Sender:\n")
             f.write(str(sender) + "\n\n")
@@ -82,7 +85,14 @@ class PrintMessages(Callback):
         if epoch == self.n_epochs:
             self.print_events(logs)
 
-    def on_early_stopping(self, _train_loss, _train_logs, epoch, _test_loss, test_logs):
+    def on_early_stopping(
+        self,
+        _train_loss: float,
+        _train_logs: Interaction,
+        _epoch: int,
+        _test_loss: float = None,
+        test_logs: Interaction = None,
+    ):
         self.print_events(test_logs)
 
 

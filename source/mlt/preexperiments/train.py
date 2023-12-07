@@ -535,18 +535,18 @@ if __name__ == "__main__":
         choices=models.keys(),
         help="model to load",
     )
-    parser.add_argument("--decoder_out", type=int, default=10)
-    parser.add_argument("--encoder_out", type=int, default=10)
-    parser.add_argument("--encoder_embedding", type=int, default=10)
-    parser.add_argument("--image_embedding", type=int, default=None)
-    parser.add_argument("--coordinate_classifier_dimension", type=int, default=10)
-    parser.add_argument("--mask_predictor_dimension", type=int, default=10)
-    parser.add_argument("--projection", type=int, default=100)
+    parser.add_argument("--decoder_out", type=int)
+    parser.add_argument("--encoder_out", type=int)
+    parser.add_argument("--encoder_embedding", type=int)
+    parser.add_argument("--image_embedding", type=int)
+    parser.add_argument("--coordinate_classifier_dimension", type=int)
+    parser.add_argument("--mask_predictor_dimension", type=int)
+    parser.add_argument("--projection", type=int)
 
     # -- TRAINING --
-    parser.add_argument("--epochs", type=int, default=None, help="number of epochs")
+    parser.add_argument("--epochs", type=int, default=10, help="number of epochs")
     parser.add_argument("--lr", type=float, default=0.002, help="learning rate")
-    parser.add_argument("--device", type=str, default=None, help="cpu or cuda")
+    parser.add_argument("--device", type=str, default="cuda", help="cpu or cuda")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size")
 
     # -- SAVING --
@@ -562,12 +562,7 @@ if __name__ == "__main__":
         default=False,
         help="if model should be saved",
     )
-    parser.add_argument(
-        "--save_appendix",
-        type=str,
-        default="",
-        help="information that will be appended to the name of the folder",
-    )
+
     args = parser.parse_args()
     print(args)
 
@@ -661,6 +656,7 @@ if __name__ == "__main__":
     model_params = get_model_params(model_name.model, args)
     model_args = set_model_params(model_name.model_args, model_params)
 
+    appendices = []
     params_check = True
     for param, value in sorted(model_args.items()):
         if param not in args:
@@ -671,6 +667,8 @@ if __name__ == "__main__":
             params_check = False
         else:
             color = colors.GREEN
+
+        appendices.append((param, value))
 
         print(f"{param} = {color}{value}{colors.ENDC}")
 
@@ -702,7 +700,8 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     loss_function = model_name.loss_function
 
-    log = [str(args) + "\n" + str(model) + "\n"]
+    log = [str(args), str(model), f"appendix: {[param for param, _ in appendices]}"]
+
     print(f"Batches per epoch: {len(train_loader)}")
     for epoch in range(args.epochs):
         total_loss = Mean(device=device)
@@ -736,11 +735,16 @@ if __name__ == "__main__":
         print()
         metrics, test_outputs = tester.test(model, test_loader, device)
         print(metrics)
-        log.append(loss_string + "\n")
-        log.append(str(metrics) + "\n")
+        log.append(loss_string)
+        log.append(str(metrics))
 
+    save_appendix = "_".join([str(value) for _, value in appendices])
     model_saver = ModelSaver(
-        args.out_dir, args.model, args.dataset, args.save_appendix, output_processor
+        out_dir=args.out_dir,
+        model_name=args.model,
+        dataset=args.dataset,
+        save_appendix=save_appendix,
+        output_processor=output_processor,
     )
     if args.save_model:
         model_saver.save_model(model, f"{model.__class__.__name__}.pth")

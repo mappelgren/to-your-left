@@ -23,7 +23,7 @@ class ModelSaver:
 
     def save_log(self, log, file_name):
         with open(os.path.join(self.directory, file_name), "w", encoding="utf-8") as f:
-            f.writelines(log)
+            f.writelines("\n".join(log))
 
     def save_output(self, output, file_name):
         processed_output = self.output_processor.process(output)

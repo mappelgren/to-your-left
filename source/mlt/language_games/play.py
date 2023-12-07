@@ -449,12 +449,6 @@ def get_params(params):
         help="Type of the cell used for Sender {rnn, gru, lstm} (default: rnn)",
     )
     parser.add_argument(
-        "--receiver_cell",
-        type=str,
-        default="rnn",
-        help="Type of the cell used for Receiver {rnn, gru, lstm} (default: rnn)",
-    )
-    parser.add_argument(
         "--sender_hidden",
         type=int,
         help="Size of the hidden layer of Sender (default: 10)",
@@ -483,6 +477,13 @@ def get_params(params):
         "--sender_projection",
         type=int,
         help="Projection dimension to combin message and image (default: 10)",
+    )
+
+    parser.add_argument(
+        "--receiver_cell",
+        type=str,
+        default="rnn",
+        help="Type of the cell used for Receiver {rnn, gru, lstm} (default: rnn)",
     )
     parser.add_argument(
         "--receiver_hidden",
@@ -539,12 +540,6 @@ def get_params(params):
         type=str,
         default="out/",
         help="directory, where the output should be saved",
-    )
-    parser.add_argument(
-        "--save_appendix",
-        type=str,
-        default="",
-        help="information that will be appended to the name of the folder",
     )
     args = core.init(parser, params)
     return args
@@ -638,14 +633,22 @@ def main(params):
         seed=7,
     )
 
-    sender_params = get_model_params(model.sender, opts, "sender_")
+    if opts.baseline:
+        sender = DummySender
+    else:
+        sender = model.sender
+
+    sender_params = get_model_params(sender, opts, "sender_")
     sender_args = set_model_params(model.sender_args, sender_params)
 
     receiver_params = get_model_params(model.receiver, opts, "receiver_")
     receiver_args = set_model_params(model.receiver_args, receiver_params)
 
+    appendices = []
     params_check = True
     message_params = {
+        "vocab_size": opts.vocab_size,
+        "max_len": opts.max_len,
         "sender_hidden": opts.sender_hidden,
         "sender_embedding": opts.sender_embedding,
         "receiver_hidden": opts.receiver_hidden,
@@ -660,6 +663,8 @@ def main(params):
             params_check = False
         else:
             color = colors.GREEN
+
+        appendices.append((param, value))
 
         print(f"{param} = {color}{value}{colors.ENDC}")
 
@@ -678,11 +683,7 @@ def main(params):
         )
 
     receiver = model.receiver(**receiver_args)
-
-    if opts.baseline:
-        sender = DummySender(**sender_args)
-    else:
-        sender = model.sender(**sender_args)
+    sender = sender(**sender_args)
 
     gs_sender = core.RnnSenderGS(
         sender,
@@ -736,10 +737,10 @@ def main(params):
     if opts.save:
         time = strftime("%Y-%m-%d_%H-%M-%S", gmtime())
         baseline = "_baseline" if opts.baseline else ""
-        save_appendix = "_" + opts.save_appendix if opts.save_appendix != "" else ""
+        save_appendix = "_".join([str(value) for _, value in appendices])
         out_dir = os.path.join(
             opts.out_dir,
-            f"{time}_{opts.model}{baseline}_{opts.dataset}{save_appendix}",
+            f"{time}_{opts.model}{baseline}_{opts.dataset}_{save_appendix}",
         )
         callbacks.extend(
             [
@@ -754,7 +755,11 @@ def main(params):
                     test_epochs=[opts.n_epochs],
                 ),
                 LogSaver(
-                    out_dir=out_dir, command=str(opts), sender=sender, receiver=receiver
+                    out_dir=out_dir,
+                    command=str(opts),
+                    variables=[param for param, _ in appendices],
+                    sender=sender,
+                    receiver=receiver,
                 ),
             ]
         )
