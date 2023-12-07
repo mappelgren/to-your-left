@@ -332,7 +332,6 @@ models = {
         model_args={
             "encoder_vocab_size": len(DaleCaptionAttributeEncoder.vocab),
             "encoder_embedding": len(DaleCaptionAttributeEncoder.vocab),
-            "encoder_encoder_out": len(DaleCaptionAttributeEncoder.vocab),
             "image_encoder": ClevrImageEncoder(
                 feature_extractor=DummyFeatureExtractor(), max_pool=False
             ),
