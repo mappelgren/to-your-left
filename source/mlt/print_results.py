@@ -1,4 +1,5 @@
 import argparse
+import ast
 import glob
 import json
 import os
@@ -18,6 +19,11 @@ class Run:
         self.epochs = []
         with open(file, "r", encoding="utf-8") as f:
             for line in f:
+                if line.startswith("appendix: "):
+                    self.variable_names = ast.literal_eval(
+                        line.removeprefix("appendix: ")
+                    )
+
                 if line.startswith("{"):
                     epoch = json.loads(line)
                     if epoch.get("mode", "test") == "train":
@@ -137,19 +143,30 @@ class Run:
         return set(self.last_epoch.keys())
 
 
+variable_dict = {
+    "max_len": "$n$",
+    "receiver_embedding": "$e_r$",
+    "receiver_hidden": "$h_r$",
+    "receiver_projection": "$p$",
+    "sender_embedding": "$e_s$",
+    "sender_hidden": "$h_s$",
+    "sender_image_embedding": "$e_i$",
+    "vocab_size": "$|V|$",
+}
+
+
 @dataclass
 class Experiment:
     folder_name: str
     dataset: str
-    variables: tuple
+    variables: dict
     run: Run
 
 
 class Experiments:
-    def __init__(self, root_folder, datasets, variables, variable_order) -> None:
+    def __init__(self, root_folder, datasets) -> None:
         self.datasets = datasets
-        self.variables = variables
-        self.variable_order = variable_order
+        self.chosen_variables = tuple()
 
         self.experiments: list[Experiment] = []
         for folder in glob.glob(root_folder):
@@ -161,17 +178,19 @@ class Experiments:
             if dataset not in datasets:
                 continue
 
-            if len(experiment_variables) != len(variables):
-                raise ValueError(f"Number of Variables don't match: {folder_name}")
-            ordered_variables = tuple(experiment_variables[o] for o in variable_order)
-
             run = Run(os.path.join(folder, "log.txt"))
+
             if len(run.epochs) != 0:
                 self.experiments.append(
                     Experiment(
                         folder_name=folder_name,
                         dataset=dataset,
-                        variables=ordered_variables,
+                        variables={
+                            variable_dict[variable_name]: variable
+                            for variable_name, variable in zip(
+                                run.variable_names, experiment_variables
+                            )
+                        },
                         run=run,
                     )
                 )
@@ -186,13 +205,6 @@ class Experiments:
             ]
 
         return dataset, experiment_variables
-
-    def _get_excluded_folders(self):
-        for index, folder in enumerate(
-            [experiment.folder_name for experiment in self.experiments]
-        ):
-            print(f"{index}: {folder}")
-        return input("exclude folders (separated by comma, ranges with hyphen):")
 
     def exclude_folders(self):
         excluded_folders = self._get_excluded_folders()
@@ -213,6 +225,44 @@ class Experiments:
                 for index, experiment in enumerate(self.experiments)
                 if index not in excluded_indices
             ]
+
+    def _get_excluded_folders(self):
+        for index, folder in enumerate(
+            [experiment.folder_name for experiment in self.experiments]
+        ):
+            print(f"{index}: {folder}")
+        return input("exclude folders (separated by comma, ranges with hyphen):")
+
+    def sort_variables(self):
+        all_variables = list(
+            sorted(
+                set(
+                    variable
+                    for experiment in self.experiments
+                    for variable in experiment.variables
+                )
+            )
+        )
+        for index, variable in enumerate(all_variables):
+            print(f"{index}: {variable}")
+        chosen_variables = [
+            int(index)
+            for index in input(
+                "choose variables and order (separated by comma):"
+            ).split(",")
+            if index != ""
+        ]
+        if len(chosen_variables) == 0:
+            chosen_variables = list(range(len(all_variables)))
+
+        self.chosen_variables = tuple(
+            all_variables[variable_index] for variable_index in chosen_variables
+        )
+
+        for experiment in self.experiments:
+            for variable_name in self.chosen_variables:
+                if variable_name not in experiment.variables:
+                    experiment.variables[variable_name] = float("nan")
 
     def __getitem__(self, index):
         return self.experiments[index]
@@ -296,13 +346,16 @@ class SortedOutputProcessor(OutputProcessor):
         )
         headers = [
             "dataset",
-            *[self.experiments.variables[i] for i in self.experiments.variable_order],
+            *self.experiments.chosen_variables,
             *list(self.chosen_metrics.keys()),
         ]
         rows = [
             [
                 experiment.dataset,
-                *experiment.variables,
+                *[
+                    experiment.variables[variable]
+                    for variable in self.experiments.chosen_variables
+                ],
                 *[
                     metric_type(experiment.run.last_epoch[metric])
                     for metric, metric_type in self.chosen_metrics.items()
@@ -320,11 +373,15 @@ class LatexOutputProcessor(OutputProcessor):
 
     def print(self):
         all_datasets = self.experiments.datasets
-        all_variables = set(
-            self.experiments.variables[i] for i in self.experiments.variable_order
-        )
+        all_variables = self.experiments.chosen_variables
         sorted_variations = sorted(
-            set(experiment.variables for experiment in self.experiments)
+            set(
+                tuple(
+                    experiment.variables.get(variable, float("nan"))
+                    for variable in self.experiments.chosen_variables
+                )
+                for experiment in self.experiments
+            )
         )
 
         number_datasets = len(all_datasets)
@@ -354,7 +411,11 @@ class LatexOutputProcessor(OutputProcessor):
             variation_experiments = [
                 experiment
                 for experiment in self.experiments.experiments
-                if experiment.variables == variation
+                if tuple(
+                    experiment.variables[variable]
+                    for variable in self.experiments.chosen_variables
+                )
+                == variation
             ]
 
             variable_string = "        " + " & ".join(
@@ -379,7 +440,7 @@ class LatexOutputProcessor(OutputProcessor):
     \begin{{tabular}}{{{'c'*number_variables}{f"|{'c'*number_metrics}"*number_datasets}}}
         \toprule
         {' &' *number_variables}{dataset_header} \\  {cmidrule_header}
-        {' & '.join([args.variables[o] for o in args.variable_order])} {metric_header} \\\midrule
+        {' & '.join(self.experiments.chosen_variables)} {metric_header} \\\midrule
 {results_block}
         \bottomrule
     \end{{tabular}}
@@ -417,17 +478,6 @@ if __name__ == "__main__":
         help="datasets in order in which they should appear in the table",
     )
     parser.add_argument(
-        "--variables",
-        nargs="+",
-        help="variables in the same order as in the folder name",
-    )
-    parser.add_argument(
-        "--variable_order",
-        nargs="+",
-        type=int,
-        help="order of the chosen variables",
-    )
-    parser.add_argument(
         "--output",
         choices=PRINT_TYPES.keys(),
         default="sorted",
@@ -435,19 +485,12 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    if not args.variable_order:
-        args.variable_order = range(len(args.variables))
 
-    if len(args.variable_order) != len(args.variables):
-        raise ValueError(
-            f"Number of variables and orders don't match: {args.variable_order}, {args.variables}"
-        )
     print(args)
 
-    all_experiments = Experiments(
-        args.folder, args.datasets, args.variables, args.variable_order
-    )
+    all_experiments = Experiments(args.folder, args.datasets)
     all_experiments.exclude_folders()
+    all_experiments.sort_variables()
 
     output_processor = PRINT_TYPES[args.output](all_experiments)
     output_processor.print()

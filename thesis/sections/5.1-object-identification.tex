@@ -49,9 +49,8 @@ The dot products are concatenated and form a vector with as many dimensions as o
 The $softmax$ function is applied over the resulting vector, which returns a probability distribution over all objects; the model points to the object with the highest probability.
 % The model then points to an object, using the \emph{softmax} function over this resulting vector.
 
-The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
+The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$ and 30 epochs.
 The number of epochs was chosen manually after identifying when the loss as well as the test accuracies didn't improve significantly.
-8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
 The loss is calculated using cross entropy.
 The following embedding dimension $e$ are compared: 2, 10, 50, 100, 500, 1000.
 % SD: So, the output of this model is a vector of 0 and 1s, with the 1 identifying the corrct object (or the other way around?).

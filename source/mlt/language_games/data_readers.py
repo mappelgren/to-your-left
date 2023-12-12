@@ -571,6 +571,53 @@ class CoordinatePredictorGameBatchIterator(GameBatchIterator):
         )
 
 
+class BoundingBoxCoordinatePredictorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[CoordinatePredictorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        targets = []
+        receiver_inputs = []
+        image_ids = []
+
+        for sample in samples:
+            sender_inputs.append(sample.bounding_boxes)
+            targets.append(sample.target_pixels)
+
+            receiver_inputs.append(sample.image)
+            image_ids.append(int(sample.image_id[-6:]))
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(targets),
+            torch.stack(receiver_inputs),
+            {
+                "image_id": torch.tensor(image_ids),
+            },
+        )
+
+
 class AttentionPredictorGameBatchIterator(GameBatchIterator):
     def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
         self.loader = loader

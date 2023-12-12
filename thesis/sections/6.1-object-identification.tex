@@ -9,13 +9,13 @@ The receiver then needs to decide based on the message, which of the images is t
 The discrimination games in this research have a very similar setup as described in \citep{Lazaridou2017}.
 The agents in this research resemble their \emph{agnostic sender} as well as their \emph{receiver}.
 One central difference is the production of the message.
-The main goal of their language game was the identification of the concept that and image was related to.
-Therefore, the sender communicated only single-symbol messages to the receiver, which should describe the concept of the target image.
-Opposed to that in this research, the agents are tasked to discriminate objects from each other based on their attributes.
+The main goal of their language games was the identification of the concept that the shown image was related to.
+Therefore, the sender communicated only single-symbol messages to the receiver which should describe the concept of the target image.
+Opposed to that, in this research, the agents are tasked to discriminate objects from each other based on their attributes.
 % SD: On the contrary,...
-% DK: TODO
+% DK: (done)
 It is therefore assumed that the sender will communicate these discriminative attributes.
-For that reason, the sender is allowed to generate sequences as a message.
+For that reason, the sender is allowed to generate sequences as a message where for instance each symbol in the sequence might correspond to on attribute.
 
 The data is prepared in the same way as for the single model object identification task in section \ref{sec:object-identification}.
 Bounding boxes of all objects in the scene are extracted and preprocessed to be used for the feature extractors.
@@ -39,8 +39,7 @@ Figure \ref{fig:discriminator_architecture} shows, how the sender and the receiv
     \label{fig:discriminator_architecture}
 \end{figure}
 
-The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
-The loss is calculated using cross entropy.
+The experiments are conducted with a learning rate of $2\times10^{-4}$, the loss is calculated using cross entropy.
 The following values for the variables are compared:
 \begin{itemize}
     \item $h_s$: 100, 500, 1000

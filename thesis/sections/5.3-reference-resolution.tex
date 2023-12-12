@@ -119,8 +119,7 @@ It therefore can only rely on its own extracted visual features and the inherent
 % DK: TODO
 Both original and masked image are processed as described in \ref{sec:image-processing} and afterwards passed through the coordinate predictor.
 
-For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $1\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
-8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
+For all setups, the same hyperparameters as in the previous experiments are used: a learning rate of $1\times10^{-4}$ and 30 epochs.
 The loss is calculated using cross entropy.
 Table \ref{tab:variables-reference-resolution} shows the variables that are changed during the experiments for each of the models.
 
@@ -176,8 +175,20 @@ More specifically, the image is encoded using the \emph{image encoder} submodule
 By this, the resulting matrix has 128\times14\times14 dimension, corresponding to the 14\time14 regions.
 For the target object, the incremental RE is passed through an LSTM as described before.
 Both encodings are passed through two linear layers separately to project them to the projection dimension $p$, followed by the $tanh$ function.
+Following, the dot product is calculated between the projected image and the projected attributes which results in a 14\times14 matrix.
+This emphasizes the correlation between the attributes and each region.
+A high dot product for a region indicates a high correlation between the attributes and the specific region, while a low dot product indicates the opposite.
+Training a model like this should therefore highlight the regions in the image that are described by the referring expression, namely the region around the target object.
+To calculate the loss, the $softmax$ function is applied over the prediction and compared to the ground truth matrix $A$ using the \emph{binary cross entropy}.
+Hereby, the models converged faster and were trained for 20 epochs with a learning rate of $2\times10^{-4}$.
+An $LSTM_e=15$ and $LSTM_o=1500$ showed the best results.
+Projection sizes $p=\{50,100,300,500,1000\}$ are compared.
 
-
+The \emph{attention reference resolver} is evaluated on the summed predicted probability for the regions in the target area.
+In particular, the predicted matrix, consisting of probabilities for each region is multiplied with the ground truth matrix $A$, consisting of only ones and zeros.
+The result is summed and returns the probability mass for the target area.
+If the model predicts the target area perfectly, the probabilities in the target area sum to 1.
+If the model for instance focuses on the wrong object, the probability mass in the target area is lower.
 
 The reference resolution models are trained on the 'CLEVR single' as well as on both 'Dale' datasets.
 The 'CLEVR single' dataset should test the model if it can actually learn locations of an object.

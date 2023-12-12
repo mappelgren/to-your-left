@@ -19,6 +19,7 @@ from mlt.language_games.data_readers import (
     AttentionPredictorGameBatchIterator,
     BoundingBoxAttentionPredictorGameBatchIterator,
     BoundingBoxCaptionGeneratorGameBatchIterator,
+    BoundingBoxCoordinatePredictorGameBatchIterator,
     CaptionGeneratorGameBatchIterator,
     CaptionGeneratorGameDataset,
     CoordinatePredictorGameBatchIterator,
@@ -340,6 +341,24 @@ models = {
         },
         loss_function=attention_loss,
     ),
+    "bounding_box_coordinate_predictor": ModelDefinition(
+        dataset=CoordinatePredictorGameDataset,
+        dataset_args={},
+        split_dataset=False,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=FeatureImageLoader,
+        iterator=BoundingBoxCoordinatePredictorGameBatchIterator,
+        sender=ReferentialGameSender,
+        sender_args={},
+        receiver=CoordinatePredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
+            ),
+            "coordinate_classifier": CoordinateClassifier,
+        },
+        loss_function=pixel_loss,
+    ),
     "bounding_box_attention_predictor": ModelDefinition(
         dataset=CoordinatePredictorGameDataset,
         dataset_args={
@@ -469,11 +488,6 @@ def get_params(params):
         help="Size of the LSTM encoder of Sender when attributes are encoded with descriptions (default: 10)",
     )
     parser.add_argument(
-        "--sender_coordinate_classifier",
-        type=int,
-        help="Dimensions for the coordinate predictor for Receiver (default: 10)",
-    )
-    parser.add_argument(
         "--sender_projection",
         type=int,
         help="Projection dimension to combin message and image (default: 10)",
@@ -512,6 +526,11 @@ def get_params(params):
     )
     parser.add_argument(
         "--receiver_projection",
+        type=int,
+        help="Projection dimension to combin message and image (default: 10)",
+    )
+    parser.add_argument(
+        "--receiver_coordinate_classifier_dimension",
         type=int,
         help="Projection dimension to combin message and image (default: 10)",
     )
@@ -679,7 +698,9 @@ def main(params):
         )
     if "coordinate_classifier" in receiver_args.keys():
         receiver_args["coordinate_classifier"] = receiver_args["coordinate_classifier"](
-            classifier_dimension=receiver_args["coordinate_classifier"]
+            coordinate_classifier_dimension=receiver_args[
+                "receiver_coordinate_classifier_dimension"
+            ]
         )
 
     receiver = model.receiver(**receiver_args)

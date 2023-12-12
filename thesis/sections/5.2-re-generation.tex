@@ -89,8 +89,7 @@ Both original and masked image are processed together with the \emph{masked imag
 Accordingly, the same \emph{RE generator} submodule is utilized here.
 This should point the model towards which object to describe and discriminate from the distractors.
 
-For both setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$, a batch size of 32 samples and 30 epochs, \emph{Adam} \citep{Kingma2015} as optimizer.
-8000 randomly selected samples are used for training, the remaining 2000 samples for testing.
+For both setups, the same hyperparameters as in the previous experiments are used: a learning rate of $2\times10^{-4}$ and 30 epochs.
 The loss is calculated using cross entropy.
 Table \ref{tab:variables-reference-expression-generation} shows which variables are compared for each model:
 
