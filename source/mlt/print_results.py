@@ -148,9 +148,10 @@ variable_dict = {
     "receiver_embedding": "$e_r$",
     "receiver_hidden": "$h_r$",
     "receiver_projection": "$p$",
+    "receiver_image_embedding": "$e_{ri}$",
     "sender_embedding": "$e_s$",
     "sender_hidden": "$h_s$",
-    "sender_image_embedding": "$e_i$",
+    "sender_image_embedding": "$e_{si}$",
     "vocab_size": "$|V|$",
 }
 
