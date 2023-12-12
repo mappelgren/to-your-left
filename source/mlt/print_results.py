@@ -149,6 +149,8 @@ variable_dict = {
     "receiver_hidden": "$h_r$",
     "receiver_projection": "$p$",
     "receiver_image_embedding": "$e_{ri}$",
+    "receiver_decoder_embedding": "$LSTM_e$",
+    "receiver_decoder_out": "$LSTM_o$",
     "sender_embedding": "$e_s$",
     "sender_hidden": "$h_s$",
     "sender_image_embedding": "$e_{si}$",
