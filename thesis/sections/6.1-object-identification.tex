@@ -1,4 +1,6 @@
 \subsection{Object identification}
+\label{sec:language-games:identification}
+
 \subsubsection*{Setup}
 
 The object identification game is set up as a discrimination game.
@@ -15,21 +17,25 @@ Opposed to that, in this research, the agents are tasked to discriminate objects
 % SD: On the contrary,...
 % DK: (done)
 It is therefore assumed that the sender will communicate these discriminative attributes.
-For that reason, the sender is allowed to generate sequences as a message where for instance each symbol in the sequence might correspond to on attribute.
+For that reason, the sender is allowed to generate sequences as a message where for instance each symbol in the sequence might correspond to one attribute.
 
 The data is prepared in the same way as for the single model object identification task in section \ref{sec:object-identification}.
 Bounding boxes of all objects in the scene are extracted and preprocessed to be used for the feature extractors.
+For datasets with a variable number of objects, the list bounding of bounding boxes is padded with a matrix of zeros to the maximum possible number of objects present in a scene across the
+dataset.
+Opposed to the experiments with one neural model, no additional information about the target object's attributes is provided.
+Instead, the sender agent is presented with the target object always as the first object, while the distractors are shuffled.
+The receiver is presented with completely shuffled bounding boxes.
+
 Accordingly, also the models from the single model tasks serve as basis for the object identification task.
 The sender uses the architecture of the model described in section \ref{sec:referring_expression_generation} apart from the final LSTM.
-Instead, it will use the LSTM with the hidden size $h_s$ included in the \emph{EGG} framework to produce a message.
+Instead, it will use the LSTM with a hidden size $h_s$ included in the \emph{EGG} framework to produce a message.
 Based on the results from the single model object identifiers, the image embedding size $e_s$ is fixed to 100.
-The bounding box of the target object is passed first, the remaining are shuffled.
 
 The receiver instead uses the architecture of the single model object identifier, described in section \ref{sec:object-identification}.
 Similarly to the sender, the LSTM of the \emph{EGG} framework with the hidden size $h_e$ is used to encode the sender's message instead of the one-hot encoded attributes in the single model.
 The hidden state of the LSTM is projected to the embedding size $e_r=500$ with a linear layer, based on the results in the previous experiments.
-As before the dot product between the embedded message and the encoded image is calculated to let the model point towards one of the bounding boxes.
-Opposed to the sender, the receiver is shown all bounding boxes in shuffled order.
+As before the dot product between the embedded message and the encoded image is calculated to let the model point towards the bounding box that is described best by the message.
 Figure \ref{fig:discriminator_architecture} shows, how the sender and the receiver of the discriminator are built up.
 
 \begin{figure}[ht]
@@ -44,22 +50,26 @@ The following values for the variables are compared:
 \begin{itemize}
     \item $h_s$: 100, 500, 1000
     \item $h_r$: 10, 30, 50, 100, 500, 1000
-    \item $|V|$: 1, 10, 16, 50, 100
-    \item $n$: 1, 2, 3, 4, 5, 6
+    \item $|V|$: 2, 10, 16, 50, 100
+    \item $n$: 1, 2, 3, 4, 6
 \end{itemize}
+
 The language game is run on the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets.
+A random guess corresponds to 50\% in the \emph{Dale-2} dataset, 20\% in the \emph{Dale-5} dataset and 13\% in the \emph{CLEVR color} dataset.
 
 \subsubsection*{Results}
+When looking at the results of the experiments, it can be seen that the agents are successfully discriminating the objects across all datasets.
+Table TODO gives an overview over the accuracy scores of selected configurations.
+For each dataset there are many configurations that outperform the baseline models by a high margin.
+However, there are still clear differences between the accuracy scores of each dataset.
+
+When the agents are tasked to discriminate between the two objects of the \emph{Dale-2} dataset, it succeeds in almost all configurations with an accuracy of over 94\%.
+In many configurations the accuracy lies above 99\%, while only 5 configurations have an accuracy of only 61\% to 64\%.
+An indicator for
+
+
+
 Table \ref{tab:results_discriminator} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
-A random guess corresponds to 50\% in the \emph{Dale-2} dataset and 20\% in the \emph{Dale-5} dataset.
-Four different vocabulary sizes $|V|$ are tested.
-A size of 13 symbols corresponds to the 13 attributes the objects can have and align with human language.
-If the symbols were similarly used, messages would have lengths between one and three symbols.
-Opposed to that a slightly smaller vocabulary with 10 symbols is used to create a smaller bottleneck with a higher pressure to condense the information.
-Similarly, a bigger vocabulary consisting of 20 symbols tests how a bigger bottleneck changes the results.
-Lastly, a big vocabulary of 100 symbols should give the model all options to encode the information, including one symbol per attribute or one symbol describing a combination of attributes.
-% SD: Motivation why this is so. The possible number of strings is {#colour} x {#shape} {object type} where all numbers except the last one also contain a padding token.
-% DK: TODO
 
 The hidden sizes $h_s$ and $h_r$ as well as the embedding sizes $e_s$ and $e_r$ are chosen in alignment with the vocabulary size.
 The hidden sizes are always smaller or equal to the vocabulary size since the information about each word needs to be compressed in a smaller dimension to learn meaning.

@@ -3,20 +3,21 @@
 \subsubsection*{Setup}
 
 In a next step, it is tested if the agents can learn to extract features of the objects together.
-For this, the receiver is tasked to describe the target object in natural language, while the sender needs to communicate, which object is the target.
-Again, the setup is asymmetrical: the sender receives the image and information, which of the objects in the image is the target object in form of a masked image.
-The receiver only sees the image without additional information.
-\cmtDK[inline]{human bias vs emergent language}
-
-For this experiment, the data is prepared in the same way as described in section \ref{sec:referring_expression_generation}.
-Since the position of the padding as well as the order of the words didn't have an effect on the results, the usual approach in natural generation task is used: padding tokens are appended and the referring expression is not reversed.
-Respectively, both agents are based on the models in these experiments.
-The sender uses the \emph{masked RE generator} with its LSTM replaced with the LSTM included in the \emph{EGG} framework, using the hidden size $h_s$.
-\cmtDK[inline]{fixed parameters}
-The receiver is built up similarly.
-The image is encoded in the same way, but afterwards it is concatenated with the decoded message, received be the sender with the hidden size $h_r$.
-The concatenated is reduced to $d=$ dimensions, based on the results of the previous experiments, and used as the initial state of the captioning LSTM.
-\cmtDK[inline]{fixed parameters}
+For this the same sender as in the previous section is used.
+Based on the results, $h_s$ is fixed to $500$ and $e_s$ to $100$
+However, the task and by that the receiver's architecture is adapted in two different ways.
+In the first setup, the \textbf{referring expression generator}, the receiver is tasked to describe the target object with natural language following the \emph{incremental GRE-algorithm} based on the sender's message (see Figure \ref{fig:caption_generator_game_architecture}).
+This follows the approach of the approach of the \emph{RE generators} described in section \ref{sec:referring_expression_generation}.
+The whole scene is encoded using the \emph{image encoder} submodule, projecting it to the image encoding dimension $e_{ri}=100$.
+The sender's message is decoded with the hidden size $h_r=500$ and $e_r=100$, and concatenated with the encoded image.
+This is then reduced to $LSTM_o=1500$ dimensions based on the results of the previous experiments, and used as the initial state of the captioning LSTM.
+Tokens are embedded with $LSTM_e=15$ dimensions.
+Since the position of the padding as well as the order of the words in the target didn't have an effect on the results, the usual approach in natural generation task is used: padding tokens are appended and the referring expression is not reversed.
+During training, the ground truth caption is used as the input to the LSTM using teacher forcing.
+% SD: I'm not sure how teacher forcing is implemented, see my earlier comment
+% DK: typo, teacher forcing is actually applied (done)
+When presented with test data, the LSTM always produces three tokens, by using its own predicted words as the input for the next step.
+The loss is calculated using cross entropy.
 
 \begin{figure}[ht]
     \centering
@@ -27,26 +28,33 @@ The concatenated is reduced to $d=$ dimensions, based on the results of the prev
     % DK: TODO
 \end{figure}
 
-During training, the ground truth caption is used as the input to the LSTM using teacher forcing.
-% SD: I'm not sure how teacher forcing is implemented, see my earlier comment
-% DK: typo, teacher forcing is actually applied (done)
-When presented with test data, the LSTM always produces three tokens, by using its own predicted words as the input for the next step.
+However, this setup could lead to two problems:
+First, the task is quite complex for both agents to learn, since two language generation steps are involved.
+This might stop the agents from converging towards a useful language.
+Secondly, in case a language emerges, it could be aligned with the natural language of the target referring expressions.
+In other words, the sender might just learn to effectively repeat the target referring expressions without extracting the necessary features themselves.
+For that reason, in the second setup the receiver is tasked to predict only the attributes of the target object in the shape of a one-hot vector.
+By this, no natural language including its salience order is involved and the complexity of the complete game is reduced.
+The receiver uses the same way to encode and combine the complete scene and the sender's message with $e_{ri}=100$, $h_r=500$ and $e_r=100$.
+This is then passed to a linear layer that produces a vector with 13 dimension, corresponding to the 2 sizes, 3 shapes, and 8 colors.
+The loss is then calculated using binary cross entropy.
 
-The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
-The loss is calculated using cross entropy.
-The following values for the variables are compared:
+\cmtDK[inline]{figure}
+
+The experiments for both setups are conducted with a learning rate of $2\times10^{-4}$.
+As in the previous section, the following values for the variables are compared:
 \begin{itemize}
-    \item $h_s$: 100, 500, 1000
-    \item $h_r$: 10, 30, 50, 100, 500, 1000
-    \item $|V|$: 1, 10, 16, 50, 100
-    \item $n$: 1, 2, 3, 4, 5, 6
+    \item $|V|$: 2, 10, 16, 50, 100
+    \item $n$: 1, 2, 3, 4, 6
 \end{itemize}
-\cmtDK[inline]{real values}
-Since the agents are trained to describe the target object discriminatively based on the described GRE-algorithm, they are trained on the 'Dale-2' and 'Dale-5' dataset.
-The 'Dale-5' should be again much harder to learn, since there are more objects that the agents need to discriminate the target object from.
+
+Since the agents are trained to describe the target object discriminatively based on the described GRE-algorithm, they are trained on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} dataset.
+The \emph{Dale-5} and the \emph{CLEVR color} should be again much harder to learn, since there are more objects that the agents need to discriminate the target object from.
 % SD: So the sender is generating descriptions following the GRE policy?
 % DK: TODO
-The same metrics as in the section \ref{sec:referring_expression_generation} are used to evaluate the results.
+The same metrics as in the section \ref{sec:referring_expression_generation} are used to evaluate the results for the first setup.
+When predicting one-hot vectors, an overall \textbf{accuracy} is reported that reflects if all attributes were predicted correctly.
+Additionally, the accuracy for each attribute is calculated separately to show which attributes give bigger challenges for the models.
 
 \subsubsection*{Results}
 \begin{table}[ht]

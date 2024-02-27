@@ -1,26 +1,16 @@
 \subsection{Reference resolution}
 \subsubsection*{Setup}
-In the final experiments, the agents are tasked to produced and understand referring expressions only based on the implicit human knowledge present in the scenes as for example the attributes of the objects.
+In the final experiments, the agents are tasked to produced and understand referring expressions only based on the implicit human knowledge present in the scenes, as for example the attributes of the objects.
 Opposed to the previous experiments, explicit human language information as human referring expressions or one-hot encoded attributes are avoided.
 By this, the agents can't just reuse these human referring expressions, but need to learn to generate them themselves during the language games just based on the visual input.
 This is done similarly to the single model reference resolution task, described in section \ref{sec:reference_resolution}.
-The agents are tasked to predict the center coordinates of the target object, after being presented with the complete scene.
-However, the agents, more specifically the sender needs to be pointed towards the target object.
-In the final setup, the \emph{masked reference resolution game}, this is done providing the sender with an additional masked visual input.
-However, this can prove to be a challenging task for the agents.
-For this reason, in an approach to reduce the complexity, for the \emph{RE reference resolution game} the sender is shown a human referring expression, generated with the incremental GRE algorithm instead of the additional masked image.
-This might lead to a heavy bias of the emerged language towards the human referring expressions and will be compared to the unbiased emerged language.
+As before, the sender has the same architecture as in the previous language games, encoding the bounding boxes of all objects.
 
-The masked sender is the same as the \emph{RE generation sender}, described in section \ref{sec:referring-expression-generation-game}.
-The RE sender works similarly, but instead encodes the human referring expression with an LSTM.
-The final hidden state is concatenated with the encoded image.
-The resulting vector is reduced to the hidden size $h_s$ and used as the initial hidden state of the LSTM included in the \emph{EGG} framework to generate the message.
-\cmtDK[inline]{fixed variables}
-
+The receiver is tasked to solve two tasks.
+First, in the \textbf{coordinate reference resolver}, the agents are tasked to predict the center coordinates of the target object (see Figure \ref{fig:coordinate_predictor_game_architecture}).
 The receiver is the same in both setups and is based on the \emph{reference resolver} + referring expressions, described in section \ref{sec:reference_resolution}.
-Again, instead of the included LSTM, the receiver uses the \emph{EGG} LSTM with the hidden size $h_r$ to encode the message.
-The dimensions of the coordinate predictor are fixed to $c=$, based on the previous results.
-\cmtDK[inline]{fixed variables}
+Again, instead of the included LSTM, the receiver uses the \emph{EGG} LSTM with the hidden size $h_r=500$ and $e_r=100$ to encode the message.
+The dimensions of the coordinate predictor are fixed to $c=2048$, based on the previous results.
 % SD: Just thinking: would there be a more systematic way to compare all the models? Perhaps if you write the parameters in a table or a text that is parallel. Then you could simply say, modal A + these changes. It would be much clearer to the reader how all models are rerlated and it would be easier for the reader to follow.
 % DK: TODO
 The euclidean distance between the resulting prediction of the center point and the true center of the target object is calculated and the weights of both agents are adapted accordingly.
@@ -34,21 +24,23 @@ The euclidean distance between the resulting prediction of the center point and 
     % DK: because it's a message sequence of discrete symbols (done)
 \end{figure}
 
+Secondly, in the \textbf{attention reference resolver}, the agents learn to point towards regions in the image, which is based on the \emph{attention reference resolver} described in section \ref{sec:reference_resolution}.
+As before, the LSTM is replaced with the \emph{EGG} LSTM to parse the sender's message with the hidden size $h_r=500$ and $e_r=100$.
+The dot product is calculated between each encoded region of the image and the encoded message, and the $softmax$ function is applied subsequently.
+The loss is calculated using \emph{binary cross entropy} between the predictions and ground truth regions.
+
+\cmtDK[inline]{figure}
 
 The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
-The loss is calculated using cross entropy.
 The following values for the variables are compared:
 \begin{itemize}
-    \item $h_s$: 100, 500, 1000
-    \item $h_r$: 10, 30, 50, 100, 500, 1000
-    \item $|V|$: 1, 10, 16, 50, 100
-    \item $n$: 1, 2, 3, 4, 5, 6
+    \item $|V|$: 2, 10, 16, 50, 100
+    \item $n$: 1, 2, 3, 4,  6
 \end{itemize}
-\cmtDK[inline]{real values}
 
-As in section \ref{sec:reference_resolution}, the agents are trained first on the 'CLEVR single' dataset to understand if they are capable of predicting locations in an image together.
-In a next step, the 'Dale-2' and 'Dale-5' datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
-The same metrics are used to evaluate the results.
+As in section \ref{sec:reference_resolution}, the agents are trained first on the \emph{CLEVR single} dataset to understand if they are capable of predicting locations in an image together.
+In a next step, the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
+The same metrics are used to evaluate the results as described in \ref{sec:reference_resolution}.
 
 \subsection*{Results}
 In the final setup, the agents are tasked with communicating objects with fewer infused human knowledge.

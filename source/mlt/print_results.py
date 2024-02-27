@@ -151,6 +151,7 @@ variable_dict = {
     "receiver_image_embedding": "$e_{ri}$",
     "receiver_decoder_embedding": "$LSTM_e$",
     "receiver_decoder_out": "$LSTM_o$",
+    "receiver_coordinate_classifier_dimension": "$c$",
     "sender_embedding": "$e_s$",
     "sender_hidden": "$h_s$",
     "sender_image_embedding": "$e_{si}$",
@@ -312,8 +313,7 @@ class OutputProcessor:
         }
 
     @abstractmethod
-    def print(self):
-        ...
+    def print(self): ...
 
 
 class SortedOutputProcessor(OutputProcessor):

@@ -1,6 +1,7 @@
 \section{Grounding referring expressions in language games}
 \label{sec:language-games}
 The experiments that are executed using language games have a similar structure as the experiments in the previous chapters, since those provided the basis for the language games.
+However, every task is solved by two neural networks that communicate through a discrete bottleneck.
 % SD: But there is an importnat difference that now we have two neural netweorks, the sender and the receiver.
 % DK: TODO
 
@@ -42,7 +43,35 @@ To train the agents, 128.000 games are played (using 128.000 randomly drawn samp
 To retrieve the samples of the emerged language, after the agents are trained, they are frozen and play 2.048 games with randomly drawn samples from the dataset.
 This yields 2.048 interactions that will be used to analyze the emerged language.
 
+
+Across all experiments, the same restriction on the vocabulary and the produced messages are compared.
+First, five different vocabulary sizes $|V|$ are tested: 2, 10, 16, 50 and 100 symbols.
+Notice that these vocabularies include the \emph{<eos>} token which signals the end of the message.
+A vocabulary of two symbols therefore consists effectively of only one token that can be learned by the agents.
+The center of attention lies on the vocabularies with 16 and 50 symbols.
+The vocabulary with 16 symbols corresponds the 13 attributes the objects can have and align with human language referring expressions.
+However, a smaller vocabulary size increases the pressure to converge on meaning, which is my also 10 and 2 symbols are tested.
+On the other side, the agents might instead of a compositional language learn to assign one symbol with every combination of attributes.
+This results in $2 * 3 * 8 = 42$ unique combinations, which corresponds to the vocabulary with 50 symbols.
+Furthermore, a vocabulary of 100 symbols is used to test the effect of a much bigger bottleneck.
+
+Secondly, also different maximum message lengths are compared: 1, 2, 3, 4 and 6 symbols.
+Notice that this applies only to the maximum possible length; the agents can choose to use shorter messages.
+Again, the corresponding length to human referring expressions in English is 3 for the three attributes.
+However, the agents can be pressured to condense the information more precisely with shorter messages or given less restrictions with longer messages.
+Vocabulary size and message length play hereby an opposing role in the pressure on condensing information.
+% If the symbols were similarly used, messages would have lengths between one and three symbols.
+% Opposed to that a slightly smaller vocabulary with 10 symbols is used to create a smaller bottleneck with a higher pressure to condense the information.
+% Similarly, a bigger vocabulary consisting of 20 symbols tests how a bigger bottleneck changes the results.
+% Lastly, a big vocabulary of 100 symbols should give the model all options to encode the information, including one symbol per attribute or one symbol describing a combination of attributes.
+% SD: Motivation why this is so. The possible number of strings is {#colour} x {#shape} {object type} where all numbers except the last one also contain a padding token.
+% DK: TODO
+
 All agents are trained using the \emph{Adam} optimizer \citep{Kingma2015}.
 LSTMs are used to produce and parse the message between the agents.
 Gumbel-Softmax relaxation is applied to train the agents with those discrete messages.
 Hereby, a temperature of $\tau=1$ is used which showed the best results in preliminary experiments.
+All setups are additionally compared to a baseline.
+In the baseline the sender is "blinded", meaning that the sender is not shown any input but produces random messages.
+Effectively, the receiver needs to solve the task on their own, by exploiting underlying structures in the shown data and the target data.
+If a non-baseline model doesn't achieve a better performance than the baseline, the sender didn't communicate any meaningful messages and no language emerged.
