@@ -49,7 +49,7 @@ The experiments are conducted with a learning rate of $2\times10^{-4}$, the loss
 The following values for the variables are compared:
 \begin{itemize}
     \item $h_s$: 100, 500, 1000
-    \item $h_r$: 10, 30, 50, 100, 500, 1000
+    \item $h_r$: 100, 500, 1000
     \item $|V|$: 2, 10, 16, 50, 100
     \item $n$: 1, 2, 3, 4, 6
 \end{itemize}
@@ -59,86 +59,163 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset, 20\% in the \em
 
 \subsubsection*{Results}
 When looking at the results of the experiments, it can be seen that the agents are successfully discriminating the objects across all datasets.
-Table TODO gives an overview over the accuracy scores of selected configurations.
+Tables \ref{tab:results_discriminator_dale-2} to \ref{tab:results_discriminator_color} give an overview over the accuracy scores of selected configurations.
 For each dataset there are many configurations that outperform the baseline models by a high margin.
 However, there are still clear differences between the accuracy scores of each dataset.
 
-When the agents are tasked to discriminate between the two objects of the \emph{Dale-2} dataset, it succeeds in almost all configurations with an accuracy of over 94\%.
-In many configurations the accuracy lies above 99\%, while only 5 configurations have an accuracy of only 61\% to 64\%.
-An indicator for
-
-
-
-Table \ref{tab:results_discriminator} shows the accuracy of the models calculated on the success of communication if the receiver can identify the target object.
-
-The hidden sizes $h_s$ and $h_r$ as well as the embedding sizes $e_s$ and $e_r$ are chosen in alignment with the vocabulary size.
-The hidden sizes are always smaller or equal to the vocabulary size since the information about each word needs to be compressed in a smaller dimension to learn meaning.
-Hereby, hidden sizes of 10 and 100 are tested.
-On the other hand, three different embedding sizes are tested: 10, 50 and 100.
-The reason for this is to experiment, what is the optimal middle ground between compressing features of an image encoded in high dimension vectors and upscaling encoded messages in low dimension vectors.
-% SD: This discussion of dimensions could already be introduced when you discuss simple modles earlier as the same dimensions are used. This is a more an evaluation of represnetations rather than interaction and hence it would fit there.
+\cmtDK[inline]{baseline}
+\cmtDK[inline]{learning curve}
+% SD: As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.
 % DK: TODO
 
 \begin{table}[ht]
     \centering
-    \begin{tabular}{ccccc|cc|cc|cc}
+    \begin{tabular}{cccc|c}
         \toprule
-              &         &         &         &         & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                         \\\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
-        $|V|$ & $h_{s}$ & $h_{r}$ & $e_{s}$ & $e_{r}$ & \textbf{Accuracy}                   & \textbf{length}                     & \textbf{Accuracy}                        & \textbf{length} & \textbf{Accuracy} & \textbf{length} \\\midrule
-        {10}  & {10}    & {10}    & {10}    & {10}    & {96,4\%}                            & {0,99}                              & {24,7\%}                                 & {0}             & {17,3\%}          & {1}             \\
-        {10}  & {50}    & {50}    & {50}    & {50}    & {50\%}                              & {1}                                 & {21,4\%}                                 & {1}             & {17,8\%}          & {0}             \\
-        {13}  & {10}    & {10}    & {10}    & {10}    & {96,16\%}                           & {1}                                 & {24,8\%}                                 & {1}             & {17,1\%}          & {1}             \\
-        {13}  & {10}    & {10}    & {50}    & {50}    & {49,6\%}                            & {1}                                 & {21,9\%}                                 & {1}             & {17,9\%}          & {0}             \\
-        {20}  & {10}    & {10}    & {50}    & {50}    & {50,9\%}                            & {0}                                 & {23\%}                                   & {1}             & {15,9\%}          & {1}             \\
-        {100} & {10}    & {10}    & {10}    & {10}    & {97,3\%}                            & {1}                                 & {24\%}                                   & {1}             & {18,1\%}          & {1}             \\
-        {100} & {10}    & {10}    & {50}    & {50}    & {49,9\%}                            & {1}                                 & {24,4\%}                                 & {1}             & {15,8\%}          & {1}             \\
-        {100} & {100}   & {100}   & {100}   & {100}   & {49\%}                              & {0}                                 & {25,3\%}                                 & {1}             & {15,6\%}          & {0}             \\
+               &        &     &       & \multicolumn{1}{c}{\textbf{Dale-2}} \\  \cmidrule(lr){5-5}
+        $h_r$  & $h_s$  & $n$ & $|V|$ & \textbf{Accuracy}                   \\\midrule
+        {100}  & {100}  & {2} & {10}  & {99,96\%}                           \\
+        {100}  & {1000} & {2} & {10}  & {99,96\%}                           \\
+        {1000} & {100}  & {3} & {10}  & {99,87\%}                           \\
+        {500}  & {100}  & {3} & {100} & {99,83\%}                           \\
+        {100}  & {100}  & {6} & {50}  & {99,83\%}                           \\
+        {100}  & {500}  & {3} & {16}  & {99,7\%}                            \\
+        {1000} & {100}  & {6} & {16}  & {99,61\%}                           \\
+        {100}  & {100}  & {6} & {100} & {99,57\%}                           \\
+        {100}  & {500}  & {1} & {100} & {99,52\%}                           \\
+        {100}  & {100}  & {1} & {50}  & {99,35\%}                           \\
+        {500}  & {100}  & {1} & {2}   & {99,26\%}                           \\
+        {100}  & {500}  & {1} & {50}  & {99,26\%}                           \\
+        {500}  & {500}  & {1} & {100} & {99,26\%}                           \\
+        {100}  & {500}  & {3} & {100} & {99,83\%}                           \\
+        {500}  & {1000} & {1} & {16}  & {98\%}                              \\
+        {100}  & {500}  & {1} & {10}  & {96,61\%}                           \\
+        {100}  & {1000} & {1} & {100} & {99,44\%}                           \\
+        {500}  & {500}  & {6} & {2}   & {95,92\%}                           \\
+        {100}  & {1000} & {4} & {2}   & {94,88\%}                           \\
+        {100}  & {1000} & {6} & {10}  & {63,15\%}                           \\
+        {1000} & {500}  & {2} & {2}   & {62,98\%}                           \\\midrule
+        {-}    & {-}    & {-} & {-}   & {62,72\% (baseline)}                \\\midrule
+        {100}  & {1000} & {3} & {2}   & {61,2\%}                            \\
         \bottomrule
     \end{tabular}
-    \caption{Results of the discriminators: $|V|$ are different vocabulary sizes, $h$ hidden sizes and $e$ embedding sizes.}
-    % SD: A note about the datasets chosen. Why do we choose these? Initially, we describe more than 3 datasets.
-    % DK: because the 'CLEVR Single' contains only one object. So there is nothing to discriminate (done)
-    \label{tab:results_discriminator}
+    \caption{Selected results of the object identification games on the Dale-2 dataset with $e_s=100$ and $e_r=500$}
+    \label{tab:results_discriminator_dale-2}
 \end{table}
-% SD: As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.
-% DK: TODO
 
-For the \emph{Dale-2}, a clear correlation between the hidden sizes, embedding sizes and the size of the vocabulary can be identified.
-A hidden/embedding size as high as the vocabulary size is beneficial for identifying the correct object.
-The receiver identifies almost every sample correctly when all sizes are 10.
-When the hidden and embedding sizes are increased, the guesses by the receiver are random with 50\% accuracy.
-Interestingly, a vocabulary size of 10 is enough to communicate a meaningful message when the model is trained on the \emph{Dale-2} dataset.
-% SD: How do we know? What would happen if the hidden layers are smaller than the vocabulary size? We would also need to test several smaller dimensions.
-% DK: because the task is solved succesfully, TODO
+When the agents are tasked to discriminate between the two objects of the \emph{Dale-2} dataset, it succeeds in almost all configurations with an accuracy of over 94\%.
+Selected results are listed in Table \ref{tab:results_discriminator_dale-2}.
+In many configurations the accuracy lies above 99\%, while only 4 configurations have an accuracy of only 61\% to 64\%.
+An antecedent for a low accuracy seems to be a low vocabulary size $|V|$.
+All experiments with a vocabulary size of only two symbols (including the <eos> symbol) tend to give worse results.
+Three of the four results that don't surpass the baseline use a vocabulary size of 2.
+On the other side, only few configurations with $|V| = 2$ are among the overall best results.
+When the vocabulary size is increased, the results become better.
+Especially configurations with $|V| = 10$, $|V| = 16$, $|V| = 50$ and $|V| = 100$ consistently achieve high accuracies.
+While there are some few exceptions, the results show that the agents tend to perform better, when they can exchange messages with more than one symbol.
+Hereby, even games with an $n = 6$ perform as well as games with $n = 2$ as seen for example for $|V| = 10$.
+However, when only one symbol is allowed in the exchange, the accuracy still surpasses the baseline by a big margin and configurations with a high vocabulary of $|V| = 50$ and $|V| = 100$ tend to achieve higher accuracies.
+Finally looking at the hidden sizes, no direct effect can be identified and the differences in the results seem to be explained by vocabulary size and message length.
 
-The results change, when using the \emph{Dale-5} dataset with four distractors.
-With four distractors and with low hidden, embedding and vocabulary sizes, the agents barely pass the random baseline with 23\%.
-Only increasing the vocabulary size to 100 raises the accuracy by almost 20\% points to 43\%.
-This is still considerably lower than the 95\% of the \emph{Dale-2} dataset.
-The same applies to the 'CLEVR color' dataset, where all models achieve a very low accuracy of around 15 to 17\%, corresponding to random guesses.
-% SD: Could we say that calculation on Dale-5 is successful?
-% DK: TODO
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cccc|c}
+        \toprule
+               &        &     &       & \multicolumn{1}{c}{\textbf{Dale-5}} \\  \cmidrule(lr){5-5}
+        $h_r$  & $h_s$  & $n$ & $|V|$ & \textbf{Accuracy}                   \\\midrule
+        {1000} & {500}  & {3} & {50}  & {91,75\%}                           \\
+        {100}  & {100}  & {6} & {10}  & {91,02\%}                           \\
+        {100}  & {100}  & {3} & {10}  & {90,76\%}                           \\
+        {100}  & {100}  & {4} & {16}  & {89,76\%}                           \\
+        {100}  & {100}  & {2} & {10}  & {88,85\%}                           \\
+        {500}  & {1000} & {1} & {100} & {87,11\%}                           \\
+        {1000} & {1000} & {6} & {50}  & {85,07\%}                           \\
+        {500}  & {1000} & {1} & {10}  & {84,46\%}                           \\
+        {500}  & {500}  & {1} & {50}  & {83,29\%}                           \\
+        {100}  & {100}  & {1} & {10}  & {80,86\%}                           \\
+        {500}  & {100}  & {1} & {100} & {76,74\%}                           \\
+        {500}  & {500}  & {4} & {2}   & {77,78\%}                           \\
+        {1000} & {1000} & {3} & {2}   & {75,78\%}                           \\
+        {100}  & {100}  & {3} & {2}   & {74\%}                              \\
+        {500}  & {500}  & {1} & {2}   & {63,41\%}                           \\
+        {500}  & {1000} & {2} & {100} & {34,98\%}                           \\
+        {500}  & {500}  & {3} & {16}  & {34,77\%}                           \\
+        {500}  & {500}  & {6} & {2}   & {34,38\%}                           \\
+        {1000} & {1000} & {4} & {2}   & {35,33\%}                           \\
+        {1000} & {1000} & {6} & {100} & {35,24\%}                           \\
+        \bottomrule
+    \end{tabular}
+    \caption{Selected results of the object identification games on the Dale-5 dataset with $e_s=100$ and $e_r=500$}
+    \label{tab:results_discriminator_dale-5}
+\end{table}
 
-Two conclusions can be drawn.
-First, the hidden as well as the embedding sizes need to be close to the vocabulary size.
-% SD: Not sure, since we never tested smaller layer sizes. If the embedding layers are the same as the vocabulary size then at least a language encoding LSTM is not motivated to geenralise at all as it can keep representations for individual words without abstracting them. Leanring word embeddings involves reducing dimensions.
-% DK: TODO
-This even applies for very low vocabulary sizes, which means that the image encodings need to be compressed to the same low dimensions.
-The reason for this is very likely that neural models have difficulties to upscale from lower dimensions (e.g. from low $h_r$ to high $e_r$) as opposed to learn how to extract the important information from a vector with many dimensions.
-% SD: Hypothesis space to find the target function is just too big and they can never approximate that function.
-% DK: TODO
+When the agents are presented with the \emph{Dale-5} dataset, the results are less clear (see Table \ref{tab:results_discriminator_dale-5}).
+Again, two groups can be identified: One group of configurations doesn't surpass the baseline of 35\% accuracy, while the other group achieves accuracies in between 62\% and 94\%.
+For this dataset, the group of successful communication has a wider range of results compared to the \emph{Dale-2} dataset.
+Only 16 configurations surpass 90\% accuracy, while the majority lies between 80\% and 90\%.
+As before, for the hidden sizes, no pattern is visible.
+However, there is now a clearer influence of the message length $n$ and the vocabulary size $|V|$.
+First, 15 of the 16 configurations above 90\% accuracy are allowed messages with more than 3 symbols.
+8 of these configurations even have a message length $n = 6$.
+Although there are a few configurations with $n = 1$ that perform well, most of them have an accuracy of below 85\%.
+Overall, a longer message tends to help the agents to communicate the correct object.
+Concerning the vocabulary size, a different pattern can be seen.
+A vocabulary size of $|V| = 10$, $|V| = 16$ and $|V| = 50$ gives the best results.
+All the configurations with results above 90\% use these vocabulary sizes.
+While a large vocabulary size of $|V| = 100$ can still give good results, most of the time, the accuracy stays around 80\% to 84\%.
+When given a vocabulary size of only two symbols, the agents still perform far above the baseline.
+However, compared to the other sizes, the accuracy scores are at the lower end, mainly between 62\% and 80\%.
+As expected, when the message length is allowed to be longer, these configurations perform the best.
 
-The second conclusion that can be drawn looks at the differences between the two datasets.
-Unsurprisingly, the agents have a much higher difficulty to discriminate a target object from four instead of one distractor.
-Since we discriminate objects based on properties that are also distinguished in human cognition (8 colors, 2 sizes, 3 shapes), we expect that the vocabulary onto which the agents converge reflects these categories and is therefore close to human vocabulary.
-There are $8*2*3=48$ possible combinations of attributes.
-% SD: Calculation behind this figure?
-% DK: (done)
-Still, for Dale-2, a vocabulary size of only 10 is enough for an almost perfect accuracy with two objects.
-This hints to the fact that the agents don't describe the complete target object, but only rely on discriminative attributes between the objects.
-The need for a more detailed description of discriminative attributes is higher when more distractors are involved.
-Therefore, the models need to learn more combinations of symbols in order to attest to this higher level of detail and especially how to relate them to features in the images.
-% SD: We would need to show that the messages in Dale-2 are shorter than in Dale-5 to claim this.
-% DK: TODO
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cccc|c}
+        \toprule
+               &        &     &       & \multicolumn{1}{c}{\textbf{CLEVR color}} \\  \cmidrule(lr){5-5}
+        $h\_r$ & $h\_s$ & $n$ & $|V|$ & \textbf{Accuracy}                        \\\midrule
+        {100}  & {1000} & {3} & {10}  & {73,65\%}                                \\
+        {100}  & {1000} & {3} & {16}  & {73,57\%}                                \\
+        {500}  & {500}  & {4} & {10}  & {73,57\%}                                \\
+        {100}  & {500}  & {3} & {16}  & {70,75\%}                                \\
+        {100}  & {1000} & {4} & {50}  & {69,31\%}                                \\
+        {1000} & {500}  & {1} & {16}  & {62,85\%}                                \\
+        {100}  & {500}  & {1} & {10}  & {57,12\%}                                \\
+        {1000} & {500}  & {6} & {16}  & {54,69\%}                                \\
+        {100}  & {100}  & {4} & {2}   & {52,95\%}                                \\
+        {1000} & {500}  & {1} & {100} & {52,82\%}                                \\
+        {100}  & {1000} & {1} & {100} & {52,34\%}                                \\
+        {100}  & {500}  & {3} & {2}   & {51,48\%}                                \\
+        {500}  & {1000} & {3} & {16}  & {24,61\%}                                \\
+        {100}  & {1000} & {3} & {50}  & {24,48\%}                                \\
+        {1000} & {1000} & {4} & {100} & {24\%}                                   \\
+        {500}  & {1000} & {1} & {2}   & {23,96\%}                                \\
+        {1000} & {100}  & {6} & {10}  & {23,87\%}                                \\
+        {500}  & {1000} & {6} & {50}  & {23,87\%}                                \\
+        {500}  & {500}  & {2} & {2}   & {22,35\%}                                \\
+        \bottomrule
+    \end{tabular}
+    \caption{Selected results of the object identification games on the CLEVR color dataset with $e_s=100$ and $e_r=500$}
+    \label{tab:results_discriminator_color}
+\end{table}
 
-\cmtDK[inline]{similarity to bounding box classifier}
+Finally, the results for the \emph{CLEVR color} dataset show a similar structure (see Table \ref{tab:results_discriminator_color}).
+Two main groups can be identified: Configurations that perform as the baseline with an accuracy of around 23\% and configurations that successfully communicate with accuracies of 40\% to 73\%.
+Compared to the \emph{Dale-5} dataset, the highest accuracy is much lower.
+Furthermore, almost 70\% of the configurations are unsuccessful, which is much bigger compared to the \emph{Dale-5} dataset.
+Still, similar conclusions can be drawn.
+Different hidden sizes don't seem to have an influence.
+For this dataset, medium message lengths of $n=2$, $n=3$ and $n=4$ provide the best results for the agents.
+However, the agents can still communicate successfully with $n=1$ and $n=6$, but the accuracy reaches maximum 64\% and mainly stays around 50\%.
+As before, the agents can utilize a vocabulary size of $|V|=10$ and $|V|=16$ the best.
+Some configurations with $|V|=2$ and $|V|=100$ achieve accuracies of up to 50\%, but most lead to an unsuccessful communication.
+Interesting hereby is that a vocabulary size of $|V|=2$ requires $n$ to be bigger for better results, while the opposite is true for $|V|=100$.
+
+Overall these results show that across all datasets successful communication between the agents emerge.
+The sender is able to encode a description of the target object into the message which the receiver is able to decode.
+Unsurprisingly, this works the best for simplest dataset \emph{Dale-2} with only one distractor.
+With an increasing number of distractors, fewer games are successful, and successful games perform worse.
+Interestingly, with all vocabulary sizes a language can emerge between the agents.
+While the vocabulary size $|V|=2$ usually requires longer messages to succeed, there are some games that also achieve high accuracies with short messages.
+This fact suggests that the agents don't necessarily rely on the attributes shape, color or size, since they would require more symbols to be encoded.
+Instead, the agents likely utilize other patterns that are not used in human referring expressions.
+This will be further analyzed in section \ref{sec:analysis_language}.
