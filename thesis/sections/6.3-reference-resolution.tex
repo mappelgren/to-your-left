@@ -43,6 +43,82 @@ In a next step, the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets
 The same metrics are used to evaluate the results as described in \ref{sec:reference_resolution}.
 
 \subsection*{Results}
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|cc|cc|cc}
+        \toprule
+                                      &         & \multicolumn{2}{c}{\textbf{Dale-2}} & \multicolumn{2}{c}{\textbf{Dale-5}} & \multicolumn{2}{c}{\textbf{CLEVR color}}                                                                                         \\  \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+        $n$                           & $|V|$   & \textbf{loss}                       & \textbf{Acc.}                       & \textbf{loss}                            & \textbf{Acc.}               & \textbf{loss}             & \textbf{Acc.}               \\\midrule
+        \multicolumn{2}{c|}{baseline} & {34,49} & {34,3\%}                            & {38,13}                             & {30,31\%}                                & {42,72}                     & {18,28\%}                                               \\\midrule
+        {1}                           & {2}     & \textcolor{purple}{34,91}           & \textcolor{purple}{34,81\%}         & \textcolor{purple}{40,61}                & {25,48\%}                   & {39,13}                   & {25\%}                      \\
+        {1}                           & {10}    & \textcolor{purple}{35,31}           & {40,15\%}                           & \textcolor{purple}{38,73}                & {28,12\%}                   & \textcolor{purple}{44,19} & {20,53\%}                   \\
+        {1}                           & {16}    & \textcolor{purple}{35,4}            & {42,93\%}                           & \textcolor{purple}{39,58}                & {26,17\%}                   & {39,64}                   & {24,18\%}                   \\
+        {1}                           & {50}    & {32,64}                             & {42,01\%}                           & \textcolor{purple}{38,99}                & {28,52\%}                   & \textcolor{purple}{42,61} & {20,79\%}                   \\
+        {1}                           & {100}   & \textcolor{purple}{36,73}           & \textcolor{purple}{31,21\%}         & \textcolor{purple}{40,25}                & {24,91\%}                   & \textcolor{purple}{41,5}  & {21,44\%}                   \\
+        {2}                           & {2}     & \textcolor{purple}{33,76}           & {40,67\%}                           & {35,86}                                  & \textcolor{purple}{31,73\%} & \textcolor{purple}{41,79} & {22,14\%}                   \\
+        {2}                           & {10}    & {31,37}                             & {43,27\%}                           & {37,23}                                  & \textcolor{purple}{30,34\%} & \textcolor{purple}{42,53} & \textcolor{purple}{19,75\%} \\
+        {2}                           & {16}    & {31,19}                             & {46,27\%}                           & \textcolor{purple}{39,38}                & {28,21\%}                   & \textcolor{purple}{41,74} & {22,7\%}                    \\
+        {2}                           & {50}    & \textcolor{purple}{33,66}           & {39,28\%}                           & \textcolor{purple}{39,62}                & {25,35\%}                   & \textcolor{purple}{45,63} & \textcolor{purple}{17,93\%} \\
+        {2}                           & {100}   & \textcolor{purple}{35,1}            & \textcolor{purple}{34,81\%}         & \textcolor{purple}{39,86}                & {27,3\%}                    & \textcolor{purple}{45,45} & \textcolor{purple}{19,05\%} \\
+        {3}                           & {2}     & {32,99}                             & {41,15\%}                           & {37,76}                                  & \textcolor{purple}{30,99\%} & \textcolor{purple}{46,45} & {20,92\%}                   \\
+        {3}                           & {10}    & \textcolor{purple}{33,74}           & {38,89\%}                           & \textcolor{purple}{40,71}                & {26,48\%}                   & \textcolor{purple}{44,53} & \textcolor{purple}{19,01\%} \\
+        {3}                           & {16}    & \textcolor{purple}{34,18}           & {38,98\%}                           & \textcolor{purple}{38,52}                & \textcolor{purple}{30,03\%} & \textcolor{purple}{41,22} & {21,53\%}                   \\
+        {3}                           & {50}    & \textcolor{purple}{34,38}           & {38,93\%}                           & \textcolor{purple}{39,52}                & {26,74\%}                   & {38,4}                    & {24,87\%}                   \\
+        {3}                           & {100}   & \textcolor{purple}{33,16}           & {40,19\%}                           & \textcolor{purple}{39,75}                & {27,78\%}                   & \textcolor{purple}{41,29} & {21,83\%}                   \\
+        {4}                           & {2}     & \textcolor{purple}{33,48}           & {40,36\%}                           & \textcolor{purple}{38,28}                & \textcolor{purple}{30,9\%}  & \textcolor{purple}{42,53} & {22,4\%}                    \\
+        {4}                           & {10}    & \textcolor{purple}{35,01}           & {39,97\%}                           & \textcolor{purple}{40,88}                & {26,39\%}                   & \textcolor{purple}{42,33} & {20,44\%}                   \\
+        {4}                           & {16}    & \textcolor{purple}{35,59}           & \textcolor{purple}{35,59\%}         & \textcolor{purple}{37,91}                & \textcolor{purple}{31,86\%} & \textcolor{purple}{41,9}  & {20,27\%}                   \\
+        {4}                           & {50}    & \textcolor{purple}{34,99}           & {36,68\%}                           & \textcolor{purple}{40,89}                & {23,26\%}                   & \textcolor{purple}{43,77} & \textcolor{purple}{18,36\%} \\
+        {4}                           & {100}   & \textcolor{purple}{35,46}           & {37,46\%}                           & \textcolor{purple}{38,53}                & \textcolor{purple}{29,08\%} & {40,6}                    & {21,22\%}                   \\
+        {6}                           & {2}     & \textcolor{purple}{34,97}           & {37,28\%}                           & \textcolor{purple}{39,52}                & \textcolor{purple}{29,69\%} & {40,53}                   & {24,7\%}                    \\
+        {6}                           & {10}    & {32,39}                             & {43,53\%}                           & \textcolor{purple}{38,61}                & {28,26\%}                   & {40,84}                   & {21,74\%}                   \\
+        {6}                           & {16}    & \textcolor{purple}{34,87}           & \textcolor{purple}{34,38\%}         & \textcolor{purple}{39,03}                & {26,82\%}                   & {40,34}                   & {23,31\%}                   \\
+        {6}                           & {50}    & \textcolor{purple}{33,85}           & {37,07\%}                           & \textcolor{purple}{39,39}                & {27,17\%}                   & {40,8}                    & {22,09\%}                   \\
+        {6}                           & {100}   & \textcolor{purple}{34,62}           & {40,02\%}                           & \textcolor{purple}{39,46}                & {25,48\%}                   & \textcolor{purple}{42,53} & \textcolor{purple}{18,4\%}  \\
+        \bottomrule
+    \end{tabular}
+    \caption{TODO: caption}
+    \label{TODO: label}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|c|c|c}
+        \toprule
+                                      &           & \multicolumn{1}{c}{\textbf{Dale-2}} & \multicolumn{1}{c}{\textbf{Dale-5}} & \multicolumn{1}{c}{\textbf{CLEVR color}} \\  \cmidrule(lr){3-3}\cmidrule(lr){4-4}\cmidrule(lr){5-5}
+        $n$                           & $|V|$     & \textbf{Probability mass}           & \textbf{Probability mass}           & \textbf{Probability mass}                \\\midrule
+        \multicolumn{2}{c|}{baseline} & {62,16\%} & {49,61\%}                           & {41,68\%}                                                                      \\\midrule
+        {1}                           & {2}       & {93,3\%}                            & {65,36\%}                           & \textcolor{purple}{39,22\%}              \\
+        {1}                           & {10}      & {93,85\%}                           & \textcolor{purple}{46,97\%}         & \textcolor{purple}{40,1\%}               \\
+        {1}                           & {16}      & {92,06\%}                           & {76,68\%}                           & \textcolor{purple}{36,43\%}              \\
+        {1}                           & {50}      & {94\%}                              & {76,43\%}                           & \textcolor{purple}{39,97\%}              \\
+        {1}                           & {100}     & {94,03\%}                           & \textcolor{purple}{54,14\%}         & \textcolor{purple}{40,27\%}              \\
+        {2}                           & {2}       & {92,27\%}                           & \textcolor{purple}{52,15\%}         & \textcolor{purple}{33,64\%}              \\
+        {2}                           & {10}      & {96,16\%}                           & {80,26\%}                           & \textcolor{purple}{36,53\%}              \\
+        {2}                           & {16}      & {95,84\%}                           & {84,03\%}                           & \textcolor{purple}{39,65\%}              \\
+        {2}                           & {50}      & {93,78\%}                           & \textcolor{purple}{52,24\%}         & \textcolor{purple}{39,56\%}              \\
+        {2}                           & {100}     & {92,43\%}                           & \textcolor{purple}{53,23\%}         & \textcolor{purple}{37,68\%}              \\
+        {3}                           & {2}       & {94,52\%}                           & \textcolor{purple}{51,97\%}         & \textcolor{purple}{37,09\%}              \\
+        {3}                           & {10}      & {94,9\%}                            & \textcolor{purple}{53,47\%}         & \textcolor{purple}{38,24\%}              \\
+        {3}                           & {16}      & {94,59\%}                           & {81,46\%}                           & {67,88\%}                                \\
+        {3}                           & {50}      & {93,88\%}                           & {79,65\%}                           & \textcolor{purple}{40,36\%}              \\
+        {3}                           & {100}     & {95,25\%}                           & \textcolor{purple}{48,52\%}         & \textcolor{purple}{42,55\%}              \\
+        {4}                           & {2}       & {89,15\%}                           & \textcolor{purple}{51,98\%}         & \textcolor{purple}{39,68\%}              \\
+        {4}                           & {10}      & {96,08\%}                           & \textcolor{purple}{48,03\%}         & {64,31\%}                                \\
+        {4}                           & {16}      & {94,14\%}                           & \textcolor{purple}{49,81\%}         & \textcolor{purple}{40,84\%}              \\
+        {4}                           & {50}      & {96,24\%}                           & \textcolor{purple}{48,79\%}         & \textcolor{purple}{43,61\%}              \\
+        {4}                           & {100}     & {95,55\%}                           & \textcolor{purple}{49,65\%}         & \textcolor{purple}{42,85\%}              \\
+        {6}                           & {2}       & \textcolor{purple}{59,68\%}         & \textcolor{purple}{53,57\%}         & \textcolor{purple}{38,43\%}              \\
+        {6}                           & {10}      & \textcolor{purple}{63,46\%}         & {82,12\%}                           & \textcolor{purple}{40,11\%}              \\
+        {6}                           & {16}      & {95,86\%}                           & \textcolor{purple}{50,71\%}         & \textcolor{purple}{40,61\%}              \\
+        {6}                           & {50}      & {91,27\%}                           & \textcolor{purple}{52,55\%}         & \textcolor{purple}{40,21\%}              \\
+        {6}                           & {100}     & \textcolor{purple}{60,27\%}         & \textcolor{purple}{46,92\%}         & \textcolor{purple}{41,98\%}              \\
+        \bottomrule
+    \end{tabular}
+    \caption{TODO: caption}
+    \label{TODO: label}
+\end{table}
+
 In the final setup, the agents are tasked with communicating objects with fewer infused human knowledge.
 Table \ref{tab:results_dale_predictor_game} shows the results for the setup, in which the sender is pointed towards the target object with a human description based on the GRE algorithm.
 Hereby, the 'CLEVR single' dataset acts as a baseline, to test if the agents are able to predict coordinates of objects at all.

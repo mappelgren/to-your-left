@@ -285,11 +285,11 @@ Masking should help the model, to also solve the second task.
     \centering
     \begin{tabular}{cc|ccc|ccc|ccc}
         \toprule
-                  &           & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR colour}}                                                                                         \\  \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
-        $LSTM\_o$ & $LSTM\_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                               & \textbf{Acc.} & \textbf{F1} & \textbf{NT} & \textbf{Acc.} & \textbf{F1} & \textbf{NT} \\\midrule
-        {100}     & {30}      & {38}                                & {41,16}                             & {40}                                      & {14}          & {48,91}     & {34}        & {15}          & {36,98}     & {34}        \\
-        {1500}    & {15}      & {45}                                & {62,66}                             & {45}                                      & {17}          & {51,89}     & {38}        & {13}          & {35,85}     & {33}        \\
-        {2000}    & {10}      & {45}                                & {60,72}                             & {44}                                      & {16}          & {50,77}     & {37}        & {13}          & {34,96}     & {36}        \\
+                  &           & \multicolumn{3}{c}{\textbf{Dale-2}} & \multicolumn{3}{c}{\textbf{Dale-5}} & \multicolumn{3}{c}{\textbf{CLEVR color}}                                                                                         \\  \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+        $LSTM\_o$ & $LSTM\_e$ & \textbf{Acc.}                       & \textbf{F1}                         & \textbf{NT}                              & \textbf{Acc.} & \textbf{F1} & \textbf{NT} & \textbf{Acc.} & \textbf{F1} & \textbf{NT} \\\midrule
+        {100}     & {30}      & {38}                                & {41,16}                             & {40}                                     & {14}          & {48,91}     & {34}        & {15}          & {36,98}     & {34}        \\
+        {1500}    & {15}      & {45}                                & {62,66}                             & {45}                                     & {17}          & {51,89}     & {38}        & {13}          & {35,85}     & {33}        \\
+        {2000}    & {10}      & {45}                                & {60,72}                             & {44}                                     & {16}          & {50,77}     & {37}        & {13}          & {34,96}     & {36}        \\
         \bottomrule
     \end{tabular}
     \caption{Overall accuracies (Acc.), F1-Score (F1) and non-target accuracies (NT) in \% of the basic RE generator after 30 epochs for selected configurations: $LSTM_o$ are different LSTM output sizes and $LSTM_e$ are different embedding sizes for the tokens in the LSTM.}
