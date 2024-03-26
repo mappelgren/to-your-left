@@ -161,7 +161,7 @@ First, 15 of the 16 configurations above 90\% accuracy are allowed messages with
 Although there are a few configurations with $n = 1$ that perform well, most of them have an accuracy of below 85\%.
 Overall, a longer message tends to help the agents to communicate the correct object.
 Concerning the vocabulary size, a different pattern can be seen.
-A vocabulary size of $|V| = 10$, $|V| = 16$ and $|V| = 50$ gives the best results.
+A vocabulary size of $|V| = \{10,16,50\}$ gives the best results.
 All the configurations with results above 90\% use these vocabulary sizes.
 While a large vocabulary size of $|V| = 100$ can still give good results, most of the time, the accuracy stays around 80\% to 84\%.
 When given a vocabulary size of only two symbols, the agents still perform far above the baseline.
@@ -206,7 +206,7 @@ Compared to the \emph{Dale-5} dataset, the highest accuracy is much lower.
 Furthermore, almost 70\% of the configurations are unsuccessful, which is much bigger compared to the \emph{Dale-5} dataset.
 Still, similar conclusions can be drawn.
 Different hidden sizes don't seem to have an influence.
-For this dataset, medium message lengths of $n=2$, $n=3$ and $n=4$ provide the best results for the agents.
+For this dataset, medium message lengths of $n \in \{2,3,4\}$ provide the best results for the agents.
 However, the agents can still communicate successfully with $n=1$ and $n=6$, but the accuracy reaches maximum 64\% and mainly stays around 50\%.
 As before, the agents can utilize a vocabulary size of $|V|=10$ and $|V|=16$ the best.
 Some configurations with $|V|=2$ and $|V|=100$ achieve accuracies of up to 50\%, but most lead to an unsuccessful communication.

@@ -113,7 +113,7 @@ Additionally, also the \emph{F1-score} almost reaches 70\% whereas it usually st
 The \emph{F1-score} evaluates each word in the referring expression separately instead of the binary \emph{overall accuracy} for the complete referring expression.
 A small increase of the accuracy accompanied by a large increase of the F1-score indicates that the agents learned to encode an additional attribute, with the larger vocabulary and longer messages.
 Finally, vocabulary sizes of $|V|=10$ and $|V|=16$ consistently perform the best with accuracies of 74\% to 81\%.
-However, a difference in the \emph{F1-score} is visible: configurations with $|V|=16$ reach 67,55\% to 73,66\% with message lengths $n=[2,4]$, where $|V|=10$ only reaches an F1-score of 66,4\% with $n=4$ and otherwise performs worse.
+However, a difference in the \emph{F1-score} is visible: configurations with $|V|=16$ reach 67,55\% to 73,66\% with message lengths $n \in [2,4]$, where $|V|=10$ only reaches an F1-score of 66,4\% with $n=4$ and otherwise performs worse.
 This indicates as before that the agents were able to encode more attributes with the larger vocabulary.
 
 The results look different when the agents are trained to generate referring expressions for the \emph{Dale-5} dataset.
