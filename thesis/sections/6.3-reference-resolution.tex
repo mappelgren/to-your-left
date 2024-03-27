@@ -18,7 +18,7 @@ The euclidean distance between the resulting prediction of the center point and 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.7\linewidth]{figures/arch_coordinate_predictor_game.png}
-    \caption{Simplified architecture of the masked coordinate predictor game}
+    \caption{Simplified architecture of the coordinate predictor game}
     \label{fig:coordinate_predictor_game_architecture}
     % SD: Again, why LSTM, are we inceremtally identifying the image while we are processing each input word?
     % DK: because it's a message sequence of discrete symbols (done)
@@ -27,9 +27,17 @@ The euclidean distance between the resulting prediction of the center point and 
 Secondly, in the \textbf{attention reference resolver}, the agents learn to point towards regions in the image, which is based on the \emph{attention reference resolver} described in section \ref{sec:reference_resolution}.
 As before, the LSTM is replaced with the \emph{EGG} LSTM to parse the sender's message with the hidden size $h_r=500$ and $e_r=100$.
 The dot product is calculated between each encoded region of the image and the encoded message, and the $softmax$ function is applied subsequently.
+Figure \ref{fig:attention_predictor_game_architecture} shows the architecture.
 The loss is calculated using \emph{binary cross entropy} between the predictions and ground truth regions.
 
-\cmtDK[inline]{figure}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.7\linewidth]{figures/arch_attention_predictor_game.png}
+    \caption{Simplified architecture of the attention predictor game}
+    \label{fig:attention_predictor_game_architecture}
+    % SD: Again, why LSTM, are we inceremtally identifying the image while we are processing each input word?
+    % DK: because it's a message sequence of discrete symbols (done)
+\end{figure}
 
 The experiments are conducted with the following hyperparameters: a learning rate of $2\times10^{-4}$, a temperature for the Gumbel-Softmax relaxation of 1 and \emph{Adam} \citep{Kingma2015} as optimizer.
 The following values for the variables are compared:
@@ -43,6 +51,24 @@ In a next step, the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets
 The same metrics are used to evaluate the results as described in \ref{sec:reference_resolution}.
 
 \subsection*{Results}
+\begin{figure}[ht!]
+    \centering
+    \subfigure[\emph{Dale-2} dataset]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_coordinate-predictor_dale-2.png}
+        \label{fig:learning-curve_coordinate-predictor_dale-2}
+    }
+    \subfigure[\emph{Dale-5} dataset]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_coordinate-predictor_dale-5.png}
+        \label{fig:learning-curve_coordinate-predictor_dale-5}
+    }
+    \subfigure[\emph{CELVR color} dataset]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_coordinate-predictor_colour.png}
+        \label{fig:learning-curve_coordinate-predictor_colour}
+    }
+    \caption{Learning curves of all discrimination games on each dataset. As almost no games beat the baseline, $|V|$ and $n$ are not highlighted separately. The baseline is marked in black.}
+    \label{fig:learning-curves_coordinate-predictor}
+\end{figure}
+
 \begin{table}[ht]
     \centering
     \begin{tabular}{cc|cc|cc|cc}
@@ -113,6 +139,36 @@ Hereby, the single model was only able to predict correct coordinates for the \e
 The higher complexity for the agents that includes more layers in the model as well as the discrete bottleneck raises the bar of the task too high to be solved in this configuration.
 The second setup in this section tries to reduce the complexity, by not predicting precise geometric locations, but instead attending to larger areas.
 The results are summed up in Table \ref{tab:results:attention-reference-resolver-game}.
+
+\begin{figure}[ht!]
+    \centering
+    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-2_vocab-size.png}
+        \label{fig:learning-curve_attention-predictor_dale-2_vocab-size}
+    }
+    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-2_max-len.png}
+        \label{fig:learning-curve_attention-predictor_dale-2_max-len}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-5_vocab-size.png}
+        \label{fig:learning-curve_attention-predictor_dale-5_vocab-size}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-5_max-len.png}
+        \label{fig:learning-curve_attention-predictor_dale-5_max-len}
+    }
+    \subfigure[\emph{CLEVR color} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_colour_vocab-size.png}
+        \label{fig:learning-curve_attention-predictor_colour_vocab-size}
+    }
+    \subfigure[\emph{CLEVR color} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_colour_max-len.png}
+        \label{fig:learning-curve_attention-predictor_colour_max-len}
+    }
+    \caption{Learning curves of all discrimination games on each dataset. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \label{fig:learning-curves_attention-predictor}
+\end{figure}
 
 \begin{table}[ht]
     \centering

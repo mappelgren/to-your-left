@@ -58,12 +58,42 @@ The language game is run on the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets.
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset, 20\% in the \emph{Dale-5} dataset and 13\% in the \emph{CLEVR color} dataset.
 
 \subsubsection*{Results}
+
+\begin{figure}[ht!]
+    \centering
+    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-2_vocab-size.png}
+        \label{fig:learning-curve_discriminator_dale-2_vocab-size}
+    }
+    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-2_max-len.png}
+        \label{fig:learning-curve_discriminator_dale-2_max-len}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-5_vocab-size.png}
+        \label{fig:learning-curve_discriminator_dale-5_vocab-size}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-5_max-len.png}
+        \label{fig:learning-curve_discriminator_dale-5_max-len}
+    }
+    \subfigure[\emph{CLEVR color} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_colour_vocab-size.png}
+        \label{fig:learning-curve_discriminator_colour_vocab-size}
+    }
+    \subfigure[\emph{CLEVR color} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_colour_max-len.png}
+        \label{fig:learning-curve_discriminator_colour_max-len}
+    }
+    \caption{Learning curves of all discrimination games on each dataset. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \label{fig:learning-curves_discriminator}
+\end{figure}
+
 When looking at the results of the experiments, it can be seen that the agents are successfully discriminating the objects across all datasets.
 Tables \ref{tab:results_discriminator_dale-2} to \ref{tab:results_discriminator_color} give an overview over the accuracy scores of selected configurations.
 For each dataset there are many configurations that outperform the baseline models by a high margin.
 However, there are still clear differences between the accuracy scores of each dataset.
 
-\cmtDK[inline]{baseline}
 \cmtDK[inline]{learning curve}
 % SD: As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.
 % DK: TODO

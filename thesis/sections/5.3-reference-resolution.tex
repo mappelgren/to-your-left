@@ -180,9 +180,17 @@ This emphasizes the correlation between the attributes and each region.
 A high dot product for a region indicates a high correlation between the attributes and the specific region, while a low dot product indicates the opposite.
 Training a model like this should therefore highlight the regions in the image that are described by the referring expression, namely the region around the target object.
 To calculate the loss, the $softmax$ function is applied over the prediction and compared to the ground truth matrix $A$ using the \emph{binary cross entropy}.
+Figure \ref{fig:attention_predictor_architecture} shows the architecture.
 Hereby, the models converged faster and were trained for 20 epochs with a learning rate of $2\times10^{-4}$.
 An $LSTM_e=15$ and $LSTM_o=1500$ showed the best results.
 Projection sizes $p=\{50,100,300,500,1000\}$ are compared.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.25\linewidth]{figures/arch_attention_predictor.png}
+    \caption{Simplified architecture of the attention predictor}
+    \label{fig:attention_predictor_architecture}
+\end{figure}
 
 The \emph{attention reference resolver} is evaluated on the summed predicted probability for the regions in the target area.
 In particular, the predicted matrix, consisting of probabilities for each region is multiplied with the ground truth matrix $A$, consisting of only ones and zeros.

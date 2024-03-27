@@ -4,7 +4,7 @@
 
 In a next step, it is tested if the agents can learn to extract features of the objects together.
 For this the same sender as in the previous section is used.
-Based on the results, $h_s$ is fixed to $500$ and $e_s$ to $100$
+Based on the results, $h_s$ is fixed to $500$ and $e_s$ to $100$.
 However, the task and by that the receiver's architecture is adapted in two different ways.
 In the first setup, the \textbf{referring expression generator}, the receiver is tasked to describe the target object with natural language following the \emph{incremental GRE-algorithm} based on the sender's message (see Figure \ref{fig:caption_generator_game_architecture}).
 This follows the approach of the approach of the \emph{RE generators} described in section \ref{sec:referring_expression_generation}.
@@ -22,7 +22,7 @@ The loss is calculated using cross entropy.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.7\linewidth]{figures/arch_caption_generator_game.png}
-    \caption{Simplified architecture of the caption generator game}
+    \caption{Simplified architecture of the referring expression generator game}
     \label{fig:caption_generator_game_architecture}
     % SD: But here we don't need an LSTM, we just want to identify one of the objects. The LSTM should only encode the inout message.
     % DK: TODO
@@ -33,13 +33,18 @@ First, the task is quite complex for both agents to learn, since two language ge
 This might stop the agents from converging towards a useful language.
 Secondly, in case a language emerges, it could be aligned with the natural language of the target referring expressions.
 In other words, the sender might just learn to effectively repeat the target referring expressions without extracting the necessary features themselves.
-For that reason, in the second setup the receiver is tasked to predict only the attributes of the target object in the shape of a one-hot vector.
+For that reason, in the second setup, the \textbf{attribute generator} the receiver is tasked to predict only the attributes of the target object in the shape of a multi-hot vector (shown in Figure \ref{fig:attribute_generator_game_architecture}).
 By this, no natural language including its salience order is involved and the complexity of the complete game is reduced.
 The receiver uses the same way to encode and combine the complete scene and the sender's message with $e_{ri}=100$, $h_r=500$ and $e_r=100$.
 This is then passed to a linear layer that produces a vector with 13 dimension, corresponding to the 2 sizes, 3 shapes, and 8 colors.
 The loss is then calculated using binary cross entropy.
 
-\cmtDK[inline]{figure}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.55\linewidth]{figures/arch_attribute_generator_game.png}
+    \caption{Simplified architecture of the attribute generator game}
+    \label{fig:attribute_generator_game_architecture}
+\end{figure}
 
 The experiments for both setups are conducted with a learning rate of $2\times10^{-4}$.
 As in the previous section, the following values for the variables are compared:
@@ -53,10 +58,32 @@ The \emph{Dale-5} and the \emph{CLEVR color} should be again much harder to lear
 % SD: So the sender is generating descriptions following the GRE policy?
 % DK: TODO
 The same metrics as in the section \ref{sec:referring_expression_generation} are used to evaluate the results for the first setup.
-When predicting one-hot vectors, an overall \textbf{accuracy} is reported that reflects if all attributes were predicted correctly.
+When predicting multi-hot vectors, an overall \textbf{accuracy} is reported that reflects if all attributes were predicted correctly.
 Additionally, the accuracy for each attribute is calculated separately to show which attributes give bigger challenges for the models.
 
 \subsubsection*{Results}
+\begin{figure}[ht!]
+    \centering
+    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_re-generator_dale-2_vocab-size.png}
+        \label{fig:learning-curve_re-generator_dale-2_vocab-size}
+    }
+    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_re-generator_dale-2_max-len.png}
+        \label{fig:learning-curve_re-generator_dale-2_max-len}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_re-generator_dale-5_vocab-size.png}
+        \label{fig:learning-curve_re-generator_dale-5_vocab-size}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_re-generator_dale-5_max-len.png}
+        \label{fig:learning-curve_re-generator_dale-5_max-len}
+    }
+    \caption{Learning curves of all referring expression generation games on the \emph{Dale} datasets. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \label{fig:learning-curves_re-generator}
+\end{figure}
+
 \begin{table}[ht]
     \centering
     \begin{tabular}{cc|ccc|ccc|ccc}
@@ -220,6 +247,28 @@ The \emph{size} attribute is more often needed to discriminate the target object
 Similarly to the \emph{color} attribute, there are differences between the single tokens.
 However, these are not constant across configurations, datasets and runs and no "difficult" token can be identified.
 
+\begin{figure}[ht!]
+    \centering
+    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_oh-generator_dale-2_vocab-size.png}
+        \label{fig:learning-curve_oh-generator_dale-2_vocab-size}
+    }
+    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_oh-generator_dale-2_max-len.png}
+        \label{fig:learning-curve_oh-generator_dale-2_max-len}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_oh-generator_dale-5_vocab-size.png}
+        \label{fig:learning-curve_oh-generator_dale-5_vocab-size}
+    }
+    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+        \includegraphics[width=0.46\linewidth]{figures/learning-curve_oh-generator_dale-5_max-len.png}
+        \label{fig:learning-curve_oh-generator_dale-5_max-len}
+    }
+    \caption{Learning curves of all attribute-predictor games on the \emph{Dale} datasets. The graphs show the accuracy of the \emph{shape}, since this highlights the learning effect best. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \label{fig:learning-curves_oh-generator}
+\end{figure}
+
 \begin{table}[ht]
     \centering
     \begin{tabular}{cc|ccc|ccc|ccc}
@@ -258,7 +307,7 @@ However, these are not constant across configurations, datasets and runs and no 
     \label{tab:results:attribute-predictor-game}
 \end{table}
 
-Finally, Table \ref{tab:results:attribute-predictor-game} shows the results for the games in which the receiver predicts a one-hot vector of the attributes.
+Finally, Table \ref{tab:results:attribute-predictor-game} shows the results for the games in which the receiver predicts a multi-hot vector of the attributes.
 Again, the baselines are games, the receiver plays alone.
 Hereby, it can be seen that the receiver can already predict the \emph{shape} and \emph{color}  very well: 88,91\% and 92\% respectively on the \emph{Dale-2} dataset, 80,78\% and 89,38\% respectively on the \emph{Dale-5} dataset, and 100\% and 90,78\% respectively on the \emph{CLEVR color} dataset.
 The \emph{size} however corresponds to a random guess on the \emph{Dale} dataset and only achieves 76,72\% on the \emph{CLEVR color} dataset.
@@ -266,10 +315,10 @@ This shows that the receiver can already identify attributes of the target objec
 However, the size still seems to be an attribute which is difficult to extract from the visual scene.
 The increase in performance compared to the generation of referring expression can be explained by two reasons:
 First, the complexity of the receiver is greatly reduced.
-When only predicting one-hot vectors, much fewer layers and weights are involved that need to be trained and hence the models can learn the given task.
+When only predicting multi-hot vectors, much fewer layers and weights are involved that need to be trained and hence the models can learn the given task.
 Secondly, the complexity of the task is reduced as well.
 The generation of referring expressions not only includes the learning of the tokens (and their embeddings), but also their order in the referring expression and their salience for the incremental algorithm.
-Using one-hot vectors, both order and salience are irrelevant and only the attributes themselves are needed to be learned.
+Using multi-hot vectors, both order and salience are irrelevant and only the attributes themselves are needed to be learned.
 The goal of these experiments is now to see if the information of the sender improves the predictions of the receiver.
 
 As can be seen in the table, the improvement is dependent on the attributes.
@@ -297,7 +346,7 @@ The predictions of the \emph{shape} stay at 100\% accuracy, while the prediction
 The predictions of the \emph{size} stay the same.
 The fact that the sender has a smaller influence on the \emph{CLEVR color} dataset than on the \emph{Dale} dataset is surprising since the sender would need to communicate only the \emph{color} instead of additionally the \emph{shape} (and \emph{size}).
 A reason why this happens might be the larger number of distractors.
-This number might hinder the receiver to converge and understand the task, by connecting the one-hot vector to the colors of the target object.
+This number might hinder the receiver to converge and understand the task, by connecting the multi-hot vector to the colors of the target object.
 While for the \emph{Dale} datasets the receiver has a choice between only 2 to 5 objects, they need to decide between up to 10 objects on the \emph{CLEVR color} dataset.
 That might confuse the model where to focus on and subsequently to connect it to the on-hot vector.
 Future experiments with a similar dataset including fewer distractors would need to verify this hypothesis.
