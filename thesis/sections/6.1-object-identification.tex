@@ -54,7 +54,7 @@ The following values for the variables are compared:
     \item $n$: 1, 2, 3, 4, 6
 \end{itemize}
 
-The language game is run on the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets.
+The language game is run on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets.
 A random guess corresponds to 50\% in the \emph{Dale-2} dataset, 20\% in the \emph{Dale-5} dataset and 13\% in the \emph{CLEVR color} dataset.
 
 \subsubsection*{Results}
@@ -62,41 +62,65 @@ A random guess corresponds to 50\% in the \emph{Dale-2} dataset, 20\% in the \em
 \begin{figure}[ht!]
     \centering
     \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-2_vocab-size.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_discriminator_dale-2_vocab-size.png}
         \label{fig:learning-curve_discriminator_dale-2_vocab-size}
     }
     \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-2_max-len.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_discriminator_dale-2_max-len.png}
         \label{fig:learning-curve_discriminator_dale-2_max-len}
     }
     \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-5_vocab-size.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_discriminator_dale-5_vocab-size.png}
         \label{fig:learning-curve_discriminator_dale-5_vocab-size}
     }
     \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_dale-5_max-len.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_discriminator_dale-5_max-len.png}
         \label{fig:learning-curve_discriminator_dale-5_max-len}
     }
     \subfigure[\emph{CLEVR color} dataset with different $|V|$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_colour_vocab-size.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_discriminator_colour_vocab-size.png}
         \label{fig:learning-curve_discriminator_colour_vocab-size}
     }
     \subfigure[\emph{CLEVR color} dataset with different $n$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_discriminator_colour_max-len.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_discriminator_colour_max-len.png}
         \label{fig:learning-curve_discriminator_colour_max-len}
     }
-    \caption{Learning curves of all discrimination games on each dataset. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \caption{Learning curves of all object identification games on each dataset. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
     \label{fig:learning-curves_discriminator}
 \end{figure}
 
 When looking at the results of the experiments, it can be seen that the agents are successfully discriminating the objects across all datasets.
-Tables \ref{tab:results_discriminator_dale-2} to \ref{tab:results_discriminator_color} give an overview over the accuracy scores of selected configurations.
+Figure \ref{fig:learning-curves_discriminator} gives an overview of the learning process of the agents.
+Each graph shows the learning curve of a configuration.
+In the left column, every color stands for configurations with a certain vocabulary size while in the right column a color corresponds to a message length.
+The rows show the three datasets.
+First of all, it can be seen that there are many configurations that outperform the baseline across all datasets and the agents are able to solve the task together.
+However, there are differences in the speed, the performance and the influence of vocabulary size and message length.
+
+The agents can solve the task on \emph{Dale-2} dataset very fast.
+Most of the configurations reach accuracies close to the final accuracy already after 2000 to 7000 games.
+If the agents learn to discriminate the object, they do so during these first games.
+After they reached these high accuracies, the learning is relatively unstable and can drop several times for up to 20\% points.
+However, the agents can recover after some thousand games to the original performance.
+The more games are played, the more stable the learning gets.
+The influence of the vocabulary size and message length is not as clear, but smaller vocabulary sizes tend to help the agents to learn faster.
+On the \emph{Dale-5} dataset, there is already a wider spread in performances and the learning is slower than on the \emph{Dale-2} dataset.
+The agents learn fast up to an accuracy of around 50\%, but for most configurations it then slows down, and the accuracy improves until the cutoff after 128.000 games.
+When the agents are given a vocabulary size of $|V|=2$, for several runs, the learning even stops after they reach around 50\% accuracy or progresses only very slowly.
+With a vocabulary size of $|V|=100$, the agents reach the 50\% some thousand games after the remaining vocabulary sizes, but the learning goes on afterwards.
+While there is no visible influence of the message length on the learning speed, all configurations that stay at an accuracy between 45\% and 65\% have a message length of $n=1$.
+Interestingly, there is also one configuration that diverges from the baseline very late after almost 80.000 games.
+Finally, on the \emph{CLEVR color} dataset, difference in learning speed are again more apparent.
+Agents tend to learn the fastest with a vocabulary size of $|V|=2$, the accuracy however almost stagnates after the initial boost to around 40\%.
+When agents are given a vocabulary of size $|V| \in \{10,16\}$, the initial learning takes place several thousand games later, but therefore reaches higher final accuracies.
+As seen already for the \emph{Dale-5} dataset, most of the configurations converge in the first 20.000 games, but there are several converge much later.
+An influence of the message length on the speed is again not visible.
+% SD: As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.
+% DK: done
+
+Tables \ref{tab:results_discriminator_dale-2} to \ref{tab:results_discriminator_color} give an overview over the final accuracy scores after 128.000 games of selected configurations.
 For each dataset there are many configurations that outperform the baseline models by a high margin.
 However, there are still clear differences between the accuracy scores of each dataset.
-
-\cmtDK[inline]{learning curve}
-% SD: As we discussed at Semdial, it would be good to have a learning curves here that would show how fast or slow the languages converge. As David pointed out it may be that convergence is unstable and changes happen in between.
-% DK: TODO
 
 \begin{table}[ht]
     \centering
@@ -129,7 +153,7 @@ However, there are still clear differences between the accuracy scores of each d
         {100}                         & {1000}    & {3} & {2}   & \textcolor{purple}{61,2\%}          \\
         \bottomrule
     \end{tabular}
-    \caption{Selected results of the object identification games on the Dale-2 dataset with $e_s=100$ and $e_r=500$}
+    \caption{Selected results of the object identification games on the Dale-2 dataset with $e_s=100$ and $e_r=500$ after 128.000 games}
     \label{tab:results_discriminator_dale-2}
 \end{table}
 
@@ -176,7 +200,7 @@ Finally looking at the hidden sizes, no direct effect can be identified and the 
         {1000}                        & {1000}    & {6} & {100} & \textcolor{purple}{35,24\%}         \\
         \bottomrule
     \end{tabular}
-    \caption{Selected results of the object identification games on the Dale-5 dataset with $e_s=100$ and $e_r=500$}
+    \caption{Selected results of the object identification games on the Dale-5 dataset with $e_s=100$ and $e_r=500$ after 128.000 games}
     \label{tab:results_discriminator_dale-5}
 \end{table}
 
@@ -226,7 +250,7 @@ As expected, when the message length is allowed to be longer, these configuratio
         {500}                         & {500}     & {2} & {2}   & \textcolor{purple}{22,35\%}              \\
         \bottomrule
     \end{tabular}
-    \caption{Selected results of the object identification games on the CLEVR color dataset with $e_s=100$ and $e_r=500$}
+    \caption{Selected results of the object identification games on the CLEVR color dataset with $e_s=100$ and $e_r=500$ after 128.000 games}
     \label{tab:results_discriminator_color}
 \end{table}
 

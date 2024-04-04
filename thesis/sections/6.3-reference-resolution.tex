@@ -3,12 +3,12 @@
 In the final experiments, the agents are tasked to produced and understand referring expressions only based on the implicit human knowledge present in the scenes, as for example the attributes of the objects.
 Opposed to the previous experiments, explicit human language information as human referring expressions or one-hot encoded attributes are avoided.
 By this, the agents can't just reuse these human referring expressions, but need to learn to generate them themselves during the language games just based on the visual input.
-This is done similarly to the single model reference resolution task, described in section \ref{sec:reference_resolution}.
+This is done similarly to the single model reference resolution task, described in Section \ref{sec:reference_resolution}.
 As before, the sender has the same architecture as in the previous language games, encoding the bounding boxes of all objects.
 
 The receiver is tasked to solve two tasks.
 First, in the \textbf{coordinate reference resolver}, the agents are tasked to predict the center coordinates of the target object (see Figure \ref{fig:coordinate_predictor_game_architecture}).
-The receiver is the same in both setups and is based on the \emph{reference resolver} + referring expressions, described in section \ref{sec:reference_resolution}.
+The receiver is the same in both setups and is based on the \emph{reference resolver} + referring expressions, described in Section \ref{sec:reference_resolution}.
 Again, instead of the included LSTM, the receiver uses the \emph{EGG} LSTM with the hidden size $h_r=500$ and $e_r=100$ to encode the message.
 The dimensions of the coordinate predictor are fixed to $c=2048$, based on the previous results.
 % SD: Just thinking: would there be a more systematic way to compare all the models? Perhaps if you write the parameters in a table or a text that is parallel. Then you could simply say, modal A + these changes. It would be much clearer to the reader how all models are rerlated and it would be easier for the reader to follow.
@@ -54,18 +54,18 @@ The same metrics are used to evaluate the results as described in \ref{sec:refer
 \begin{figure}[ht!]
     \centering
     \subfigure[\emph{Dale-2} dataset]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_coordinate-predictor_dale-2.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_dale-2.png}
         \label{fig:learning-curve_coordinate-predictor_dale-2}
     }
     \subfigure[\emph{Dale-5} dataset]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_coordinate-predictor_dale-5.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_dale-5.png}
         \label{fig:learning-curve_coordinate-predictor_dale-5}
     }
     \subfigure[\emph{CELVR color} dataset]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_coordinate-predictor_colour.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_colour.png}
         \label{fig:learning-curve_coordinate-predictor_colour}
     }
-    \caption{Learning curves of all discrimination games on each dataset. As almost no games beat the baseline, $|V|$ and $n$ are not highlighted separately. The baseline is marked in black.}
+    \caption{Learning curves of all coordinate reference resolving games on each dataset. As almost no games beat the baseline, $|V|$ and $n$ are not highlighted separately. The baseline is marked in black.}
     \label{fig:learning-curves_coordinate-predictor}
 \end{figure}
 
@@ -103,12 +103,15 @@ The same metrics are used to evaluate the results as described in \ref{sec:refer
         {6}                           & {100}   & \textcolor{purple}{34,62}           & {40,02\%}                           & \textcolor{purple}{39,46}                & \textcolor{purple}{25,48\%} & \textcolor{purple}{42,53} & \textcolor{purple}{18,4\%}  \\
         \bottomrule
     \end{tabular}
-    \caption{TODO: caption}
+    \caption{Mean distance (loss) in pixels and accuracy in \% of the coordinate reference resolver after 128.000 games: $n$ are different maximum message lengths and $|V|$ are different vocabulary sizes.}
     \label{tab:results:coordinate-reference-resolver-game}
 \end{table}
 
-Table \ref{tab:results:coordinate-reference-resolver-game} shows the results of the coordinate reference resolver on different datasets.
+Figure \ref{fig:learning-curves_coordinate-predictor} show the learning curves for the \textbf{coordinate reference resolver}.
+As visible, all configurations perform exactly as the baselines across all datasets.
 The baselines show the predictions of the receiver without information of the sender, and correspond to the structural bias in the dataset.
+This shows, that the agents don't communicate successfully in any of the configurations to solve the task and predict correct coordinates.
+Table \ref{tab:results:coordinate-reference-resolver-game} shows the final results after 128.000 games on different datasets.
 When looking at how the agents fare with each dataset, not much general improvement can be seen.
 Most of the configurations don't beat the baseline, independently of the shown dataset.
 If they do, they can improve the mean distance of the predicted coordinates to the center of the target object only by 2 to 4 pixels.
@@ -123,7 +126,7 @@ This is an increase of around 13\% compared to the baseline.
 While this value is still lower than a random guess between the objects in the scene, it shows, that some information is exchanged between the agents.
 The meaning of the messages however doesn't seem to correspond to any attribute or object to consistently solve the task.
 
-Looking at the results on the \emph{Dale-5}, no improvements for the mean distance nor the accuracy can be seen when a sender is involved.
+Looking at the results on the \emph{Dale-5} dataset, no improvements for the mean distance nor the accuracy can be seen when a sender is involved.
 However, while the loss stays again constant, the accuracy drops lower in many configurations, up to 7\% points to an accuracy of 23,26\%.
 Again, this is an indicator that messages are transferred and interpreted by the receiver.
 The receiver seems to use this information to focus more on the objects.
@@ -137,36 +140,53 @@ The greater number of distractors seems to raise the complexity of the task even
 These numbers align with the results of the single model, discussed in Section \ref{sec:referring_expression_generation}.
 Hereby, the single model was only able to predict correct coordinates for the \emph{Dale-2} dataset with one distractor.
 The higher complexity for the agents that includes more layers in the model as well as the discrete bottleneck raises the bar of the task too high to be solved in this configuration.
-The second setup in this section tries to reduce the complexity, by not predicting precise geometric locations, but instead attending to larger areas.
-The results are summed up in Table \ref{tab:results:attention-reference-resolver-game}.
+The second setup in this section, the \textbf{attention reference resolver}, tries to reduce the complexity, by not predicting precise geometric locations, but instead attending to larger areas.
+The learning curves are shown in Figure \ref{fig:learning-curves_attention-predictor}.
+
+As expected, the task is solver better by the agents, and they communicate successfully across all datasets.
+Compared to the experiments in the previous sections, the learning is still generally slower, and the configurations diverge from the baseline overall later.
+However, when the agents start to learn to communicate, the probability is boosted instantly to a higher level, where it again learns at a slower speed parallel to the baseline.
+On the \emph{Dale-2} dataset, the boost is around 40\% points.
+Most of the learning takes place in the first 40.000 games, but there are also two configurations that increase the performance very late after 70.000 and 105.000 games respectively.
+Hereby, agents tend to learn faster the smaller their vocabulary size is.
+The same applies as well to the message length.
+Using the \emph{Dale-5} dataset, the probability masses are boosted around 30\% points when the agents start to communicate successfully.
+Compared to the \emph{Dale-2} dataset, fewer configurations start to converge, while most achieve performances close to the baseline.
+The smaller number of learning curves makes the analysis more difficult, but the same trend about the vocabulary size and the message length is still visible.
+Interestingly, only one configuration with $|V|=2$ beats the baseline, but behaves relatively unstable over the remaining training.
+On the other hand no configuration with $|V|=100$ is successful.
+This indicates that one symbol too few to encode all meaning, but too many symbols are too difficult to learn.
+This hypothesis is amplified by the results on the \emph{CLEVR color} dataset.
+Only two configurations beat the baseline, both with a medium-sized vocabulary size and message length.
+In both cases, the learning takes place relatively late, after 15.000 and 30.000 games respectively.
 
 \begin{figure}[ht!]
     \centering
     \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-2_vocab-size.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-2_vocab-size.png}
         \label{fig:learning-curve_attention-predictor_dale-2_vocab-size}
     }
     \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-2_max-len.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-2_max-len.png}
         \label{fig:learning-curve_attention-predictor_dale-2_max-len}
     }
     \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-5_vocab-size.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-5_vocab-size.png}
         \label{fig:learning-curve_attention-predictor_dale-5_vocab-size}
     }
     \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_dale-5_max-len.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-5_max-len.png}
         \label{fig:learning-curve_attention-predictor_dale-5_max-len}
     }
     \subfigure[\emph{CLEVR color} dataset with different $|V|$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_colour_vocab-size.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_colour_vocab-size.png}
         \label{fig:learning-curve_attention-predictor_colour_vocab-size}
     }
     \subfigure[\emph{CLEVR color} dataset with different $n$ highlighted]{
-        \includegraphics[width=0.46\linewidth]{figures/learning-curve_attention-predictor_colour_max-len.png}
+        \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_colour_max-len.png}
         \label{fig:learning-curve_attention-predictor_colour_max-len}
     }
-    \caption{Learning curves of all discrimination games on each dataset. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \caption{Learning curves of all attention reference resolver games on each dataset. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
     \label{fig:learning-curves_attention-predictor}
 \end{figure}
 
@@ -204,10 +224,11 @@ The results are summed up in Table \ref{tab:results:attention-reference-resolver
         {6}                           & {100}     & \textcolor{purple}{60,27\%}         & \textcolor{purple}{46,92\%}         & \textcolor{purple}{41,98\%}              \\
         \bottomrule
     \end{tabular}
-    \caption{TODO: caption}
+    \caption{Probability masses of the attention reference resolver after 128.000 games: $n$ are different maximum message lengths and $|V|$ are different vocabulary sizes.}
     \label{tab:results:attention-reference-resolver-game}
 \end{table}
 
+The final probability masses after 128.000 games are summed up in Table \ref{tab:results:attention-reference-resolver-game}.
 Opposed to the \emph{coordinate reference resolver}, the baseline can already find and attend to the correct regions in many cases.
 The probability mass, that is the sum of the predicted probabilities of all regions of the target object is higher than a uniform distribution (\approx 4,6\%) and a random guess of an object.
 It reaches 62,16\% on the \emph{Dale-2} dataset, 49,61\% on the \emph{Dale-5} dataset and 41,68\% on the \emph{CLEVR color} dataset.
