@@ -138,12 +138,10 @@ These are assigned randomly.
 There is again no control over the relations between distractors, which means that distractors can appear multiple times.
 
 Two datasets following these rules are created.
-The Dale-2 dataset contains one target object and one distractor (see Figure \ref{fig:clevr-dale-2}), while the Dale-5 dataset contains one target object and exactly four distractors.
+The 'Dale-2' dataset contains one target object and one distractor (see Figure \ref{fig:clevr-dale-2}), while the Dale-5 dataset contains one target object and exactly four distractors.
 Consider Figure \ref{fig:clevr-dale-5}, with the target object being the \emph{large purple cylinder}. The large purple sphere shares the size and color, the two cubes only share the size, and the small turquoise sphere doesn't share any attribute.
 % SD: It’s actually the reverse in which descriptions are generated, we start left to right: large purple (are shared), the last attribute must thus be unique. Generation proceeds in the opposite order, one would just say sphere. We should clarify this. Now it is very hard to understand.
 % DK: That's true for the generation of the descriptions. This is explained in chapter 4.2.1 where the captions are needed for the training as input. As said before, the algorithm was not directly used and is just the reason. (done)
 
 These two datasets allow a more realistic look in how models can acquire knowledge about attributes of objects.
 More specifically it helps to understand how models learn to discriminate objects from each other, since the model may only need to learn discriminative features of objects and not all features of the whole object.
-
-\cmtDK[inline]{probabilities of shared attributes for both Dale-2 and Dale-5}

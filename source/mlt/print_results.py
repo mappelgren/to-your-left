@@ -145,6 +145,9 @@ class Run:
 
 variable_dict = {
     "max_len": "$n$",
+    "encoder_embedding": "$LSTM_e$",
+    "encoder_out": "$LSTM_o$",
+    "projection": "$p$",
     "receiver_embedding": "$e_r$",
     "receiver_hidden": "$h_r$",
     "receiver_projection": "$p$",

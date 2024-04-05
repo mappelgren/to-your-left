@@ -46,8 +46,7 @@ The following values for the variables are compared:
     \item $n$: 1, 2, 3, 4,  6
 \end{itemize}
 
-As in section \ref{sec:reference_resolution}, the agents are trained first on the \emph{CLEVR single} dataset to understand if they are capable of predicting locations in an image together.
-In a next step, the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
+As in section \ref{sec:reference_resolution}, the agents are trained on the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
 The same metrics are used to evaluate the results as described in \ref{sec:reference_resolution}.
 
 \subsection*{Results}
@@ -61,7 +60,7 @@ The same metrics are used to evaluate the results as described in \ref{sec:refer
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_dale-5.png}
         \label{fig:learning-curve_coordinate-predictor_dale-5}
     }
-    \subfigure[\emph{CELVR color} dataset]{
+    \subfigure['CLEVR color' dataset]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_colour.png}
         \label{fig:learning-curve_coordinate-predictor_colour}
     }

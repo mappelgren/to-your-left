@@ -172,7 +172,7 @@ The model is then tasked to predict the matrix $A = (a_{ij})$, where:
 
 To do this, the model combines a representation of the image and a representation of the target object.
 More specifically, the image is encoded using the \emph{image encoder} submodule, omitting the last \emph{max pool} layer.
-By this, the resulting matrix has 128\times14\times14 dimension, corresponding to the 14\time14 regions.
+By this, the resulting matrix has 128\times14\times14 dimension, corresponding to the 14\times14 regions.
 For the target object, the incremental RE is passed through an LSTM as described before.
 Both encodings are passed through two linear layers separately to project them to the projection dimension $p$, followed by the $tanh$ function.
 Following, the dot product is calculated between the projected image and the projected attributes which results in a 14\times14 matrix.
@@ -408,7 +408,7 @@ Preliminary experiments showed that applying dropout to help the model to genera
 % SD: The results show that the model is learning something from the training data but this is not the feature that should be learning as the performance on the test data is low. Actually, is it low, it is 10, 35 and 45 pixels. We should not expect any difference between epochs as there is no training. Hence, a flat line is expected.
 % DK: (done)
 
-\begin{figure}[ht!]
+\begin{figure}[p]
     \centering
     \subfigure['Dale-2', train split]{
         \includegraphics[width=.839\linewidth]{figures/visualization_dale-2_train.png}
@@ -440,7 +440,7 @@ Preliminary experiments showed that applying dropout to help the model to genera
 
 An interesting pattern appears when doing a qualitative analysis of the models' predictions.
 Here, the predicted coordinates compared to the ground truth coordinates are visualized (Figure \ref{fig:visualizations}), using the best performing model with $e_i=300$, $c=2048$, $LSTM_o=1500$ and $LSTM_e=15$.
-Figure \ref{fig:visualizations_dale-2_train} shows random examples of predictions for images in the train dataset of Dale-2.
+Figure \ref{fig:visualizations_dale-2_train} shows random examples of predictions for images in the train dataset of 'Dale-2'.
 The green circle shows the ground truth center coordinates of the target object, while the red circle shows the prediction of the model.
 As can be seen, the predictions are very precise.
 Figure \ref{fig:visualizations_complete} combines the predictions and ground truths across all images in the train dataset.
@@ -523,3 +523,81 @@ As soon as more objects are present, the task gets to difficult and the model on
 Concluding, the model is able to extract, where objects are located in the image, but can't consistently make use of the referring expressions, to decide which of these objects is the target object.
 % SD: There is a centre bias and the model can partially locate the target. The task is hard. The features are not optimal for this task. Future would should focus on using geometric features - we should have tried these and I'm sure we would get better results. Another extension would be making pointing less precise, i.e. focus on a single point, i.e. using a circle of 20 pixels or a 7x7 grid as in the attention mechanism. This would simplify the task.
 % DK: TODO (future work)
+
+A central problem in the models' predictions is therefore the focussing on precise locations in the image and connecting them to the referring expression.
+The \textbf{attention reference resolver} is meant to solve this problem in two ways.
+First, the predictions must not be as precise, as only regions in a 14\times14 grid need to be identified.
+Second, the referring expressions are naturally combined with each region in the image.
+While the \emph{coordinate reference resolver} only combines the complete feature map with the encoded referring expression, the \emph{attention reference resolver} calculates the similarity of each region with the referring expression separately.
+This should connect both encodings easier.
+As Table \ref{tab:results:attention-reference-resolver} shows, this hypothesis seems to be confirmed.
+Across all datasets, the model is able focus on the correct region in the image with high precision.
+On the 'Dale-2' dataset, the model is able to make 96,57\% of its predictions in the correct regions around the target object with a projection size of $p=500$.
+The worst result with $p=300$ still only lies around 3\% points below and therefore identifies the target object almost always correctly.
+These results still hold, when more distractors and more complex referring expressions are introduced.
+On the 'Dale-5' dataset, the model can achieve similar performances, with a probability mass of 93,61\% with $p=300$, while three of the remaining configurations stay above 92\%.
+When the \emph{color} is the only discriminating attribute, the model achieves again similar results to the 'Dale-2' dataset, despite the higher number of distractors of up to 10.
+The best performance of 95,33\% is achieved with $p=100$, but all configurations beat are almost reach 94\%.
+In conclusion, the models are able to easily understand the referring expression and to ground them in the target object in the image.
+While more complex referring expressions challenge the model slightly more, it still can focus on the correct object.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{c|c|c|c}
+        \toprule
+               & \multicolumn{1}{c}{\textbf{Dale-2}} & \multicolumn{1}{c}{\textbf{Dale-5}} & \multicolumn{1}{c}{\textbf{CLEVR color}} \\  \cmidrule(lr){2-2}\cmidrule(lr){3-3}\cmidrule(lr){4-4}
+        $p$    & \textbf{Probability mass}           & \textbf{Probability mass}           & \textbf{Probability mass}                \\\midrule
+        {50}   & {94,47\%}                           & {89,69\%}                           & {94,36\%}                                \\
+        {100}  & {95,16\%}                           & {92,19\%}                           & {95,33\%}                                \\
+        {300}  & {93,65\%}                           & {93,61\%}                           & {94,15\%}                                \\
+        {500}  & {96,57\%}                           & {92,29\%}                           & {94,15\%}                                \\
+        {1000} & {95,93\%}                           & {92,93\%}                           & {93,82\%}                                \\
+        \bottomrule
+    \end{tabular}
+    \caption{Probability masses of the \emph{attention reference resolver} for different projection sizes $p$ of the model after 20 epochs with $LSTM_e=15$ and $LSTM_o=1500$}
+    \label{tab:results:attention-reference-resolver}
+\end{table}
+
+This conclusion gets even more clear, when having a look at the image, where the model identified the wrong regions.
+Figure \ref{fig:visualizations_attention} shows three images for each dataset, where the model's predicted probability mass was lower than 60\%.
+The errors of the models can be classified into three categories.
+Most of the errors are based on non-visible target objects.
+Either the target object is located outside the preprocessed cropped image, or it is partially hidden behind another object.
+Unsurprisingly, the model has difficulties to focus on these regions.
+However, in several cases, the models can still make use of small hints of the target object.
+In the left image if figure \ref{fig:visualizations_dale-2_attention}, a corner of the target object is visible, which the model uses to 31,9\% of its attention on.
+In the central image of the same figure, only the shadow of the target image is visible.
+Still, the model 44,8\% of its attention onto the correct region, while the remaining probabilities are on adjacent regions.
+This indicates that the model can base its decision on excluding a distractor if it doesn't match the referring expression.
+This behavior is mainly visible on the 'Dale-2' dataset with only one distractor.
+On the 'Dale-5' dataset, the model often focuses one on of the remaining distractors.
+Hereby, the model still focuses on distractors that have attributes mentioned in the referring expressions, as the \emph{sphere} in the left image of Figure \ref{fig:visualizations_dale-5_attention} or the \emph{cyan} and \emph{cylinder} distractors in the central image.
+
+The second category of errors includes errors in which the model confuses a distractor with the target object.
+Most of the time, the model still focuses partially on target object, but the main focus lies somewhere else.
+Again, in these cases, the distractor usually shares an attribute with the target object.
+This is for instance shown in the right image of Figure \ref{fig:visualizations_dale-5_attention}, where the model focuses on the \emph{blue} and \emph{small cube} distractors.
+
+Finally, errors also happen when the target region is not completely placed on the target object.
+In several cases the automatic calculation of the target region around the center point doesn't include the parts of the object.
+The model then doesn't actually make an error and focuses on the correct object, but attends only to adjacent regions.
+These predictions are then evaluated as wrong, even though the model was attending correctly.
+This can be for example seen in the left and central images of Figure \ref{fig:visualizations_colour_attention}.
+
+\begin{figure}[ht]
+    \centering
+    \subfigure['Dale-2']{
+        \includegraphics[width=.839\linewidth]{figures/visualization_dale-2_attention.png}
+        \label{fig:visualizations_dale-2_attention}
+    }
+    \subfigure['Dale-5']{
+        \includegraphics[width=.839\linewidth]{figures/visualization_dale-5_attention.png}
+        \label{fig:visualizations_dale-5_attention}
+    }
+    \subfigure['CLEVR color']{
+        \includegraphics[width=.839\linewidth]{figures/visualization_colour_attention.png}
+        \label{fig:visualizations_colour_attention}
+    }
+    \caption{Examples of the \emph{attention reference resolvers'} predictions with a probability mass lower than 60\% on the 'Dale' and 'CLEVR color' datasets. The black rectangle shows the cropped section, the model is actually seeing after the image is preprocessed. The green rectangle surrounds the target region that needs to be predicted while the red regions show the actual predictions of the model. The more intense the red, the higher is the probability that the model assigned to this region.}
+    \label{fig:visualizations_attention}
+\end{figure}
