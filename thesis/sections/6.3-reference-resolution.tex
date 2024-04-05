@@ -259,7 +259,42 @@ Both utilize a medium message length of $n \in \{3,4\}$ and a medium-sized vocab
 Interestingly, several configurations with short message lengths of $n \in \{1,2\}$ perform worse than the baseline.
 This indicates that there is communication between the agents, but it rather distracts the receiver from the target object towards the distractors.
 The same argument for a more difficult task when more objects are involved can be made for the 'CLEVR color' dataset.
-This dataset includes even up to 10 objects, present in the scene which increases the likelihood that the receiver focuses on a wrong object.
+This dataset includes even up to 10 objects present in the scene which increases the likelihood that the receiver focuses on a wrong object.
+
+\begin{figure}[ht]
+    \centering
+    \subfigure['Dale-2']{
+        \includegraphics[width=.839\linewidth]{figures/visualization_games_dale-2_attention.png}
+        \label{fig:visualizations_game_dale-2_attention}
+    }
+    \subfigure['Dale-5']{
+        \includegraphics[width=.839\linewidth]{figures/visualization_games_dale-5_attention.png}
+        \label{fig:visualizations_game_dale-5_attention}
+    }
+    \subfigure['CLEVR color']{
+        \includegraphics[width=.839\linewidth]{figures/visualization_games_colour_attention.png}
+        \label{fig:visualizations_game_colour_attention}
+    }
+    \caption{Examples of the \emph{attention reference resolvers'} predictions in games with successful communication with a probability mass lower than 50\% on the 'Dale' and 'CLEVR color' datasets. The black rectangle shows the cropped section, the model is actually seeing after the image is preprocessed. The green rectangle surrounds the target region that needs to be predicted while the red regions show the actual predictions of the model. The more intense the red, the higher is the probability that the model assigned to this region.}
+    \label{fig:visualizations_game_attention}
+\end{figure}
+
+Figure \ref{fig:visualizations_game_attention} shows examples of the wrongly identified regions on each dataset.
+These are predictions by configurations in which the agents were successfully communicating.
+In other words the sender was not able to transfer information to the receiver, even though a language had already emerged.
+As can be seen on the 'Dale-2' dataset in Figure \ref{fig:visualizations_game_dale-2_attention}, similar problems about non-visible objects occur as for the single models described in Section \ref{sec:reference_resolution}.
+These are in fact the main errors on this dataset.
+However, in several cases (as in the central image), all objects are visible, and the agents still don't attend solely on the target object.
+Rather than choosing one of the distractors, the agents usually attend to both objects relatively equally.
+This indicates that the receiver is uncertain which object the sender is describing.
+Similar errors also occur on both remaining datasets.
+In contrast, the share of errors of the latter type is drastically higher.
+Looking at the results on the 'Dale-5' dataset (see Figure \ref{fig:visualizations_game_dale-5_attention}), the model focusses usually on several objects at once.
+While a general pattern is difficult to identify, the receiver tends to confuse the target object with distractors that share multiple attributes with each other.
+In the central and right image, the wrongly identified distractors share both \emph{size} and \emph{shape} with the target object.
+Finally, on the 'CLEVR color' dataset, no overall reason for the errors can be identified in the qualitative analysis.
+
+
 
 % SD: This identifies that the problem lies in how the sender encodes the messages; what is its policy to generate longer strings or reuse the word. Without a policy the sender will never be motivated to encode longer messages and therefore rely on single-word expressions.
 % SD: The second problem is the size of these networks. We should also test smaller embedding sizes than 10. Practice shows that the embedding sizes can be even several magnitues smaller than the vocabulary sizes, cf. the Bengio paper and word2vec.

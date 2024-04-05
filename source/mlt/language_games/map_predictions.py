@@ -14,17 +14,17 @@ dataset_mapping = {
 
 
 def save_csv(run_dir, dataset, split, file_name):
+    interaction_dir = os.path.join(run_dir, "interactions/")
+    if not os.path.exists(interaction_dir):
+        return
+
     with open(
         os.path.join(run_dir, f"{file_name}_outputs.csv"), "w", encoding="utf-8"
     ) as f:
         f.write("image_id,x,y,target_x,target_y\n")
 
     train_interaction = torch.load(
-        glob(
-            os.path.join(
-                run_dir, "interactions/", f"{split}/", "epoch*/", "interaction*"
-            )
-        )[0]
+        glob(os.path.join(interaction_dir, f"{split}/", "epoch*/", "interaction*"))[0]
     )
 
     for image_id, label, receiver_output, length in zip(
