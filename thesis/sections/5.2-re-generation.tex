@@ -148,28 +148,28 @@ Using this measure, we can get an overview if the model's problem lies in extrac
 
 The RE generator models are trained on both 'Dale' datasets.
 Again, each of these datasets increases the complexity of the description.
-While the referring expression for the \emph{Dale-2} datasets are generally shorter, expressions of the \emph{Dale-5} datasets need to be more specific and use more attributes.
+While the referring expression for the 'Dale-2' datasets are generally shorter, expressions of the 'Dale-5' datasets need to be more specific and use more attributes.
 Additionally, the model needs to attend to many more locations in the image at the same time to find discriminating factors between those.
-Furthermore, the models are trained on the \emph{CLEVR color} dataset.
+Furthermore, the models are trained on the 'CLEVR color' dataset.
 In this dataset, the focus lies mainly on only one discriminating attribute, the color.
 This might help the model in its prediction and will be tested in the experiments.
 
 \subsubsection*{Results}
-Table \ref{tab:results:bb-re-generator} shows the \emph{overall accuracy}, \emph{F1 scores} for each word and the \emph{non-target accuracies} of the \textbf{bounding box RE generator} when trained on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets.
+Table \ref{tab:results:bb-re-generator} shows the \emph{overall accuracy}, \emph{F1 scores} for each word and the \emph{non-target accuracies} of the \textbf{bounding box RE generator} when trained on the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets.
 As can be seen, the overall accuracies, in other words perfect matches of the generated referring expression depend very much on the dataset.
-With the \emph{Dale-2} dataset, the model can achieve perfect matches in 99\% of the cases in its best configuration.
-Also the \emph{CLEVR color} dataset allows the model to predict the correct referring expression in 93\% of the samples.
-Opposed to that the model can only generate perfect referring expressions in 69\% of the samples of the \emph{Dale-5} dataset.
-Looking at the \emph{non-target accuracy}, one of the problems can be identified for the \emph{CLEVR color} dataset.
+With the 'Dale-2' dataset, the model can achieve perfect matches in 99\% of the cases in its best configuration.
+Also the 'CLEVR color' dataset allows the model to predict the correct referring expression in 93\% of the samples.
+Opposed to that the model can only generate perfect referring expressions in 69\% of the samples of the 'Dale-5' dataset.
+Looking at the \emph{non-target accuracy}, one of the problems can be identified for the 'CLEVR color' dataset.
 Summing the \emph{non-target accuracy} and the \emph{overall accuracy}, one gets the accuracy that any of the shown object was described independently if it was the target object.
-For the \emph{CLEVR color} dataset, this score lies at 96\% to 97\% in the best configurations, which means that the model described a shown object for almost all the samples.
+For the 'CLEVR color' dataset, this score lies at 96\% to 97\% in the best configurations, which means that the model described a shown object for almost all the samples.
 In 3\% to 4\% of the cases, the model only picked the wrong object to describe.
-This looks different for the \emph{Dale-5} dataset.
+This looks different for the 'Dale-5' dataset.
 Here, the model describes only in 71\% of the cases one of the shown objects, 69\% the target object and 2\% a distractor.
 The model therefore struggles more with the correct generation of words than with choosing, which object to describe.
 
-When looking at the different configurations, in especially different values for $e$, $LSTM_o$ and $LSTM_e$, it can be seen that the results are not very different for the \emph{Dale-2} and \emph{CLEVR color} datasets.
-However, bigger effects can be identified for the \emph{Dale-5} dataset.
+When looking at the different configurations, in especially different values for $e$, $LSTM_o$ and $LSTM_e$, it can be seen that the results are not very different for the 'Dale-2' and 'CLEVR color' datasets.
+However, bigger effects can be identified for the 'Dale-5' dataset.
 Here, a low output dimension of the LSTM $LSTM_o$ tends to give lower scores.
 This especially enhanced, when also the embedding dimensions of the tokens $LSTM_e$ is low.
 Again, the image embedding size $e$ doesn't seem to have a big effect, when over 50 dimensions.
@@ -199,30 +199,30 @@ Indeed, the model achieves an accuracy of 69\% with all three tested embedding s
     \label{tab:results:bb-re-generator}
 \end{table}
 
-Tables \ref{tab:results:bb-re-generator_size-shape} and \ref{tab:results:bb-re-generator_color} give a more detailed insight in the results and especially what mistakes the model is making for both the \emph{Dale-5} and \emph{CLEVR color} datasets.
+Tables \ref{tab:results:bb-re-generator_size-shape} and \ref{tab:results:bb-re-generator_color} give a more detailed insight in the results and especially what mistakes the model is making for both the 'Dale-5' and 'CLEVR color' datasets.
 They list \emph{precision} and \emph{recall} metrics for each token for the best configuration of the model with $e=100$, $LSTM_o=500$ and $LSTM_e=30$.
 The tokens are grouped by attribute and also show the metrics averaged over each of the attributes.
-Since the overall results for the \emph{Dale-2} dataset are already close to perfect, the focus for this analysis lies on the remaining two datasets.
+Since the overall results for the 'Dale-2' dataset are already close to perfect, the focus for this analysis lies on the remaining two datasets.
 The metrics of the \emph{<pad>} token indicate if the model produced the correct length of the referring expression, in other words if it was able to determine which attributes are necessary to discriminate the target object from the distractors.
-For the \emph{CLEVR color} dataset, the scores are perfect.
-This is not surprising, because all referring expressions for the \emph{CLEVR color} dataset consist of exactly two attributes, shape and color, and the first generated token will always be the only \emph{<pad>} token in the referring expression (corresponding to the unspecified size).
+For the 'CLEVR color' dataset, the scores are perfect.
+This is not surprising, because all referring expressions for the 'CLEVR color' dataset consist of exactly two attributes, shape and color, and the first generated token will always be the only \emph{<pad>} token in the referring expression (corresponding to the unspecified size).
 The \emph{<pad>} token is therefore easy to learn.
-For the \emph{Dale-5} dataset, the model struggles more to predict the correct length of the referring expression.
+For the 'Dale-5' dataset, the model struggles more to predict the correct length of the referring expression.
 
 When looking at the tokens for the shape, it can be seen that the model is able to identify it very well across all datasets.
-The model predicts the correct shape for all samples using the \emph{CLEVR color} dataset, while both \emph{precision} and \emph{recall} lie around 98,3\% when using the \emph{Dale-5} dataset.
+The model predicts the correct shape for all samples using the 'CLEVR color' dataset, while both \emph{precision} and \emph{recall} lie around 98,3\% when using the 'Dale-5' dataset.
 Even though the score is almost perfect, the slight difference might stem from the fact that all distractors have the same shape in the first case, while distractors can be different in the second case.
 Consequently, the model is only exposed to one shape at a time for each sample, which might simplify its identification.
 
-For the color attribute, the metrics drop significantly for both \emph{Dale-5} and \emph{CLEVR color} to an average of around 93\%.
+For the color attribute, the metrics drop significantly for both 'Dale-5' and 'CLEVR color' to an average of around 93\%.
 Hereby, no meaningful difference can be seen across the datasets, but there are differences between the colors.
 Some colors are predicted with \emph{precision} and \emph{recall} around 95\% to 96\%, while others are only around 90\%.
 However, these differences are not reproducible across multiple runs and configurations.
 The best and worst predicted colors vary and no conclusions can be drawn which colors are easier to predict for the model.
 
 Finally, the size is the most difficult attribute to predict for the model.
-Apart from the \emph{CLEVR color} dataset, where a size never needs to be predicted and also is never predicted, the metrics for the prediction of size tokens are the lowest across all tokens.
-They are the only mistakes, the model makes, when exposed to the \emph{Dale-2} dataset and the average \emph{precision} lies around 23\% below the average of predictions of the color for the \emph{Dale-5} dataset, while the average \emph{recall} lies around 28,82\% below.
+Apart from the 'CLEVR color' dataset, where a size never needs to be predicted and also is never predicted, the metrics for the prediction of size tokens are the lowest across all tokens.
+They are the only mistakes, the model makes, when exposed to the 'Dale-2' dataset and the average \emph{precision} lies around 23\% below the average of predictions of the color for the 'Dale-5' dataset, while the average \emph{recall} lies around 28,82\% below.
 The reason why the \emph{precision} is higher than the \emph{recall} is the \emph{<pad>} token, which is predicted very often instead of a token specifying the size.
 In fact, the opposite relationship is visible for the \emph{precision} and \emph{recall} for said token.
 The much higher absolute number of \emph{<pad>} tokens leads to a smaller relative difference of \%-points shown in the table.
@@ -301,7 +301,7 @@ The sum of the \emph{overall accuracy} and \emph{non-target accuracy} represents
 As can be seen, the sum is always relatively high independently of the dataset.
 This shows verifies that the model is able to extract information about the objects in the image.
 However, it can't decide which object to describe.
-Most clearly, this is shown with the \emph{Dale-2} dataset where the sum lies around 90\%.
+Most clearly, this is shown with the 'Dale-2' dataset where the sum lies around 90\%.
 In almost all samples, the  model describes an object perfectly, but in 45\% of the cases it is the target object, in 45\% the distractor.
 Which object, the model chooses is pure chance.
 The same pattern is visible for the other datasets.
@@ -311,10 +311,10 @@ The incremental GRE-algorithm can only generate unique referring expressions, wh
 This applies to all target objects, but there is no such restriction on the distractors.
 One scene can include for instance multiple \emph{large red spheres} as distractors.
 The algorithm then generates two identical referring expressions which can affect the \emph{non-target accuracy}.
-Indeed, while the average number of distractors per scene in the \emph{CLEVR color} dataset is 7,5, the average number of unique distractors lies at 2,7.
+Indeed, while the average number of distractors per scene in the 'CLEVR color' dataset is 7,5, the average number of unique distractors lies at 2,7.
 As seen later, the model learns to correctly never predict a \emph{size} and always predict the correct \emph{shape}.
 Given this fact, a random guess of a color would predict in $\frac{1}{8} * 2,7 = 33,9\%$ of the cases a unique distractor while in $\frac{1}{8}=12,5\%$ of the cases it would predict the target object.
-This corresponds the \emph{non-target accuracies} and \emph{overall accuracies} the \emph{CLEVR color} dataset.
+This corresponds the \emph{non-target accuracies} and \emph{overall accuracies} the 'CLEVR color' dataset.
 The high \emph{non-target accuracy} is therefore misleading and doesn't represent that the model identified other objects in the scene.
 
 \begin{table}[ht]
@@ -353,31 +353,31 @@ The high \emph{non-target accuracy} is therefore misleading and doesn't represen
 
 Table \ref{tab:results:masked-re-generator} shows the results for the \emph{masked RE generator} after 30 epochs.
 A first look at the sum of the \emph{overall accuracy} and the \emph{non-target accuracy} shows the model is able to extract the attributes from the shown objects.
-For the \emph{Dale-2} dataset, this number lies at 90\% for the best configuration, at 51\% for the \emph{Dale-5} dataset and at 55\% for the \emph{CLEVR color} dataset.
+For the 'Dale-2' dataset, this number lies at 90\% for the best configuration, at 51\% for the 'Dale-5' dataset and at 55\% for the 'CLEVR color' dataset.
 Those sums correspond more or less to the sums of the model without masking shown in Table \ref{tab:results:basic-re-generator}.
 In other words, the masking doesn't hinder the model to extract and describe attributes in the image.
 However, the balance in between the two accuracy scores shifts towards the \emph{overall accuracy}, meaning that the model is now able to identify the correct target object more often.
-While the model still achieves 85\% \emph{overall accuracy} in its best configuration, for the \emph{Dale-2} dataset, the model only reaches 36\% for the \emph{Dale-5} dataset and 29\% for the \emph{CLEVR color} dataset.
+While the model still achieves 85\% \emph{overall accuracy} in its best configuration, for the 'Dale-2' dataset, the model only reaches 36\% for the 'Dale-5' dataset and 29\% for the 'CLEVR color' dataset.
 The scores for all datasets are all well above the \emph{basic RE generator} baselines of 45\%, 16\% and 15\% respectively, while in all cases the \emph{non-target accuracies} drop lower.
 In other words, the masked image helps the model to focus on the correct object.
 
 Comparing it to the less complex \emph{bounding box RE generator}, the results are much less accurate.
-This applies to all datasets, even though it is most apparent for the \emph{CLEVR color} dataset.
+This applies to all datasets, even though it is most apparent for the 'CLEVR color' dataset.
 Given the highly increased complexity of the task, the model fares well in comparison on the \emph{Dale} datasets.
 
-Moreover, the referring expression generated for the \emph{Dale-2} dataset are also efficient in the sense that they follow the incremental GRE-algorithm and only use necessary discriminative attributes.
+Moreover, the referring expression generated for the 'Dale-2' dataset are also efficient in the sense that they follow the incremental GRE-algorithm and only use necessary discriminative attributes.
 Features of both target object and distractor are therefore extracted and associated with the vocabulary.
 Striking in these results is also the \emph{non-target accuracy}, which is much higher than for the \emph{bounding box RE generator}.
-For the \emph{Dale-2} dataset, it arrives at 11\% in one configuration, for the \emph{Dale-5} dataset, the model describes for at least 12\% of the samples a distractor, for one configuration even in over 25\% of the cases.
-The \emph{non-target accuracy} of the \emph{CLEVR color} is misleading, and is therefore not considered.
+For the 'Dale-2' dataset, it arrives at 11\% in one configuration, for the 'Dale-5' dataset, the model describes for at least 12\% of the samples a distractor, for one configuration even in over 25\% of the cases.
+The \emph{non-target accuracy} of the 'CLEVR color' is misleading, and is therefore not considered.
 This shows that the model still struggles to learn which of the objects in the scene is the target object, even though masking is applied.
 
-Looking at the effects of the LSTM output size $LSTM_o$ and the LSTM embedding size $LSTM_e$, a difference between the \emph{Dale} datasets and the \emph{CLEVR color} dataset can be identified.
+Looking at the effects of the LSTM output size $LSTM_o$ and the LSTM embedding size $LSTM_e$, a difference between the \emph{Dale} datasets and the 'CLEVR color' dataset can be identified.
 A higher $LSTM_o$ tends to increase the performance of the model, when presented with the \emph{Dale} datasets until a size of 1500 to 2000 dimensions.
 When it is further increased the model starts to perform worse.
 Furthermore, with a low $LSTM_o$, the model is more likely to identify and describe a distractor, while a higher $LSTM_o$ helps the model to focus on the target object.
 The $LSTM_e$ however doesn't seem to have a big consistent effect on the results. With an $LSTM_o$ of around 1500 to 2000, the model seems to fare slightly better with higher $LSTM_e$ of 15 or 30 dimensions.
-For the \emph{CLEVR color} dataset, the results look different.
+For the 'CLEVR color' dataset, the results look different.
 Opposed to the former datasets, a lower $LSTM_o$ helps the model to describe the correct target object.
 On the other side, the \emph{non-target accuracy} stays relatively constant independently of the variables at the same level as for the \emph{basic RE generator}.
 This indicates that the model uses random guesses of the color when it is not able to extract the color of the target object.
@@ -418,17 +418,17 @@ To confirm this, the model's performance on different tokens and attributes are 
 \end{table}
 
 Tables \ref{tab:results:masked-re-generator_size-shape} and \ref{tab:results:masked-re-generator_color} shows the precision and recall for each token.
-The metrics on the \emph{<pad>} token show that the model always predicts the correct length of the referring expression when presented with the \emph{CLEVR color} dataset.
-For the \emph{Dale-2} dataset, the model is able to do this in almost all the cases, while the model struggles the most with the \emph{Dale-5} dataset.
+The metrics on the \emph{<pad>} token show that the model always predicts the correct length of the referring expression when presented with the 'CLEVR color' dataset.
+For the 'Dale-2' dataset, the model is able to do this in almost all the cases, while the model struggles the most with the 'Dale-5' dataset.
 While this was similar to the \emph{bounding box RE generator}, the effect here is amplified.
 Furthermore, the easiest attribute to predict is the shape.
-Again, the metrics for the \emph{Dale-2} and \emph{CLEVR color} dataset are almost the same, but the model is much less able to predict the correct shape for images from the \emph{Dale-5} dataset with only around 85\%.
+Again, the metrics for the 'Dale-2' and 'CLEVR color' dataset are almost the same, but the model is much less able to predict the correct shape for images from the 'Dale-5' dataset with only around 85\%.
 Hereby, the precision is the highest for predicting \emph{cubes} and lowest for predicting \emph{cylinders}, but this varies across runs.
 
 The prediction of the color drops very much in comparison.
 While the metrics all lied above 90\% for the \emph{bounding box RE generator}, now none of datasets passes this limit.
-With the \emph{Dale-2} dataset, the precision and recall lie around 85\%, with the \emph{Dale-5} dataset around 70\% and around 30\% with the \emph{CLEVR color} dataset.
-The drop for the 'Dale' datasets is expected, because of the higher complexity of the task, but the model's performance on the \emph{CLEVR color} dataset is much worse.
+With the 'Dale-2' dataset, the precision and recall lie around 85\%, with the 'Dale-5' dataset around 70\% and around 30\% with the 'CLEVR color' dataset.
+The drop for the 'Dale' datasets is expected, because of the higher complexity of the task, but the model's performance on the 'CLEVR color' dataset is much worse.
 Only every third prediction is correct.
 Hereby, a difference across the colors is visible.
 Some colors reach both precision and recall of around 40\%, while others only of only around 20\%.
@@ -438,13 +438,13 @@ A low precision and high recall indicates that the model predicts the specific c
 In particular, 'blue', 'green' and 'yellow' are predicted too often and 'cyan' and 'purple' are predicted too few.
 
 Finally, the size is again the most difficult attribute to predict.
-As the \emph{bounding box RE generator}, the \emph{masked RE generator} learns correctly to never predict a size for the \emph{CLEVR color} dataset.
+As the \emph{bounding box RE generator}, the \emph{masked RE generator} learns correctly to never predict a size for the 'CLEVR color' dataset.
 Interestingly is the fact that the recall is low which shows that the model likely predicts a \emph{<pad>} token instead.
 This might be due to the fact that the \emph{<pad>} token is very frequent in the size slot across all referring expressions and the model amplified this fact.
 Between both sizes, 'large' objects are easier to predict for the model than 'small' objects.
 The difference lies for both \emph{Dale} datasets at around 8\%.
-However, the precision is still far above a random guess, when used on the \emph{Dale-2} dataset.
-Using the \emph{Dale-5} dataset, the precision only lies at around 50\% to 57\%.
+However, the precision is still far above a random guess, when used on the 'Dale-2' dataset.
+Using the 'Dale-5' dataset, the precision only lies at around 50\% to 57\%.
 
 
 % With 21\% of these descriptions being a description of the target object, the model again uses a random guess.
@@ -462,27 +462,27 @@ Using the \emph{Dale-5} dataset, the precision only lies at around 50\% to 57\%.
 
 
 In conclusion, when the model doesn't need to extract the objects from the scene it performs very well.
-In this case, it is able to achieve almost perfect results on the \emph{Dale-2} dataset and very good results on the remaining two datasets.
+In this case, it is able to achieve almost perfect results on the 'Dale-2' dataset and very good results on the remaining two datasets.
 However, using complete scenes impairs the performance highly.
 The \emph{overall accuracies} decrease and the \emph{non-target accuracies} increase; the model has more difficulties to focus on the correct object.
-The most difficulties the model has with the \emph{CLEVR color} dataset where only the color is a discriminative attribute.
-Looking at the attributes, the last slot (shape) is always the easiest to predict, while the first slot (size for the \emph{Dale} dataset and color for the \emph{CLEVR color} dataset) is the most difficult.
+The most difficulties the model has with the 'CLEVR color' dataset where only the color is a discriminative attribute.
+Looking at the attributes, the last slot (shape) is always the easiest to predict, while the first slot (size for the \emph{Dale} dataset and color for the 'CLEVR color' dataset) is the most difficult.
 This effect is again amplified when the model needs to extract the objects itself instead of being presented with bounding boxes.
 
 There are two main explanations for these results.
 First, as already seen in the previous experiments, a bigger number of distractors confuses the model more where to focus on.
-In the \emph{Dale-2} dataset, there are only two possibilities, while the four distractors in the \emph{Dale-5} dataset and up to nine distractors in the \emph{CLEVR color} give the model a bigger choice.
+In the 'Dale-2' dataset, there are only two possibilities, while the four distractors in the 'Dale-5' dataset and up to nine distractors in the 'CLEVR color' give the model a bigger choice.
 Moreover, having only one attribute to discriminate the target object, poses the model with more difficulties.
 % SD: But before you argued, rather pesimistically, that having distractors with the same attributes actaully contributes to greater performance as it is moire likely that the correct word is generated. I would only pose this as a very vague hypothesis to be tested, as you conclude now it is also the case that images with simialr distractors are more difficult to describe correctly. Hence, it is by no way given.
 % DK: TODO
 The second explanation lies in the incremental GRE-algorithm.
-For instance using the \emph{Dale-2} dataset, when only two random objects are placed in a scene, a second (or third) attribute to discriminate the objects is only needed, when the shape is the same.
+For instance using the 'Dale-2' dataset, when only two random objects are placed in a scene, a second (or third) attribute to discriminate the objects is only needed, when the shape is the same.
 Otherwise, the shape is enough, and the RE is only one word long.
 The probability for this lies at 66,6\%.
 % SD: Why 66? We have 3 attributes, right, so 33%?
 % DK: but that the other attributes are only needed if the shape is the same. The prob. for the shape being different for the second object is 66% (rephrased; done)
 For shape and color being enough, the probability lies at 29,2\% and that all three attributes are necessary is 4,1\%.
-Opposed to that the probabilities with four distractors as in the \emph{Dale-5} dataset are 19,8\%, 47\% and 33,2\% respectively.
+Opposed to that the probabilities with four distractors as in the 'Dale-5' dataset are 19,8\%, 47\% and 33,2\% respectively.
 With four distractors the algorithm is much more likely to produce longer referring expressions.
 These are harder to learn and generate for the model since it needs to take more extracted attributes into account to discriminate the target object from the distractors.
 This is verified by the lower precisions and recalls of the size and color tokens.

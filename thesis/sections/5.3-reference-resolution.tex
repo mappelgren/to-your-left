@@ -408,7 +408,7 @@ Preliminary experiments showed that applying dropout to help the model to genera
 % SD: The results show that the model is learning something from the training data but this is not the feature that should be learning as the performance on the test data is low. Actually, is it low, it is 10, 35 and 45 pixels. We should not expect any difference between epochs as there is no training. Hence, a flat line is expected.
 % DK: (done)
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
     \centering
     \subfigure['Dale-2', train split]{
         \includegraphics[width=.839\linewidth]{figures/visualization_dale-2_train.png}
@@ -472,7 +472,7 @@ They form roughly the shape of a smaller rhombus.
 % SD: The centre bias could be the way the error function is used, that is averages all distances and of course this has a tendency to some middle distance. A solution would be to have better geometric features that could take these errors better into account.
 % DK: TODO (future work)
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
     \centering
     \subfigure['Dale-2', train split]{
         \includegraphics[width=0.42\linewidth]{figures/visualization_dale-2_train_complete.png}

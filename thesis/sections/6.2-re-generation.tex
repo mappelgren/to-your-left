@@ -53,8 +53,8 @@ As in the previous section, the following values for the variables are compared:
     \item $n$: 1, 2, 3, 4, 6
 \end{itemize}
 
-Since the agents are trained to describe the target object discriminatively based on the described GRE-algorithm, they are trained on the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} dataset.
-The \emph{Dale-5} and the \emph{CLEVR color} should be again much harder to learn, since there are more objects that the agents need to discriminate the target object from.
+Since the agents are trained to describe the target object discriminatively based on the described GRE-algorithm, they are trained on the 'Dale-2', 'Dale-5' and 'CLEVR color' dataset.
+The 'Dale-5' and the 'CLEVR color' should be again much harder to learn, since there are more objects that the agents need to discriminate the target object from.
 % SD: So the sender is generating descriptions following the GRE policy?
 % DK: TODO
 The same metrics as in the Section \ref{sec:referring_expression_generation} are used to evaluate the results for the first setup.
@@ -64,23 +64,23 @@ Additionally, the accuracy for each attribute is calculated separately to show w
 \subsubsection*{Results}
 \begin{figure}[ht!]
     \centering
-    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+    \subfigure['Dale-2' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_re-generator_dale-2_vocab-size.png}
         \label{fig:learning-curve_re-generator_dale-2_vocab-size}
     }
-    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+    \subfigure['Dale-2' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_re-generator_dale-2_max-len.png}
         \label{fig:learning-curve_re-generator_dale-2_max-len}
     }
-    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+    \subfigure['Dale-5' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_re-generator_dale-5_vocab-size.png}
         \label{fig:learning-curve_re-generator_dale-5_vocab-size}
     }
-    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+    \subfigure['Dale-5' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_re-generator_dale-5_max-len.png}
         \label{fig:learning-curve_re-generator_dale-5_max-len}
     }
-    \caption{Learning curves of all referring expression generation games on the \emph{Dale} datasets. On the \emph{CLEVR color} dataset, the learning curves don't diverge from the baseline and are therefore left out. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
+    \caption{Learning curves of all referring expression generation games on the \emph{Dale} datasets. On the 'CLEVR color' dataset, the learning curves don't diverge from the baseline and are therefore left out. In the left column, the colors correspond to different vocabulary sizes $|V|$ while in the right column, the colors correspond to different message lengths $n$. The baseline is marked in black.}
     \label{fig:learning-curves_re-generator}
 \end{figure}
 
@@ -89,14 +89,14 @@ The baselines are shown in black.
 Hereby, the sender is sending random messages, so that the receiver needs to solve the task on their own.
 In all configurations that don't pass this baseline, no meaningful messages are exchanged, and no language emerged.
 If configurations perform better on the other hand means that the agents learned to encode some meaning in their messages.
-While for both \emph{Dale} dataset, several configuration diverge from the baseline, in other words, learning takes place, all learning curves align with the baseline for the \emph{CLEVR color} dataset and are therefore left out.
-Looking at the learning curves for the \emph{Dale-2} dataset, most of the configurations can decrease the loss compared to the baseline faster on to a bigger extend.
+While for both \emph{Dale} dataset, several configuration diverge from the baseline, in other words, learning takes place, all learning curves align with the baseline for the 'CLEVR color' dataset and are therefore left out.
+Looking at the learning curves for the 'Dale-2' dataset, most of the configurations can decrease the loss compared to the baseline faster on to a bigger extend.
 Fast learning takes place in the first 10.000 to 15.000 games and decelerates afterwards.
 Also on this task, there are several configurations that converge much later than the initial fast decrease of the loss.
 Most of these configurations diverge from the baseline between 15.000 to 35.000 games, but some even need up to 70.000 games.
 While the vocabulary size now seems to have a lower impact on the learning speed, configurations that converge later tend to have a message length of $n=6$.
-For the \emph{Dale-2} dataset a clear distinction between configurations that align with the baseline and configurations that diverge from the baseline is visible.
-For the \emph{Dale-5} dataset, however, all learning curves are closer together and success of learning is not instantly apparent.
+For the 'Dale-2' dataset a clear distinction between configurations that align with the baseline and configurations that diverge from the baseline is visible.
+For the 'Dale-5' dataset, however, all learning curves are closer together and success of learning is not instantly apparent.
 Nonetheless, several configurations (with low- to medium-sized vocabularies) start to converge earlier than the baseline.
 Configurations with $|V|=2$ start to do so already after 5.000 games, with $|V|\in\{10,16\}$ after around 7.000 games and with $|V|=50$ after around 12.000 games.
 With $|V|=100$, almost no configuration diverges from the baseline.
@@ -143,7 +143,7 @@ This happens across all vocabulary sizes and message lengths.
 \end{table}
 
 Table \ref{tab:results:re-generator-game} shows the \emph{overall accuracies}, \emph{F1-scores} and \emph{non-target accuracies} across all datasets for different message lengths $n$ and vocabulary sizes $|V|$.
-When first having a look at the results of the \emph{Dale-2} dataset, it can be seen that the baseline already identifies correct referring expressions in 41,8\% of the samples.
+When first having a look at the results of the 'Dale-2' dataset, it can be seen that the baseline already identifies correct referring expressions in 41,8\% of the samples.
 However, almost all other configurations perform much better.
 This shows that the agents consistently learn languages to solve the tasks.
 Still, differences in how well the agents perform can be identified.
@@ -158,7 +158,7 @@ Finally, vocabulary sizes of $|V|=10$ and $|V|=16$ consistently perform the best
 However, a difference in the \emph{F1-score} is visible: configurations with $|V|=16$ reach 67,55\% to 73,66\% with message lengths $n \in [2,4]$, where $|V|=10$ only reaches an F1-score of 66,4\% with $n=4$ and otherwise performs worse.
 This indicates as before that the agents were able to encode more attributes with the larger vocabulary.
 
-The results look different when the agents are trained to generate referring expressions for the \emph{Dale-5} dataset.
+The results look different when the agents are trained to generate referring expressions for the 'Dale-5' dataset.
 First, the baseline, in other words the receiver on their own, performs much better.
 It already produces the whole correct referring expressions in 62,66\% of the samples, and achieves and \emph{F1-score} of 81,36\%.
 However, the \emph{non-target accuracy} is quite high with producing correct referring expressions for a distractor in 18,36\% of the cases.
@@ -188,7 +188,7 @@ Having more symbols to describe the objects apparently helps the agents to learn
 However, when the bottleneck is too big, the agents are not able to encode useful messages as seen with $|V|=100$.
 The agents are only able to beat the baseline with $n=3$; all other configurations perform equal or worse.
 
-Finally, the results of the experiments with the \emph{CLEVR color} dataset show that the agents are not able to learn a language to describe the target objects.
+Finally, the results of the experiments with the 'CLEVR color' dataset show that the agents are not able to learn a language to describe the target objects.
 The baseline corresponds to a random guess of the color while the other attributes are identified correctly (since they are identical for target and distractor in the complete scene).
 No configuration beats this baseline which shows that no meaningful language emerges independently of vocabulary size $|V|$ and message length $n$.
 
@@ -229,34 +229,34 @@ No configuration beats this baseline which shows that no meaningful language eme
 Tables \ref{tab:results:re-generator-game_size-shape} and \ref{tab:results:re-generator-game_color} show the precision and recall divided by attributes and tokens.
 The results have a similar general pattern to the single model experiments in Section \ref{sec:referring_expression_generation}.
 For the \emph{Dale} dataset, the \emph{shape} is identified well while the agents struggle more with the \emph{color} and the most with the \emph{size}.
-The agents identify the \emph{shape} and \emph{size} perfectly on the \emph{CLEVR color} dataset, but only predict few \emph{colors}.
+The agents identify the \emph{shape} and \emph{size} perfectly on the 'CLEVR color' dataset, but only predict few \emph{colors}.
 
-Looking at the \emph{shape}, the agents perform almost perfectly with the \emph{Dale-2} dataset.
-The precision and recall are slightly lower with the \emph{Dale-5} dataset, and the agents predict the \emph{sphere} too often, while predicting the \emph{cube} too few.
+Looking at the \emph{shape}, the agents perform almost perfectly with the 'Dale-2' dataset.
+The precision and recall are slightly lower with the 'Dale-5' dataset, and the agents predict the \emph{sphere} too often, while predicting the \emph{cube} too few.
 The difference however lies only around 1\%.
 
-Interestingly, the agents can predict the \emph{color} the best, when presented with the \emph{Dale-5} dataset.
-The precision and recall lie around 90\%, while for the \emph{Dale-2} dataset they lie only around 73\%.
+Interestingly, the agents can predict the \emph{color} the best, when presented with the 'Dale-5' dataset.
+The precision and recall lie around 90\%, while for the 'Dale-2' dataset they lie only around 73\%.
 However, there is a bigger difference across the colors.
-Some colors are predicted more often (e.g. purple and red for \emph{Dale-5}, and yellow red, cyan and blue for \emph{Dale-2}) than others (e.g. brown and green for \emph{Dale-5}, and purple, gray and brown for \emph{Dale-2}).
+Some colors are predicted more often (e.g. purple and red for 'Dale-5', and yellow red, cyan and blue for 'Dale-2') than others (e.g. brown and green for 'Dale-5', and purple, gray and brown for 'Dale-2').
 As can be seen, the colors are not consistent and "difficult" or "easy" colors can't be identified.
 Additionally, these colors also differ across several runs of the same configurations and datasets.
 The differences between the two \emph{Dale} dataset, might be explainable by the number of scenes in which the color is part of the referring expression.
-As seen in Table \ref{tab:results:re-generator-game}, the \emph{overall accuracy} is higher for the \emph{Dale-2} dataset, even though the prediction of the \emph{color} attribute is worse.
-The reason for this is that many referring expressions in the \emph{Dale-2} dataset only rely on the \emph{shape} and no \emph{color} is needed.
+As seen in Table \ref{tab:results:re-generator-game}, the \emph{overall accuracy} is higher for the 'Dale-2' dataset, even though the prediction of the \emph{color} attribute is worse.
+The reason for this is that many referring expressions in the 'Dale-2' dataset only rely on the \emph{shape} and no \emph{color} is needed.
 The agents therefore can perform well even though predictions of the \emph{color} are wrong.
-On the other side, the \emph{color} is a central part of almost all referring expressions in the \emph{Dale-5} dataset and the agents are pushed to learn this attribute more intensely.
+On the other side, the \emph{color} is a central part of almost all referring expressions in the 'Dale-5' dataset and the agents are pushed to learn this attribute more intensely.
 
-Since the single model in Section \ref{sec:referring_expression_generation} already struggled with predicting the \emph{color} on the \emph{CLEVR color} dataset, it is no surprise that it performs badly in the more complex setup of language games.
+Since the single model in Section \ref{sec:referring_expression_generation} already struggled with predicting the \emph{color} on the 'CLEVR color' dataset, it is no surprise that it performs badly in the more complex setup of language games.
 Hereby, the agents are not able to communicate anything and the receiver only generates two colors (green and purple) for all shown samples.
 This results in a random guess of one of the 8 \emph{colors}, explaining the \emph{overall accuracy} of $\frac{1}{8}=12,5\%$.
 
 The final attribute is the \emph{size}.
-While the agents easily learn that the \emph{size} is never part of the referring expression for the \emph{CLEVR color} dataset, they struggle with the \emph{Dale} datasets.
+While the agents easily learn that the \emph{size} is never part of the referring expression for the 'CLEVR color' dataset, they struggle with the \emph{Dale} datasets.
 As in Section \ref{sec:referring_expression_generation}, the agents again struggle to predict the correct length of the referring expression.
 Especially, the agents predict too short referring expressions as the precision of the \emph{<pad>} token in lower than its recall.
 This is mostly due to the \emph{size} attribute, since a large difference of the precision and recall is visible.
-As for the \emph{color}, the agents perform better on the \emph{Dale-5} dataset.
+As for the \emph{color}, the agents perform better on the 'Dale-5' dataset.
 This reason might be the same.
 The \emph{size} attribute is more often needed to discriminate the target object and appears therefore in more samples and is more central in the referring expressions.
 Similarly to the \emph{color} attribute, there are differences between the single tokens.
@@ -264,19 +264,19 @@ However, these are not constant across configurations, datasets and runs and no 
 
 \begin{figure}[ht!]
     \centering
-    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+    \subfigure['Dale-2' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_oh-generator_dale-2_vocab-size.png}
         \label{fig:learning-curve_oh-generator_dale-2_vocab-size}
     }
-    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+    \subfigure['Dale-2' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_oh-generator_dale-2_max-len.png}
         \label{fig:learning-curve_oh-generator_dale-2_max-len}
     }
-    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+    \subfigure['Dale-5' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_oh-generator_dale-5_vocab-size.png}
         \label{fig:learning-curve_oh-generator_dale-5_vocab-size}
     }
-    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+    \subfigure['Dale-5' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_oh-generator_dale-5_max-len.png}
         \label{fig:learning-curve_oh-generator_dale-5_max-len}
     }
@@ -326,10 +326,10 @@ Finally, Figure \ref{fig:learning-curves_oh-generator} shows the learning curves
 The measure of learning is hereby the accuracy of the \emph{shape}.
 The reason for this is that the \emph{size} is not learned at all, while also the \emph{color} diverges only very slightly from baseline.
 Communication is therefore impacting mostly the \emph{shape}, and the influence of the vocabulary size and message length is shown in the figures.
-On the \emph{Dale-2} dataset, configuration that learn the \emph{shape} quickly tend to use smaller vocabularies.
+On the 'Dale-2' dataset, configuration that learn the \emph{shape} quickly tend to use smaller vocabularies.
 However, there are configurations with $|V| \in \{16,10\}$ that need 15.000 to 20.000 games, but outperform the configurations which learned faster.
 A similar result is visible for the message length, where shorter messages help the agents to learn faster while longer messages need more games.
-Looking at the \emph{Dale-5} dataset, more configurations are able to learn the \emph{shape}.
+Looking at the 'Dale-5' dataset, more configurations are able to learn the \emph{shape}.
 Most of the configurations again outperform the baseline already after 5.000 to 10.000 games, but the learning decelerates shortly after.
 Interestingly, most of the configurations reach a final accuracy of the \emph{shape} after 128.000 games of 85\% to 97\%.
 However, the learning progress is different across the configurations.
@@ -341,8 +341,8 @@ However, agents seem to learn slower with $|V| \in \{50,100\}$, while $|V| \in \
 Opposed, a short message length tends to decrease the speed.
 
 Table \ref{tab:results:attribute-predictor-game} shows the results for the games in which the receiver predicts a multi-hot vector of the attributes.
-In the results for the baseline, it can be seen that the receiver can already predict the \emph{shape} and \emph{color}  very well: 88,91\% and 92\% respectively on the \emph{Dale-2} dataset, 80,78\% and 89,38\% respectively on the \emph{Dale-5} dataset, and 100\% and 90,78\% respectively on the \emph{CLEVR color} dataset.
-The \emph{size} however corresponds to a random guess on the \emph{Dale} dataset and only achieves 76,72\% on the \emph{CLEVR color} dataset.
+In the results for the baseline, it can be seen that the receiver can already predict the \emph{shape} and \emph{color}  very well: 88,91\% and 92\% respectively on the 'Dale-2' dataset, 80,78\% and 89,38\% respectively on the 'Dale-5' dataset, and 100\% and 90,78\% respectively on the 'CLEVR color' dataset.
+The \emph{size} however corresponds to a random guess on the \emph{Dale} dataset and only achieves 76,72\% on the 'CLEVR color' dataset.
 This shows that the receiver can already identify attributes of the target object on their own and discriminate it from the distractors.
 However, the size still seems to be an attribute which is difficult to extract from the visual scene.
 The increase in performance compared to the generation of referring expression can be explained by two reasons:
@@ -354,7 +354,7 @@ Using multi-hot vectors, both order and salience are irrelevant and only the att
 The goal of these experiments is now to see if the information of the sender improves the predictions of the receiver.
 
 As can be seen in the table, the improvement is dependent on the attributes.
-When the agents are trained on the \emph{Dale-2} dataset, almost all configurations improve the prediction of the shape.
+When the agents are trained on the 'Dale-2' dataset, almost all configurations improve the prediction of the shape.
 While 11 out of 30 configurations only improve by a maximum of 2\% points, most can predict the \emph{shape} much better, with an accuracy of up to 98,91\%.
 A pattern based on the vocabulary size $|V|$ and message length $n$ is however difficult to identify.
 A smaller vocabulary size of $|V|=10$ generally fares well, but also a large vocabulary size of $|V|=100$ can help to predict the shape both with short messages ($n=2$) and long messages ($n=6$).
@@ -366,20 +366,20 @@ This indicates that the sender doesn't have enough space to communicate both att
 Looking at the \emph{size}, a constant improvement of 2\% points across all configurations can be seen.
 The final accuracy however still lies slightly above a random guess.
 
-The results are similar when the agents need to describe the \emph{Dale-5} dataset.
-The baseline accuracies of the \emph{shape} and \emph{color} are lower, but can be improved to similar peaks as for the \emph{Dale-2} dataset.
+The results are similar when the agents need to describe the 'Dale-5' dataset.
+The baseline accuracies of the \emph{shape} and \emph{color} are lower, but can be improved to similar peaks as for the 'Dale-2' dataset.
 The highest accuracy for the \emph{shape} lies at 97,18\%, while it lies at 95,23\% for the \emph{color}.
 This indicates that the larger number of distractors makes it difficult to focus on the correct object and instead describes distractors when the receiver is on their own.
 But when the sender can communicate the correct object, the receiver describes the attributes as well as with fewer distractors.
 As before, the predictions of the \emph{size} correspond to a random guess.
 
-Using the \emph{CLEVR color} dataset, almost no improvements can be seen.
+Using the 'CLEVR color' dataset, almost no improvements can be seen.
 The predictions of the \emph{shape} stay at 100\% accuracy, while the predictions of the \emph{color} get slightly worse for most configurations and if they improve they only improve by maximum 1\% point.
 The predictions of the \emph{size} stay the same.
-The fact that the sender has a smaller influence on the \emph{CLEVR color} dataset than on the \emph{Dale} dataset is surprising since the sender would need to communicate only the \emph{color} instead of additionally the \emph{shape} (and \emph{size}).
+The fact that the sender has a smaller influence on the 'CLEVR color' dataset than on the \emph{Dale} dataset is surprising since the sender would need to communicate only the \emph{color} instead of additionally the \emph{shape} (and \emph{size}).
 A reason why this happens might be the larger number of distractors.
 This number might hinder the receiver to converge and understand the task, by connecting the multi-hot vector to the colors of the target object.
-While for the \emph{Dale} datasets the receiver has a choice between only 2 to 5 objects, they need to decide between up to 10 objects on the \emph{CLEVR color} dataset.
+While for the \emph{Dale} datasets the receiver has a choice between only 2 to 5 objects, they need to decide between up to 10 objects on the 'CLEVR color' dataset.
 That might confuse the model where to focus on and subsequently to connect it to the on-hot vector.
 Future experiments with a similar dataset including fewer distractors would need to verify this hypothesis.
 

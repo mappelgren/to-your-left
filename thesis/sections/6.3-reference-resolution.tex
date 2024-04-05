@@ -47,17 +47,17 @@ The following values for the variables are compared:
 \end{itemize}
 
 As in section \ref{sec:reference_resolution}, the agents are trained first on the \emph{CLEVR single} dataset to understand if they are capable of predicting locations in an image together.
-In a next step, the \emph{Dale-2}, \emph{Dale-5} and \emph{CLEVR color} datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
+In a next step, the 'Dale-2', 'Dale-5' and 'CLEVR color' datasets are used to test if the agents are able to first communicate a target object and second describe the target object discriminatively with a small vocabulary.
 The same metrics are used to evaluate the results as described in \ref{sec:reference_resolution}.
 
 \subsection*{Results}
 \begin{figure}[ht!]
     \centering
-    \subfigure[\emph{Dale-2} dataset]{
+    \subfigure['Dale-2' dataset]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_dale-2.png}
         \label{fig:learning-curve_coordinate-predictor_dale-2}
     }
-    \subfigure[\emph{Dale-5} dataset]{
+    \subfigure['Dale-5' dataset]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_coordinate-predictor_dale-5.png}
         \label{fig:learning-curve_coordinate-predictor_dale-5}
     }
@@ -120,25 +120,25 @@ However, an influence on the accuracy can be identified.
 The accuracy evaluates how many of the predictions are on the target object.
 An increase in the accuracy with a stable mean distance corresponds shows a behavior where the agents make more correct predictions on the target objects, while the wrong predictions a further away from the target object.
 As a conclusion, this can mean, that the agents' predictions, both correct and incorrect are more confident.
-This seems to happen on the \emph{Dale-2} dataset.
+This seems to happen on the 'Dale-2' dataset.
 The mean distance is not improved, but the accuracy reaches in some configurations up to 46,27\%.
 This is an increase of around 13\% compared to the baseline.
 While this value is still lower than a random guess between the objects in the scene, it shows, that some information is exchanged between the agents.
 The meaning of the messages however doesn't seem to correspond to any attribute or object to consistently solve the task.
 
-Looking at the results on the \emph{Dale-5} dataset, no improvements for the mean distance nor the accuracy can be seen when a sender is involved.
+Looking at the results on the 'Dale-5' dataset, no improvements for the mean distance nor the accuracy can be seen when a sender is involved.
 However, while the loss stays again constant, the accuracy drops lower in many configurations, up to 7\% points to an accuracy of 23,26\%.
 Again, this is an indicator that messages are transferred and interpreted by the receiver.
 The receiver seems to use this information to focus more on the objects.
-Since there are more distractors present in the \emph{Dale-5} dataset, the receiver more likely chooses one of those, as again no discriminating information about the target object seems to be transferred.
+Since there are more distractors present in the 'Dale-5' dataset, the receiver more likely chooses one of those, as again no discriminating information about the target object seems to be transferred.
 
-Lastly, the similar pattern on the mean distance is also visible for the \emph{CLEVR color} dataset.
+Lastly, the similar pattern on the mean distance is also visible for the 'CLEVR color' dataset.
 The accuracy of the baseline is already lower to begin, and a sender can lift this score in almost all configurations.
 But as for the other datasets, the final accuracy is still low and reaches a maximum of only 25\%.
 The greater number of distractors seems to raise the complexity of the task even more.
 
 These numbers align with the results of the single model, discussed in Section \ref{sec:referring_expression_generation}.
-Hereby, the single model was only able to predict correct coordinates for the \emph{Dale-2} dataset with one distractor.
+Hereby, the single model was only able to predict correct coordinates for the 'Dale-2' dataset with one distractor.
 The higher complexity for the agents that includes more layers in the model as well as the discrete bottleneck raises the bar of the task too high to be solved in this configuration.
 The second setup in this section, the \textbf{attention reference resolver}, tries to reduce the complexity, by not predicting precise geometric locations, but instead attending to larger areas.
 The learning curves are shown in Figure \ref{fig:learning-curves_attention-predictor}.
@@ -146,43 +146,43 @@ The learning curves are shown in Figure \ref{fig:learning-curves_attention-predi
 As expected, the task is solver better by the agents, and they communicate successfully across all datasets.
 Compared to the experiments in the previous sections, the learning is still generally slower, and the configurations diverge from the baseline overall later.
 However, when the agents start to learn to communicate, the probability is boosted instantly to a higher level, where it again learns at a slower speed parallel to the baseline.
-On the \emph{Dale-2} dataset, the boost is around 40\% points.
+On the 'Dale-2' dataset, the boost is around 40\% points.
 Most of the learning takes place in the first 40.000 games, but there are also two configurations that increase the performance very late after 70.000 and 105.000 games respectively.
 Hereby, agents tend to learn faster the smaller their vocabulary size is.
 The same applies as well to the message length.
-Using the \emph{Dale-5} dataset, the probability masses are boosted around 30\% points when the agents start to communicate successfully.
-Compared to the \emph{Dale-2} dataset, fewer configurations start to converge, while most achieve performances close to the baseline.
+Using the 'Dale-5' dataset, the probability masses are boosted around 30\% points when the agents start to communicate successfully.
+Compared to the 'Dale-2' dataset, fewer configurations start to converge, while most achieve performances close to the baseline.
 The smaller number of learning curves makes the analysis more difficult, but the same trend about the vocabulary size and the message length is still visible.
 Interestingly, only one configuration with $|V|=2$ beats the baseline, but behaves relatively unstable over the remaining training.
 On the other hand no configuration with $|V|=100$ is successful.
 This indicates that one symbol too few to encode all meaning, but too many symbols are too difficult to learn.
-This hypothesis is amplified by the results on the \emph{CLEVR color} dataset.
+This hypothesis is amplified by the results on the 'CLEVR color' dataset.
 Only two configurations beat the baseline, both with a medium-sized vocabulary size and message length.
 In both cases, the learning takes place relatively late, after 15.000 and 30.000 games respectively.
 
 \begin{figure}[ht!]
     \centering
-    \subfigure[\emph{Dale-2} dataset with different $|V|$ highlighted]{
+    \subfigure['Dale-2' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-2_vocab-size.png}
         \label{fig:learning-curve_attention-predictor_dale-2_vocab-size}
     }
-    \subfigure[\emph{Dale-2} dataset with different $n$ highlighted]{
+    \subfigure['Dale-2' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-2_max-len.png}
         \label{fig:learning-curve_attention-predictor_dale-2_max-len}
     }
-    \subfigure[\emph{Dale-5} dataset with different $|V|$ highlighted]{
+    \subfigure['Dale-5' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-5_vocab-size.png}
         \label{fig:learning-curve_attention-predictor_dale-5_vocab-size}
     }
-    \subfigure[\emph{Dale-5} dataset with different $n$ highlighted]{
+    \subfigure['Dale-5' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_dale-5_max-len.png}
         \label{fig:learning-curve_attention-predictor_dale-5_max-len}
     }
-    \subfigure[\emph{CLEVR color} dataset with different $|V|$ highlighted]{
+    \subfigure['CLEVR color' dataset with different $|V|$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_colour_vocab-size.png}
         \label{fig:learning-curve_attention-predictor_colour_vocab-size}
     }
-    \subfigure[\emph{CLEVR color} dataset with different $n$ highlighted]{
+    \subfigure['CLEVR color' dataset with different $n$ highlighted]{
         \includegraphics[width=0.485\linewidth]{figures/learning-curve_attention-predictor_colour_max-len.png}
         \label{fig:learning-curve_attention-predictor_colour_max-len}
     }
@@ -231,9 +231,9 @@ In both cases, the learning takes place relatively late, after 15.000 and 30.000
 The final probability masses after 128.000 games are summed up in Table \ref{tab:results:attention-reference-resolver-game}.
 Opposed to the \emph{coordinate reference resolver}, the baseline can already find and attend to the correct regions in many cases.
 The probability mass, that is the sum of the predicted probabilities of all regions of the target object is higher than a uniform distribution (\approx 4,6\%) and a random guess of an object.
-It reaches 62,16\% on the \emph{Dale-2} dataset, 49,61\% on the \emph{Dale-5} dataset and 41,68\% on the \emph{CLEVR color} dataset.
+It reaches 62,16\% on the 'Dale-2' dataset, 49,61\% on the 'Dale-5' dataset and 41,68\% on the 'CLEVR color' dataset.
 Interestingly, including a sender in the setup can improve the result for all dataset.
-Looking at the \emph{Dale-2} dataset, almost all configurations beat the baseline and achieve performances of over 90\%, the best configurations reach even 96\%.
+Looking at the 'Dale-2' dataset, almost all configurations beat the baseline and achieve performances of over 90\%, the best configurations reach even 96\%.
 Only three configurations stay on the level of the baseline.
 When comparing the results, mostly the message length $n$ seems to have an influence on the performance.
 While configurations with $n=6$ can perform well, this is not constant.
@@ -243,23 +243,23 @@ In both cases, the target object is unambiguously identified.
 The small number of experiments doesn't allow definite conclusions on the influence of the vocabulary size $|V|$, though $|V|=2$ performs slightly worse than the remaining vocabulary sizes.
 A correlation between $n$ and $|V|$ is not identifiable.
 
-On the \emph{Dale-5} dataset, the agents already have bigger problems to beat the baseline.
+On the 'Dale-5' dataset, the agents already have bigger problems to beat the baseline.
 Only 8 out of 30 configuration perform better and reach probability masses around 76\% to 84\%.
-However, the increase compared to the baseline is with around 30\% points as high as on the \emph{Dale-2} dataset.
+However, the increase compared to the baseline is with around 30\% points as high as on the 'Dale-2' dataset.
 Smaller message lengths ($n \in \{1,2,3\}$) as well as a medium-sized vocabulary ($|V| \in \{10,16,50\}$) tend to help the agents more, to solve the task successfully.
 As before, no correlation is visible with the few successful games.
-That the agents struggle more with the \emph{Dale-5} dataset is not surprising.
+That the agents struggle more with the 'Dale-5' dataset is not surprising.
 First, the larger number of distractors makes it more difficult for the receiver to focus, as can be seen already in the baseline performances.
 Additionally, in case the sender communicates the attributes of the target object to the receiver, more information needs to be encoded to uniquely describe the target object.
 This is naturally more complex to learn for the agents.
 Finally, since more objects are present, they are more likely clustered closer together, which can result in the identification of adjacent regions to the target regions.
 
-The agents struggle the most on the \emph{CLEVR color} dataset.
+The agents struggle the most on the 'CLEVR color' dataset.
 Hereby, only two configurations perform better than the baseline and reach a probability mass of around 64\% to 67\%.
 Both utilize a medium message length of $n \in \{3,4\}$ and a medium-sized vocabulary of $|V| \in \{10,16\}$.
 Interestingly, several configurations with short message lengths of $n \in \{1,2\}$ perform worse than the baseline.
 This indicates that there is communication between the agents, but it rather distracts the receiver from the target object towards the distractors.
-The same argument for a more difficult task when more objects are involved can be made for the \emph{CLEVR color} dataset.
+The same argument for a more difficult task when more objects are involved can be made for the 'CLEVR color' dataset.
 This dataset includes even up to 10 objects, present in the scene which increases the likelihood that the receiver focuses on a wrong object.
 
 % SD: This identifies that the problem lies in how the sender encodes the messages; what is its policy to generate longer strings or reuse the word. Without a policy the sender will never be motivated to encode longer messages and therefore rely on single-word expressions.
