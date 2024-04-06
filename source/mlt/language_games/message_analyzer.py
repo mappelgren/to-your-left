@@ -275,9 +275,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
     parser.add_argument(
-        "--run_root_dir", type=str, help="Path to the root dir of the runs"
-    )
-    parser.add_argument(
         "--dataset_name",
         type=str,
         help="Name of the dataset (dale-2, dale-5, single, colour)",
@@ -287,12 +284,6 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="Name of the run",
-    )
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        default=None,
-        help="Name of the model (discriminator, ...)",
     )
     parser.add_argument(
         "--dataset_root_dir",
@@ -333,14 +324,15 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    model_dir = os.path.join(args.run_root_dir, args.model_name)
-    dataset_dir = os.path.join(model_dir, f"{args.dataset_name}/")
-    run_dir = os.path.join(dataset_dir, args.run_folder)
     train_interaction_path = glob(
-        os.path.join(run_dir, "interactions/", "train/", "epoch*/", "interaction*")
+        os.path.join(
+            args.run_folder, "interactions/", "train/", "epoch*/", "interaction*"
+        )
     )[0]
     test_interaction_path = glob(
-        os.path.join(run_dir, "interactions/", "validation/", "epoch*/", "interaction*")
+        os.path.join(
+            args.run_folder, "interactions/", "validation/", "epoch*/", "interaction*"
+        )
     )[0]
 
     scenes_root = os.path.join(
