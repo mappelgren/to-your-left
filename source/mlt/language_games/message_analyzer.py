@@ -1,8 +1,9 @@
 import argparse
+import ast
 import json
 import math
 import os
-import sys
+import re
 from dataclasses import dataclass
 from glob import glob
 
@@ -12,6 +13,10 @@ from egg.core import Interaction
 from mlt.preexperiments.data_readers import Color, Shape, Size
 from torch import nn, optim
 from torch.utils.data import DataLoader, Dataset
+
+
+class NotARunDirectory(Exception):
+    pass
 
 
 @dataclass
@@ -61,18 +66,44 @@ class LanguageTranslationDataset(Dataset):
     }
 
     def __init__(
-        self, emerged_vocab_size, dataset, interaction_path, scenes_root, combination
+        self,
+        run_folder,
+        split,
+        dataset_root_dir,
+        combination,
     ) -> None:
-        self.emerged_vocab_size = emerged_vocab_size
-        self.samples: list[LanguageTranslationSample] = []
+        log_file = os.path.join(run_folder, "log.txt")
+        if not os.path.exists(log_file):
+            raise NotARunDirectory(f"{run_folder} is not a run dir.")
 
+        with open(log_file, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("appendix: "):
+                    variable_names = ast.literal_eval(line.removeprefix("appendix: "))
+                    break
+
+        dataset, variable_values = self._extract_information_from_folder(
+            os.path.basename(run_folder)
+        )
+        self.variables = dict(zip(variable_names, variable_values))
+
+        interaction_path = glob(
+            os.path.join(run_folder, "interactions/", split, "epoch*/", "interaction*")
+        )[0]
         interaction: Interaction = torch.load(interaction_path)
 
+        scenes_root = os.path.join(
+            dataset_root_dir,
+            self.dataset_mapping[dataset][1],
+            "scenes/",
+        )
+
+        self.samples: list[LanguageTranslationSample] = []
         for raw_message, image_id in zip(
             interaction.message, interaction.aux_input["image_id"]
         ):
             image_id = self._get_image_name(image_id, dataset)
-            message = self._remove_eos(raw_message.max(dim=1).indices)
+            message = raw_message.max(dim=1).indices
             english_description = self._get_english_description(
                 scenes_root, image_id, combination
             )
@@ -80,12 +111,30 @@ class LanguageTranslationDataset(Dataset):
             self.samples.append(
                 LanguageTranslationSample(
                     image_id=image_id,
-                    emerged_message=torch.tensor(message),
+                    emerged_message=message,
                     english_description=torch.tensor(
                         [self.english_vocab[word] for word in english_description]
                     ),
                 )
             )
+
+    def _extract_information_from_folder(self, folder_name):
+        pattern = r"_([^_]+)((_[\de\-\.]+)*)$"
+        match = re.search(pattern, folder_name)
+        if match:
+            dataset = match.group(1)
+            experiment_variables = []
+            for var in match.group(2).split("_"):
+                if var != "":
+                    try:
+                        experiment_variables.append(int(var))
+                    except ValueError:
+                        try:
+                            experiment_variables.append(float(var))
+                        except ValueError:
+                            experiment_variables.append(var)
+
+        return dataset, experiment_variables
 
     def _get_image_name(self, image_id, dataset):
         return f"{self.dataset_mapping[dataset][0]}_{str(int(image_id)).zfill(6)}"
@@ -114,8 +163,9 @@ class LanguageTranslationDataset(Dataset):
             ),
             scene,
         )
+        padding = [self.PAD_TOKEN] * (3 - len(description))
 
-        return [self.SOS_TOKEN, *description, self.EOS_TOKEN]
+        return [self.SOS_TOKEN, *description, self.EOS_TOKEN] + padding
 
     def _get_dale(self, order, target_attributes, scene):
         caption = [target_attributes[0]]
@@ -275,15 +325,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # -- DATASET --
     parser.add_argument(
-        "--dataset_name",
-        type=str,
-        help="Name of the dataset (dale-2, dale-5, single, colour)",
-    )
-    parser.add_argument(
-        "--run_folder",
+        "--root_folder",
         type=str,
         default=None,
         help="Name of the run",
+    )
+    parser.add_argument(
+        "--is_run",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="root_folder contains run or instead multiple run folders",
     )
     parser.add_argument(
         "--dataset_root_dir",
@@ -292,21 +343,20 @@ if __name__ == "__main__":
         help="Path to the root of the datasets",
     )
     parser.add_argument(
-        "--emerged_vocab_size",
-        type=int,
-        default=None,
-        help="Size of the emerged language",
-    )
-    parser.add_argument(
         "--combination",
         type=int,
         default=0,
-        help="Number of combination",
+        help="Number of combination (-1 if all)",
     )
     parser.add_argument(
         "--translator",
         choices=["english", "baseline", "emergent"],
         help="Translator to load",
+    )
+    parser.add_argument(
+        "--out_dir",
+        type=str,
+        help="Directory to save runs. (Leave empty to save in run folder)",
     )
 
     # -- TRAINING --
@@ -324,106 +374,139 @@ if __name__ == "__main__":
     else:
         raise AttributeError("Device must be cpu or cuda")
 
-    train_interaction_path = glob(
-        os.path.join(
-            args.run_folder, "interactions/", "train/", "epoch*/", "interaction*"
-        )
-    )[0]
-    test_interaction_path = glob(
-        os.path.join(
-            args.run_folder, "interactions/", "validation/", "epoch*/", "interaction*"
-        )
-    )[0]
+    if args.is_run:
+        run_folders = [args.root_folder]
+    else:
+        run_folders = glob(os.path.join(args.root_folder, "*"))
 
-    scenes_root = os.path.join(
-        args.dataset_root_dir,
-        LanguageTranslationDataset.dataset_mapping[args.dataset_name][1],
-        "scenes/",
-    )
+    for run_folder in run_folders:
+        print(run_folder)
+        if args.out_dir is None:
+            out_dir = run_folder
+        else:
+            out_dir = args.out_dir
 
-    dataset = LanguageTranslationDataset(
-        dataset=args.dataset_name,
-        interaction_path=test_interaction_path,
-        scenes_root=scenes_root,
-        combination=LanguageTranslationDataset.combinations[args.combination],
-        emerged_vocab_size=args.emerged_vocab_size,
-    )
+        try:
+            if args.combination == -1:
+                combinations = LanguageTranslationDataset.combinations
+            else:
+                combinations = LanguageTranslationDataset.combinations[args.combination]
 
-    language_decoder = LanguageDecoder(len(dataset.english_vocab), 10, 10)
+            for combination_index, combination in enumerate(combinations):
+                dataset = LanguageTranslationDataset(
+                    run_folder=run_folder,
+                    split="validation",
+                    dataset_root_dir=args.dataset_root_dir,
+                    combination=combination,
+                )
 
-    if args.translator == "baseline":
-        translator = BaselineLanguageTranslationModel(
-            language_encoder=LanguageEncoder(1, 10, 10),
-            translation_space=10,
-            language_decoder=language_decoder,
-        )
-    elif args.translator == "english":
-        translator = EnglishLanguageTranslationModel(
-            language_encoder=LanguageEncoder(len(dataset.english_vocab), 10, 10),
-            translation_space=10,
-            language_decoder=language_decoder,
-        )
-    elif args.translator == "emergent":
-        translator = EmergentLanguageTranslationModel(
-            language_encoder=LanguageEncoder(dataset.emerged_vocab_size, 10, 10),
-            translation_space=10,
-            language_decoder=language_decoder,
-        )
-    translator.to(device)
+                language_decoder = LanguageDecoder(len(dataset.english_vocab), 10, 10)
 
-    def collate(data):
-        sources = []
-        targets = []
-        outputs = []
-        image_ids = []
+                if args.translator == "baseline":
+                    translator = BaselineLanguageTranslationModel(
+                        language_encoder=LanguageEncoder(1, 10, 10),
+                        translation_space=10,
+                        language_decoder=language_decoder,
+                    )
+                elif args.translator == "english":
+                    translator = EnglishLanguageTranslationModel(
+                        language_encoder=LanguageEncoder(
+                            len(dataset.english_vocab), 10, 10
+                        ),
+                        translation_space=10,
+                        language_decoder=language_decoder,
+                    )
+                elif args.translator == "emergent":
+                    translator = EmergentLanguageTranslationModel(
+                        language_encoder=LanguageEncoder(
+                            dataset.variables["vocab_size"], 10, 10
+                        ),
+                        translation_space=10,
+                        language_decoder=language_decoder,
+                    )
+                translator.to(device)
 
-        for (source, target), output, image_id in data:
-            sources.append(torch.cat((source, torch.zeros(3 - source.shape[0]))))
-            targets.append(torch.cat((target, torch.zeros(5 - target.shape[0]))))
-            outputs.append(torch.cat((output, torch.zeros(5 - output.shape[0]))))
-            image_ids.append(image_id)
+                def collate(data):
+                    sources = []
+                    targets = []
+                    outputs = []
+                    image_ids = []
 
-        return (
-            (torch.stack(sources), torch.stack(targets)),
-            torch.stack(outputs),
-            image_ids,
-        )
+                    # torch.cat((source, torch.zeros(3 - source.shape[0])))
+                    for (source, target), output, image_id in data:
+                        sources.append(source)
+                        targets.append(target)
+                        outputs.append(output)
+                        image_ids.append(image_id)
 
-    loss_function = nn.CrossEntropyLoss()
-    train_dataloader = DataLoader(
-        dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate
-    )
-    optimizer = optim.Adam(translator.parameters(), lr=args.lr)
+                    return (
+                        (torch.stack(sources), torch.stack(targets)),
+                        torch.stack(outputs),
+                        image_ids,
+                    )
 
-    print(
-        f"{args.epochs} EPOCHS - {math.floor(len(dataset) / train_dataloader.batch_size)} BATCHES PER EPOCH"
-    )
+                loss_function = nn.CrossEntropyLoss()
+                train_dataloader = DataLoader(
+                    dataset,
+                    batch_size=args.batch_size,
+                    shuffle=True,
+                    collate_fn=collate,
+                )
+                optimizer = optim.Adam(translator.parameters(), lr=args.lr)
 
-    for epoch in range(args.epochs):
-        total_loss = 0
-        for i, (model_input, target, image_ids) in enumerate(train_dataloader):
-            model_input = [tensor.to(device).long() for tensor in model_input]
-            target = target.to(device).long()
+                print(
+                    f"{args.epochs} EPOCHS - {math.floor(len(dataset) / train_dataloader.batch_size)} BATCHES PER EPOCH"
+                )
 
-            output = translator(model_input).float()
+                log = [
+                    str(args),
+                    str(translator),
+                    str(combination),
+                ]
+                for epoch in range(args.epochs):
+                    total_loss = 0
+                    for i, (model_input, target, image_ids) in enumerate(
+                        train_dataloader
+                    ):
+                        model_input = [
+                            tensor.to(device).long() for tensor in model_input
+                        ]
+                        target = target.to(device).long()
 
-            # print(list(zip(target, output.max(dim=1).indices)))
+                        output = translator(model_input).float()
 
-            loss = loss_function(
-                output,
-                target[:, 1:],
-            )
-            total_loss += loss.item()
+                        # print(list(zip(target, output.max(dim=1).indices)))
 
-            # print average loss for the epoch
-            sys.stdout.write(
-                f"\repoch {epoch}, batch {i}: {np.round(total_loss / (i + 1), 4)}"
-            )
+                        loss = loss_function(
+                            output,
+                            target[:, 1:],
+                        )
+                        total_loss += loss.item()
 
-            # compute gradients
-            loss.backward()
-            # update parameters
-            optimizer.step()
-            # reset gradients
-            optimizer.zero_grad()
-        print()
+                        # print average loss for the epoch
+                        loss_string = f"epoch {epoch}, batch {i}: {np.round(total_loss / (i + 1), 4)}"
+                        print(
+                            loss_string,
+                            end="\r",
+                        )
+
+                        # compute gradients
+                        loss.backward()
+                        # update parameters
+                        optimizer.step()
+                        # reset gradients
+                        optimizer.zero_grad()
+                    print()
+                    log.append(loss_string)
+
+                with open(
+                    os.path.join(
+                        out_dir,
+                        f"translate_log_{args.combination if args.combination else combination_index}.txt",
+                    ),
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    f.writelines("\n".join(log))
+        except NotARunDirectory:
+            continue
