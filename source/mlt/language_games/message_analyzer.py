@@ -369,6 +369,7 @@ if __name__ == "__main__":
             translation_space=10,
             language_decoder=language_decoder,
         )
+    translator.to(device)
 
     def collate(data):
         sources = []
