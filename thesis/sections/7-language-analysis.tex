@@ -205,3 +205,76 @@ With 100 symbols, the vocabulary resembles mostly \emph{shape > size > color} an
 Striking here is that even though the related orders are different, the most important attributes are either the \emph{size} or \emph{shape} across all three emerged languages.
 The attribute \emph{color} seems to be less important.
 This is reinforced by the fact that the losses are closer to the baseline, when the \emph{color} is the most or second most important attribute in the order.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|c|c|c|c|c|c}
+        \toprule
+        $n$ & $|V|$ & \textbf{c > sh > s}               & \textbf{c > si > sh}              & \textbf{sh > c > si}     & \textbf{sh > si > c}      & \textbf{si > c > sh}      & \textbf{si > sh > c}      \\\midrule
+        {1} & {2}   & \textcolor{red}{95,17\%}          & \textcolor{red}{97,23\%}          & {87,74\%}                & {82,8\%}                  & \textcolor{red}{94,4\%}   & {88,75\%}                 \\
+        {1} & {10}  & \textcolor{red}{96,04\%}          & \textcolor{red}{94,67\%}          & \textcolor{red}{94,06\%} & {88,67\%}                 & {82,86\%}                 & {79,71\%}                 \\
+        {1} & {16}  & \textcolor{red}{93,82\%}          & \textcolor{red}{95,48\%}          & {85,33\%}                & {79,96\%}                 & \textcolor{red}{90,17\%}  & {84,6\%}                  \\
+        {1} & {50}  & \textcolor{red}{94,47\%}          & \textcolor{red}{96,65\%}          & {86,98\%}                & {81,89\%}                 & \textcolor{red}{90,93\%}  & {86,51\%}                 \\
+        {1} & {100} & \textcolor{red}{95,6\%}           & \textcolor{red}{98,19\%}          & \textcolor{red}{90,41\%} & {86,13\%}                 & \textcolor{red}{95,74\%}  & \textcolor{red}{93,76\%}  \\
+        {2} & {2}   & \textcolor{red}{94,75\%}          & \textcolor{red}{96,65\%}          & {86,51\%}                & {80,84\%}                 & \textcolor{red}{92,99\%}  & {86,3\%}                  \\
+        {2} & {10}  & \textcolor{red}{94,69\%}          & \textcolor{red}{98\%}             & {86,92\%}                & {82,2\%}                  & \textcolor{red}{96,31\%}  & \textcolor{red}{92,55\%}  \\
+        {2} & {16}  & \textcolor{red}{95,04\%}          & \textcolor{red}{96,39\%}          & {87,82\%}                & {82,54\%}                 & \textcolor{red}{90,91\%}  & {87,2\%}                  \\
+        {2} & {50}  & \textcolor{red}{97,18\%}          & \textcolor{red}{93,99\%}          & \textcolor{red}{96,42\%} & \textcolor{red}{92,26\%}  & \textbf{77,97\%}          & {75,58\%}                 \\
+        {2} & {100} & \textcolor{red}{93,71\%}          & \textcolor{red}{94,65\%}          & {85,56\%}                & {78,95\%}                 & {83,77\%}                 & {78,69\%}                 \\
+        {3} & {2}   & \textcolor{red}{95,24\%}          & \textcolor{red}{97,37\%}          & {87,56\%}                & {82,49\%}                 & \textcolor{red}{94,38\%}  & {88,87\%}                 \\
+        {3} & {10}  & \textcolor{red}{96,62\%}          & \textcolor{red}{\textbf{91,61\%}} & \textcolor{red}{94,87\%} & {89\%}                    & \textbf{69,2\%}           & \textbf{65,45\%}          \\
+        {3} & {16}  & \textcolor{red}{93,45\%}          & \textcolor{red}{97,16\%}          & {83,6\%}                 & {77,06\%}                 & \textcolor{red}{94,5\%}   & {89\%}                    \\
+        {3} & {50}  & \textcolor{red}{\textbf{90,97\%}} & \textcolor{red}{95,74\%}          & \textbf{74,49\%}         & \textbf{68,89\%}          & \textcolor{red}{92,37\%}  & {84,98\%}                 \\
+        {3} & {100} & \textcolor{red}{96,74\%}          & \textcolor{red}{\textbf{92,76\%}} & \textcolor{red}{95,51\%} & \textcolor{red}{90,35\%}  & \textbf{71,88\%}          & \textbf{69,69\%}          \\
+        {4} & {2}   & \textcolor{red}{94,94\%}          & \textcolor{red}{96,45\%}          & {89,08\%}                & {83,89\%}                 & \textcolor{red}{92,29\%}  & {85,7\%}                  \\
+        {4} & {10}  & \textcolor{red}{\textbf{91,62\%}} & \textcolor{red}{\textbf{93,29\%}} & {78,53\%}                & {70,85\%}                 & {81,99\%}                 & \textbf{74,83\%}          \\
+        {4} & {16}  & \textcolor{red}{92,86\%}          & \textcolor{red}{96,45\%}          & {79,49\%}                & {73,49\%}                 & \textcolor{red}{94,05\%}  & {86,05\%}                 \\
+        {4} & {50}  & \textcolor{red}{94\%}             & \textcolor{red}{94,78\%}          & {86,17\%}                & {79,61\%}                 & {88,11\%}                 & {82,65\%}                 \\
+        {4} & {100} & \textcolor{red}{92,15\%}          & \textcolor{red}{96,99\%}          & {78,91\%}                & {72,51\%}                 & \textcolor{red}{94,8\%}   & {88,6\%}                  \\
+        {6} & {2}   & \textcolor{red}{99,41\%}          & \textcolor{red}{100,29\%}         & \textcolor{red}{97,91\%} & \textcolor{red}{97\%}     & \textcolor{red}{101,11\%} & \textcolor{red}{98,09\%}  \\
+        {6} & {10}  & \textcolor{red}{100,14\%}         & \textcolor{red}{99,98\%}          & \textcolor{red}{99,94\%} & \textcolor{red}{100,07\%} & \textcolor{red}{99,92\%}  & \textcolor{red}{100,06\%} \\
+        {6} & {16}  & \textcolor{red}{\textbf{90,04\%}} & \textcolor{red}{95,83\%}          & \textbf{69,71\%}         & \textbf{61,75\%}          & \textcolor{red}{91,77\%}  & {81,6\%}                  \\
+        {6} & {50}  & \textcolor{red}{91,9\%}           & \textcolor{red}{96,28\%}          & \textbf{76,04\%}         & \textbf{69,86\%}          & \textcolor{red}{92,81\%}  & {85,2\%}                  \\
+        {6} & {100} & \textcolor{red}{99,95\%}          & \textcolor{red}{100,09\%}         & \textcolor{red}{100\%}   & \textcolor{red}{100,1\%}  & \textcolor{red}{99,9\%}   & \textcolor{red}{100,04\%} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Attention predictor: Dale-2}
+    \label{TODO: label}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cc|c|c|c|c|c|c}
+        \toprule
+        $n$ & $|V|$ & \textbf{('color', 'shape', 'size')} & \textbf{('color', 'size', 'shape')} & \textbf{('shape', 'color', 'size')} & \textbf{('shape', 'size', 'color')} & \textbf{('size', 'color', 'shape')} & \textbf{('size', 'shape', 'color')} \\\midrule
+        {1} & {1}   & {99,59\%}                           & {100,07\%}                          & {99,22\%}                           & {99,34\%}                           & {99,87\%}                           & {99,38\%}                           \\
+        {1} & {2}   & {95,35\%}                           & {89,87\%}                           & {95,09\%}                           & {87,23\%}                           & {86,01\%}                           & {84,14\%}                           \\
+        {1} & {10}  & {99,96\%}                           & {100\%}                             & {99,96\%}                           & {99,99\%}                           & {99,98\%}                           & {100,01\%}                          \\
+        {1} & {16}  & {92,95\%}                           & {87,03\%}                           & {92,63\%}                           & {83,91\%}                           & {82,77\%}                           & {80,06\%}                           \\
+        {1} & {50}  & {93,35\%}                           & {87,23\%}                           & {93,26\%}                           & {84,65\%}                           & {82,46\%}                           & {80,38\%}                           \\
+        {1} & {100} & {99,94\%}                           & {100,1\%}                           & {99,93\%}                           & {99,94\%}                           & {99,96\%}                           & {100,09\%}                          \\
+        {2} & {2}   & {100,38\%}                          & {99,41\%}                           & {100,25\%}                          & {98,61\%}                           & {99,01\%}                           & {98,53\%}                           \\
+        {2} & {10}  & {88,94\%}                           & {84,78\%}                           & {87,5\%}                            & {77,76\%}                           & {80,24\%}                           & {74,95\%}                           \\
+        {2} & {16}  & {85,71\%}                           & {84,53\%}                           & {82,98\%}                           & {72,85\%}                           & {79,72\%}                           & {71,85\%}                           \\
+        {2} & {50}  & {99,95\%}                           & {99,98\%}                           & {99,99\%}                           & {100,02\%}                          & {99,99\%}                           & {99,93\%}                           \\
+        {2} & {100} & {100,05\%}                          & {99,98\%}                           & {99,96\%}                           & {99,93\%}                           & {99,99\%}                           & {99,97\%}                           \\
+        {3} & {2}   & {100,38\%}                          & {99,51\%}                           & {100,31\%}                          & {98,57\%}                           & {98,96\%}                           & {98,5\%}                            \\
+        {3} & {10}  & {99,93\%}                           & {100,01\%}                          & {99,99\%}                           & {100,15\%}                          & {100,01\%}                          & {100,01\%}                          \\
+        {3} & {16}  & {92,18\%}                           & {86,23\%}                           & {91,93\%}                           & {82,59\%}                           & {81,69\%}                           & {78,72\%}                           \\
+        {3} & {50}  & {92,68\%}                           & {86,53\%}                           & {91,9\%}                            & {83,35\%}                           & {82,45\%}                           & {79,99\%}                           \\
+        {3} & {100} & {100,03\%}                          & {99,98\%}                           & {100,03\%}                          & {99,93\%}                           & {100,02\%}                          & {99,87\%}                           \\
+        {4} & {2}   & {100,37\%}                          & {99,38\%}                           & {100,31\%}                          & {98,66\%}                           & {98,9\%}                            & {98,53\%}                           \\
+        {4} & {10}  & {99,99\%}                           & {99,97\%}                           & {99,96\%}                           & {99,91\%}                           & {99,95\%}                           & {99,99\%}                           \\
+        {4} & {16}  & {100\%}                             & {100,02\%}                          & {99,97\%}                           & {99,94\%}                           & {100\%}                             & {99,94\%}                           \\
+        {4} & {50}  & {99,99\%}                           & {99,95\%}                           & {99,95\%}                           & {100,01\%}                          & {99,99\%}                           & {99,98\%}                           \\
+        {4} & {100} & {99,95\%}                           & {100,01\%}                          & {100\%}                             & {100,02\%}                          & {100,05\%}                          & {99,98\%}                           \\
+        {6} & {2}   & {100,41\%}                          & {99,42\%}                           & {100,29\%}                          & {98,6\%}                            & {98,89\%}                           & {98,55\%}                           \\
+        {6} & {10}  & {93,4\%}                            & {86,51\%}                           & {91,64\%}                           & {84,03\%}                           & {82,51\%}                           & {80,06\%}                           \\
+        {6} & {16}  & {100,05\%}                          & {100,01\%}                          & {99,94\%}                           & {99,91\%}                           & {100,03\%}                          & {100\%}                             \\
+        {6} & {50}  & {99,96\%}                           & {99,96\%}                           & {99,92\%}                           & {99,99\%}                           & {100,02\%}                          & {100,03\%}                          \\
+        {6} & {100} & {99,98\%}                           & {99,99\%}                           & {99,94\%}                           & {100,03\%}                          & {100,01\%}                          & {99,93\%}                           \\
+        \bottomrule
+    \end{tabular}
+    \caption{Attention predictor: Dale-5}
+    \label{TODO: label}
+\end{table}

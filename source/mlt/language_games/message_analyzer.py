@@ -502,7 +502,7 @@ if __name__ == "__main__":
                 with open(
                     os.path.join(
                         out_dir,
-                        f"translate_log_{args.combination if args.combination else combination_index}.txt",
+                        f"translate_log_{args.translator}_{args.combination if args.combination != -1 else combination_index}.txt",
                     ),
                     "w",
                     encoding="utf-8",
