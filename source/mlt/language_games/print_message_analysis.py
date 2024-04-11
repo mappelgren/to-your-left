@@ -134,6 +134,19 @@ class Experiments:
 
         return dataset, experiment_variables
 
+    def filter_variables(self, variables):
+        renamed_variables = {
+            variable_dict[key]: float(value) for key, value in variables.items()
+        }
+
+        self.experiments = [
+            experiment
+            for experiment in self.experiments
+            if set(renamed_variables.items()).issubset(
+                set(experiment.variables.items())
+            )
+        ]
+
     def exclude_folders(self):
         excluded_folders = self._get_excluded_folders()
 
@@ -273,7 +286,10 @@ class LatexOutputProcessor(OutputProcessor):
         number_combinations = len(all_combinations)
 
         combination_header = " & ".join(
-            [rf"\textbf{{{combination}}}" for combination in all_combinations]
+            [
+                rf"\textbf{{{self.format_combination(combination)}}}"
+                for combination in all_combinations
+            ]
         )
 
         result_lines = []
@@ -321,6 +337,10 @@ class LatexOutputProcessor(OutputProcessor):
 
         print(latex_stub)
 
+    def format_combination(self, combination):
+        abbr = {"color": "C", "shape": "Sh", "size": "Si"}
+        return f"{' > '.join([abbr[attribute] for attribute in combination])}"
+
 
 METRIC_TYPES = {
     "%": OutputProcessor.to_percent,
@@ -363,8 +383,13 @@ if __name__ == "__main__":
         help="how the output should be printed",
     )
 
-    args = parser.parse_args()
+    args, additional_args = parser.parse_known_args()
     print(args)
+    additional_args = {
+        key.removeprefix("--"): value
+        for key, value in zip(additional_args[::2], additional_args[1::2])
+    }
+    print(additional_args)
 
     baseline_runs = {}
     english_runs = {}
@@ -387,6 +412,7 @@ if __name__ == "__main__":
     all_experiments = Experiments(
         args.folder, args.datasets, baseline_runs, english_runs
     )
+    all_experiments.filter_variables(additional_args)
     all_experiments.exclude_folders()
     all_experiments.sort_variables()
 
