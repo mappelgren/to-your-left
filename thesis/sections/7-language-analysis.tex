@@ -4,6 +4,7 @@ The languages that emerge are analyzed in two ways.
 First, for each language that emerges through successful communication, a score is calculated that represents the similarity of the messages to valid English referring expressions.
 In a second step, several languages are analyzed qualitatively, to determine what certain symbols mean and what they might refer to in the visual scenes.
 \cmtDK[inline]{talks about why and which few languages}
+\cmtDK[inline]{chosen salience order might be due to number of possibilities (more efficient to exclude larger number of distractors instantly)}
 
 To compare the emerged language to English in a \textbf{quantitative} way, a probing approach is used.
 Probing can be used to analyze and interpret the hidden representations in neural networks.
@@ -260,10 +261,11 @@ This fact is interesting for two reasons:
 First, the \emph{shape} being the most important attribute in the messages aligns with the receiver's generated referring expressions where the \emph{shape} was predicted almost perfectly.
 The receiver therefore seems to make use of the sender's ability to extract the \emph{shape} from the images and reproduces what the sender communicated.
 However, without a deeper analysis, it can't be ruled out that the receiver extracts the \emph{shape} themselves from the image, and uses the sender's message only to determine the correct target object in the scene.
-Secondly, this does not apply to the \emph{size} and the \emph{color}.
-While the size seems to be communicated, it is not generated correctly by the receiver.
+Secondly, this does not apply directly to the \emph{size} and the \emph{color}.
+The \emph{size} seems to be communicated often by the sender to discriminate the target object.
+On the other hand, as the target referring expression uses the salience order 'Sh > C > Si', the shape is only needed to be generated in $\frac{1}{3} * \frac{1}{8} \approx 4,2\%$ of the samples.
 The opposite applies to the \emph{color}.
-The \emph{color} is not important in the communication, but the receiver however is able to produce correct colors in the generated referring expression.
+The \emph{color} is not important in the agents' communication, but the receiver however needs to produce colors in the generated referring expression in $\frac{1}{3} \approx 33,3\%$ of the samples.
 This shows that the agents actually don't align their own language with the target referring expression.
 The communication of the target object between the agents seems to be a separate step from the receiver's generation of the referring expression.
 
@@ -305,8 +307,16 @@ While larger vocabularies, can still correlate relatively much with English refe
 
 On the 'Dale-5' dataset, the emerged languages again resemble the English referring expressions less.
 While the dominant salience order is 'Sh > Si > C' as on the 'Dale-2' dataset, the \emph{color} plays a bigger role.
-This effect is the same as for the discrimination games, and can be explained by the higher number or distractors.
+This effect is the same as for the discrimination games, and can be explained by the higher number of distractors.
 While the loss for the salience order 'Sh > Si > C' is lower than 70\% for two languages, it stays between 70\% and 80\% for most.
+Interesting now is that all attributes are communicated by the sender, while the receiver is also generating the correct attributes in the referring expression.
+Opposed to the 'Dale-2' dataset, the need for \emph{size} and \emph{color} is much bigger to discriminate the target object in any salience order, due to the larger number of distractors.
+
+$Lang_{6,50}$ is the emerged language, with which the agents can achieve the best results on the task.
+While the receiver achieves high precision and recall scores on each attribute (recall Tables \ref{tab:results:re-generator-game_size-shape} and \ref{tab:results:re-generator-game_color}), each attribute also plays a bigger role in the message be the sender.
+Indeed, one can see a correlation between the predictions of the receiver and the usage of attributes in emerged language.
+A more frequent usage of an attribute in the emerged language leads to a more accurate generation of this attribute in the final referring expression.
+
 
 
 \begin{table}[ht]

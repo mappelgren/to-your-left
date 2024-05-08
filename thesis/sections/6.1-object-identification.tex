@@ -147,10 +147,10 @@ However, there are still clear differences between the accuracy scores of each d
         {100}                         & {1000}    & {1} & {100} & {99,44\%}                           \\
         {500}                         & {500}     & {6} & {2}   & {95,92\%}                           \\
         {100}                         & {1000}    & {4} & {2}   & {94,88\%}                           \\
-        {100}                         & {1000}    & {6} & {10}  & \textcolor{purple}{63,15\%}         \\
-        {1000}                        & {500}     & {2} & {2}   & \textcolor{purple}{62,98\%}         \\\midrule
+        {100}                         & {1000}    & {6} & {10}  & \textcolor{red}{63,15\%}            \\
+        {1000}                        & {500}     & {2} & {2}   & \textcolor{red}{62,98\%}            \\\midrule
         \multicolumn{4}{c|}{baseline} & {62,72\%}                                                     \\\midrule
-        {100}                         & {1000}    & {3} & {2}   & \textcolor{purple}{61,2\%}          \\
+        {100}                         & {1000}    & {3} & {2}   & \textcolor{red}{61,2\%}             \\
         \bottomrule
     \end{tabular}
     \caption{Selected results of the object identification games on the 'Dale-2' dataset with $e_s=100$ and $e_r=500$ after 128.000 games}
@@ -193,11 +193,11 @@ Finally looking at the hidden sizes, no direct effect can be identified and the 
         {100}                         & {100}     & {3} & {2}   & {74\%}                              \\
         {500}                         & {500}     & {1} & {2}   & {63,41\%}                           \\\midrule
         \multicolumn{4}{c|}{baseline} & {35,07\%}                                                     \\\midrule
-        {500}                         & {1000}    & {2} & {100} & \textcolor{purple}{34,98\%}         \\
-        {500}                         & {500}     & {3} & {16}  & \textcolor{purple}{34,77\%}         \\
-        {500}                         & {500}     & {6} & {2}   & \textcolor{purple}{34,38\%}         \\
-        {1000}                        & {1000}    & {4} & {2}   & \textcolor{purple}{35,33\%}         \\
-        {1000}                        & {1000}    & {6} & {100} & \textcolor{purple}{35,24\%}         \\
+        {500}                         & {1000}    & {2} & {100} & \textcolor{red}{34,98\%}            \\
+        {500}                         & {500}     & {3} & {16}  & \textcolor{red}{34,77\%}            \\
+        {500}                         & {500}     & {6} & {2}   & \textcolor{red}{34,38\%}            \\
+        {1000}                        & {1000}    & {4} & {2}   & \textcolor{red}{35,33\%}            \\
+        {1000}                        & {1000}    & {6} & {100} & \textcolor{red}{35,24\%}            \\
         \bottomrule
     \end{tabular}
     \caption{Selected results of the object identification games on the 'Dale-5' dataset with $e_s=100$ and $e_r=500$ after 128.000 games}
@@ -240,14 +240,14 @@ As expected, when the message length is allowed to be longer, these configuratio
         {1000}                        & {500}     & {1} & {100} & {52,82\%}                                \\
         {100}                         & {1000}    & {1} & {100} & {52,34\%}                                \\
         {100}                         & {500}     & {3} & {2}   & {51,48\%}                                \\
-        {500}                         & {1000}    & {3} & {16}  & \textcolor{purple}{24,61\%}              \\
-        {100}                         & {1000}    & {3} & {50}  & \textcolor{purple}{24,48\%}              \\
-        {1000}                        & {1000}    & {4} & {100} & \textcolor{purple}{24\%}                 \\
-        {500}                         & {1000}    & {1} & {2}   & \textcolor{purple}{23,96\%}              \\
-        {1000}                        & {100}     & {6} & {10}  & \textcolor{purple}{23,87\%}              \\
-        {500}                         & {1000}    & {6} & {50}  & \textcolor{purple}{23,87\%}              \\\midrule
+        {500}                         & {1000}    & {3} & {16}  & \textcolor{red}{24,61\%}                 \\
+        {100}                         & {1000}    & {3} & {50}  & \textcolor{red}{24,48\%}                 \\
+        {1000}                        & {1000}    & {4} & {100} & \textcolor{red}{24\%}                    \\
+        {500}                         & {1000}    & {1} & {2}   & \textcolor{red}{23,96\%}                 \\
+        {1000}                        & {100}     & {6} & {10}  & \textcolor{red}{23,87\%}                 \\
+        {500}                         & {1000}    & {6} & {50}  & \textcolor{red}{23,87\%}                 \\\midrule
         \multicolumn{4}{c|}{baseline} & {23,74\%}                                                          \\\midrule
-        {500}                         & {500}     & {2} & {2}   & \textcolor{purple}{22,35\%}              \\
+        {500}                         & {500}     & {2} & {2}   & \textcolor{red}{22,35\%}                 \\
         \bottomrule
     \end{tabular}
     \caption{Selected results of the object identification games on the 'CLEVR color' dataset with $e_s=100$ and $e_r=500$ after 128.000 games}
