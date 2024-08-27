@@ -263,7 +263,7 @@ models = {
             "image_masker": SingleObjectImageMasker(),
             "number_regions": 14,
         },
-        split_dataset=False,
+        split_dataset=True,
         image_loader=FeatureImageLoader,
         bounding_box_loader=None,
         iterator=AttentionPredictorGameBatchIterator,

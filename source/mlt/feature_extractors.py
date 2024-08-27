@@ -260,6 +260,7 @@ if __name__ == "__main__":
             number_blocks=args.num_blocks, avgpool=args.avgpool, fc=args.fc
         ).to(device)
         preprocess = ResNet101_Weights.IMAGENET1K_V2.transforms()
+        print(preprocess)
     else:
         raise AttributeError("no feature extractor specified")
 

@@ -14,8 +14,12 @@ dataset_mapping = {
 
 
 def save_csv(run_dir, dataset, split, file_name):
+
+    print('running with params', run_dir, dataset, split, file_name)
+
     interaction_dir = os.path.join(run_dir, "interactions/")
     if not os.path.exists(interaction_dir):
+        print("interactions doesn't exist")
         return
 
     with open(

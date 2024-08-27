@@ -18,3 +18,9 @@ python source/preexperiments/feature_extractors.py --image_dir $image_dir --out_
 python source/preexperiments/feature_extractors.py --image_dir $image_dir --out_file "$out_dir"vgg_avgpool_3.h5 --feature_extractor VGG --avgpool --classifier_layers 3 --device $device --batch_size $batch_size
 
 python source/preexperiments/feature_extractors.py --image_dir /scratch/guskunkdo/clevr-images-unambigous-colour/images/ --scene_dir /scratch/guskunkdo/clevr-images-unambigous-colour/scenes/ --out_file /scratch/guskunkdo/clevr-images-unambigous-colour/features/bounding_box_resnet_4_avgpool_no-fc.h5 --feature_extractor ResNet --avgpool --no-fc --num_blocks 4 --device cuda --batch_size 200 --bounding_boxes
+
+python feature_extractors.py --image_dir ~/clevr-images-unambigous-dale-two/images/ --scene_dir ~/clevr-images-unambigous-dale-two/scenes/ --out_file ~/clevr-images-unambigous-dale-two/features/resnet_3_noavgpool_no-fc2.h5 --feature_extractor ResNet --no-avgpool --no-fc --num_blocks 3 --device cuda --batch_size 32
+
+
+
+python language_games/play.py --dataset_base_dir=/home/xappma/ --out_dir=out/ --validation_batch_size=32 --validation_batches_per_epoch=2 --n_epochs=50 --batch_size=32 --batches_per_epoch=1 --lr=0.0002 --validation_freq 3 --image_feature_file=resnet_3_noavgpool_no-fc.h5 --max_samples=100 --model=masked_attention_predictor --sender_cell=lstm --receiver_cell=lstm --save --sender_image_embedding=500 --sender_projection=100 --dataset dale-2 --sender_hidden 100 --receiver_hidden 10 --receiver_embeddin 10 --receiver_projection=100 --sender_embedding=15 --temperature 1 --vocab_size 16 --max_len 2
