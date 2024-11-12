@@ -102,7 +102,7 @@ class ResnetFeatureExtractor(FeatureExtractor):
 
 class VggFeatureExtractor(FeatureExtractor):
     def __init__(
-        self, pretrained=True, fine_tune=False, avgpool=True, classifier_layers=3
+        self, pretrained=True, fine_tune=False, avgpool=True, classifier_layers=2
     ) -> None:
         super().__init__()
 

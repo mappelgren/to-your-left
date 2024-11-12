@@ -364,7 +364,7 @@ models = {
         dataset_args={
             "number_regions": 14,
         },
-        split_dataset=False,
+        split_dataset=True,
         image_loader=FeatureImageLoader,
         bounding_box_loader=FeatureImageLoader,
         iterator=BoundingBoxAttentionPredictorGameBatchIterator,
@@ -386,7 +386,8 @@ datasets = {
     "dale-5": "clevr-images-unambigous-dale",
     "single": "clevr-images-random-single",
     "colour": "clevr-images-unambigous-colour",
-}
+    "middle": "one_middle_dataset"}
+
 
 
 def get_params(params):
