@@ -254,7 +254,7 @@ def make_name(feature_extractor='VGG', avgpool=False, classifier_layers=3, num_b
         name = f"{feature_extractor}-pool_{avgpool}-blocks_{num_blocks}-fc_{fc}-bb_{bounding_boxes}.h5py"
     return name
 
-def extract_rotation_dataset(basedir, feature_dir='~/to-your-left/data', **kwargs):
+def extract_rotation_dataset(basedir, feature_dir='/home/xappma/to-your-left/data', **kwargs):
     rotations = ['rot0', 'rot90', 'rot180', 'rot270']
     targets = ['target', 'distractor']
     dataset = os.path.basename(os.path.normpath(basedir))
@@ -262,9 +262,9 @@ def extract_rotation_dataset(basedir, feature_dir='~/to-your-left/data', **kwarg
         for t in targets:
             os.makedirs(os.path.join(feature_dir, dataset , t, rotation), exist_ok=True)
     existance = []
+    filename = make_name(**kwargs)
     for t in ['target', 'distractor']:
         for r in rotations:
-            filename = make_name(**kwargs)
             out_file = os.path.join(feature_dir, dataset , t, r, filename)
             if not os.path.isfile(out_file):
                 image_dir = os.path.join(basedir, 'images', t, r)
@@ -275,6 +275,7 @@ def extract_rotation_dataset(basedir, feature_dir='~/to-your-left/data', **kwarg
                 existance.append(True)
     if all(existance):
         print('All feature files exist')
+    return filename
 
 
 def extract_features(device='cuda', feature_extractor='VGG', avgpool=False, classifier_layers=3, num_blocks=4, fc=False,
@@ -397,3 +398,4 @@ def extract_features(device='cuda', feature_extractor='VGG', avgpool=False, clas
                     i_start = i_end
                     batch = []
             print()
+

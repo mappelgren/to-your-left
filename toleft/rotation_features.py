@@ -13,7 +13,8 @@ import argparse
 
 
 class RotFeat(data.Dataset):
-    def __init__(self, root='/home/xappma/spatial-dataset/features',  train=True):
+    def __init__(self, root='/home/xappma/to-your-left/data', dataset='one_colour_square',
+                 name='VGG-pool_no-layers_3-fc_no-bb_no.h5py',  train=True, norm=None):
         import h5py
 
         self.root = os.path.expanduser(root)
@@ -24,7 +25,7 @@ class RotFeat(data.Dataset):
         features = {}
         for target in ['target', 'distractor']:
             for rot in ['rot0', 'rot90', 'rot180', 'rot270']:
-                fc_file = os.path.join(root, f'new-vgg-layers-2-{target}-{rot}.h5')
+                fc_file = os.path.join(root, dataset, target, rot, name)
                 fc = h5py.File(fc_file, 'r')
                 key = list(fc.keys())[0]
                 data = torch.FloatTensor(list(fc[key]))
@@ -38,16 +39,19 @@ class RotFeat(data.Dataset):
         self.features = features
         self.create_obj2id(features)
         data = self.flat_features
-        img_norm = torch.norm(data, p=2, dim=1, keepdim=True)
+        if norm is None:
+            img_norm = torch.norm(data, p=2, dim=1, keepdim=True)
+        else:
+            img_norm = norm
         normed_data = data / img_norm
+        self.norm = img_norm
         self.flat_features = normed_data
 
         target_to_idx = {'target':1, 'distractor':0}
         rotation_to_idx = {'rot0':0, 'rot90':1, 'rot180':2, 'rot270':3}
         
         for t, r in features.keys():
-            x = int(t == 'target')
-            
+
             self.features[(t,r)] = self.flat_features[self.obj2id[target_to_idx[t]][rotation_to_idx[r]]['ims']]
 
     def __getitem__(self, index):
@@ -60,7 +64,6 @@ class RotFeat(data.Dataset):
 
         self.obj2id = {}
         keys = {}
-        rot_keys = {}
         idx_label = 0
         flat_features = None
         for i, (target, rot) in enumerate(feature_dict.keys()):
