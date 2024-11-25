@@ -198,7 +198,6 @@ class CoordinatePredictorSample:
     bounding_boxes: torch.Tensor = torch.tensor(0)
 
 
-
 class CoordinatePredictorDataset(Dataset):
     """
     Input:
@@ -565,3 +564,194 @@ class DaleCaptionAttributeEncoder(AttributeEncoder, Captioner):
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.padding_position=}, {self.reversed_caption=})"
+
+
+
+
+@dataclass
+class RotationCoordinatePredictorSample:
+    image_id: str
+
+    sender_view: torch.Tensor
+    receiver_view: torch.Tensor
+
+    target_pixels: torch.Tensor
+    target_region: torch.Tensor
+
+    rotation_encoding: torch.Tensor
+
+    masked_image: torch.Tensor = torch.tensor(0)
+
+
+class RotationalCoordinatePredictorDataset(Dataset):
+    """
+    Input:
+     - image
+     - attributes (optional)
+     - center coordinates of all objects (optional)
+     - masked image
+
+    Ouput:
+     - x and y coordinate of target object
+    """
+
+    def __init__(self, file_path) -> None:
+        super().__init__()
+        self.file = file_path
+
+        with h5py.File(file_path, "r") as f:
+            self.num_samples = len(list(f.values())[0])
+
+    @classmethod
+    def load(
+        cls,
+        scenes_json_dir,
+        image_loader: ImageLoader,
+        max_number_samples,
+        persistor: Persistor,
+        *_args,
+        bounding_box_loader: ImageLoader = None,
+        attribute_encoder: AttributeEncoder = None,
+        encode_locations=False,
+        image_masker: ImageMasker = None,
+        preprocess=ResNet101_Weights.DEFAULT.transforms(),
+        # magic number 7 = size of cnn layers (128 x 7 x 7)
+        number_regions=7,
+        **_kwargs,
+    ) -> None:
+        coordinate_encoder = CoordinateEncoder(preprocess)
+
+        samples: list[RotationCoordinatePredictorSample] = []
+
+        scenes = os.listdir(scenes_json_dir)
+        print("sampling scenes...")
+        selected_scenes = random.sample(scenes, max_number_samples)
+
+        for scene_index, scene_file in enumerate(selected_scenes):
+            if scene_index % 50 == 0:
+                print(f"processing scene {scene_index}...", end="\r")
+
+            with open(
+                os.path.join(scenes_json_dir, scene_file), "r", encoding="utf-8"
+            ) as f:
+                scene = json.load(f)
+
+            image_id = scene_file.removesuffix(".json")
+            images, processed_images, image_size = image_loader.get_image(image_id)
+
+            sender_image = processed_images[0]
+            rotation_index = random.choice([0, 1, 2, 3])
+            receiver_image = processed_images[rotation_index]
+            rotation_onehot = torch.nn.functional.one_hot(rotation_index, num_classes=4)
+
+            target_object = scene["groups"]["target"][0]
+
+            target_x, target_y = coordinate_encoder.get_object_coordinates(
+                target_object,
+                scene,
+                image_size,
+            )
+
+            target_region = coordinate_encoder.get_region(
+                target_object, scene, image_size, number_regions
+            )
+
+            masked_image = PreprocessMask(224)(
+                image_masker.get_masked_image(images[0], scene, target_object)
+            )
+
+            sample = RotationCoordinatePredictorSample(
+                image_id = image_id,
+                sender_view = sender_image,
+                receiver_view = receiver_image,
+                target_pixels = torch.tensor([target_x, target_y]),
+                target_region = target_region,
+                masked_image = masked_image,
+                rotation_encoding = rotation_onehot
+
+            )
+
+            #if attribute_encoder is not None:
+            #   sample.attribute_tensor = attribute_encoder.encode(scene, target_object)
+
+            #if encode_locations:
+            #    sample.locations = torch.cat(
+            #        coordinate_encoder.get_locations(scene, image_size)
+            #    )
+
+            samples.append(sample)
+        print()
+        print("loaded data.")
+
+        persistor.save(samples)
+        return cls(persistor.file_path)
+
+    def __getitem__(self, index):
+        with h5py.File(self.file, "r") as f:
+            return (
+                (
+                    load_tensor(f["sender_view"][index]),
+                    load_tensor(f["receiver_view"][index]),
+                    load_tensor(f["masked_image"][index]),
+                    load_tensor(f["rotation_encoding"][index]),
+                ),
+                load_tensor(f["target_region"][index]),
+                str(f["image_id"][index], "utf-8"),
+            )
+
+    def __len__(self) -> int:
+        return self.num_samples
+
+
+class RotationAttentionPredictorGameBatchIterator(GameBatchIterator):
+    def __init__(self, loader, batch_size, n_batches, train_mode, seed) -> None:
+        self.loader = loader
+        self.batch_size = batch_size
+        self.n_batches = n_batches
+        self.batches_generated = 0
+        self.train_mode = train_mode
+        self.random_seed = random.Random(seed)
+
+    def __next__(self):
+        if self.batches_generated > self.n_batches:
+            raise StopIteration()
+
+        batch_data = self.get_batch()
+        self.batches_generated += 1
+        return batch_data
+
+    def get_batch(self):
+        sampled_indices = self.random_seed.sample(
+            range(len(self.loader.dataset)), self.batch_size
+        )
+        samples: list[RotationCoordinatePredictorSample] = [
+            self.loader.dataset[i] for i in sampled_indices
+        ]
+
+        sender_inputs = []
+        target_regions = []
+        receiver_inputs = []
+        masked_images = []
+        rotation_indexes = []
+        image_ids = []
+
+
+        for sample in samples:
+            sender_inputs.append(sample.sender_view)
+            target_regions.append(sample.target_region)
+            receiver_inputs.append(sample.receiver_view)
+            masked_images.append(sample.masked_image)
+            rotation_indexes.append(sample.rotation_encoding)
+            image_ids.append(int(sample.image_id[-6:]))
+
+        return (
+            torch.stack(sender_inputs),
+            torch.stack(target_regions),
+            torch.stack(receiver_inputs),
+            {
+                "masked_image": torch.stack(masked_images),
+                "rotation": torch.stack(rotation_indexes),
+                "image_id": torch.tensor(image_ids),
+            },
+        )
+

@@ -10,7 +10,7 @@ from egg import core
 from feature_extractors import DummyFeatureExtractor, ResnetFeatureExtractor
 from image_loader import ImageLoader, FeatureImageLoader
 from data_readers import GameBatchIterator, CoordinatePredictorGameDataset, \
-    AttentionPredictorGameBatchIterator
+    AttentionPredictorGameBatchIterator, RotationalCoordinatePredictorDataset
 from models import MaskedCoordinatePredictorSender, AttentionPredictorReceiver
 from torch.utils.data import Dataset
 from torch.nn import Module
@@ -68,7 +68,43 @@ models = {"masked_attention_predictor": ModelDefinition(
             ),
         },
         loss_function=attention_loss,
-    ),}
+    ),
+    "rotator": ModelDefinition(
+        dataset=RotationalCoordinatePredictorDataset,
+        dataset_args={
+            "image_masker": SingleObjectImageMasker(),
+            "number_regions": 14,
+        },
+        split_dataset=True,
+        image_loader=FeatureImageLoader,
+        bounding_box_loader=None,
+        iterator=AttentionPredictorGameBatchIterator,
+        sender=MaskedCoordinatePredictorSender,
+        sender_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=True
+            ),
+            "masked_image_encoder": ClevrImageEncoder(
+                feature_extractor=ResnetFeatureExtractor(
+                    pretrained=True,
+                    avgpool=False,
+                    fc=False,
+                    fine_tune=False,
+                    number_blocks=3,
+                ),
+                max_pool=True,
+            ),
+        },
+        receiver=AttentionPredictorReceiver,
+        receiver_args={
+            "image_encoder": ClevrImageEncoder(
+                feature_extractor=DummyFeatureExtractor(), max_pool=False
+            ),
+        },
+        loss_function=attention_loss,
+    ),
+
+    }
 
 datasets = {
     "dale-2": "clevr-images-unambigous-dale-two",

@@ -160,7 +160,7 @@ class _BatchIterator:
             images_vectors_receiver[:, i, :] = images_vectors_sender[permutation, i, :]
             y[i] = permutation.argmin()
 
-        return images_vectors_sender, y, images_vectors_receiver
+        return images_vectors_sender, y, images_vectors_receiver, {'img_ids':idxs}
 
 
 
