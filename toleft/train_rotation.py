@@ -13,7 +13,10 @@ import egg.core as core
 from egg.zoo.signal_game.archs import InformedSender, Receiver
 from torch.onnx.symbolic_opset9 import tensor
 
+from egg.core import Callback, InteractionSaver
 from rotation_features import RotFeat, RotationLoader
+
+
 
 
 def parse_arguments():
@@ -168,7 +171,7 @@ def run_game(root='/home/xappma/to-your-left/data', dataset='one_colour_square',
     )
 
     validation_set = dataset if validation_dataset is None else validation_dataset
-    valid_data = RotFeat(root=root, dataset=validation_set, name=features_name, norm=train_data.norm)
+    valid_data = RotFeat(root=root, dataset=validation_set, name=features_name)
     validation_loader = RotationLoader(
         valid_data,
         opt=opts,
@@ -185,6 +188,7 @@ def run_game(root='/home/xappma/to-your-left/data', dataset='one_colour_square',
         callbacks = []
 
     callbacks.append(core.ConsoleLogger(as_json=True, print_train_loss=True))
+    callbacks.append(InteractionSaver(train_epochs=[10], test_epochs=[10], checkpoint_dir='checkpoints/'))
     trainer = core.Trainer(
         game=game,
         optimizer=optimizer,
@@ -227,7 +231,9 @@ if __name__ == "__main__":
     else:
         callbacks = []
 
+
     callbacks.append(core.ConsoleLogger(as_json=True, print_train_loss=True))
+    callbacks.append()
     trainer = core.Trainer(
         game=game,
         optimizer=optimizer,
