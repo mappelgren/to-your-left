@@ -7,6 +7,8 @@ dist/
 *.h5
 *.h5py
 .ipynb_checkpoints/
+toleft/checkpoints
+signaling_game_data
 
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
