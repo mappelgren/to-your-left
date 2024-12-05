@@ -59,6 +59,9 @@ class InformedSender(nn.Module):
         # h of size (batch_size, vocab_size)
         logits = F.log_softmax(h, dim=1)
 
+        print(_aux_input)
+        raise NotImplementedError()
+
         return logits
 
     def return_embeddings(self, x):
