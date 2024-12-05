@@ -17,7 +17,7 @@ from torch.nn import Module
 from typing import Callable
 
 from data_readers import SingleObjectImageMasker
-from test import attention_loss
+from test_metric import attention_loss
 from shared_models import ClevrImageEncoder
 
 @dataclass
